@@ -1,0 +1,1348 @@
+@import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Palanquin:wght@100;200;300;400;500;600;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Space+Grotesk:wght@300..700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Nunito:wght@400;700&display=swap");
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-background: #0e1425;
+  --color-foreground: #f2f2f2;
+  --color-muted: #a1aabf;
+  --color-border: #243460;
+  --color-card: #121a31;
+  --color-accent: #8e98f3;
+  --color-accent-hover: #aab3fd;
+  --font-sans: "Poppins", system-ui, sans-serif;
+
+  /* --color-green-accent: #c2fec9;
+  --color-green-accent-highlight: #77fd87;
+  --color-green-accent-dark: #5c8a61;
+  --color-accent: #d4d8fe;
+  --color-accent-highlight: #aab3fd; */
+  /* --font-poppins: "Poppins", sans-serif;
+  --font-montserrat: "Montserrat", sans-serif;
+  --font-palanquin: "Palanquin", sans-serif;
+  --font-inter: "Inter", sans-serif;
+  --font-nunito: "Nunito", sans-serif;
+  --font-roboto: "Roboto", sans-serif;
+  --font-space-grotesk: "Space Grotesk", serif;
+  --font-lato: "Lato", sans-serif;
+  --font-open-sans: "Open Sans", sans-serif; */
+}
+
+@layer base {
+  * {
+    @apply m-0 p-0 box-border;
+  }
+
+  * {
+    scrollbar-color: var(--color-muted) var(--color-card);
+    scrollbar-width: auto;
+  }
+
+  *::-webkit-scrollbar {
+    width: 14px;
+    height: 14px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: var(--color-card);
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--color-muted);
+    border: 2px solid var(--color-card);
+    border-radius: 999px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent-hover);
+  }
+
+  body {
+    @apply font-sans bg-background text-foreground antialiased;
+  }
+
+  .app {
+    @apply min-h-screen flex flex-col;
+  }
+}
+
+@layer components {
+  /* navbar styles */
+  .navbar {
+    @apply fixed top-0 left-0 right-0 z-50 border-b-2 border-border bg-background/80 backdrop-blur-md;
+  }
+
+  .navbar-container {
+    @apply max-w-7xl mx-auto px-6 h-16 flex items-center justify-between flex-wrap gap-4;
+  }
+
+  .navbar-logo {
+    @apply flex items-center gap-2 text-foreground font-semibold text-lg;
+  }
+
+  .navbar-icon {
+    @apply w-6 h-6 text-accent;
+  }
+
+  .navbar-links {
+    @apply flex items-center gap-6;
+  }
+
+  .navbar-link {
+    @apply text-foreground hover:text-accent transition-colors duration-200 decoration-0 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent;
+  }
+
+  /* Current page: accent colour with an underline bar */
+  .navbar-link.is-active {
+    @apply text-accent font-medium underline decoration-2 underline-offset-8;
+  }
+
+  .navbar-auth {
+    @apply flex items-center gap-4;
+  }
+
+  /* footer styles - public pages only */
+  .footer {
+    @apply border-t-2 border-border bg-card;
+  }
+
+  .footer-content {
+    @apply max-w-7xl mx-auto px-6 py-12 grid grid-cols-4;
+  }
+
+  /* Accent bar between columns, like the dividers in footer.php */
+  .footer-column {
+    @apply flex flex-col items-start gap-2 px-6 border-l-4 border-accent/60 first:border-l-0 first:pl-0;
+  }
+
+  .footer-tagline {
+    @apply mt-2 text-muted tracking-wide;
+  }
+
+  .footer-title {
+    @apply mb-2 text-foreground font-semibold;
+  }
+
+  .footer-link,
+  .footer-social {
+    @apply text-muted hover:text-accent transition-colors duration-200 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent;
+  }
+
+  .footer-socials {
+    @apply flex items-center gap-4 text-xl;
+  }
+
+  .footer-copyright {
+    @apply border-t border-border py-6 px-6 text-center text-sm text-muted tracking-wide;
+  }
+
+  @media (max-width: 768px) {
+    .footer-content {
+      @apply grid-cols-1 gap-8;
+    }
+
+    .footer-column {
+      @apply border-l-0 px-0;
+    }
+  }
+
+  /* section styles */
+  .home-page {
+    @apply w-full bg-background;
+  }
+
+  .section-container {
+    @apply h-[calc(100vh-64px)] flex justify-center items-center bg-card;
+  }
+
+  .section-content {
+    @apply w-full max-w-7xl mx-auto py-20 px-6 flex flex-col justify-center items-center gap-8;
+  }
+
+  .section-title {
+    @apply w-full text-3xl text-accent-hover font-semibold text-center;
+  }
+
+  .hero-container,
+  .content-container {
+    @apply w-full max-w-7xl flex justify-between items-center gap-8 p-2;
+  }
+
+  .hero-wrapper,
+  .content-wrapper {
+    @apply w-full flex flex-col items-start text-left gap-8 p-4;
+  }
+
+  .hero-title {
+    @apply text-4xl text-accent-hover font-semibold;
+  }
+
+  .hero-title span {
+    @apply text-7xl font-black bg-cover bg-clip-text text-transparent;
+    background-position: center 35%;
+  }
+
+  .hero-sub {
+    @apply text-lg font-medium text-foreground;
+  }
+
+  .hero-btn-box,
+  .content-btn-box {
+    @apply w-full flex justify-center items-center gap-8;
+  }
+
+  .content-wrapper {
+    @apply max-w-2xl;
+  }
+
+  .content-container-reversed {
+    @apply flex-row-reverse;
+  }
+
+  .content-container-stacked {
+    @apply flex-col;
+  }
+
+  .content-items-column {
+    @apply w-full flex flex-col gap-6;
+  }
+
+  .content-items-row {
+    @apply w-full grid grid-cols-3 gap-6;
+  }
+
+  .content-box {
+    @apply flex flex-col gap-3;
+  }
+
+  .content-sub {
+    @apply flex items-center gap-3 text-lg text-foreground font-semibold;
+  }
+
+  .content-icon {
+    @apply w-6 h-6 shrink-0 text-accent;
+  }
+
+  .content-p {
+    @apply text-base leading-7 text-muted;
+  }
+
+  .events-page {
+    @apply items-stretch;
+  }
+
+  .events-intro {
+    @apply max-w-5xl;
+  }
+
+  /* Keywords gets double width; the Search button is only as wide as it needs */
+  .events-search {
+    @apply w-full max-w-7xl p-4 grid grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto] gap-3 rounded-xl bg-card;
+  }
+
+  .events-search-input {
+    @apply w-full min-w-0 rounded-lg border border-border bg-background px-4 py-3 text-foreground outline-none focus:border-accent;
+    accent-color: #8e98f3;
+    color-scheme: dark;
+  }
+
+  /* Date field: the browser's calendar button stays clickable but invisible,
+     over a Lucide icon in the accent colour (same as the sidebar icons) */
+  .date-field {
+    @apply relative min-w-0;
+  }
+
+  .events-search-input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .date-field-icon {
+    @apply pointer-events-none absolute right-4 top-1/2 size-5 -translate-y-1/2 text-accent;
+  }
+
+  /* My Events, 4 columns: Keywords (2) | Date | Category,
+     then Location | Status | Sort | Apply */
+  .events-search-wide {
+    @apply grid-cols-4;
+  }
+
+  .events-search-wide .events-search-keywords {
+    @apply col-span-2;
+  }
+
+  .events-toolbar {
+    @apply w-full max-w-7xl flex items-center justify-between gap-4;
+  }
+
+  .events-toolbar-label {
+    @apply text-sm text-muted;
+  }
+
+  .events-view-switcher {
+    @apply flex items-center gap-2;
+  }
+
+  /* Same 34px square and 8px corners as the icon buttons */
+  .events-view-switcher button {
+    @apply inline-flex size-[34px] items-center justify-center rounded-lg text-muted transition-colors hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  }
+
+  .events-view-switcher button.is-active {
+    @apply bg-accent text-background;
+  }
+
+  .events-view-switcher svg {
+    @apply size-[18px];
+  }
+
+  .events-grid {
+    @apply w-full max-w-7xl grid gap-6;
+  }
+
+  .events-grid-three {
+    @apply grid-cols-3;
+  }
+
+  .events-grid-two {
+    @apply grid-cols-2;
+  }
+
+  .events-grid-one {
+    @apply grid-cols-1;
+  }
+
+  .events-empty-state {
+    @apply col-span-full p-8 flex flex-col items-center gap-4 rounded-xl bg-card text-center;
+  }
+
+  /* Surfaces (event, dashboard and chart cards, tables) share one edge: a
+     1px border and a faint top highlight. Drop shadows barely show on this
+     dark background, so depth comes from the edge instead. */
+  .event-card {
+    @apply relative min-w-0 overflow-hidden rounded-xl border border-border/60 bg-card shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] transition-[translate,border-color] duration-200 motion-reduce:transition-none;
+  }
+
+  /* The whole card is clickable, so it answers hover and keyboard focus */
+  .event-card:hover {
+    @apply -translate-y-0.5 border-accent/40 motion-reduce:translate-y-0;
+  }
+
+  .event-card:has(.event-card-link:focus-visible) {
+    @apply border-accent/40 outline-2 outline-offset-2 outline-accent;
+  }
+
+  /* The title link covers the card; the card shows its focus ring instead */
+  .event-card-link {
+    @apply outline-none after:absolute after:inset-0 after:content-[''];
+  }
+
+  .event-card-media {
+    @apply overflow-hidden;
+  }
+
+  .event-card-image {
+    @apply block w-full aspect-video object-cover transition-transform duration-200 motion-reduce:transition-none;
+  }
+
+  .event-card:hover .event-card-image {
+    @apply scale-[1.03] motion-reduce:scale-100;
+  }
+
+  .event-card-content {
+    @apply p-5 flex flex-col gap-3;
+  }
+
+  .event-card-category,
+  .event-card-detail {
+    @apply flex items-center gap-2 text-sm text-muted;
+  }
+
+  .event-card-category {
+    @apply text-accent;
+  }
+
+  .event-card-icon {
+    @apply w-4 h-4 shrink-0;
+  }
+
+  .event-card-title {
+    @apply text-xl text-foreground font-semibold;
+  }
+
+  /* Above the stretched title link, so the buttons keep their own clicks */
+  .event-card-actions {
+    @apply relative z-10 mt-2 flex items-center gap-3;
+  }
+
+  /* Same 34px square and 8px corners as the icon buttons; the heart stays
+     20px because it is the card's main action */
+  .event-favourite-button {
+    @apply inline-flex size-[34px] items-center justify-center rounded-lg text-red-500 transition-colors hover:bg-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  }
+
+  .event-favourite-button svg {
+    @apply w-5 h-5;
+  }
+
+  .event-favourite-button.is-favourite {
+    @apply bg-background;
+  }
+
+  .event-details-page {
+    @apply items-stretch;
+  }
+
+  .event-details-image-container,
+  .event-details-content {
+    @apply w-full max-w-5xl mx-auto;
+  }
+
+  .event-details-image-container {
+    @apply overflow-hidden rounded-2xl;
+    aspect-ratio: 16 / 7;
+  }
+
+  .event-details-image {
+    @apply block w-full h-full object-cover;
+  }
+
+  .event-details-content {
+    @apply flex flex-col items-start gap-4;
+  }
+
+  .event-details-back {
+    @apply text-accent hover:text-accent-hover;
+  }
+
+  /* contact styles */
+  .contact-content {
+    @apply gap-6;
+  }
+
+  .contact-form-container {
+    @apply w-full rounded-2xl border border-border bg-card p-6;
+  }
+
+  .contact-form {
+    @apply w-full flex flex-col gap-5;
+  }
+
+  .contact-form-title {
+    @apply text-2xl font-semibold text-foreground;
+  }
+
+  .contact-field {
+    @apply flex flex-col gap-2;
+  }
+
+  .contact-field label {
+    @apply text-sm font-medium text-foreground;
+  }
+
+  .contact-field input,
+  .contact-field textarea {
+    @apply w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground outline-none transition-colors placeholder:text-muted focus:border-accent;
+  }
+
+  .contact-field textarea {
+    @apply resize-y;
+  }
+
+  .contact-actions {
+    @apply justify-start;
+  }
+
+
+  .contact-details {
+    @apply w-full flex flex-col gap-4 list-none text-base text-muted;
+  }
+
+  .contact-details li {
+    @apply flex items-center gap-2;
+  }
+
+  .contact-details a {
+    @apply text-accent hover:text-accent-hover;
+  }
+
+  .about-social-links {
+    @apply flex items-center gap-3;
+  }
+
+  .about-social-link {
+    @apply flex items-center justify-center w-10 h-10 rounded-full text-muted border border-border transition-colors hover:text-foreground hover:border-accent hover:bg-card;
+  }
+
+  .about-social-link svg {
+    @apply w-5 h-5;
+  }
+
+  .hero-img-container,
+  .content-img-container {
+    @apply w-full max-w-xl flex justify-center items-center overflow-hidden rounded-2xl;
+    aspect-ratio: 4 / 3;
+  }
+
+  .about-image-container {
+    @apply max-w-6xl;
+    aspect-ratio: 16 / 7;
+  }
+
+  .hero-img,
+  .content-img {
+    @apply block w-full h-full rounded-2xl ring-2 ring-accent/30
+        shadow-lg shadow-accent/40 object-cover;
+  }
+
+  @media (max-width: 768px) {
+    .section-content {
+      @apply py-14 px-4;
+    }
+
+    .section-title {
+      @apply text-2xl;
+    }
+
+    .hero-container,
+    .content-container,
+    .content-container-reversed {
+      @apply flex-col;
+    }
+
+    .hero-wrapper,
+    .content-wrapper {
+      @apply max-w-none;
+    }
+
+    .content-items-row {
+      @apply grid-cols-1;
+    }
+
+    .about-image-container {
+      aspect-ratio: 4 / 3;
+    }
+
+    .events-search {
+      @apply grid-cols-1;
+    }
+
+    .events-search-keywords,
+    .events-search-wide .events-search-keywords {
+      @apply col-span-1;
+    }
+
+    .events-grid-three,
+    .events-grid-two {
+      @apply grid-cols-1;
+    }
+
+    .dashboard-container {
+      @apply m-1 p-1 gap-1;
+    }
+
+    .dashboard-content {
+      @apply m-1;
+    }
+
+    .dashboard-utility-bar {
+      @apply items-start flex-wrap gap-3 px-4;
+    }
+
+    .dashboard-utility-items {
+      @apply ml-0 flex-wrap gap-3;
+    }
+
+    .dashboard-utility-divider {
+      @apply hidden;
+    }
+  }
+
+  /* sidebar styles */
+
+  .sidebar {
+    @apply w-64 shrink-0 sticky top-0 self-start h-[calc(100vh-32px)] flex flex-col justify-between overflow-hidden text-foreground transition-[width] duration-200;
+  }
+
+  .sidebar-collapsed {
+    @apply w-0 invisible;
+  }
+
+  .sidebar-group {
+    @apply py-2 flex flex-col justify-between gap-2;
+  }
+
+  .sidebar-group-main {
+    @apply flex-1 min-h-0;
+  }
+
+  .sidebar-group-main .sidebar-menu {
+    @apply flex-1 min-h-0 overflow-y-auto;
+  }
+
+  .sidebar-group-secondary {
+    @apply shrink-0;
+  }
+
+  .sidebar-title {
+    @apply px-8 py-2 flex text-lg text-foreground;
+  }
+
+  .sidebar-menu {
+    @apply px-2 py-2 flex flex-col items-start gap-2;
+  }
+
+  .menu-item {
+    @apply px-4 py-1 w-full flex items-center justify-start gap-3 rounded-lg text-base text-muted hover:text-foreground hover:bg-background;
+  }
+
+  .menu-icon {
+    @apply w-5 h-5 text-accent;
+  }
+
+  .sidebar-link {
+    @apply block w-full rounded-lg focus-visible:outline-2 focus-visible:outline-accent;
+  }
+
+  /* Logo at the top of the sidebar: the way back to the public site */
+  .sidebar-brand {
+    @apply px-4 py-3 text-base whitespace-nowrap rounded-lg focus-visible:outline-2 focus-visible:outline-accent;
+  }
+
+  /* Signed-in user at the bottom of the sidebar */
+  .sidebar-user {
+    @apply shrink-0 px-2 pt-3 pb-1 flex flex-col gap-2 border-t-3 border-border;
+  }
+
+  .sidebar-user-row {
+    @apply flex items-center gap-3 px-2;
+  }
+
+  .sidebar-user-avatar {
+    @apply w-8 h-8 shrink-0 text-accent;
+  }
+
+  .sidebar-user-details {
+    @apply flex-1 min-w-0;
+  }
+
+  .sidebar-user-name {
+    @apply text-sm font-medium text-foreground truncate;
+  }
+
+  .sidebar-user-email {
+    @apply text-xs text-muted truncate;
+  }
+
+  .sidebar-test-role {
+    @apply mx-2;
+  }
+
+  /* Current page: darker background, bright text and an accent bar */
+  .menu-item.is-active {
+    @apply bg-background text-foreground font-medium shadow-[inset_3px_0_0_var(--color-accent)];
+  }
+
+  /* tooltip styles */
+  .tooltip-wrapper {
+    @apply relative inline-flex;
+  }
+
+  .tooltip {
+    @apply pointer-events-none absolute bottom-full right-0 z-20 mb-2.5 px-2.5 py-1.5 whitespace-nowrap rounded-lg border-2 border-accent/70 bg-border text-xs font-medium text-foreground shadow-lg shadow-black/40 opacity-0 translate-y-1 transition duration-150 motion-reduce:transition-none;
+  }
+
+  /* Arrow: a rotated square sharing the tooltip border, centred on the button */
+  .tooltip::after {
+    content: "";
+    @apply absolute top-full right-[11px] -mt-[5px] w-2.5 h-2.5 rotate-45 border-r-2 border-b-2 border-accent/70 bg-border;
+  }
+
+  .tooltip-wrapper:hover .tooltip,
+  .tooltip-wrapper:has(:focus-visible) .tooltip {
+    @apply opacity-100 translate-y-0;
+  }
+
+  /* dashboard main section styles */
+  /* relative keeps absolutely positioned children (sr-only labels, tooltips)
+     inside this scroll area instead of stretching the whole page */
+  .dashboard-container {
+    @apply relative flex items-start gap-2 p-2 m-2 h-[calc(100vh-16px)] overflow-y-auto overflow-x-hidden rounded-2xl bg-card;
+  }
+
+  .dashboard-content {
+    @apply flex-1 m-2 min-w-0 min-h-[calc(100vh-48px)] flex flex-col rounded-2xl bg-background text-foreground;
+  }
+
+  .dashboard-utility-bar {
+    @apply w-full min-h-12 shrink-0 px-5 py-3 flex items-center border-b border-border text-sm text-muted;
+  }
+
+  .sidebar-toggle {
+    @apply mr-4 p-1.5 shrink-0 rounded-lg text-muted hover:bg-card hover:text-foreground;
+  }
+
+  .sidebar-toggle svg {
+    @apply w-5 h-5;
+  }
+
+  .dashboard-utility-items {
+    @apply ml-auto flex items-center gap-5;
+  }
+
+  .dashboard-utility-item {
+    @apply flex items-center gap-2 whitespace-nowrap;
+  }
+
+  .dashboard-utility-text {
+    @apply flex items-center gap-2;
+  }
+
+  .dashboard-utility-item strong {
+    @apply text-foreground font-semibold;
+  }
+
+  .dashboard-utility-icon {
+    @apply w-4 h-4 shrink-0 text-accent;
+  }
+
+  .dashboard-utility-divider {
+    @apply h-5 w-px bg-border;
+  }
+
+  .dashboard-section {
+    @apply w-full p-4 flex flex-col justify-center items-center gap-6;
+  }
+
+  .dashboard-home {
+    @apply w-full flex flex-col gap-6;
+  }
+
+  /* Home page greeting: name plus one live status line */
+  .dashboard-greeting {
+    @apply w-full px-4 pt-6 flex flex-col gap-1;
+  }
+
+  .dashboard-greeting-title {
+    @apply text-2xl text-foreground font-semibold;
+  }
+
+  .dashboard-greeting-name {
+    @apply text-accent-hover;
+  }
+
+  .dashboard-greeting-status {
+    @apply text-muted;
+  }
+
+  .dashboard-greeting-link {
+    @apply text-foreground font-medium underline decoration-accent/60 underline-offset-4 hover:text-accent rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  }
+
+  .dashboard-intro {
+    @apply flex-row justify-between items-end gap-4;
+  }
+
+  .dashboard-eyebrow {
+    @apply text-sm text-muted;
+  }
+
+  .dashboard-heading {
+    @apply text-3xl text-foreground font-semibold;
+  }
+
+  .dashboard-date {
+    @apply text-sm text-muted;
+  }
+
+  .dashboard-title {
+    @apply w-full flex items-center gap-2 text-xl text-muted text-start font-semibold;
+  }
+
+  .dashboard-title-icon {
+    @apply w-5 h-5 text-accent;
+  }
+
+  .dashboard-flex {
+    @apply flex justify-center items-center;
+  }
+
+  .dashboard-grid {
+    @apply w-full grid grid-cols-4 gap-4;
+  }
+
+  .dashboard-actions {
+    @apply w-full flex flex-wrap items-center gap-4;
+  }
+
+  /* Stat card: label + quiet icon, one big figure, one line of context.
+     Left-aligned so a row of cards scans like a table. */
+  .dashboard-card {
+    @apply min-w-0 min-h-32 p-4 flex flex-col gap-2 rounded-xl border border-border/60 bg-card shadow-[inset_0_1px_0_rgb(255_255_255/0.04)];
+  }
+
+  .dashboard-card-header {
+    @apply flex items-start justify-between gap-3;
+  }
+
+  .dashboard-card-title {
+    @apply text-sm font-medium text-muted;
+  }
+
+  .dashboard-card-icon {
+    @apply size-4 shrink-0 text-muted;
+  }
+
+  .dashboard-card-number {
+    @apply text-3xl font-semibold leading-none text-foreground tabular-nums;
+  }
+
+  .dashboard-card-value {
+    @apply text-lg font-semibold leading-snug text-foreground;
+  }
+
+  /* The context line sits at the bottom, so figures line up across a row */
+  .dashboard-card-context {
+    @apply mt-auto flex items-center gap-1.5 text-xs text-muted tabular-nums;
+  }
+
+  .dashboard-card-context-icon {
+    @apply size-3.5 shrink-0 text-foreground;
+  }
+
+  .dashboard-card-action {
+    @apply mt-auto inline-flex w-fit items-center gap-1 rounded-sm text-sm font-medium text-accent hover:text-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent [&_svg]:size-3.5;
+  }
+
+  /* Colour only for states that need action, matching statusColours:
+     yellow = waiting for approval, red = rejected; only the figure changes */
+  .dashboard-card-accent-yellow .dashboard-card-number {
+    @apply text-yellow-400;
+  }
+
+  .dashboard-card-accent-red .dashboard-card-number {
+    @apply text-red-400;
+  }
+
+  .dashboard-insights {
+    @apply w-full flex flex-col gap-4;
+  }
+
+  .dashboard-grid-three {
+    @apply grid-cols-3;
+  }
+
+  .dashboard-grid-two {
+    @apply grid-cols-2;
+  }
+
+  .event-card-status {
+    @apply w-fit capitalize;
+  }
+
+  .dashboard-empty-state {
+    @apply w-full col-span-full p-6 flex flex-col items-center gap-4 rounded-xl bg-card text-center;
+  }
+
+  .dashboard-empty-text {
+    @apply text-sm text-muted;
+  }
+
+  /* preferences styles */
+  .preferences-options {
+    @apply flex flex-wrap gap-4 py-6 border-y border-dashed border-border;
+  }
+
+  .preferences-option {
+    @apply px-4 py-2 flex items-center gap-2 rounded-full border border-border bg-background text-foreground font-medium cursor-pointer transition-colors hover:border-accent has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent-hover;
+  }
+
+  .preferences-option:has(input:checked) {
+    @apply border-accent bg-accent text-background;
+  }
+
+  .preferences-option input {
+    @apply w-4 h-4 accent-background cursor-pointer;
+  }
+
+  /* notifications styles */
+  .notification-toolbar {
+    @apply w-full flex justify-end mb-4;
+  }
+
+  .notification-list {
+    @apply w-full flex flex-col gap-4 list-none;
+  }
+
+  .notification-card {
+    @apply p-4 flex flex-col gap-2 rounded-xl border-l-4 border-border bg-card;
+  }
+
+  .notification-card.is-unread {
+    @apply border-yellow-400;
+  }
+
+  .notification-header {
+    @apply flex items-center gap-3;
+  }
+
+  .notification-status-icon {
+    @apply w-5 h-5 shrink-0 text-green-400;
+  }
+
+  .notification-card.is-unread .notification-status-icon {
+    @apply text-yellow-400;
+  }
+
+  .notification-subject {
+    @apply text-lg text-foreground font-semibold;
+  }
+
+  .notification-card:not(.is-unread) .notification-subject {
+    @apply font-medium text-muted;
+  }
+
+  .notification-body {
+    @apply text-base text-foreground;
+  }
+
+  .notification-meta {
+    @apply text-sm text-muted;
+  }
+
+  .notification-actions {
+    @apply mt-2 flex flex-wrap items-center gap-3;
+  }
+
+  /* activity log styles */
+  .activity-log {
+    @apply w-full p-4 flex flex-col items-start gap-4 rounded-xl bg-card;
+  }
+
+  .activity-list {
+    @apply w-full flex flex-col list-none divide-y divide-border;
+  }
+
+  .activity-item {
+    @apply py-3 flex items-baseline gap-4;
+  }
+
+  .activity-time {
+    @apply w-40 shrink-0 text-sm text-muted;
+  }
+
+  .activity-desc {
+    @apply min-w-0 text-base text-foreground;
+  }
+
+  .activity-action {
+    @apply font-semibold text-accent;
+  }
+
+  @media (max-width: 768px) {
+    .activity-item {
+      @apply flex-col gap-1;
+    }
+  }
+
+  /* table styles */
+  .table-wrapper {
+    @apply w-full overflow-x-auto rounded-xl border border-border/60 bg-card shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] focus-visible:outline-2 focus-visible:outline-accent;
+  }
+
+  .data-table {
+    @apply w-full text-left text-sm;
+  }
+
+  .data-table th {
+    @apply px-4 py-3 whitespace-nowrap bg-background font-semibold text-muted;
+  }
+
+  .data-table td {
+    @apply px-4 py-3 whitespace-nowrap border-t border-border text-foreground;
+  }
+
+  .data-table tbody tr {
+    @apply transition-colors hover:bg-background/60;
+  }
+
+  .table-actions {
+    @apply flex items-center gap-2;
+  }
+
+
+  .data-table td.table-cell-wrap {
+    @apply min-w-40 max-w-56 whitespace-normal;
+  }
+
+  .table-cell-stack {
+    @apply flex flex-col;
+  }
+
+  .table-cell-secondary {
+    @apply text-xs text-muted;
+  }
+
+  .table-message {
+    @apply w-full mb-4;
+  }
+
+  .status-badge {
+    @apply px-2.5 py-1 inline-flex rounded-full border text-xs font-medium;
+  }
+
+  .status-active,
+  .status-approved {
+    @apply border-green-400/40 bg-green-400/10 text-green-400;
+  }
+
+  .status-pending {
+    @apply border-yellow-400/40 bg-yellow-400/10 text-yellow-400;
+  }
+
+  .status-suspended,
+  .status-rejected {
+    @apply border-red-400/40 bg-red-400/10 text-red-400;
+  }
+
+  /* Event status colours match the PHP input.css */
+  .status-cancelled {
+    @apply border-orange-400/40 bg-orange-400/10 text-orange-400;
+  }
+
+  .status-draft {
+    @apply border-cyan-300/40 bg-cyan-300/10 text-cyan-300;
+  }
+
+  .status-past {
+    @apply border-gray-300/40 bg-gray-300/10 text-gray-300;
+  }
+
+  .data-table tbody tr.table-row-cancelled {
+    @apply bg-orange-400/10;
+  }
+
+  .data-table tbody tr.table-row-past {
+    @apply bg-slate-200/5;
+  }
+
+  .section-heading-row {
+    @apply w-full flex items-center justify-between gap-4;
+  }
+
+  .section-heading-row .dashboard-title {
+    @apply w-auto min-w-0;
+  }
+
+  .section-heading-row > a,
+  .section-heading-row > button {
+    @apply shrink-0 whitespace-nowrap;
+  }
+
+  /* Search, layout switcher and cards inside the dashboard Explore Events section */
+  .dashboard-events-browser {
+    @apply w-full flex flex-col items-center gap-6;
+  }
+
+  .event-details-body {
+    @apply w-full mt-4 flex flex-col gap-6;
+  }
+
+  .form-select {
+    @apply w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground outline-none transition-colors focus:border-accent cursor-pointer;
+  }
+
+  /* organiser event pages */
+  .filter-panel {
+    @apply w-full mb-6 flex flex-col gap-3;
+  }
+
+  .contact-field input[type="datetime-local"] {
+    color-scheme: dark;
+  }
+
+  .event-image-preview {
+    @apply w-full flex flex-col gap-2;
+  }
+
+  .event-image-preview-img {
+    @apply w-full max-w-md aspect-video rounded-xl border border-border object-cover;
+  }
+
+  .event-image-preview-empty {
+    @apply w-full max-w-md aspect-video flex items-center justify-center rounded-xl border border-dashed border-border bg-background;
+  }
+
+  .form-actions {
+    @apply flex-wrap gap-4;
+  }
+
+  /* contact messages: reuse the notification card, but keep every card
+     bright (messages have no read/unread state) */
+  .notification-card.contact-message-card .notification-subject {
+    @apply font-semibold text-foreground;
+  }
+
+  .notification-card.contact-message-card .notification-status-icon {
+    @apply text-accent;
+  }
+
+  .contact-message-email {
+    @apply font-normal text-accent hover:text-accent-hover;
+  }
+
+  /* Keep the line breaks the sender typed (PHP used nl2br) */
+  .contact-message-text {
+    @apply whitespace-pre-line;
+  }
+
+  .info-badge {
+    @apply ml-auto shrink-0 rounded-full border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted;
+  }
+
+  /* System logs: the Details column wraps instead of widening the table */
+  .data-table td.table-cell-details {
+    @apply min-w-64 max-w-md;
+  }
+
+  /* analytics styles */
+  .period-switcher {
+    @apply flex flex-wrap items-center gap-1 rounded-xl border border-border bg-background p-1;
+  }
+
+  .period-switcher button {
+    @apply rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  }
+
+  .period-switcher button.is-active {
+    @apply bg-accent text-background;
+  }
+
+  .analytics-grid {
+    @apply w-full grid grid-cols-2 gap-4;
+  }
+
+  .chart-card {
+    @apply min-w-0 p-4 flex flex-col gap-4 rounded-xl border border-border/60 bg-card shadow-[inset_0_1px_0_rgb(255_255_255/0.04)];
+  }
+
+  .chart-card-wide {
+    @apply col-span-full;
+  }
+
+  /* Title and description left, controls right; controls wrap below when narrow */
+  .chart-card-header {
+    @apply flex flex-wrap items-start justify-between gap-3;
+  }
+
+  .chart-card-heading {
+    @apply min-w-0 flex flex-col gap-1;
+  }
+
+  .chart-card-actions {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .chart-card-title {
+    @apply text-base font-semibold text-foreground;
+  }
+
+  .chart-card-description {
+    @apply text-sm text-muted;
+  }
+
+  /* Recharts draws its own focus box on the SVG; hide it (the table view and
+     tooltips cover keyboard and screen-reader users) */
+  .chart-plot .recharts-surface:focus,
+  .chart-plot .recharts-wrapper:focus {
+    outline: none;
+  }
+
+  .chart-table-toggle summary {
+    @apply w-fit cursor-pointer rounded-sm text-sm text-accent hover:text-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  }
+
+  .chart-table-toggle[open] summary {
+    @apply mb-3;
+  }
+
+  .chart-tooltip {
+    @apply flex flex-col gap-0.5 rounded-lg border-2 border-accent/70 bg-border px-3 py-2 shadow-lg shadow-black/40;
+  }
+
+  .chart-tooltip-value {
+    @apply flex items-center gap-2 text-sm font-semibold text-foreground;
+  }
+
+  /* Short line key, not a box (dataviz guidance) */
+  .chart-tooltip-key {
+    @apply inline-block h-0.5 w-3 rounded-full;
+  }
+
+  /* Legend for charts with more than one series (the timeline) */
+  .chart-legend {
+    @apply mb-2 flex flex-wrap items-center gap-4 text-sm text-muted;
+  }
+
+  .chart-legend li {
+    @apply flex items-center gap-2;
+  }
+
+  .chart-legend-key {
+    @apply inline-block size-3 rounded-sm;
+  }
+
+  .chart-tooltip-label {
+    @apply text-xs text-muted;
+  }
+
+  /* profile settings styles */
+  .profile-form-grid {
+    @apply w-full grid grid-cols-2 gap-6;
+  }
+
+  .profile-form-column {
+    @apply min-w-0 flex flex-col gap-5;
+  }
+
+  .contact-field input.profile-readonly {
+    @apply bg-card text-muted cursor-default focus:border-border;
+  }
+
+  .contact-field input.profile-file-input {
+    @apply px-3 py-2 text-sm text-muted cursor-pointer file:mr-4 file:rounded-lg file:border-0 file:bg-accent file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-background hover:file:bg-accent-hover;
+  }
+
+  .profile-avatar {
+    @apply mt-2 w-28 h-28 flex items-center justify-center overflow-hidden rounded-full border border-border bg-background;
+  }
+
+  .profile-avatar-image {
+    @apply w-full h-full object-cover;
+  }
+
+  .profile-avatar-icon {
+    @apply w-16 h-16 text-muted;
+  }
+
+  .profile-legend {
+    @apply mb-2 text-sm font-medium text-foreground;
+  }
+
+  .profile-password-field {
+    @apply flex flex-col gap-1;
+  }
+
+  .profile-error {
+    @apply text-sm text-red-400;
+  }
+
+  .success-message {
+    @apply p-3 flex flex-col gap-1 rounded-lg border border-green-400/40 bg-green-400/10 text-sm text-green-400;
+  }
+
+  .error-message {
+    @apply p-3 flex flex-col gap-1 rounded-lg border border-red-400/40 bg-red-400/10 text-sm text-red-400;
+  }
+
+  .profile-meta {
+    @apply w-full mt-4 flex flex-col gap-1 text-sm text-muted;
+  }
+
+  @media (max-width: 768px) {
+    .analytics-grid {
+      @apply grid-cols-1;
+    }
+
+    /* Chart controls take the full width, buttons in an even grid of two */
+    .chart-card-actions {
+      @apply w-full;
+    }
+
+    .period-switcher {
+      @apply w-full grid grid-cols-2;
+    }
+
+    /* Chart cards can be ~190px wide here: smaller text, and a long label may
+       wrap to two centred lines rather than spill out of its button */
+    .period-switcher button {
+      @apply px-1.5 text-xs leading-tight text-center;
+    }
+
+
+    .profile-form-grid {
+      @apply grid-cols-1;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .dashboard-grid {
+      @apply grid-cols-2;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .sidebar:not(.sidebar-collapsed) {
+      @apply w-16;
+    }
+
+    /* hidden, not text-transparent: invisible labels still took up width
+       and pushed the icons out of the 64px rail */
+    .sidebar:not(.sidebar-collapsed) .sidebar-title,
+    .sidebar:not(.sidebar-collapsed) .menu-item span {
+      @apply hidden;
+    }
+
+    .sidebar:not(.sidebar-collapsed) .menu-item {
+      @apply justify-center px-2;
+    }
+
+    /* Icon rail: drone and avatar only, log out stacked under the avatar */
+    .sidebar:not(.sidebar-collapsed) .sidebar-brand {
+      @apply justify-center px-2;
+    }
+
+    .sidebar:not(.sidebar-collapsed) .sidebar-brand span,
+    .sidebar:not(.sidebar-collapsed) .sidebar-user-details,
+    .sidebar:not(.sidebar-collapsed) .sidebar-test-role {
+      @apply hidden;
+    }
+
+    .sidebar:not(.sidebar-collapsed) .sidebar-user-row {
+      @apply flex-col px-0;
+    }
+
+    .dashboard-utility-bar {
+      @apply items-start flex-wrap gap-3 px-4;
+    }
+
+    .dashboard-utility-divider {
+      @apply hidden;
+    }
+
+    /* Weather bar: one item per line; the text beside each icon may wrap
+       between its parts ("Manchester, UK" / "14°C" / "Partly cloudy").
+       These live here, after the base rules, so they win the cascade. */
+    .dashboard-utility-items {
+      @apply ml-0 w-full flex-col items-start gap-1.5;
+    }
+
+    .dashboard-utility-item {
+      @apply items-start whitespace-normal;
+    }
+
+    .dashboard-utility-icon {
+      @apply mt-0.5;
+    }
+
+    .dashboard-utility-text {
+      @apply flex-wrap gap-y-0.5;
+    }
+
+    .dashboard-intro {
+      @apply flex-col items-start;
+    }
+  }
+}
