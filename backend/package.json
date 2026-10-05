@@ -5,7 +5,8 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "db:seed": "node src/db/seed.js"
   },
   "keywords": [],
   "author": "",
@@ -13,6 +14,7 @@
   "type": "module",
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",
+    "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.3",
     "express": "^5.2.1"
