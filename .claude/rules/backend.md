@@ -1,7 +1,7 @@
 # Backend Rules
 
-The backend is at an early stage: the server, routers and the Drizzle/Neon connection are wired,
-and the `users` table is defined. Everything else is stubs.
+The backend is at an early stage: the full schema is applied to Neon and seeded, but the routers are
+still stubs that don't touch the database.
 
 ## Stack constraints
 
@@ -36,9 +36,19 @@ backend/
 - Columns: camelCase JS key, snake_case DB name: `userId: integer('user_id')`
 - Primary keys: `integer(...).primaryKey().generatedAlwaysAsIdentity()`
 - Enums: `pgEnum('<snake_name>', [...])`, exported as `<name>Enum`
-- Every table spreads the shared `timestamps` object (`created_at`, `updated_at` with `$onUpdate`)
+- Shared column helpers live in `schema/columns.js` (`timestamptz`, `createdAt`, `timestamps`) and
+  are deliberately not exported from `schema/index.js`. Every date column is `timestamptz`
+- `updated_at` is set by Drizzle's `$onUpdate` in JavaScript, not by a database trigger: raw SQL
+  updates leave it unchanged
 - New schema files must be added to `schema/index.js` or drizzle-kit won't see them
-- The full schema was agreed on 2026-10-05; check the project's brain page before inventing tables
+- The full schema (3 enums, 9 tables) was agreed on 2026-10-05; see `schema-decisions.md` in project
+  memory before inventing tables
+
+## Seed
+
+`npm run db:seed` inserts the 19 categories (slugs = frontend `eventCategories` ids) and the demo
+admin from `SEED_ADMIN_USERNAME`, `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` in `.env`. Passwords
+are hashed with `bcryptjs` (cost 12). It skips rows that already exist, so it's safe to re-run.
 
 ## Migrations
 

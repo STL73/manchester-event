@@ -1,6 +1,2 @@
-import { pgTable, integer, varchar, timestamp } from 'drizzle-orm/pg-core';
-
-const timestamps = {
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-    updatedAt: timestamp('updated_at').notNull().defaultNow().$onUpdate(() => new Date()),
-};
+// Auth tables live here. The email verification tokens table is designed together
+// with sign-up; import the shared timestamps from ./columns.js when it's added.

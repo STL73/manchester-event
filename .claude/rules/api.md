@@ -19,11 +19,11 @@ All routes are versioned under `/api/v1`, one router per resource, mounted in `s
 - REST verbs: `GET` list/detail, `POST` create, `PUT` update, `DELETE` remove. Actions that
   aren't CRUD are a sub-path verb (`/user/:id/cancel`)
 
-## Known issue
+## Middleware order
 
-`app.use(express.json())` is registered **after** the routers in `server.js`, so `req.body` will be
-`undefined` inside every route. Move it above the `app.use('/api/v1/...')` lines before writing the
-first handler that reads a body.
+`app.use(express.json())` must stay **above** the `app.use('/api/v1/...')` lines in `server.js`.
+Middleware registered after a router never runs for that router's routes, so `req.body` would be
+`undefined`.
 
 ## To decide when handlers are written
 

@@ -12,8 +12,8 @@ behaviour. Comments here that cite `*.php` files or PHP functions mark parity th
 The migration is half done, and **the two halves are not connected yet**:
 
 - `frontend/` is a near-complete React port that runs entirely on in-memory mock data
-- `backend/` is an Express + Drizzle skeleton: routers return placeholder strings, and only the
-  `users` table is defined
+- `backend/` is an Express + Drizzle skeleton: routers return placeholder strings. The full schema
+  in `src/db/schema/app.js` is applied to Neon and seeded
 
 There are no `fetch` calls, no API client and no Vite proxy. Wiring the frontend to the API is
 future work, so don't assume an endpoint exists because a page shows the data.
@@ -61,9 +61,9 @@ will need to do.
 schema files sit in `src/db/schema/` behind a barrel `index.js`, which `drizzle.config.js` points at.
 Migrations generate into `backend/drizzle/`.
 
-### Database schema: approved but not yet written
+### Database schema
 
-The full Postgres schema (3 enums, 10 tables) was agreed on 2026-10-05 and is recorded in project
+The full Postgres schema (3 enums, 9 tables) was agreed on 2026-10-05 and is recorded in project
 memory (`schema-decisions.md`). Build from that, not from the old MySQL `create tables.txt`. The
 decisions that change how the code should behave:
 
@@ -78,9 +78,8 @@ decisions that change how the code should behave:
   Users with public events can be suspended but not deleted
 - All date columns are `timestamp(..., { withTimezone: true })`
 
-Migration `0000_flowery_rafael_vega.sql` predates this schema and has probably not been applied. Check
-Neon read-only, and get Slav's OK, before deleting or replacing it. Show the generated SQL before
-applying anything to Neon.
+Migration `0000_flowery_rafael_vega.sql` predates this schema. Neon was confirmed empty on 2026-10-05,
+so it was never applied. Show the generated SQL before applying anything to Neon.
 
 ## Active Feature
 
@@ -101,6 +100,7 @@ npm start
 npx eslint .               # no lint script defined
 npx drizzle-kit generate   # schema -> SQL in drizzle/
 npx drizzle-kit migrate    # apply to DB_URL
+npm run db:seed            # 19 categories + demo admin (SEED_ADMIN_* in .env)
 ```
 
 There is no test runner in either package yet.
@@ -111,6 +111,7 @@ There is no test runner in either package yet.
 | --- | --- | --- |
 | `backend/.env` | `DB_URL` | Neon connection string. `db/index.js` and `drizzle.config.js` throw without it |
 | `backend/.env` | `PORT`, `NODE_ENV` | Read through `src/config/env.js` |
+| `backend/.env` | `SEED_ADMIN_USERNAME`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` | Demo admin for `npm run db:seed` |
 | `frontend/.env` | `VITE_NEON_AUTH_URL`, `VITE_NEON_DATA_API_URL` | Defined but not yet read by any code |
 
 All `.env*` files are gitignored.
@@ -126,7 +127,5 @@ All `.env*` files are gitignored.
 
 ## Notes
 
-- Known bug: in `backend/src/server.js`, `app.use(express.json())` comes after the routers, so
-  `req.body` is undefined in routes. Fix it before writing the first handler that reads a body
 - Icons: lucide-react only. Extend `EventCard` / `DashboardCard` / `Button` with optional props
   rather than wrapping or copying them
