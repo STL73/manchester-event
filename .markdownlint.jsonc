@@ -1,0 +1,13 @@
+{
+  // Project-level markdownlint config.
+  // Inherits all rules from the user's global config, then adds
+  // project-scoped `ignores` (paths relative to this file's location).
+  // The VS Code DavidAnson.vscode-markdownlint extension reads this
+  // file on every lint pass.
+  "extends": "C:/Users/slavi/.markdownlint.jsonc",
+
+  "ignores": [
+    "graphify-out/**",
+    "node_modules/**"
+  ]
+}

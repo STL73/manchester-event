@@ -1,0 +1,40 @@
+# Claude Code — per-machine, do not commit
+CLAUDE.local.md
+.claude/projects/
+.claude/settings.local.json
+
+# OS pollution
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*~
+
+# Logs and env
+*.log
+.env
+.env.*
+!.env.example
+
+# Node ecosystem
+node_modules/
+npm-debug.log*
+
+# Python ecosystem
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# PHP ecosystem
+vendor/
+composer.phar
+
+# Generated / regenerable
+graphify-out/
+memory/
