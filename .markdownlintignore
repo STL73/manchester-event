@@ -1,0 +1,5 @@
+# gitignore-style ignore list for markdownlint-cli2.
+# Mirrors the `ignores` field in .markdownlint.jsonc so both the CLI
+# and the VS Code extension agree on what to skip.
+graphify-out/
+node_modules/
