@@ -108,9 +108,11 @@ const navigationData = [
   },
 ];
 
-// Public header links (signed-out). "end" keeps Home active only on "/".
+// Public header links. "end" keeps Home active only on "/". Home is
+// guestOnly: signed in, "/" is their dashboard, which the Dashboard button
+// already links to
 export const publicNav = [
-  { title: "Home", url: "/", end: true },
+  { title: "Home", url: "/", end: true, guestOnly: true },
   { title: "Explore Events", url: "/events" },
   { title: "About Us", url: "/about" },
   { title: "Contact Us", url: "/contact" },
