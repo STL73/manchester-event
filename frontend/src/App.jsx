@@ -23,6 +23,7 @@ import ManageEvents from "./pages/ManageEvents";
 import EditEventStatus from "./pages/EditEventStatus";
 import SystemLogs from "./pages/SystemLogs";
 import ContactMessages from "./pages/ContactMessages";
+import NotFound from "./pages/NotFound";
 import { TEST_USER_TYPE, getData, getUserData } from "./data/navigationData";
 import { mockUsers } from "./data/manageUsersData";
 import { currentAdmin, getManagedEvents } from "./data/manageEventsData";
@@ -265,7 +266,11 @@ function App() {
             <Route path="site-analytics" element={<Suspense fallback={<PageLoading />}><SiteAnalytics users={users} events={events} /></Suspense>} />
             <Route path="system-logs" element={<SystemLogs />} />
             <Route path="contact-messages" element={<ContactMessages contactMessages={contactMessages} />} />
+            <Route path="*" element={<NotFound inDashboard />} />
           </Route>
+          {/* Any other address, e.g. a mistyped /home, gets a proper 404
+              instead of an empty page */}
+          <Route path="*" element={<NotFound isUser={isUser} />} />
         </Routes>
       </main>
       {showFooter && <Footer />}
