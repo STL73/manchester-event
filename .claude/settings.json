@@ -3,7 +3,5 @@
     "allow": [],
     "deny": []
   },
-  "hooks": {
-    "_comment": "Example: { \"PostToolUse\": [{ \"matcher\": \"Write\", \"hooks\": [{ \"type\": \"command\", \"command\": \"npx prettier --write $FILE_PATH\" }] }] }"
-  }
+  "hooks": {}
 }
