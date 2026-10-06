@@ -1,7 +1,7 @@
 import { LogIn, UserPlus } from "lucide-react";
 
-import mediacityNight from "../images/mediacity-night.jpg";
-import quaysDusk from "../images/quays-dusk.jpg";
+import mediacityGlobeNight from "../images/events/mediacity-globe-night.jpg";
+import salfordQuaysDusk from "../images/events/salford-quays-dusk.jpg";
 
 // The backend applies the same rule; the check here only gives quick feedback
 export const PASSWORD_MIN_LENGTH = 8;
@@ -14,7 +14,7 @@ export const authPageData = {
   login: {
     title: "Welcome back",
     subtitle: "Log in to your Manchester Event Portal account",
-    image: { src: mediacityNight, alt: "MediaCityUK lit up at night" },
+    image: { src: mediacityGlobeNight, alt: "MediaCityUK lit up at night" },
     // Each row is one field, or an array of fields shown side by side
     fields: [
       {
@@ -39,7 +39,7 @@ export const authPageData = {
   "sign-up": {
     title: "Create your account",
     subtitle: "Discover events across Greater Manchester, or promote your own",
-    image: { src: quaysDusk, alt: "Salford Quays at dusk" },
+    image: { src: salfordQuaysDusk, alt: "Salford Quays at dusk" },
     // Hints sit on the label row, so they stay short. maxLength already
     // enforces the display name limit, and the verification email is
     // explained in the success message instead

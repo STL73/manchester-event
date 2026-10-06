@@ -1,32 +1,31 @@
-import concert1 from "../images/concert1.jpg";
-import concert2 from "../images/concert2.jpg";
-import concert3 from "../images/concert3.jpg";
-import concert4 from "../images/concert4.jpg";
-import concert5 from "../images/concert5.jpg";
-import concert6 from "../images/concert6.jpg";
-import concert7 from "../images/concert7.jpg";
-import concert8 from "../images/concert8.jpg";
-import mediacity1 from "../images/mediacity1.jpg";
-import mediacity2 from "../images/mediacity2.jpg";
-import mediacity3 from "../images/mediacity3.jpg";
-import mediacity4 from "../images/mediacity4.jpg";
-import berryCheesecake from "../images/berry-cheesecake.jpg";
-import chocolate from "../images/chocolate.jpg";
-import christmasMarket from "../images/christmas-market.jpg";
-import colourFestival from "../images/colour-festival.jpg";
-import djFireworks from "../images/dj-fireworks.jpg";
-import football from "../images/football.jpg";
-import ginDistillery from "../images/gin-distillery.jpg";
-import guitarScreen from "../images/guitar-screen.jpg";
-import hotAirBalloon from "../images/hot-air-balloon.jpg";
-import kidsPlay from "../images/kids-play.jpg";
-import kites from "../images/kites.jpg";
-import mediacityNight from "../images/mediacity-night.jpg";
-import pasta from "../images/pasta.jpg";
-import quaysDusk from "../images/quays-dusk.jpg";
-import shipModel from "../images/ship-model.jpg";
-import stadiumConcert from "../images/stadium-concert.jpg";
-import studioTour from "../images/studio-tour.jpg";
+import stadiumConcertDaytime from "../images/events/stadium-concert-daytime.jpg";
+import arenaRedLights from "../images/events/arena-red-lights.jpg";
+import arenaCrowdStage from "../images/events/arena-crowd-stage.jpg";
+import arenaBlueLasers from "../images/events/arena-blue-lasers.jpg";
+import arenaLightBeams from "../images/events/arena-light-beams.jpg";
+import stageConfetti from "../images/events/stage-confetti.jpg";
+import arenaStageScreens from "../images/events/arena-stage-screens.jpg";
+import stageRedSpotlights from "../images/events/stage-red-spotlights.jpg";
+import mediacityWaterfrontNight from "../images/events/mediacity-waterfront-night.jpg";
+import oldTraffordNight from "../images/events/old-trafford-night.jpg";
+import mediacityPiazzaSunset from "../images/events/mediacity-piazza-sunset.jpg";
+import berryCheesecake from "../images/events/berry-cheesecake.jpg";
+import darkChocolate from "../images/events/dark-chocolate.jpg";
+import tinselTownChristmasFair from "../images/events/tinsel-town-christmas-fair.jpg";
+import colourPowderFestival from "../images/events/colour-powder-festival.jpg";
+import crowdPurpleFireworks from "../images/events/crowd-purple-fireworks.jpg";
+import footballOnPitch from "../images/events/football-on-pitch.jpg";
+import ginDistilleryCopperStills from "../images/events/gin-distillery-copper-stills.jpg";
+import edSheeranGuitarPickScreen from "../images/events/ed-sheeran-guitar-pick-screen.jpg";
+import heatonParkBalloon from "../images/events/heaton-park-balloon.jpg";
+import childrenPlayingTrainSet from "../images/events/children-playing-train-set.jpg";
+import kitesInSky from "../images/events/kites-in-sky.jpg";
+import mediacityGlobeNight from "../images/events/mediacity-globe-night.jpg";
+import spaghettiTomatoBasil from "../images/events/spaghetti-tomato-basil.jpg";
+import salfordQuaysDusk from "../images/events/salford-quays-dusk.jpg";
+import titanicShipModel from "../images/events/titanic-ship-model.jpg";
+import edSheeran360Stage from "../images/events/ed-sheeran-360-stage.jpg";
+import gameOfThronesTourSign from "../images/events/game-of-thrones-tour-sign.jpg";
 import { ChevronLeft, Eye } from "lucide-react";
 
 // Dashboard pages open event details inside the dashboard;
@@ -100,7 +99,7 @@ export const initialEvents = [
     address: "Albert Square, Manchester M2 5DB",
     externalLink: "https://tickets.example.com/live-sessions",
     endDatetime: null,
-    image: concert1,
+    image: stadiumConcertDaytime,
     categoryId: "music",
     category: "Music",
     locationId: "city-centre",
@@ -123,7 +122,7 @@ export const initialEvents = [
     address: "Stevenson Square, Manchester M1 1FB",
     externalLink: "https://tickets.example.com/art-after-dark",
     endDatetime: null,
-    image: concert2,
+    image: arenaRedLights,
     categoryId: "art-exhibitions",
     category: "Art & Exhibitions",
     locationId: "northern-quarter",
@@ -146,7 +145,7 @@ export const initialEvents = [
     address: "Peel Park, Salford M5 4WU",
     externalLink: "https://tickets.example.com/community-day",
     endDatetime: null,
-    image: concert3,
+    image: arenaCrowdStage,
     categoryId: "community-culture",
     category: "Community & Culture",
     locationId: "salford",
@@ -169,7 +168,7 @@ export const initialEvents = [
     address: "MediaCityUK, Salford M50 2EQ",
     externalLink: "https://tickets.example.com/live-at-mediacity",
     endDatetime: null,
-    image: concert4,
+    image: arenaBlueLasers,
     categoryId: "music",
     category: "Music",
     locationId: "mediacity",
@@ -192,7 +191,7 @@ export const initialEvents = [
     address: "Piccadilly Gardens, Manchester M1 1RG",
     externalLink: "https://tickets.example.com/active-weekend",
     endDatetime: null,
-    image: concert5,
+    image: arenaLightBeams,
     categoryId: "sports",
     category: "Sports",
     locationId: "city-centre",
@@ -215,7 +214,7 @@ export const initialEvents = [
     address: "The Lowry, Pier 8, Salford M50 3AZ",
     externalLink: "https://tickets.example.com/people-of-manchester",
     endDatetime: null,
-    image: concert6,
+    image: stageConfetti,
     categoryId: "community-culture",
     category: "Community & Culture",
     locationId: "mediacity",
@@ -238,7 +237,7 @@ export const initialEvents = [
     address: "Salford Quays, Salford M50 3SQ",
     externalLink: "https://tickets.example.com/night-market",
     endDatetime: null,
-    image: mediacity2,
+    image: mediacityWaterfrontNight,
     categoryId: "markets-fairs",
     category: "Markets & Fairs",
     locationId: "salford",
@@ -261,7 +260,7 @@ export const initialEvents = [
     address: "Cathedral Gardens, Manchester M4 3BG",
     externalLink: "https://tickets.example.com/summer-jazz",
     endDatetime: null,
-    image: concert7,
+    image: arenaStageScreens,
     categoryId: "music",
     category: "Music",
     locationId: "city-centre",
@@ -284,7 +283,7 @@ export const initialEvents = [
     address: "Cutting Room Square, Manchester M4 6AE",
     externalLink: "https://tickets.example.com/ancoats-food",
     endDatetime: null,
-    image: concert8,
+    image: stageRedSpotlights,
     categoryId: "food-drink",
     category: "Food & Drink",
     locationId: "northern-quarter",
@@ -307,7 +306,7 @@ export const initialEvents = [
     address: "MediaCityUK, Salford M50 2EQ",
     externalLink: "https://tickets.example.com/winter-lights",
     endDatetime: null,
-    image: mediacity1,
+    image: mediacityGlobeNight,
     categoryId: "art-exhibitions",
     category: "Art & Exhibitions",
     locationId: "mediacity",
@@ -333,7 +332,7 @@ export const initialEvents = [
     address: "Exchange Square, Manchester M3 1BD",
     externalLink: "https://tickets.example.com/spring-food-festival",
     endDatetime: null,
-    image: pasta,
+    image: spaghettiTomatoBasil,
     categoryId: "food-drink",
     category: "Food & Drink",
     locationId: "city-centre",
@@ -356,7 +355,7 @@ export const initialEvents = [
     address: "Heaton Park, Middleton Road, Manchester M25 2SW",
     externalLink: "https://tickets.example.com/kite-festival",
     endDatetime: null,
-    image: kites,
+    image: kitesInSky,
     categoryId: "family-kids",
     category: "Family & Kids",
     locationId: "heaton-park",
@@ -379,7 +378,7 @@ export const initialEvents = [
     address: "Tib Street, Manchester M4 1LN",
     externalLink: "https://tickets.example.com/chocolate-tasting",
     endDatetime: null,
-    image: chocolate,
+    image: darkChocolate,
     categoryId: "food-drink",
     category: "Food & Drink",
     locationId: "northern-quarter",
@@ -402,7 +401,7 @@ export const initialEvents = [
     address: "Salford Sports Village, Littleton Road, Salford M7 3NQ",
     externalLink: "https://tickets.example.com/charity-cup",
     endDatetime: null,
-    image: football,
+    image: footballOnPitch,
     categoryId: "charity-causes",
     category: "Charity & Causes",
     locationId: "salford",
@@ -425,7 +424,7 @@ export const initialEvents = [
     address: "Heaton Park, Middleton Road, Manchester M25 2SW",
     externalLink: "https://tickets.example.com/colour-run",
     endDatetime: null,
-    image: colourFestival,
+    image: colourPowderFestival,
     categoryId: "festivals",
     category: "Festivals",
     locationId: "heaton-park",
@@ -448,7 +447,7 @@ export const initialEvents = [
     address: "MediaCityUK, Salford M50 2EQ",
     externalLink: "https://tickets.example.com/summer-stage",
     endDatetime: null,
-    image: mediacity4,
+    image: mediacityPiazzaSunset,
     categoryId: "music",
     category: "Music",
     locationId: "mediacity",
@@ -471,7 +470,7 @@ export const initialEvents = [
     address: "Hilton Street, Manchester M1 2EH",
     externalLink: "https://tickets.example.com/gin-tour",
     endDatetime: null,
-    image: ginDistillery,
+    image: ginDistilleryCopperStills,
     categoryId: "food-drink",
     category: "Food & Drink",
     locationId: "northern-quarter",
@@ -494,7 +493,7 @@ export const initialEvents = [
     address: "Salford Museum, Peel Park, Salford M5 4WU",
     externalLink: "https://tickets.example.com/kids-play",
     endDatetime: null,
-    image: kidsPlay,
+    image: childrenPlayingTrainSet,
     categoryId: "family-kids",
     category: "Family & Kids",
     locationId: "salford",
@@ -517,7 +516,7 @@ export const initialEvents = [
     address: "Piccadilly Gardens, Manchester M1 1RG",
     externalLink: "https://tickets.example.com/christmas-market",
     endDatetime: null,
-    image: christmasMarket,
+    image: tinselTownChristmasFair,
     categoryId: "markets-fairs",
     category: "Markets & Fairs",
     locationId: "city-centre",
@@ -564,7 +563,7 @@ export const initialEvents = [
     address: "Deansgate, Manchester M3 4LY",
     externalLink: "https://tickets.example.com/nye-party",
     endDatetime: null,
-    image: djFireworks,
+    image: crowdPurpleFireworks,
     categoryId: "nightlife",
     category: "Nightlife",
     locationId: "city-centre",
@@ -587,7 +586,7 @@ export const initialEvents = [
     address: "Salford Quays, Salford M50 3SQ",
     externalLink: "https://tickets.example.com/sunset-walk",
     endDatetime: null,
-    image: quaysDusk,
+    image: salfordQuaysDusk,
     categoryId: "health-wellness",
     category: "Health & Wellness",
     locationId: "mediacity",
@@ -610,7 +609,7 @@ export const initialEvents = [
     address: "Ordsall Hall, 322 Ordsall Lane, Salford M5 3AN",
     externalLink: "https://tickets.example.com/maritime-history",
     endDatetime: null,
-    image: shipModel,
+    image: titanicShipModel,
     categoryId: "history-heritage",
     category: "History & Heritage",
     locationId: "salford",
@@ -633,7 +632,7 @@ export const initialEvents = [
     address: "MediaCityUK, Salford M50 2EQ",
     externalLink: "https://tickets.example.com/film-tv-sets",
     endDatetime: null,
-    image: studioTour,
+    image: gameOfThronesTourSign,
     imagePosition: "center 20%",
     categoryId: "film-screenings",
     category: "Film & Screenings",
@@ -657,7 +656,7 @@ export const initialEvents = [
     address: "Heaton Park, Middleton Road, Manchester M25 2SW",
     externalLink: "https://tickets.example.com/balloon-rides",
     endDatetime: null,
-    image: hotAirBalloon,
+    image: heatonParkBalloon,
     categoryId: "family-kids",
     category: "Family & Kids",
     locationId: "heaton-park",
@@ -680,7 +679,7 @@ export const initialEvents = [
     address: "Oxford Road, Manchester M1 5QA",
     externalLink: "https://tickets.example.com/guitar-heroes",
     endDatetime: null,
-    image: guitarScreen,
+    image: edSheeranGuitarPickScreen,
     imagePosition: "center 20%",
     categoryId: "music",
     category: "Music",
@@ -704,7 +703,7 @@ export const initialEvents = [
     address: "Etihad Stadium, Ashton New Road, Manchester M11 3FF",
     externalLink: "https://tickets.example.com/stadium-concert",
     endDatetime: null,
-    image: stadiumConcert,
+    image: edSheeran360Stage,
     categoryId: "music",
     category: "Music",
     locationId: "city-centre",
@@ -727,7 +726,7 @@ export const initialEvents = [
     address: "MediaCityUK, Salford M50 2EQ",
     externalLink: "https://tickets.example.com/lights-on-the-quays",
     endDatetime: null,
-    image: mediacityNight,
+    image: mediacityGlobeNight,
     categoryId: "art-exhibitions",
     category: "Art & Exhibitions",
     locationId: "mediacity",
@@ -750,7 +749,7 @@ export const initialEvents = [
     address: "Salford Quays, Salford M50 3SQ",
     externalLink: "https://tickets.example.com/photography-walk",
     endDatetime: null,
-    image: mediacity3,
+    image: oldTraffordNight,
     categoryId: "community-culture",
     category: "Community & Culture",
     locationId: "mediacity",
@@ -773,7 +772,7 @@ export const initialEvents = [
     address: "Salford Sports Village, Littleton Road, Salford M7 3NQ",
     externalLink: "https://tickets.example.com/winter-league",
     endDatetime: null,
-    image: football,
+    image: footballOnPitch,
     categoryId: "sports",
     category: "Sports",
     locationId: "salford",

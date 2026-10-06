@@ -13,7 +13,7 @@ import {
   maxImageSize,
 } from "../data/createEventsData";
 import { organiserEventActions } from "../data/organiserEventsData";
-import placeholder from "../images/placeholder.jpg";
+import placeholder from "../images/events/placeholder.jpg";
 
 const emptyForm = {
   eventName: "",
