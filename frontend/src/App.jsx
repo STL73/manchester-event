@@ -1,5 +1,5 @@
-import { lazy, Suspense, useState } from "react";
-import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { Fragment, lazy, Suspense, useState } from "react";
+import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
@@ -40,6 +40,14 @@ const SiteAnalytics = lazy(() => import("./pages/SiteAnalytics"));
 
 function PageLoading() {
   return <p className="dashboard-empty-text p-4">Loading…</p>;
+}
+
+// React reuses a page when only a URL parameter changes, so an edit form
+// would keep the previous record's status and message. A new key per ID
+// starts the page fresh
+function ResetOnParam({ param, children }) {
+  const params = useParams();
+  return <Fragment key={params[param]}>{children}</Fragment>;
 }
 
 function App() {
@@ -256,13 +264,13 @@ function App() {
             <Route path="settings" element={<Settings selectedUser={selectedUser} />} />
             <Route path="create-events" element={<CreateEvents onCreateEvent={createOrganiserEvent} />} />
             <Route path="my-events" element={<MyEvents organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} />} />
-            <Route path="my-events/:eventId/edit" element={<CreateEvents mode="edit" events={organiserEvents} onUpdateEvent={updateOrganiserEvent} onCancelEvent={cancelOrganiserEvent} />} />
+            <Route path="my-events/:eventId/edit" element={<ResetOnParam param="eventId"><CreateEvents mode="edit" events={organiserEvents} onUpdateEvent={updateOrganiserEvent} onCancelEvent={cancelOrganiserEvent} /></ResetOnParam>} />
             <Route path="my-drafts" element={<MyDrafts organiserEvents={organiserEvents} onSubmitDraft={submitDraft} onDeleteEvent={deleteOrganiserEvent} />} />
             <Route path="event-analytics" element={<Suspense fallback={<PageLoading />}><EventAnalytics organiserEvents={organiserEvents} /></Suspense>} />
             <Route path="manage-users" element={<ManageUsers users={users} onDeleteUser={deleteUser} />} />
-            <Route path="manage-users/:userId/edit" element={<EditUser users={users} onUpdateUserStatus={updateUserStatus} />} />
+            <Route path="manage-users/:userId/edit" element={<ResetOnParam param="userId"><EditUser users={users} onUpdateUserStatus={updateUserStatus} /></ResetOnParam>} />
             <Route path="manage-events" element={<ManageEvents events={managedEvents} />} />
-            <Route path="manage-events/:eventId/edit" element={<EditEventStatus events={managedEvents} onUpdateEventStatus={updateEventStatus} />} />
+            <Route path="manage-events/:eventId/edit" element={<ResetOnParam param="eventId"><EditEventStatus events={managedEvents} onUpdateEventStatus={updateEventStatus} /></ResetOnParam>} />
             <Route path="site-analytics" element={<Suspense fallback={<PageLoading />}><SiteAnalytics users={users} events={events} /></Suspense>} />
             <Route path="system-logs" element={<SystemLogs />} />
             <Route path="contact-messages" element={<ContactMessages contactMessages={contactMessages} />} />
