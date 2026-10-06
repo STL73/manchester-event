@@ -10,18 +10,18 @@ import {
   Users,
 } from "lucide-react";
 
-import concert1 from "../images/concert1.jpg";
-import concert4 from "../images/concert4.jpg";
-import concert6 from "../images/concert6.jpg";
+import stadiumConcertDaytime from "../images/events/stadium-concert-daytime.jpg";
+import arenaBlueLasers from "../images/events/arena-blue-lasers.jpg";
+import stageConfetti from "../images/events/stage-confetti.jpg";
 
 export const homePageData = {
   hero: {
-    image: concert6,
+    image: stageConfetti,
     imageAlt: "Live event audience",
   },
   promote: {
     title: "Looking to promote your event? Choose Manchester Event Portal.",
-    image: concert4,
+    image: arenaBlueLasers,
     imageAlt: "People enjoying a live event",
     button: { label: "Create Events", to: "/auth/sign-up" },
     features: [
@@ -47,7 +47,7 @@ export const homePageData = {
   },
   discover: {
     title: "Searching for events in Manchester? You are at the right place.",
-    image: concert1,
+    image: stadiumConcertDaytime,
     imageAlt: "Crowd at a Manchester event",
     button: { label: "Explore Events", to: "/events" },
     features: [

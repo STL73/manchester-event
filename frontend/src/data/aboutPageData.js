@@ -1,17 +1,17 @@
 import { Mail } from "lucide-react";
 
-import concert2 from "../images/concert2.jpg";
-import mediacity3 from "../images/mediacity3.jpg";
+import arenaRedLights from "../images/events/arena-red-lights.jpg";
+import oldTraffordNight from "../images/events/old-trafford-night.jpg";
 import { socialLinks } from "./socialLinks";
 
 export const aboutPageData = {
   title: "About Us",
   introImage: {
-    src: mediacity3,
+    src: oldTraffordNight,
     alt: "Manchester MediaCity",
   },
   outroImage: {
-    src: concert2,
+    src: arenaRedLights,
     alt: "People enjoying a concert",
   },
   paragraphs: [
