@@ -25,8 +25,9 @@ export default function Sidebar({
       className={`sidebar ${isCollapsed ? "sidebar-collapsed" : ""}`}
       {...props}
     >
-      {/* The way back to the public site, now the dashboard has no navbar */}
-      <Link to="/" className="navbar-logo sidebar-brand">
+      {/* Signed-in users stay in the dashboard, so the logo goes to its home
+          rather than the public landing page (which is for guests) */}
+      <Link to="/dashboard/home" className="navbar-logo sidebar-brand">
         <DroneIcon className="navbar-icon" aria-hidden="true" />
         <span>Manchester Event Portal</span>
       </Link>

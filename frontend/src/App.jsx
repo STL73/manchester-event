@@ -218,7 +218,13 @@ function App() {
       )}
       <main className={`flex-1 ${showNavbar ? "pt-16" : ""}`}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          {/* The landing page is for guests: signed-in users go to their
+              dashboard. The other public pages stay open to everyone, so a
+              shared event link still works */}
+          <Route
+            path="/"
+            element={isUser ? <Navigate to="/dashboard/home" replace /> : <Home />}
+          />
           <Route path="/auth/:pathname" element={<Auth />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact onSendMessage={sendContactMessage} />} />

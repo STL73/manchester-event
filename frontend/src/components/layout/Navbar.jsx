@@ -7,8 +7,9 @@ function navLinkClass({ isActive }) {
   return `navbar-link ${isActive ? "is-active" : ""}`;
 }
 
-// Public pages only. Signed in, it matches header.php: the public links plus
-// Dashboard and Log Out (the user's details live in the dashboard sidebar)
+// Public pages only; the dashboard has its own sidebar instead. The main links
+// are the same for everyone. Signed in, Dashboard and Log Out take the place
+// of Log In and Sign Up, so a signed-in user who lands here has a way back
 export default function Navbar({ isUser, onToggleUserMode, ...props }) {
   return (
     <nav className="navbar" {...props}>
@@ -27,18 +28,18 @@ export default function Navbar({ isUser, onToggleUserMode, ...props }) {
               {title}
             </NavLink>
           ))}
-          {isUser && (
-            <NavLink to="/dashboard" className={navLinkClass}>
-              Dashboard
-            </NavLink>
-          )}
         </div>
 
         <div className="navbar-auth">
           {isUser ? (
-            <Button variant="ghost" size="sm" onClick={onToggleUserMode}>
-              Log Out
-            </Button>
+            <>
+              <Button to="/dashboard/home" size="sm">
+                Dashboard
+              </Button>
+              <Button variant="ghost" size="sm" onClick={onToggleUserMode}>
+                Log Out
+              </Button>
+            </>
           ) : (
             <>
               {/* Button renders the link itself: one element, one Tab stop */}
