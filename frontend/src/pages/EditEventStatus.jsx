@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import Button from "../components/UI/Button";
+import StatusMessage from "../components/UI/StatusMessage";
 import {
   editableEventStatuses,
   eventActions,
@@ -69,12 +70,9 @@ export default function EditEventStatus({ events, onUpdateEventStatus }) {
           <div className="contact-form-container">
             <form className="contact-form" onSubmit={handleSubmit}>
               {(message || lockedMessage) && (
-                <div
-                  className={message ? "success-message" : "error-message"}
-                  role="status"
-                >
-                  <p>{message || lockedMessage}</p>
-                </div>
+                <StatusMessage variant={message ? "success" : "error"}>
+                  {message || lockedMessage}
+                </StatusMessage>
               )}
 
               <div className="profile-form-grid">

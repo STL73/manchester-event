@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Users, Zap } from "lucide-react";
 import Button from "../components/UI/Button";
 import Tooltip from "../components/UI/Tooltip";
+import StatusMessage from "../components/UI/StatusMessage";
 import {
   accountStatuses,
   manageUsersActions,
@@ -62,9 +63,7 @@ export default function ManageUsers({ users, onDeleteUser }) {
         </h2>
 
         {message && (
-          <div className="success-message table-message" role="status">
-            <p>{message}</p>
-          </div>
+          <StatusMessage className="table-message">{message}</StatusMessage>
         )}
 
         {users.length === 0 ? (

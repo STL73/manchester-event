@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Button from "../components/UI/Button";
+import StatusMessage from "../components/UI/StatusMessage";
 import { contactMessagesText } from "../data/contactMessagesData";
 import { contactPageData } from "../data/contactPageData";
 
@@ -56,16 +57,9 @@ export default function Contact({ onSendMessage }) {
               <p className="content-p">{form.description}</p>
 
               {status && (
-                <div
-                  className={status === "sent" ? "success-message" : "error-message"}
-                  role="status"
-                >
-                  <p>
-                    {status === "sent"
-                      ? contactMessagesText.sent
-                      : contactMessagesText.error}
-                  </p>
-                </div>
+                <StatusMessage variant={status === "sent" ? "success" : "error"}>
+                  {status === "sent" ? contactMessagesText.sent : contactMessagesText.error}
+                </StatusMessage>
               )}
 
               {form.fields.map((field) => (

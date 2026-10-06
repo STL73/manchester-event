@@ -3,6 +3,7 @@ import { CalendarCheck, ChartNoAxesColumn, Zap } from "lucide-react";
 import Button from "../components/UI/Button";
 import DashboardCard from "../components/UI/DashboardCard";
 import EventCard from "../components/events/EventCard";
+import StatusMessage from "../components/UI/StatusMessage";
 import {
   lastCreatedInsight,
   nextEventInsight,
@@ -129,9 +130,7 @@ export default function OrganiserDashboardHome({ organiserEvents: events, onDele
         </h2>
 
         {message && (
-          <div className="success-message table-message" role="status">
-            <p>{message}</p>
-          </div>
+          <StatusMessage className="table-message">{message}</StatusMessage>
         )}
 
         <div className="events-grid events-grid-three">
