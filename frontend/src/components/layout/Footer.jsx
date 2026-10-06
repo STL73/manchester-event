@@ -1,5 +1,5 @@
-import { DroneIcon } from "lucide-react";
 import { Link } from "react-router-dom";
+import LogoMark from "../UI/LogoMark";
 import { footerNav } from "../../data/navigationData";
 import { socialLinks } from "../../data/socialLinks";
 
@@ -9,7 +9,7 @@ export default function Footer() {
       <div className="footer-content">
         <div className="footer-column">
           <Link to="/" className="navbar-logo">
-            <DroneIcon className="navbar-icon" />
+            <LogoMark className="navbar-icon" />
             <span>Manchester Event Portal</span>
           </Link>
           <p className="footer-tagline">

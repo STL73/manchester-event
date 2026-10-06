@@ -38,7 +38,4 @@ Found by reverse image search (TinEye) on 2026-10-06 and checked by eye against 
 Own photos (Slav Lambov): the eight `arena-*`, `stage-*` and `stadium-concert-daytime` images,
 `placeholder.jpg`, `berry-cheesecake`, `tinsel-town-christmas-fair`, `gin-distillery-copper-stills`,
 `ed-sheeran-guitar-pick-screen`, `ed-sheeran-360-stage`, `heaton-park-balloon`, `salford-quays-dusk`,
-`titanic-ship-model` and `game-of-thrones-tour-sign`.
-
-Source not found yet (no online copy found by TinEye or Google Lens): `old-trafford-night`,
-`mediacity-piazza-sunset`.
+`titanic-ship-model`, `game-of-thrones-tour-sign`, `old-trafford-night` and `mediacity-piazza-sunset`.

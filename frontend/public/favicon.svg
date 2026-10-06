@@ -1,11 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#8e98f3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M10 10 7 7" />
-  <path d="m10 14-3 3" />
-  <path d="m14 10 3-3" />
-  <path d="m14 14 3 3" />
-  <path d="M14.205 4.139a4 4 0 1 1 5.439 5.863" />
-  <path d="M19.637 14a4 4 0 1 1-5.432 5.868" />
-  <path d="M4.367 10a4 4 0 1 1 5.438-5.862" />
-  <path d="M9.795 19.862a4 4 0 1 1-5.429-5.873" />
-  <rect x="10" y="8" width="4" height="8" rx="1" />
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <!-- Same mark as src/components/UI/LogoMark.jsx: the bee is cut out of the hexagon -->
+  <mask id="bee">
+    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" fill="white" stroke="white" stroke-width="2" stroke-linejoin="round" />
+    <g fill="none" stroke="black" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" transform="translate(12 12.4) scale(0.66) translate(-12 -12)">
+      <path d="m8 2l1.88 1.88m4.24 0L16 2M9 7V6a3 3 0 1 1 6 0v1M5 7a3 3 0 1 0 2.2 5.1C9.1 10 12 7 12 7s2.9 3 4.8 5.1A3 3 0 1 0 19 7Zm2.56 5h8.87M7.5 17h9" />
+      <path d="M15.5 10.7c.9.9 1.4 2.1 1.5 3.3c0 5.8-5 8-5 8s-5-2.2-5-8c.1-1.2.6-2.4 1.5-3.3" />
+    </g>
+  </mask>
+  <rect width="24" height="24" fill="#8e98f3" mask="url(#bee)" />
 </svg>

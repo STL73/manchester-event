@@ -1,5 +1,5 @@
-import { DroneIcon } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
+import LogoMark from "../UI/LogoMark";
 import { Button } from "../UI/Button";
 import { publicNav } from "../../data/navigationData";
 
@@ -18,7 +18,7 @@ export default function Navbar({ isUser, onToggleUserMode, ...props }) {
     <nav className="navbar" {...props}>
       <div className="navbar-container">
         <Link to={isUser ? "/dashboard/home" : "/"} className="navbar-logo">
-          <DroneIcon className="navbar-icon" />
+          <LogoMark className="navbar-icon" />
           <span>Manchester Event Portal</span>
         </Link>
         <Button variant="secondary" size="sm" onClick={onToggleUserMode}>

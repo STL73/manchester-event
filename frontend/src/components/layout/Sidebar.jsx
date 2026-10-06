@@ -1,5 +1,5 @@
-import { DroneIcon } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import LogoMark from "../UI/LogoMark";
 import MainNav from "./MainNav";
 import SecondaryNav from "./SecondaryNav";
 import UserNav from "./UserNav";
@@ -28,7 +28,7 @@ export default function Sidebar({
       {/* Signed-in users stay in the dashboard, so the logo goes to its home
           rather than the public landing page (which is for guests) */}
       <Link to="/dashboard/home" className="navbar-logo sidebar-brand">
-        <DroneIcon className="navbar-icon" aria-hidden="true" />
+        <LogoMark className="navbar-icon" />
         <span>Manchester Event Portal</span>
       </Link>
       <MainNav items={selectedUser} activePath={activePath} pathname={pathname} />
