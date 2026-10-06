@@ -235,7 +235,7 @@ function App() {
             element={isUser ? <Navigate to="/dashboard/home" replace /> : <Home />}
           />
           <Route path="/auth/:pathname" element={<Auth />} />
-          <Route path="/about" element={<About />} />
+          <Route path="/about" element={<About events={publicEvents} isUser={isUser} />} />
           <Route path="/contact" element={<Contact onSendMessage={sendContactMessage} />} />
           <Route path="/events" element={<ExploreEvents events={publicEvents} />} />
           <Route path="/events/:eventId" element={<EventDetails events={publicEvents} />} />

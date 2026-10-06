@@ -1,29 +1,79 @@
-import { Mail } from "lucide-react";
+import {
+  CalendarPlus,
+  CalendarSearch,
+  ClipboardCheck,
+  Megaphone,
+  ShieldCheck,
+} from "lucide-react";
 
-import arenaRedLights from "../images/events/arena-red-lights.jpg";
-import oldTraffordNight from "../images/events/old-trafford-night.jpg";
-import { socialLinks } from "./socialLinks";
+import skylineSunset from "../images/site/manchester-skyline-sunset.webp";
+import canalNarrowboat from "../images/site/canal-narrowboat-mills.webp";
+import beeMosaic from "../images/site/manchester-bee-mosaic.webp";
 
+// One job: who runs the site and why it can be trusted. What's on lives on
+// Home, how to get help on Contact
 export const aboutPageData = {
-  title: "About Us",
-  introImage: {
-    src: oldTraffordNight,
-    alt: "Manchester MediaCity",
+  hero: {
+    eyebrow: "About Us",
+    title: "Made in Manchester, for Manchester",
+    intro:
+      "One place to find what's on across Greater Manchester, from gigs and food festivals to family days out, listed by local organisers and checked by a person.",
+    // Decorative: the heading says what the page is
+    image: { src: skylineSunset, alt: "" },
   },
-  outroImage: {
-    src: arenaRedLights,
-    alt: "People enjoying a concert",
+  story: {
+    title: "Our story",
+    paragraphs: [
+      "Manchester Event Portal connects local businesses, event organisers and the people who go to their events. Organisers list what they're running for free, and everyone else can find it in one place.",
+      "We want it to be easy for everyone to find and join the events that matter to them, whether that's a cultural night, a professional meetup or just a fun evening out.",
+      "We believe in the power of community, and we're building a platform that helps Manchester stay a vibrant place to live, work and play.",
+    ],
+    image: {
+      src: canalNarrowboat,
+      alt: "A narrowboat moored by red-brick mills on a Manchester canal",
+    },
+    bee: { src: beeMosaic, alt: "The Manchester worker bee" },
   },
-  paragraphs: [
-    "Manchester Event Portal is a platform that connects local businesses, event organisers, and attendees. We help you find events, create your own events, and connect with your community.",
-    "Our mission is to make it easy for everyone to discover and participate in events that matter to them. Whether you are looking for cultural events, professional networking opportunities, or just a fun night out, we have got you covered.",
-    "We believe in the power of community and strive to create a platform that fosters connections and engagement. Join us in making Manchester a vibrant place to live, work, and play.",
-    "If you have any questions or suggestions, feel free to reach out to us through our contact page. We would love to hear from you!",
-  ],
-  contact: {
-    label: "Contact Us",
-    to: "/contact",
-    icon: Mail,
+  process: {
+    title: "How an event goes live",
+    steps: [
+      {
+        icon: CalendarPlus,
+        title: "An organiser submits it",
+        text: "Organisers add the date, place, details and a photo from their dashboard.",
+      },
+      {
+        icon: ClipboardCheck,
+        title: "An admin reviews it",
+        text: "Someone on our team checks it's real, local and clearly described. Anything that needs fixing goes back to the organiser.",
+      },
+      {
+        icon: Megaphone,
+        title: "It goes live",
+        text: "Approved events appear on Explore Events straight away, ready to share.",
+      },
+      {
+        icon: CalendarSearch,
+        title: "You find it",
+        text: "Search by date, category or area, save favourites and get reminders.",
+      },
+    ],
+    promise: {
+      icon: ShieldCheck,
+      text: "Every event is checked by a person before it appears.",
+    },
   },
-  socialLinks,
+  // Labels only: the numbers are counted from the live data so they never go stale
+  stats: {
+    title: "The portal in numbers",
+    events: "events listed",
+    categories: "categories",
+    areas: "areas covered",
+  },
+  closing: {
+    title: "Why the bee?",
+    text: "The worker bee has been Manchester's symbol since the Industrial Revolution and is on the city's coat of arms. It stands for hard work and a city that pulls together. Our logo puts it in a honeycomb cell: lots of people, one hive.",
+    explore: { label: "Explore Events", to: "/events" },
+    signUp: { label: "List your event", to: "/auth/sign-up" },
+  },
 };
