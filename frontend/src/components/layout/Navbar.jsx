@@ -42,8 +42,8 @@ export default function Navbar({ isUser, onToggleUserMode, ...props }) {
           ) : (
             <>
               {/* Button renders the link itself: one element, one Tab stop */}
-              <Button to="/auth/sign-in" variant="ghost" size="sm">
-                Sign In
+              <Button to="/auth/login" variant="ghost" size="sm">
+                Log In
               </Button>
               <Button to="/auth/sign-up" size="sm">
                 Sign Up

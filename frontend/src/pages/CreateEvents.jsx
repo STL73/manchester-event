@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Button from "../components/UI/Button";
+import FieldError from "../components/UI/FieldError";
+import StatusMessage from "../components/UI/StatusMessage";
 import { eventCategories, eventLocations } from "../data/eventsData";
 import {
   allowedImageTypes,
@@ -301,9 +303,7 @@ function EventFormPage({
         <label htmlFor={field.id}>{label}</label>
         {control}
         {errors[field.id] && (
-          <p className="profile-error" id={errorId}>
-            {errors[field.id]}
-          </p>
+          <FieldError id={errorId}>{errors[field.id]}</FieldError>
         )}
       </div>
     );
@@ -335,18 +335,16 @@ function EventFormPage({
             <p className="dashboard-empty-text">{createEventMessages.notFound}</p>
           </div>
         ) : lockedMessage ? (
-          <div className="error-message table-message" role="status">
-            <p>{lockedMessage}</p>
-          </div>
+          <StatusMessage variant="error" className="table-message">
+            {lockedMessage}
+          </StatusMessage>
         ) : (
           <div className="contact-form-container">
             <form className="contact-form" onSubmit={handleSubmit} noValidate>
               <h3 className="contact-form-title">{createEventForm.title}</h3>
 
               {message && (
-                <div className="success-message" role="status" ref={messageRef}>
-                  <p>{message}</p>
-                </div>
+                <StatusMessage ref={messageRef}>{message}</StatusMessage>
               )}
 
               <div className="profile-form-grid">

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { UserRoundCog } from "lucide-react";
 import Button from "../components/UI/Button";
+import FieldError from "../components/UI/FieldError";
+import StatusMessage from "../components/UI/StatusMessage";
 import {
   accountDetails,
   allowedAvatarTypes,
@@ -134,11 +136,11 @@ export default function Settings({ selectedUser }) {
             <p className="content-p">{profileSettingsForm.description}</p>
 
             {messages.length > 0 && (
-              <div className="success-message" role="status">
+              <StatusMessage>
                 {messages.map((message) => (
                   <p key={message}>{message}</p>
                 ))}
-              </div>
+              </StatusMessage>
             )}
 
             <div className="profile-form-grid">
@@ -179,9 +181,7 @@ export default function Settings({ selectedUser }) {
                     onChange={handleAvatarChange}
                   />
                   {errors.avatar && (
-                    <p className="profile-error" id="avatar-error">
-                      {errors.avatar}
-                    </p>
+                    <FieldError id="avatar-error">{errors.avatar}</FieldError>
                   )}
                   <div className="profile-avatar">
                     {shownAvatar ? (
@@ -240,9 +240,7 @@ export default function Settings({ selectedUser }) {
                         onChange={handlePasswordChange}
                       />
                       {errors[field.id] && (
-                        <p className="profile-error" id={`${field.id}-error`}>
-                          {errors[field.id]}
-                        </p>
+                        <FieldError id={`${field.id}-error`}>{errors[field.id]}</FieldError>
                       )}
                     </div>
                   ))}

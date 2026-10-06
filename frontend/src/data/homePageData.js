@@ -23,7 +23,7 @@ export const homePageData = {
     title: "Looking to promote your event? Choose Manchester Event Portal.",
     image: concert4,
     imageAlt: "People enjoying a live event",
-    button: { label: "Create Events", to: "/auth/signup" },
+    button: { label: "Create Events", to: "/auth/sign-up" },
     features: [
       {
         icon: CalendarPlus,

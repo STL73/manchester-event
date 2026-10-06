@@ -35,6 +35,12 @@
     @apply m-0 p-0 box-border;
   }
 
+  /* Always reserve the scrollbar's strip, so centred content and the fixed
+     navbar don't shift sideways between pages that scroll and pages that don't */
+  html {
+    scrollbar-gutter: stable;
+  }
+
   * {
     scrollbar-color: var(--color-muted) var(--color-card);
     scrollbar-width: auto;
@@ -444,7 +450,7 @@
 
   .contact-field input,
   .contact-field textarea {
-    @apply w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground outline-none transition-colors placeholder:text-muted focus:border-accent;
+    @apply w-full rounded-lg border border-border bg-background px-4 py-2.5 text-foreground outline-none transition-colors placeholder:text-muted focus:border-accent;
   }
 
   .contact-field textarea {
@@ -1051,7 +1057,7 @@
   }
 
   .form-select {
-    @apply w-full rounded-lg border border-border bg-background px-4 py-3 text-foreground outline-none transition-colors focus:border-accent cursor-pointer;
+    @apply w-full rounded-lg border border-border bg-background px-4 py-2.5 text-foreground outline-none transition-colors focus:border-accent cursor-pointer;
   }
 
   /* organiser event pages */
@@ -1235,20 +1241,127 @@
     @apply flex flex-col gap-1;
   }
 
+  /* FieldError: the icon sits on the first line of the text */
   .profile-error {
-    @apply text-sm text-red-400;
+    @apply flex items-start gap-1.5 text-sm text-red-400 [&_svg]:mt-0.5 [&_svg]:size-4 [&_svg]:shrink-0;
   }
 
-  .success-message {
-    @apply p-3 flex flex-col gap-1 rounded-lg border border-green-400/40 bg-green-400/10 text-sm text-green-400;
+  /* StatusMessage: one box for success and error, icon beside the text */
+  .status-message {
+    @apply p-3 flex items-start gap-2 rounded-lg border text-sm [&>svg]:mt-0.5 [&>svg]:size-4 [&>svg]:shrink-0;
   }
 
-  .error-message {
-    @apply p-3 flex flex-col gap-1 rounded-lg border border-red-400/40 bg-red-400/10 text-sm text-red-400;
+  .status-message-success {
+    @apply border-green-400/40 bg-green-400/10 text-green-400;
+  }
+
+  .status-message-error {
+    @apply border-red-400/40 bg-red-400/10 text-red-400;
+  }
+
+  .status-message-text {
+    @apply flex flex-col gap-1;
   }
 
   .profile-meta {
     @apply w-full mt-4 flex flex-col gap-1 text-sm text-muted;
+  }
+
+  /* shared form field extras (FormField) */
+  /* Label on the left, short hint on the right: the hint costs no height */
+  .field-label-row {
+    @apply w-full flex items-baseline justify-between gap-3 text-sm font-medium text-foreground;
+  }
+
+  .field-hint {
+    @apply text-xs font-normal text-muted;
+  }
+
+  /* fieldset has a browser border and min-width; the legend sits in the
+     column like a label, so it needs its own gap */
+  fieldset.contact-field {
+    @apply min-w-0 border-0;
+  }
+
+  fieldset.contact-field legend {
+    @apply mb-2;
+  }
+
+  .radio-cards {
+    @apply grid grid-cols-2 gap-6;
+  }
+
+  /* Compact choice cards: the radio dot is visually hidden (still focusable
+     and announced), the border and corner tick show which one is chosen */
+  .radio-card {
+    @apply relative flex flex-col cursor-pointer rounded-lg border border-border bg-background py-2 pl-3 pr-9 transition-colors hover:border-accent/60 has-checked:border-accent has-checked:bg-accent/10 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent has-aria-invalid:border-red-400 motion-reduce:transition-none;
+  }
+
+  .radio-card-input {
+    @apply sr-only;
+  }
+
+  .radio-card-check {
+    @apply absolute right-3 top-1/2 size-4 -translate-y-1/2 text-accent opacity-0 transition-opacity motion-reduce:transition-none;
+  }
+
+  .radio-card:has(:checked) .radio-card-check {
+    @apply opacity-100;
+  }
+
+  .radio-card-label {
+    @apply text-sm font-medium text-foreground;
+  }
+
+  .radio-card-description {
+    @apply text-xs text-muted;
+  }
+
+  .contact-field [aria-invalid="true"] {
+    @apply border-red-400 focus:border-red-400;
+  }
+
+  /* auth styles: log in and sign up share one card, form beside an image.
+     No padding on the card so the image reaches its edges; the form pads itself.
+     From md up the section fills at least the space under the navbar, so the
+     card sits centred; a taller form scrolls the page like every other page
+     (the html scrollbar-gutter keeps the navbar from shifting) */
+  .auth-section {
+    @apply md:min-h-[calc(100dvh-4rem)] md:py-8;
+  }
+
+  /* One minimum height for log in and sign up (sign up's natural height), so
+     switching between them doesn't resize the card. Log in's shorter form
+     centres inside it */
+  .auth-card {
+    @apply w-full max-w-5xl flex overflow-hidden rounded-2xl border border-border bg-card md:min-h-[33rem];
+  }
+
+  .auth-form {
+    @apply grow basis-1/2 min-w-0 justify-center gap-4 p-6 md:p-8;
+  }
+
+  .auth-form-header {
+    @apply flex flex-col items-center gap-2 text-center;
+  }
+
+  /* Secondary to the fields, so smaller than the 16px input text */
+  .auth-subtitle {
+    @apply text-sm leading-6 text-muted text-balance;
+  }
+
+  .auth-switch {
+    @apply text-sm text-center text-muted;
+  }
+
+  /* The image is absolute so its own height never stretches the card:
+     the form sets the height and the image fills it. Hidden on small screens */
+  .auth-media {
+    @apply relative hidden grow basis-1/2 min-w-0 md:block;
+  }
+
+  .auth-image {
+    @apply absolute inset-0 w-full h-full object-cover;
   }
 
   @media (max-width: 768px) {

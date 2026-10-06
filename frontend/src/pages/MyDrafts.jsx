@@ -2,6 +2,7 @@ import { useState } from "react";
 import { SquarePen, Zap } from "lucide-react";
 import Button from "../components/UI/Button";
 import Tooltip from "../components/UI/Tooltip";
+import StatusMessage from "../components/UI/StatusMessage";
 import {
   draftTableColumns,
   draftTooltips,
@@ -76,9 +77,7 @@ export default function MyDrafts({
         </h2>
 
         {message && (
-          <div className="success-message table-message" role="status">
-            <p>{message}</p>
-          </div>
+          <StatusMessage className="table-message">{message}</StatusMessage>
         )}
 
         {drafts.length === 0 ? (

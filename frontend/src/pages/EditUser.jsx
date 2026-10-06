@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import Button from "../components/UI/Button";
+import StatusMessage from "../components/UI/StatusMessage";
 import {
   accountStatuses,
   manageUsersMessages,
@@ -55,9 +56,7 @@ export default function EditUser({ users, onUpdateUserStatus }) {
           <div className="contact-form-container">
             <form className="contact-form" onSubmit={handleSubmit}>
               {message && (
-                <div className="success-message" role="status">
-                  <p>{message}</p>
-                </div>
+                <StatusMessage>{message}</StatusMessage>
               )}
 
               <div className="profile-form-grid">

@@ -22,7 +22,7 @@ export default function Hero() {
             <Button to="/events" variant="primary" size="lg">
               Explore Events
             </Button>
-            <Button to="/auth/signup" variant="secondary" size="lg">
+            <Button to="/auth/sign-up" variant="secondary" size="lg">
               Create Events
             </Button>
           </div>

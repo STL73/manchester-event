@@ -4,6 +4,7 @@ import { CalendarCheck, Zap } from "lucide-react";
 import Button from "../components/UI/Button";
 import EventCard from "../components/events/EventCard";
 import SearchBar from "../components/events/SearchBar";
+import StatusMessage from "../components/UI/StatusMessage";
 import { eventCategories, eventLocations } from "../data/eventsData";
 import {
   applyFiltersAction,
@@ -179,9 +180,7 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
         </div>
 
         {message && (
-          <div className="success-message table-message" role="status">
-            <p>{message}</p>
-          </div>
+          <StatusMessage className="table-message">{message}</StatusMessage>
         )}
 
         <div className="events-grid events-grid-three">
