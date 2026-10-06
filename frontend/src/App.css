@@ -524,27 +524,153 @@
     @apply px-4 pb-4 text-sm leading-6 text-muted;
   }
 
-  .about-social-links {
-    @apply flex items-center gap-3;
+  /* honeycomb: the brand pattern. One moment per screen, never behind text
+     people need to read. The cell is drawn inline, so there is no image file */
+  .honeycomb-texture {
+    @apply pointer-events-none absolute inset-0 -z-10 opacity-15;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='45' viewBox='0 0 26 45'%3E%3Cpath d='M13 0v7.5L26 15v15l-13 7.5L0 30V15l13-7.5M13 37.5V45' fill='none' stroke='%238e98f3' stroke-width='1'/%3E%3C/svg%3E");
+    background-size: 26px 45px;
+    mask-image: radial-gradient(ellipse at center, black 10%, transparent 70%);
   }
 
-  .about-social-link {
-    @apply flex items-center justify-center w-10 h-10 rounded-full text-muted border border-border transition-colors hover:text-foreground hover:border-accent hover:bg-card;
+  .honeycomb-divider {
+    @apply flex justify-center gap-1 text-accent [&>svg]:size-5 [&>svg]:opacity-40 [&>svg:nth-child(2)]:opacity-100;
   }
 
-  .about-social-link svg {
-    @apply w-5 h-5;
+  /* about page: hero, story, how an event goes live, numbers, closing */
+  .about-page {
+    @apply mx-auto flex w-full max-w-7xl flex-col gap-16 px-4 py-10 md:gap-24 md:px-6 md:py-14;
+  }
+
+  .about-hero {
+    @apply relative isolate flex min-h-96 items-end overflow-hidden rounded-2xl border border-border md:min-h-120;
+  }
+
+  /* Darkens the photo towards the text so the heading keeps its contrast */
+  .about-hero::before {
+    @apply absolute inset-0 -z-10 bg-linear-to-t from-background via-background/75 to-background/10 content-[''];
+  }
+
+  .about-hero-img {
+    @apply absolute inset-0 -z-20 h-full w-full object-cover;
+  }
+
+  .about-hero-content {
+    @apply flex max-w-3xl flex-col gap-4 p-6 md:p-12;
+  }
+
+  .about-eyebrow {
+    @apply text-sm font-semibold uppercase tracking-[0.2em] text-accent;
+  }
+
+  .about-hero-title {
+    @apply text-4xl leading-tight font-semibold text-balance text-foreground md:text-6xl;
+  }
+
+  .about-hero-intro {
+    @apply max-w-2xl text-base leading-7 text-balance text-foreground/85 md:text-lg;
+  }
+
+  .about-section {
+    @apply flex flex-col gap-8;
+  }
+
+  .about-heading {
+    @apply text-2xl font-semibold text-accent-hover md:text-3xl;
+  }
+
+  .about-heading-center {
+    @apply text-center;
+  }
+
+  .about-story {
+    @apply grid items-center gap-12 md:grid-cols-2;
+  }
+
+  .about-story-text {
+    @apply flex flex-col gap-5;
+  }
+
+  .about-story-media {
+    @apply relative;
+  }
+
+  .about-story-img {
+    @apply block aspect-5/4 w-full rounded-2xl object-cover ring-1 ring-border;
+  }
+
+  /* The city bee in a honeycomb cell, overlapping the photo's corner */
+  .about-story-bee {
+    @apply absolute -bottom-6 -left-2 aspect-square w-24 object-cover md:-bottom-8 md:-left-10 md:w-36;
+    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  }
+
+  .about-steps {
+    @apply grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4;
+  }
+
+  .about-step {
+    @apply relative flex flex-col gap-3 rounded-2xl border border-border bg-card p-6 pt-9;
+  }
+
+  .about-step-number {
+    @apply absolute -top-4 left-6 grid size-9 place-items-center bg-accent text-sm font-semibold text-background;
+    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+  }
+
+  .about-step-icon {
+    @apply size-7 text-accent;
+  }
+
+  .about-step-title {
+    @apply text-lg font-semibold text-foreground;
+  }
+
+  .about-step-text {
+    @apply text-sm leading-6 text-muted;
+  }
+
+  .about-promise {
+    @apply inline-flex items-center gap-2 self-center rounded-full border border-accent/40 bg-accent/10 px-4 py-2 text-center text-sm font-medium text-foreground [&>svg]:size-5 [&>svg]:shrink-0 [&>svg]:text-accent;
+  }
+
+  .about-stats {
+    @apply grid grid-cols-3 gap-3 md:gap-6;
+  }
+
+  /* <dt> comes first for screen readers; the number shows above it */
+  .about-stat {
+    @apply flex flex-col-reverse items-center justify-end gap-1 rounded-2xl border border-border bg-card px-2 py-5 text-center md:p-6;
+  }
+
+  .about-stat-value {
+    @apply text-3xl font-semibold tabular-nums text-accent-hover md:text-5xl;
+  }
+
+  .about-stat-label {
+    @apply text-xs tracking-wider text-muted uppercase md:text-sm;
+  }
+
+  .about-closing {
+    @apply relative isolate flex flex-col items-center gap-5 overflow-hidden rounded-2xl border border-border bg-card px-6 py-14 text-center md:py-20;
+  }
+
+  .about-closing-mark {
+    @apply size-16 text-accent;
+  }
+
+  .about-closing-text {
+    @apply max-w-2xl text-base leading-7 text-balance text-muted;
+  }
+
+  .about-closing-actions {
+    @apply flex flex-wrap justify-center gap-4 pt-2;
   }
 
   .hero-img-container,
   .content-img-container {
     @apply w-full max-w-xl flex justify-center items-center overflow-hidden rounded-2xl;
     aspect-ratio: 4 / 3;
-  }
-
-  .about-image-container {
-    @apply max-w-6xl;
-    aspect-ratio: 16 / 7;
   }
 
   .hero-img,
@@ -575,10 +701,6 @@
 
     .content-items-row {
       @apply grid-cols-1;
-    }
-
-    .about-image-container {
-      aspect-ratio: 4 / 3;
     }
 
     .events-search {
