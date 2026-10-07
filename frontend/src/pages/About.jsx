@@ -1,6 +1,7 @@
 import Button from "../components/UI/Button";
 import HoneycombDivider from "../components/UI/HoneycombDivider";
 import LogoMark from "../components/UI/LogoMark";
+import PageHero from "../components/UI/PageHero";
 import { aboutPageData } from "../data/aboutPageData";
 import { eventCategories, eventLocations } from "../data/eventsData";
 
@@ -15,26 +16,13 @@ export default function About({ events, isUser }) {
 
   return (
     <div className="about-page">
-      <section className="about-hero" aria-labelledby="about-title">
-        {/* A real <img> rather than a CSS background, so it loads first and
-            keeps its dimensions */}
-        <img
-          className="about-hero-img"
-          src={hero.image.src}
-          alt={hero.image.alt}
-          width="1920"
-          height="1280"
-          fetchPriority="high"
-        />
-        <div className="honeycomb-texture" aria-hidden="true" />
-        <div className="about-hero-content">
-          <p className="about-eyebrow">{hero.eyebrow}</p>
-          <h1 className="about-hero-title" id="about-title">
-            {hero.title}
-          </h1>
-          <p className="about-hero-intro">{hero.intro}</p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow={hero.eyebrow}
+        title={hero.title}
+        titleId="about-title"
+        intro={hero.intro}
+        image={{ ...hero.image, width: 1920, height: 1280 }}
+      />
 
       <section className="about-section about-story" aria-labelledby="story-title">
         <div className="about-story-text">

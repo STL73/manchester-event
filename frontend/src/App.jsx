@@ -5,10 +5,13 @@ import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import Faq from "./pages/Faq";
+import LegalPage from "./pages/LegalPage";
 import ExploreEvents from "./pages/ExploreEvents";
 import EventDetails from "./pages/EventDetails";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
+import ScrollToTop from "./components/layout/ScrollToTop";
 import DashboardHome from "./pages/DashboardHome";
 import MyFavourites from "./pages/MyFavourites";
 import Preferences from "./pages/Preferences";
@@ -29,6 +32,7 @@ import { mockUsers } from "./data/manageUsersData";
 import { currentAdmin, getManagedEvents } from "./data/manageEventsData";
 import { currentOrganiser } from "./data/organiserEventsData";
 import { initialEvents, isPublicEvent } from "./data/eventsData";
+import { privacyPage, termsPage } from "./data/legalPagesData";
 import { initialFavouriteIds } from "./data/myFavouritesData";
 import { initialContactMessages } from "./data/contactMessagesData";
 
@@ -222,6 +226,7 @@ function App() {
 
   return (
     <div className="app">
+      <ScrollToTop />
       {showNavbar && (
         <Navbar isUser={isUser} onToggleUserMode={toggleUserMode} />
       )}
@@ -237,6 +242,9 @@ function App() {
           <Route path="/auth/:pathname" element={<Auth />} />
           <Route path="/about" element={<About events={publicEvents} isUser={isUser} />} />
           <Route path="/contact" element={<Contact onSendMessage={sendContactMessage} />} />
+          <Route path="/faq" element={<Faq />} />
+          <Route path="/privacy" element={<LegalPage page={privacyPage} titleId="privacy-title" />} />
+          <Route path="/terms" element={<LegalPage page={termsPage} titleId="terms-title" />} />
           <Route path="/events" element={<ExploreEvents events={publicEvents} />} />
           <Route path="/events/:eventId" element={<EventDetails events={publicEvents} />} />
           <Route

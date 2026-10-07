@@ -58,6 +58,14 @@ export default function EventsBrowser({
 }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState(() => readFilters(searchParams));
+  // A link can change the address while this page is open (the footer's
+  // "Tonight", the navbar's Explore Events). When the address no longer
+  // matches what the filters last wrote or read, read it again
+  const [syncedSearch, setSyncedSearch] = useState(() => searchParams.toString());
+  if (searchParams.toString() !== syncedSearch) {
+    setSyncedSearch(searchParams.toString());
+    setFilters(readFilters(searchParams));
+  }
   // Fixed when the page opens, so the list doesn't reshuffle while it's read
   const [now] = useState(() => new Date());
   const view = validViews.includes(searchParams.get("view"))
@@ -97,6 +105,7 @@ export default function EventsBrowser({
     });
     nextParams.set("view", view);
     setFilters(nextFilters);
+    setSyncedSearch(nextParams.toString());
     setSearchParams(nextParams);
   }
 
@@ -122,6 +131,8 @@ export default function EventsBrowser({
   function handleViewChange(nextView) {
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set("view", nextView);
+    // Only the layout changed: keep any filters typed but not yet searched
+    setSyncedSearch(nextParams.toString());
     setSearchParams(nextParams);
   }
 

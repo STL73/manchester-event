@@ -1,6 +1,9 @@
 import { CalendarPlus, Heart, Search } from "lucide-react";
 
 import stageConfetti from "../images/events/stage-confetti.jpg";
+import manchesterFireworksNight from "../images/events/manchester-fireworks-night.jpg";
+import arenaBlueLasers from "../images/events/arena-blue-lasers.jpg";
+import colourPowderFestival from "../images/events/colour-powder-festival.jpg";
 import townHallClockTower from "../images/site/town-hall-clock-tower.webp";
 import northernQuarterMural from "../images/site/northern-quarter-mural.webp";
 import mediacityDusk from "../images/site/mediacity-dusk.webp";
@@ -11,12 +14,15 @@ import heatonParkTemple from "../images/site/heaton-park-temple.webp";
 // already set. Home never holds the full list; who runs the site is on About.
 export const homePageData = {
   hero: {
-    titleLead: "Welcome to",
     title: "Manchester Event Portal",
+    // The giant word and the line under it; the <h1> reads the full title
+    word: "Manchester",
+    name: "Event Portal",
     intro:
       "Gigs, markets, festivals and family days out across Greater Manchester, every one checked by a person before it goes live.",
-    image: stageConfetti,
-    imageAlt: "Confetti falling over a crowd at a live show",
+    // Shown in turn inside the letters, four seconds each. Bright, colourful
+    // shots only: dark or busy ones (a night crowd) make the letters vanish
+    images: [stageConfetti, manchesterFireworksNight, arenaBlueLasers, colourPowderFestival],
     search: {
       label: "Search events",
       placeholder: "Try jazz, food market, Salford...",

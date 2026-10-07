@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import Hero from "../components/home/Hero";
 import WhatsOnSection from "../components/home/WhatsOnSection";
 import Button from "../components/UI/Button";
-import HoneycombDivider from "../components/UI/HoneycombDivider";
 import { homePageData } from "../data/homePageData";
 import { eventCategories, eventLocations } from "../data/eventsData";
 import { isUpcoming } from "../lib/eventDates";
@@ -65,9 +64,6 @@ export default function Home({ events }) {
           ))}
         </ul>
       </section>
-
-      {/* The page's one honeycomb moment */}
-      <HoneycombDivider />
 
       <section className="home-audiences" aria-label="Get involved">
         {audiences.map(({ icon: Icon, title, text, button }) => (

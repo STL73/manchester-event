@@ -1,5 +1,6 @@
 import { Zap } from "lucide-react";
 import Button from "../components/UI/Button";
+import PageHero from "../components/UI/PageHero";
 import EventsBrowser from "../components/events/EventsBrowser";
 import {
   exploreEventsActions,
@@ -27,18 +28,17 @@ export default function ExploreEvents({
 
   if (!inDashboard) {
     return (
-      <section
-        className="section-content events-page"
-        aria-labelledby="events-title"
-      >
-        <div className="content-wrapper events-intro">
-          <h1 className="section-title" id="events-title">
-            {publicIntro.title}
-          </h1>
-          <p className="content-p">{publicIntro.text}</p>
-        </div>
+      <div className="explore-page">
+        <PageHero
+          compact
+          eyebrow={publicIntro.eyebrow}
+          title={publicIntro.title}
+          titleId="events-title"
+          intro={publicIntro.text}
+          image={publicIntro.image}
+        />
         {browser}
-      </section>
+      </div>
     );
   }
 

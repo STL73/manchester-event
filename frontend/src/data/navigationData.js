@@ -118,23 +118,47 @@ export const publicNav = [
   { title: "Contact Us", url: "/contact" },
 ];
 
-// Link groups from footer.php; "Create Events" sends visitors to sign up first
+// Footer link groups. "Find events" are filter links into Explore Events,
+// the most useful thing a footer can hold on an events site
 export const footerNav = [
   {
-    title: "Use Manchester Event Portal",
+    title: "Find events",
     links: [
-      { title: "Explore Events", url: "/events" },
-      { title: "Create Events", url: "/auth/sign-up" },
+      { title: "What's on", url: "/events" },
+      { title: "Tonight", url: "/events?when=tonight" },
+      { title: "This weekend", url: "/events?when=weekend" },
+      { title: "Next 7 days", url: "/events?when=week" },
     ],
   },
   {
-    title: "Contact Us",
+    title: "Organisers",
     links: [
-      { title: "Contact Us", url: "/contact" },
-      { title: "About Us", url: "/about" },
+      { title: "List your event", url: "/auth/sign-up" },
+      // About is built around the approval steps
+      { title: "How approval works", url: "/about" },
+      { title: "Log in", url: "/auth/login" },
+    ],
+  },
+  {
+    title: "Portal",
+    links: [
+      { title: "About us", url: "/about" },
+      { title: "Contact us", url: "/contact" },
+      { title: "FAQs", url: "/faq" },
+      { title: "Privacy", url: "/privacy" },
+      { title: "Terms", url: "/terms" },
     ],
   },
 ];
+
+export const footerText = {
+  tagline: "Made in Manchester, for Manchester. Every event checked by a person before it goes live.",
+  // Shown huge and faded across the bottom, echoing the Home hero
+  wordmark: "Manchester",
+  rights: "Manchester Event Portal · Every event checked by a person",
+  socialsLabel: "Follow us",
+  backToTop: "Back to top",
+};
 
 export const TEST_USER_TYPE = "user";
 

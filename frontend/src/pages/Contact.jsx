@@ -1,14 +1,16 @@
 import { useState } from "react";
-import { ChevronDown, Clock } from "lucide-react";
+import { ArrowRight, Clock } from "lucide-react";
 import Button from "../components/UI/Button";
+import FaqList from "../components/UI/FaqList";
+import PageHero from "../components/UI/PageHero";
 import StatusMessage from "../components/UI/StatusMessage";
 import { contactMessagesText } from "../data/contactMessagesData";
 import { contactPageData } from "../data/contactPageData";
+import { featuredQuestions } from "../data/faqData";
 
 export default function Contact({ onSendMessage }) {
   const {
-    title,
-    intro,
+    hero,
     responseNote,
     quickAnswers,
     contactDetails,
@@ -38,38 +40,31 @@ export default function Contact({ onSendMessage }) {
   }
 
   return (
-    <section className="section-content contact-page" aria-labelledby="contact-title">
-      {/* The heading sits beside the form rather than above it, so the whole
-          form, Send button included, fits on a laptop screen */}
+    <div className="contact-page">
+      <PageHero
+        compact
+        eyebrow={hero.eyebrow}
+        title={hero.title}
+        titleId="contact-title"
+        intro={hero.intro}
+        image={hero.image}
+      />
+
       <div className="contact-layout">
-        <div className="contact-aside">
-          <header className="contact-header">
-            <h1 className="contact-title" id="contact-title">
-              {title}
-            </h1>
-            <p className="content-p">{intro}</p>
-            <p className="contact-response-note">
-              <Clock aria-hidden="true" />
-              {responseNote}
-            </p>
-          </header>
+        <section className="contact-aside" aria-labelledby="quick-answers-title">
+          <p className="contact-response-note">
+            <Clock aria-hidden="true" />
+            {responseNote}
+          </p>
 
           <h2 className="contact-aside-title" id="quick-answers-title">
             {quickAnswers.title}
           </h2>
-          {/* <details> opens and closes without JavaScript and is keyboard
-              accessible by default */}
-          <div className="faq-list">
-            {quickAnswers.items.map(({ question, answer }) => (
-              <details className="faq-item" key={question}>
-                <summary>
-                  {question}
-                  <ChevronDown className="faq-icon" aria-hidden="true" />
-                </summary>
-                <p>{answer}</p>
-              </details>
-            ))}
-          </div>
+          <FaqList items={featuredQuestions} />
+          <Button to={quickAnswers.seeAll.to} variant="link" size="sm" className="self-start">
+            {quickAnswers.seeAll.label}
+            <ArrowRight aria-hidden="true" />
+          </Button>
 
           <ul className="contact-details">
             {contactDetails.map(({ label, value, icon: Icon, href }) => (
@@ -80,7 +75,7 @@ export default function Contact({ onSendMessage }) {
               </li>
             ))}
           </ul>
-        </div>
+        </section>
 
         <div className="contact-form-container">
           <form className="contact-form" onSubmit={handleSubmit}>
@@ -136,6 +131,6 @@ export default function Contact({ onSendMessage }) {
           </form>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

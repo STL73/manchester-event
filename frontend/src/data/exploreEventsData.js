@@ -1,9 +1,14 @@
 import { Bell, CalendarSearch, Heart, Settings2 } from "lucide-react";
 
+import arenaLightBeams from "../images/events/arena-light-beams.jpg";
+
 // Public /events page intro (signed-out)
 export const publicIntro = {
+  eyebrow: "Explore Events",
   title: "What's on in Manchester",
   text: "Every upcoming event, soonest first, each one checked by a person before it went live. Narrow it down by date, area or category.",
+  // Decorative: the heading says what the page is
+  image: { src: arenaLightBeams, alt: "", width: 1600, height: 1200 },
 };
 
 // The quick date ranges; ids are the `when` keys in lib/eventDates.js and the
