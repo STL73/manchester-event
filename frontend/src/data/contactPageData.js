@@ -1,37 +1,24 @@
 import { Mail, MapPin, RefreshCw, Send } from "lucide-react";
 
-// A task page: the form sits beside the answers people most often need, so
-// many questions are answered before a message is sent. Social links live in
+import manchesterOutdoorDiningLights from "../images/events/manchester-outdoor-dining-lights.jpg";
+
+// A task page: the most common questions sit beside the form, so many are
+// answered before a message is sent. They come from data/faqData.js (the
+// ones marked `featured`); the FAQs page has the rest. Social links live in
 // the footer only
 export const contactPageData = {
-  title: "Contact Us",
-  intro:
-    "Questions, feedback or a problem with an event? Check the quick answers first, or send us a message.",
+  hero: {
+    eyebrow: "Contact Us",
+    title: "We're here to help",
+    intro:
+      "Questions, feedback or a problem with an event? Check the quick answers first, or send us a message.",
+    // Decorative: the heading says what the page is
+    image: { src: manchesterOutdoorDiningLights, alt: "", width: 1200, height: 1799, position: "center 30%" },
+  },
   responseNote: "We reply within 1–2 working days.",
   quickAnswers: {
     title: "Quick answers",
-    items: [
-      {
-        question: "Do I need an account to browse events?",
-        answer:
-          "No. Anyone can browse and search events. A free account lets you save favourites, set your preferences and get reminders.",
-      },
-      {
-        question: "How do I list my event?",
-        answer:
-          "Sign up as an organiser, then choose Create Events in your dashboard. You can save it as a draft or submit it for approval straight away.",
-      },
-      {
-        question: "When will my event appear on the site?",
-        answer:
-          "An admin checks every new or edited event before it goes public. You can follow its status (Pending, Approved or Rejected) in My Events.",
-      },
-      {
-        question: "How do I edit or cancel my event?",
-        answer:
-          "Open My Events in your dashboard and choose Edit. The edit page also has a Cancel Event button.",
-      },
-    ],
+    seeAll: { label: "See all FAQs", to: "/faq" },
   },
   // Placeholders until the real details are decided
   contactDetails: [

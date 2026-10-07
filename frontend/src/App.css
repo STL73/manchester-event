@@ -30,6 +30,11 @@
   --font-open-sans: "Open Sans", sans-serif; */
 }
 
+/* Clips an element to the logo's honeycomb cell (see --hex-cell) */
+@utility hex-cell {
+  mask: var(--hex-cell) center / 100% 100% no-repeat;
+}
+
 @layer base {
   * {
     @apply m-0 p-0 box-border;
@@ -39,6 +44,13 @@
      navbar don't shift sideways between pages that scroll and pages that don't */
   html {
     scrollbar-gutter: stable;
+  }
+
+  /* The logo's honeycomb cell (lucide's hexagon, rounded corners and all),
+     as a mask. Every hexagon on the site uses it through .hex-cell, which
+     stretches it to the element: keep elements at the cell's 10:11 ratio */
+  :root {
+    --hex-cell: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='2 1 20 22' preserveAspectRatio='none'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z' stroke='%23000' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E");
   }
 
   * {
@@ -80,89 +92,151 @@
     @apply fixed top-0 left-0 right-0 z-50 border-b-2 border-border bg-background/80 backdrop-blur-md;
   }
 
+  /* From lg up, three columns: the links sit exactly in the middle
+     whatever the width of the logo on the left and the buttons on the right */
   .navbar-container {
-    @apply max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-4;
+    @apply max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-4 lg:grid lg:grid-cols-[1fr_auto_1fr];
   }
 
   .navbar-logo {
-    @apply flex items-center gap-2 text-foreground font-semibold text-lg;
+    @apply flex items-center gap-2.5 rounded-lg text-foreground font-semibold text-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent;
   }
 
+  /* 32px: big enough for the bee to read inside its cell */
   .navbar-icon {
-    @apply w-6 h-6 text-accent;
+    @apply size-8 text-accent;
   }
 
-  /* Below xl: a panel dropping from the bar, opened by the menu button.
-     From xl up: the test toggle, links and auth buttons spread along the bar */
+  /* Below lg: a panel that slides down from the bar, opened by the menu
+     button. Invisible rather than display:none, so it can animate and its
+     links still leave the Tab order while it's closed. From lg up it steps
+     out of the way (display: contents), so the links and the auth buttons
+     become the bar's middle and right columns */
   .navbar-menu {
-    @apply absolute inset-x-0 top-full hidden flex-col items-start gap-5 border-b-2 border-border bg-background px-4 py-5 md:px-6 xl:static xl:flex xl:flex-1 xl:flex-row xl:items-center xl:justify-between xl:gap-4 xl:border-0 xl:bg-transparent xl:p-0 xl:pl-4;
+    @apply invisible absolute inset-x-0 top-full flex -translate-y-2 flex-col items-stretch gap-4 border-b-2 border-border bg-background px-4 py-5 opacity-0 transition duration-200 ease-out motion-reduce:transition-none md:px-6 lg:visible lg:contents;
   }
 
   .navbar-menu.is-open {
-    @apply flex;
+    @apply visible translate-y-0 opacity-100;
   }
 
   .navbar-links {
-    @apply flex flex-col items-start gap-4 xl:flex-row xl:items-center xl:gap-6;
+    @apply relative flex flex-col gap-1 lg:flex-row lg:items-center;
   }
 
+  /* Muted until hovered; the current page is bright. In the panel the
+     current page gets its own pill; from lg up the sliding pill does it */
   .navbar-link {
-    @apply whitespace-nowrap text-foreground hover:text-accent transition-colors duration-200 decoration-0 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent;
+    @apply relative z-10 whitespace-nowrap rounded-full px-4 py-2 text-[15px] font-medium text-muted transition-colors duration-200 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none;
   }
 
-  /* Current page: accent colour with an underline bar */
   .navbar-link.is-active {
-    @apply text-accent font-medium underline decoration-2 underline-offset-8;
+    @apply bg-foreground/8 text-foreground lg:bg-transparent;
+  }
+
+  .navbar-pill {
+    @apply pointer-events-none absolute left-0 top-0 hidden h-full rounded-full bg-foreground/8 opacity-0 ring-1 ring-inset ring-foreground/10 lg:block;
+  }
+
+  .navbar-pill.is-visible {
+    @apply opacity-100;
+  }
+
+  .navbar-pill.is-gliding {
+    @apply transition-[transform,width,opacity] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-none;
   }
 
   .navbar-auth {
-    @apply flex w-full items-center gap-4 border-t border-border pt-5 xl:w-auto xl:border-0 xl:pt-0;
+    @apply flex items-center gap-3 border-t border-border pt-4 lg:justify-self-end lg:border-0 lg:pt-0;
+  }
+
+  /* Development-only role switch, out of the way in the corner */
+  .dev-role-badge {
+    @apply fixed bottom-4 left-4 z-50 rounded-lg shadow-lg shadow-black/40;
   }
 
   /* footer styles - public pages only */
   .footer {
-    @apply border-t-2 border-border bg-card;
+    @apply relative border-t-2 border-border bg-card;
+  }
+
+  /* Sits across the top border, half in and half out; filled so the
+     border line doesn't run through the cells */
+  .footer-divider {
+    @apply absolute inset-x-0 top-0 -translate-y-1/2 [&>svg]:fill-card;
   }
 
   .footer-content {
-    @apply max-w-7xl mx-auto px-6 py-12 grid grid-cols-4;
+    @apply mx-auto grid max-w-7xl grid-cols-2 gap-x-6 gap-y-10 px-4 pt-14 pb-8 md:grid-cols-[1.4fr_1fr_1fr_1fr] md:gap-10 md:px-6;
   }
 
-  /* Accent bar between columns, like the dividers in footer.php */
-  .footer-column {
-    @apply flex flex-col items-start gap-2 px-6 border-l-4 border-accent/60 first:border-l-0 first:pl-0;
+  .footer-brand {
+    @apply col-span-2 flex flex-col items-start gap-4 md:col-span-1;
+  }
+
+  .footer-icon {
+    @apply size-10 text-accent;
   }
 
   .footer-tagline {
-    @apply mt-2 text-muted tracking-wide;
+    @apply max-w-xs text-[15px] leading-6 text-muted;
   }
 
   .footer-title {
-    @apply mb-2 text-foreground font-semibold;
+    @apply mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-accent;
   }
 
-  .footer-link,
-  .footer-social {
-    @apply text-muted hover:text-accent transition-colors duration-200 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent;
+  .footer-links {
+    @apply flex flex-col items-start gap-2.5;
+  }
+
+  .footer-link {
+    @apply rounded-sm text-[15px] text-muted transition-colors duration-200 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent motion-reduce:transition-none;
   }
 
   .footer-socials {
-    @apply flex items-center gap-4 text-xl;
+    @apply mt-1 flex flex-wrap gap-2.5;
   }
 
-  .footer-copyright {
-    @apply border-t border-border py-6 px-6 text-center text-sm text-muted tracking-wide;
+  /* Hexagon buttons in the logo's cell (socials, back to top). The outline
+     is the button's own background showing round a slightly smaller cell; on
+     hover or keyboard focus the whole cell fills with the accent and the icon
+     lifts. The mask would hide a focus outline, so focus gets the hover fill */
+  .hex-button {
+    @apply hex-cell relative grid h-[46px] w-[42px] place-items-center bg-accent/35 text-muted transition-colors duration-200 outline-none motion-reduce:transition-none;
   }
 
-  @media (max-width: 768px) {
-    .footer-content {
-      @apply grid-cols-1 gap-8;
-    }
-
-    .footer-column {
-      @apply border-l-0 px-0;
-    }
+  .hex-button::before {
+    @apply hex-cell absolute inset-[1.5px] bg-card transition-colors duration-200 content-[''] motion-reduce:transition-none;
   }
+
+  .hex-button svg {
+    @apply relative size-[18px] transition-transform duration-200 ease-out motion-reduce:transition-none;
+  }
+
+  .hex-button:hover,
+  .hex-button:focus-visible,
+  .hex-button:hover::before,
+  .hex-button:focus-visible::before {
+    @apply bg-accent text-background;
+  }
+
+  .hex-button:hover svg,
+  .hex-button:focus-visible svg {
+    @apply -translate-y-0.5;
+  }
+
+  /* The city's name in faded photo letters, as wide as the screen allows */
+  .footer-wordmark {
+    @apply pointer-events-none select-none bg-cover bg-clip-text text-center font-black uppercase leading-[0.8] tracking-[-0.04em] text-transparent opacity-20;
+    background-position: center 30%;
+    font-size: min(18rem, calc((100vw - 2rem) / 7.1));
+  }
+
+  .footer-bottom {
+    @apply mx-auto flex max-w-7xl flex-col items-center gap-3 border-t border-border px-4 py-5 text-center text-sm text-muted md:flex-row md:justify-between md:px-6 md:text-left;
+  }
+
 
   /* section styles */
   .section-content {
@@ -193,13 +267,44 @@
     @apply text-base leading-7 text-muted;
   }
 
-  .events-page {
-    @apply items-stretch;
+  /* Pages that open with a compact PageHero: same width and spacing as
+     Home and About */
+  .explore-page,
+  .contact-page,
+  .reading-page {
+    @apply mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-10 md:px-6 md:py-14;
   }
 
-  /* One heading and one line, centred above the search */
-  .events-intro {
-    @apply max-w-3xl self-center items-center text-center gap-4;
+  .contact-page,
+  .reading-page {
+    @apply gap-10;
+  }
+
+  /* FAQs, Privacy and Terms: header and text share one centred column, at a
+     comfortable reading width */
+  .reading-page {
+    @apply max-w-4xl;
+  }
+
+  .reading-column {
+    @apply flex flex-col gap-10;
+  }
+
+  .faq-group,
+  .reading-section {
+    @apply flex flex-col gap-4;
+  }
+
+  .reading-heading {
+    @apply text-xl font-semibold text-accent-hover md:text-2xl;
+  }
+
+  .reading-meta {
+    @apply -mb-6 text-sm text-muted;
+  }
+
+  .reading-note {
+    @apply flex items-start gap-3 rounded-xl border border-accent/40 bg-accent/10 p-4 text-sm leading-6 text-foreground [&>svg]:mt-0.5 [&>svg]:size-5 [&>svg]:shrink-0 [&>svg]:text-accent;
   }
 
   /* Keywords gets double width; the Search button is only as wide as it needs */
@@ -459,30 +564,22 @@
     @apply min-w-0 text-accent hover:text-accent-hover [overflow-wrap:anywhere];
   }
 
-  /* contact page: heading and quick answers beside the form, so the form
-     is visible without scrolling */
-  .contact-page {
-    @apply md:py-12;
-  }
-
-  .contact-header {
-    @apply flex flex-col items-start gap-3;
-  }
-
-  .contact-title {
-    @apply text-3xl font-semibold text-accent-hover;
-  }
-
+  /* contact page: header, then quick answers and the form as two cards */
   .contact-response-note {
     @apply inline-flex items-center gap-2 text-sm font-medium text-foreground [&>svg]:size-4 [&>svg]:text-accent;
   }
 
   .contact-layout {
-    @apply w-full max-w-5xl grid grid-cols-[minmax(0,1fr)] items-start gap-8 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)];
+    @apply grid w-full grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)];
   }
 
   .contact-aside {
-    @apply flex flex-col gap-6;
+    @apply flex flex-col gap-5 rounded-2xl border border-border bg-card p-6;
+  }
+
+  /* Questions sit on the darker page colour inside the card */
+  .contact-aside .faq-item {
+    @apply bg-background;
   }
 
   .contact-aside-title {
@@ -513,8 +610,10 @@
     @apply px-4 pb-4 text-sm leading-6 text-muted;
   }
 
-  /* honeycomb: the brand pattern. One moment per screen, never behind text
-     people need to read. The cell is drawn inline, so there is no image file */
+  /* honeycomb: the brand pattern. One moment per screen, on a photo or on
+     empty space, never on a plain background behind body text. Every public
+     page has at least the footer's divider. The cell is drawn inline, so
+     there is no image file */
   .honeycomb-texture {
     @apply pointer-events-none absolute inset-0 -z-10 opacity-15;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='45' viewBox='0 0 26 45'%3E%3Cpath d='M13 0v7.5L26 15v15l-13 7.5L0 30V15l13-7.5M13 37.5V45' fill='none' stroke='%238e98f3' stroke-width='1'/%3E%3C/svg%3E");
@@ -531,32 +630,50 @@
     @apply mx-auto flex w-full max-w-7xl flex-col gap-16 px-4 py-10 md:gap-24 md:px-6 md:py-14;
   }
 
-  .about-hero {
+  /* Page hero (PageHero.jsx): photo card with the heading over it. Tall
+     on About, compact on Explore Events */
+  .page-hero {
     @apply relative isolate flex min-h-96 items-end overflow-hidden rounded-2xl border border-border md:min-h-120;
   }
 
+  .page-hero-compact {
+    @apply min-h-60 md:min-h-72;
+  }
+
+  .page-hero-plain {
+    @apply min-h-52 bg-card md:min-h-60;
+  }
+
   /* Darkens the photo towards the text so the heading keeps its contrast */
-  .about-hero::before {
+  .page-hero::before {
     @apply absolute inset-0 -z-10 bg-linear-to-t from-background via-background/75 to-background/10 content-[''];
   }
 
-  .about-hero-img {
+  .page-hero-img {
     @apply absolute inset-0 -z-20 h-full w-full object-cover;
   }
 
-  .about-hero-content {
+  .page-hero-content {
     @apply flex max-w-3xl flex-col gap-4 p-6 md:p-12;
   }
 
-  .about-eyebrow {
+  .page-hero-compact .page-hero-content {
+    @apply gap-3 md:p-10;
+  }
+
+  .page-hero-eyebrow {
     @apply text-sm font-semibold uppercase tracking-[0.2em] text-accent;
   }
 
-  .about-hero-title {
+  .page-hero-title {
     @apply text-4xl leading-tight font-semibold text-balance text-foreground md:text-6xl;
   }
 
-  .about-hero-intro {
+  .page-hero-compact .page-hero-title {
+    @apply text-3xl md:text-5xl;
+  }
+
+  .page-hero-intro {
     @apply max-w-2xl text-base leading-7 text-balance text-foreground/85 md:text-lg;
   }
 
@@ -590,8 +707,7 @@
 
   /* The city bee in a honeycomb cell, overlapping the photo's corner */
   .about-story-bee {
-    @apply absolute -bottom-6 -left-2 aspect-square w-24 object-cover md:-bottom-8 md:-left-10 md:w-36;
-    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+    @apply hex-cell absolute -bottom-6 -left-2 aspect-10/11 w-24 object-cover md:-bottom-8 md:-left-10 md:w-36;
   }
 
   .about-steps {
@@ -603,8 +719,7 @@
   }
 
   .about-step-number {
-    @apply absolute -top-4 left-6 grid size-9 place-items-center bg-accent text-sm font-semibold text-background;
-    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+    @apply hex-cell absolute -top-4 left-6 grid h-10 w-9 place-items-center bg-accent text-sm font-semibold text-background;
   }
 
   .about-step-icon {
@@ -662,22 +777,36 @@
     @apply mx-auto flex w-full max-w-7xl flex-col gap-16 px-4 py-10 md:gap-20 md:px-6 md:py-14;
   }
 
+  /* Hero: the city's name, full width, with event photos showing through
+     the letters. The honeycomb texture is this page's first-screen moment */
   .home-hero {
-    @apply grid items-center gap-10 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)];
+    @apply relative isolate flex flex-col gap-6 pt-4 md:gap-8 md:pt-10;
   }
 
-  .home-hero-text {
-    @apply flex flex-col gap-6;
+  /* Sized from the viewport so the ten letters always fit on one line:
+     about 7 em wide, with the page's side padding taken off first */
+  .home-hero-word {
+    @apply relative block font-black uppercase leading-[0.9] tracking-[-0.035em];
+    font-size: min(11rem, calc((100vw - 3rem) / 7.1));
   }
 
-  .home-hero-title {
-    @apply text-2xl font-semibold text-accent-hover md:text-4xl;
+  .home-hero-word span {
+    @apply block bg-cover bg-clip-text text-transparent;
+    background-position: center 40%;
+    animation: hero-photo infinite;
   }
 
-  /* The photo shows through the letters of the site name */
-  .home-hero-title span {
-    @apply block text-5xl leading-none font-black text-balance bg-cover bg-clip-text text-transparent md:text-7xl;
-    background-position: center 35%;
+  /* Later photos stack on the first; without motion only the first shows */
+  .home-hero-word span + span {
+    @apply absolute inset-0 opacity-0;
+  }
+
+  .home-hero-sub {
+    @apply grid gap-4 md:grid-cols-[auto_minmax(0,1fr)] md:items-end md:gap-10;
+  }
+
+  .home-hero-name {
+    @apply text-3xl leading-none font-semibold text-accent-hover md:text-5xl;
   }
 
   .home-hero-intro {
@@ -685,15 +814,7 @@
   }
 
   .home-search {
-    @apply flex w-full max-w-xl gap-3 rounded-xl bg-card p-3;
-  }
-
-  .home-hero-media {
-    @apply hidden md:block;
-  }
-
-  .home-hero-img {
-    @apply block aspect-4/5 max-h-130 w-full rounded-2xl object-cover ring-1 ring-border;
+    @apply flex w-full max-w-3xl gap-3 rounded-2xl border border-border bg-card p-3;
   }
 
   .home-section {
@@ -1716,5 +1837,27 @@
     .dashboard-intro {
       @apply flex-col items-start;
     }
+  }
+}
+
+/* Each copy of the hero word is visible for a quarter of the cycle, with a
+   short crossfade either side (four photos; see Hero.jsx) */
+@keyframes hero-photo {
+  0%,
+  25% {
+    opacity: 1;
+  }
+  31%,
+  94% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-hero-word span {
+    animation: none;
   }
 }
