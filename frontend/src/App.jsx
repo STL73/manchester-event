@@ -232,7 +232,7 @@ function App() {
               shared event link still works */}
           <Route
             path="/"
-            element={isUser ? <Navigate to="/dashboard/home" replace /> : <Home />}
+            element={isUser ? <Navigate to="/dashboard/home" replace /> : <Home events={publicEvents} />}
           />
           <Route path="/auth/:pathname" element={<Auth />} />
           <Route path="/about" element={<About events={publicEvents} isUser={isUser} />} />

@@ -2,11 +2,25 @@ import { Bell, CalendarSearch, Heart, Settings2 } from "lucide-react";
 
 // Public /events page intro (signed-out)
 export const publicIntro = {
-  title: "Explore All Events in Manchester Area",
-  paragraphs: [
-    "Discover a variety of events happening around Manchester. From music festivals to art exhibitions, there is something for everyone. Whether you are looking for family-friendly activities or nightlife events, our platform has you covered.",
-    "Check out the latest events, add them as favourites, and share your experiences with others. Use the search bar below to filter events by date, category, location, or keywords.",
-  ],
+  title: "What's on in Manchester",
+  text: "Every upcoming event, soonest first, each one checked by a person before it went live. Narrow it down by date, area or category.",
+};
+
+// The quick date ranges; ids are the `when` keys in lib/eventDates.js and the
+// ?when= values in the URL. Home's "When?" switch uses the same list.
+export const whenOptions = [
+  { id: "", label: "Any date" },
+  { id: "tonight", label: "Tonight" },
+  { id: "weekend", label: "This weekend" },
+  { id: "week", label: "Next 7 days" },
+];
+
+export const resultsText = {
+  count: (total) => `${total} ${total === 1 ? "event" : "events"}`,
+  clearAll: "Clear all",
+  removeFilter: (label) => `Remove filter: ${label}`,
+  empty: "No upcoming events match your search.",
+  clearFilters: "Clear filters",
 };
 
 // Dashboard version: Quick Actions from explore_events.php

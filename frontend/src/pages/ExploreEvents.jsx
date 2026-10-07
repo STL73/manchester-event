@@ -27,24 +27,18 @@ export default function ExploreEvents({
 
   if (!inDashboard) {
     return (
-      <main>
-        <section
-          className="section-content events-page"
-          aria-labelledby="events-title"
-        >
-          <div className="content-wrapper events-intro">
-            <h1 className="section-title" id="events-title">
-              {publicIntro.title}
-            </h1>
-            {publicIntro.paragraphs.map((paragraph) => (
-              <p className="content-p" key={paragraph}>
-                {paragraph}
-              </p>
-            ))}
-          </div>
-          {browser}
-        </section>
-      </main>
+      <section
+        className="section-content events-page"
+        aria-labelledby="events-title"
+      >
+        <div className="content-wrapper events-intro">
+          <h1 className="section-title" id="events-title">
+            {publicIntro.title}
+          </h1>
+          <p className="content-p">{publicIntro.text}</p>
+        </div>
+        {browser}
+      </section>
     );
   }
 

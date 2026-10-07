@@ -81,7 +81,7 @@
   }
 
   .navbar-container {
-    @apply max-w-7xl mx-auto px-6 h-16 flex items-center justify-between flex-wrap gap-4;
+    @apply max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-4;
   }
 
   .navbar-logo {
@@ -92,12 +92,22 @@
     @apply w-6 h-6 text-accent;
   }
 
+  /* Below xl: a panel dropping from the bar, opened by the menu button.
+     From xl up: the test toggle, links and auth buttons spread along the bar */
+  .navbar-menu {
+    @apply absolute inset-x-0 top-full hidden flex-col items-start gap-5 border-b-2 border-border bg-background px-4 py-5 md:px-6 xl:static xl:flex xl:flex-1 xl:flex-row xl:items-center xl:justify-between xl:gap-4 xl:border-0 xl:bg-transparent xl:p-0 xl:pl-4;
+  }
+
+  .navbar-menu.is-open {
+    @apply flex;
+  }
+
   .navbar-links {
-    @apply flex items-center gap-6;
+    @apply flex flex-col items-start gap-4 xl:flex-row xl:items-center xl:gap-6;
   }
 
   .navbar-link {
-    @apply text-foreground hover:text-accent transition-colors duration-200 decoration-0 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent;
+    @apply whitespace-nowrap text-foreground hover:text-accent transition-colors duration-200 decoration-0 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent;
   }
 
   /* Current page: accent colour with an underline bar */
@@ -106,7 +116,7 @@
   }
 
   .navbar-auth {
-    @apply flex items-center gap-4;
+    @apply flex w-full items-center gap-4 border-t border-border pt-5 xl:w-auto xl:border-0 xl:pt-0;
   }
 
   /* footer styles - public pages only */
@@ -155,14 +165,6 @@
   }
 
   /* section styles */
-  .home-page {
-    @apply w-full bg-background;
-  }
-
-  .section-container {
-    @apply h-[calc(100vh-64px)] flex justify-center items-center bg-card;
-  }
-
   .section-content {
     @apply w-full max-w-7xl mx-auto py-20 px-6 flex flex-col justify-center items-center gap-8;
   }
@@ -171,60 +173,16 @@
     @apply w-full text-3xl text-accent-hover font-semibold text-center;
   }
 
-  .hero-container,
-  .content-container {
-    @apply w-full max-w-7xl flex justify-between items-center gap-8 p-2;
-  }
-
-  .hero-wrapper,
   .content-wrapper {
     @apply w-full flex flex-col items-start text-left gap-8 p-4;
   }
 
-  .hero-title {
-    @apply text-4xl text-accent-hover font-semibold;
-  }
-
-  .hero-title span {
-    @apply text-7xl font-black bg-cover bg-clip-text text-transparent;
-    background-position: center 35%;
-  }
-
-  .hero-sub {
-    @apply text-lg font-medium text-foreground;
-  }
-
-  .hero-btn-box,
   .content-btn-box {
     @apply w-full flex justify-center items-center gap-8;
   }
 
   .content-wrapper {
     @apply max-w-2xl;
-  }
-
-  .content-container-reversed {
-    @apply flex-row-reverse;
-  }
-
-  .content-container-stacked {
-    @apply flex-col;
-  }
-
-  .content-items-column {
-    @apply w-full flex flex-col gap-6;
-  }
-
-  .content-items-row {
-    @apply w-full grid grid-cols-3 gap-6;
-  }
-
-  .content-box {
-    @apply flex flex-col gap-3;
-  }
-
-  .content-sub {
-    @apply flex items-center gap-3 text-lg text-foreground font-semibold;
   }
 
   .content-icon {
@@ -239,8 +197,9 @@
     @apply items-stretch;
   }
 
+  /* One heading and one line, centred above the search */
   .events-intro {
-    @apply max-w-5xl;
+    @apply max-w-3xl self-center items-center text-center gap-4;
   }
 
   /* Keywords gets double width; the Search button is only as wide as it needs */
@@ -279,12 +238,42 @@
     @apply col-span-2;
   }
 
+  /* Quick date ranges: a segmented row under the search bar */
+  .events-when {
+    @apply w-full max-w-7xl flex flex-wrap gap-2;
+  }
+
+  .events-when-option {
+    @apply rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-muted transition-colors hover:border-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none;
+  }
+
+  .events-when-option.is-active {
+    @apply border-accent bg-accent text-background;
+  }
+
   .events-toolbar {
     @apply w-full max-w-7xl flex items-center justify-between gap-4;
   }
 
-  .events-toolbar-label {
-    @apply text-sm text-muted;
+  /* Result count, then one chip per filter in use */
+  .events-results {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .events-count {
+    @apply mr-2 text-sm font-semibold text-foreground;
+  }
+
+  .filter-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-accent/60 bg-accent/10 py-1 pl-3 pr-2 text-sm text-accent-hover transition-colors hover:bg-accent/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none;
+  }
+
+  .filter-chip svg {
+    @apply size-3.5;
+  }
+
+  .filter-chip-clear {
+    @apply rounded px-1 text-sm text-muted underline underline-offset-4 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
   }
 
   .events-view-switcher {
@@ -667,16 +656,120 @@
     @apply flex flex-wrap justify-center gap-4 pt-2;
   }
 
-  .hero-img-container,
-  .content-img-container {
-    @apply w-full max-w-xl flex justify-center items-center overflow-hidden rounded-2xl;
-    aspect-ratio: 4 / 3;
+  /* home page: the shop window. Hero with search, what's on, areas,
+     categories, then one band for going out and organising */
+  .home-page {
+    @apply mx-auto flex w-full max-w-7xl flex-col gap-16 px-4 py-10 md:gap-20 md:px-6 md:py-14;
   }
 
-  .hero-img,
-  .content-img {
-    @apply block w-full h-full rounded-2xl ring-2 ring-accent/30
-        shadow-lg shadow-accent/40 object-cover;
+  .home-hero {
+    @apply grid items-center gap-10 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)];
+  }
+
+  .home-hero-text {
+    @apply flex flex-col gap-6;
+  }
+
+  .home-hero-title {
+    @apply text-2xl font-semibold text-accent-hover md:text-4xl;
+  }
+
+  /* The photo shows through the letters of the site name */
+  .home-hero-title span {
+    @apply block text-5xl leading-none font-black text-balance bg-cover bg-clip-text text-transparent md:text-7xl;
+    background-position: center 35%;
+  }
+
+  .home-hero-intro {
+    @apply max-w-xl text-base leading-7 text-foreground/85 md:text-lg;
+  }
+
+  .home-search {
+    @apply flex w-full max-w-xl gap-3 rounded-xl bg-card p-3;
+  }
+
+  .home-hero-media {
+    @apply hidden md:block;
+  }
+
+  .home-hero-img {
+    @apply block aspect-4/5 max-h-130 w-full rounded-2xl object-cover ring-1 ring-border;
+  }
+
+  .home-section {
+    @apply flex flex-col gap-6;
+  }
+
+  .home-section-header {
+    @apply flex items-baseline justify-between gap-4;
+  }
+
+  .home-heading {
+    @apply text-2xl font-semibold text-accent-hover md:text-3xl;
+  }
+
+  /* Five areas as a bento: the city centre tile is the tall one */
+  .area-tiles {
+    @apply grid grid-cols-2 gap-4 md:grid-cols-4 md:grid-rows-2;
+  }
+
+  .area-tile {
+    @apply relative isolate flex min-h-40 overflow-hidden rounded-2xl border border-border md:min-h-52;
+  }
+
+  .area-tile:first-child {
+    @apply col-span-2 md:col-span-2 md:row-span-2;
+  }
+
+  .area-tile-img {
+    @apply absolute inset-0 -z-20 h-full w-full object-cover transition-transform duration-500 motion-reduce:transition-none;
+  }
+
+  /* Darkens the bottom of the photo so the name keeps its contrast */
+  .area-tile::before {
+    @apply absolute inset-0 -z-10 bg-linear-to-t from-background via-background/40 to-transparent content-[''];
+  }
+
+  .area-tile:hover .area-tile-img,
+  .area-tile:focus-within .area-tile-img {
+    @apply scale-105;
+  }
+
+  /* The link covers the whole tile */
+  .area-tile-link {
+    @apply flex w-full flex-col justify-end gap-1 p-4 md:p-5 focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-accent rounded-2xl;
+  }
+
+  .area-tile-name {
+    @apply text-lg font-semibold text-foreground md:text-xl;
+  }
+
+  .area-tile-count {
+    @apply text-sm text-foreground/80;
+  }
+
+  .category-chips {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .category-chip {
+    @apply inline-flex rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground transition-colors hover:border-accent hover:text-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none;
+  }
+
+  .home-audiences {
+    @apply grid gap-6 md:grid-cols-2;
+  }
+
+  .home-audience {
+    @apply flex flex-col items-start gap-4 rounded-2xl border border-border bg-card p-6 md:p-8;
+  }
+
+  .home-audience-icon {
+    @apply size-8 text-accent;
+  }
+
+  .home-audience-title {
+    @apply text-xl font-semibold text-foreground md:text-2xl;
   }
 
   @media (max-width: 768px) {
@@ -688,19 +781,8 @@
       @apply text-2xl;
     }
 
-    .hero-container,
-    .content-container,
-    .content-container-reversed {
-      @apply flex-col;
-    }
-
-    .hero-wrapper,
     .content-wrapper {
       @apply max-w-none;
-    }
-
-    .content-items-row {
-      @apply grid-cols-1;
     }
 
     .events-search {
@@ -715,6 +797,11 @@
     .events-grid-three,
     .events-grid-two {
       @apply grid-cols-1;
+    }
+
+    /* Every layout is one column here, so the switcher would do nothing */
+    .events-view-switcher {
+      @apply hidden;
     }
 
     .dashboard-container {
