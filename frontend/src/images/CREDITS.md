@@ -35,7 +35,31 @@ Found by reverse image search (TinEye) on 2026-10-06 and checked by eye against 
 | `spaghetti-tomato-basil.jpg` | Lisa Fotios | [Pexels 1279330](https://www.pexels.com/photo/selective-focus-photography-of-pasta-with-tomato-and-basil-1279330/) |
 | `mediacity-globe-night.jpg` | Jason Jeandron | [Unsplash](https://unsplash.com/photos/a-city-at-night-with-lights-reflecting-in-the-water-l02_lpZ0JDA) |
 
+Added on 2026-10-07 for the new mock events and to replace photos taken outside Greater Manchester.
+The four whose names start `manchester-` and `old-trafford-` are tagged Manchester on Unsplash; the
+rest show no recognisable place.
+
+| File | Photographer | Source |
+| --- | --- | --- |
+| `distillery-copper-stills.jpg` | François Hoppet | [Unsplash](https://unsplash.com/photos/two-copper-stills-in-a-distillery-KqOHcCwt7TQ) |
+| `tall-ship-model.jpg` | Ivy Dao | [Unsplash](https://unsplash.com/photos/wooden-tall-ship-model-Rq4BUAtz72c) |
+| `film-set-crew.jpg` | Jakob Owens | [Unsplash](https://unsplash.com/photos/a-group-of-people-standing-around-a-camera-set-up-xKfS7Hll0Ck) |
+| `comedy-microphone-brick-wall.jpg` | Simon H | [Unsplash](https://unsplash.com/photos/a-microphone-on-a-stand-in-front-of-a-brick-wall-B53qfHDHa_Y) |
+| `tech-talk-audience.jpg` | charlesdeluvio | [Unsplash](https://unsplash.com/photos/woman-speaking-at-brick-walled-conference-wn7dOzUh3Rs) |
+| `bookshelf-reading.jpg` | Christin Hume | [Unsplash](https://unsplash.com/photos/person-picking-white-and-red-book-on-bookshelf-k2Kcwkandwg) |
+| `yoga-class-stretch.jpg` | Jaspinder Singh | [Unsplash](https://unsplash.com/photos/a-group-of-people-doing-yoga-in-a-room-vpVE1Xk1eR4) |
+| `pride-flag-sky.jpg` | Ken Whytock | [Unsplash](https://unsplash.com/photos/NVI6gFrpG4Q) |
+| `students-laptops-cafe.jpg` | Brooke Cagle | [Unsplash](https://unsplash.com/photos/three-people-sitting-in-front-of-table-laughing-together-g1Kr4Ozfoac) |
+| `old-trafford-match-crowd.jpg` | Samuel Regan-Asante | [Unsplash](https://unsplash.com/photos/people-watching-football-game-during-nighttime-9p4LkGgpP4Y) |
+| `manchester-fireworks-night.jpg` | Chris Curry | [Unsplash](https://unsplash.com/photos/a-fireworks-display-in-the-night-sky-over-a-city-Nz5B-mtgavo) |
+| `manchester-outdoor-dining-lights.jpg` | Konrad Nowacki | [Unsplash](https://unsplash.com/photos/sunny-street-with-outdoor-dining-string-lights-and-brick-buildings-jy3oOEYWZJs) |
+| `manchester-canal-reflections.jpg` | Jason Jeandron | [Unsplash](https://unsplash.com/photos/a-river-running-through-a-city-next-to-tall-buildings-o5aYYDkLgYU) |
+
 Own photos (Slav Lambov): the eight `arena-*`, `stage-*` and `stadium-concert-daytime` images,
 `placeholder.jpg`, `berry-cheesecake`, `tinsel-town-christmas-fair`, `gin-distillery-copper-stills`,
 `ed-sheeran-guitar-pick-screen`, `ed-sheeran-360-stage`, `heaton-park-balloon`, `salford-quays-dusk`,
 `titanic-ship-model`, `game-of-thrones-tour-sign`, `old-trafford-night` and `mediacity-piazza-sunset`.
+
+No longer used by any event, because they were taken outside Greater Manchester (Hinch Distillery,
+Titanic Belfast and the Game of Thrones Studio Tour, all in Northern Ireland):
+`gin-distillery-copper-stills`, `titanic-ship-model` and `game-of-thrones-tour-sign`.

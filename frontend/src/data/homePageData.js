@@ -1,120 +1,65 @@
-import {
-  Bell,
-  CalendarCheck,
-  CalendarSearch,
-  CalendarPlus,
-  CircleUserRound,
-  LayoutList,
-  Settings2,
-  UserRoundPlus,
-  Users,
-} from "lucide-react";
+import { CalendarPlus, Heart, Search } from "lucide-react";
 
-import stadiumConcertDaytime from "../images/events/stadium-concert-daytime.jpg";
-import arenaBlueLasers from "../images/events/arena-blue-lasers.jpg";
 import stageConfetti from "../images/events/stage-confetti.jpg";
+import townHallClockTower from "../images/site/town-hall-clock-tower.webp";
+import northernQuarterMural from "../images/site/northern-quarter-mural.webp";
+import mediacityDusk from "../images/site/mediacity-dusk.webp";
+import salfordQuaysDay from "../images/site/salford-quays-day.webp";
+import heatonParkTemple from "../images/site/heaton-park-temple.webp";
 
+// One job: show what's on and send visitors into Explore Events with a filter
+// already set. Home never holds the full list; who runs the site is on About.
 export const homePageData = {
   hero: {
+    titleLead: "Welcome to",
+    title: "Manchester Event Portal",
+    intro:
+      "Gigs, markets, festivals and family days out across Greater Manchester, every one checked by a person before it goes live.",
     image: stageConfetti,
-    imageAlt: "Live event audience",
+    imageAlt: "Confetti falling over a crowd at a live show",
+    search: {
+      label: "Search events",
+      placeholder: "Try jazz, food market, Salford...",
+      button: { label: "Search", icon: Search },
+    },
   },
-  promote: {
-    title: "Looking to promote your event? Choose Manchester Event Portal.",
-    image: arenaBlueLasers,
-    imageAlt: "People enjoying a live event",
-    button: { label: "Create Events", to: "/auth/sign-up" },
-    features: [
-      {
-        icon: CalendarPlus,
-        title: "Cost-free events promotion.",
-        description:
-          "Promote your events in Manchester for free. No subscriptions or fees required. Share your events, photos and reach your target audience.",
-      },
-      {
-        icon: UserRoundPlus,
-        title: "Seamless registration",
-        description:
-          "Sign up with our easy-to-follow registration process. Create your account and list all of your events.",
-      },
-      {
-        icon: LayoutList,
-        title: "User-friendly interface",
-        description:
-          "Use an intuitive dashboard to add, update, edit and delete your events. Get approval for changes from our admin.",
-      },
+  whatsOn: {
+    title: "What's on",
+    // At most one row of cards: the full list belongs on Explore Events
+    limit: 3,
+    seeAll: (total) => `See all ${total}`,
+    empty: "Nothing listed for these dates yet.",
+    emptyLink: "Browse every upcoming event",
+  },
+  areas: {
+    title: "Explore by area",
+    count: (total) =>
+      total === 0 ? "Nothing listed yet" : `${total} upcoming ${total === 1 ? "event" : "events"}`,
+    // ids match eventLocations; the image is decorative because the tile names the area
+    tiles: [
+      { id: "city-centre", image: townHallClockTower, position: "center 30%" },
+      { id: "northern-quarter", image: northernQuarterMural, position: "center 40%" },
+      { id: "mediacity", image: mediacityDusk },
+      { id: "salford", image: salfordQuaysDay },
+      { id: "heaton-park", image: heatonParkTemple },
     ],
   },
-  discover: {
-    title: "Searching for events in Manchester? You are at the right place.",
-    image: stadiumConcertDaytime,
-    imageAlt: "Crowd at a Manchester event",
-    button: { label: "Explore Events", to: "/events" },
-    features: [
-      {
-        icon: CalendarSearch,
-        title: "Find events by category",
-        description:
-          "Explore all types of events in Manchester: music, arts, sports, conferences, webinars and more.",
-      },
-      {
-        icon: CircleUserRound,
-        title: "Just search or create an account",
-        description:
-          "Search for events without registration, or create an account and bookmark your favourite events.",
-      },
-      {
-        icon: LayoutList,
-        title: "User-friendly dashboard",
-        description:
-          "Manage your bookmarked events from the dashboard and get reminders for events in your favourite list.",
-      },
-    ],
+  categories: {
+    title: "Browse by category",
   },
-  platform: {
-    title: "All you need for your events in one platform.",
-    features: [
-      {
-        icon: CalendarPlus,
-        title: "Organisers",
-        description:
-          "Create and promote events while reaching your target audience.",
-      },
-      {
-        icon: Users,
-        title: "Event hunters",
-        description:
-          "Find high art, professional progress, exciting sports or simple fun in one place.",
-      },
-      {
-        icon: UserRoundPlus,
-        title: "Free and easy registration",
-        description:
-          "Use an intuitive interface for effortless task completion and navigation.",
-      },
-    ],
-  },
-  preferences: {
-    title: "Set preferences and get notified about upcoming events.",
-    features: [
-      {
-        icon: Settings2,
-        title: "Personalised preferences",
-        description:
-          "Choose the event categories and interests that matter to you.",
-      },
-      {
-        icon: Bell,
-        title: "Useful notifications",
-        description:
-          "Get timely reminders about events that match your interests.",
-      },
-      {
-        icon: CalendarCheck,
-        title: "Never miss an event",
-        description:
-          "Keep your favourite events organised and ready for your next plan.",
-      },
-    ],
-  },
+  // Replaces the four feature sections that repeated each other
+  audiences: [
+    {
+      icon: Heart,
+      title: "Going out?",
+      text: "Browsing is free and needs no account. Sign up to save favourites and get a reminder before they start.",
+      button: { label: "Create a free account", to: "/auth/sign-up" },
+    },
+    {
+      icon: CalendarPlus,
+      title: "Organising?",
+      text: "List your event for free. We check every listing before it goes public, so people trust what they find here.",
+      button: { label: "List your event", to: "/auth/sign-up" },
+    },
+  ],
 };
