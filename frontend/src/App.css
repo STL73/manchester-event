@@ -487,9 +487,11 @@
 
   /* Above the stretched title link, so the buttons keep their own clicks.
      mt-auto pins them to the bottom, so a longer title on one card doesn't
-     push its buttons below its neighbours' */
+     push its buttons below its neighbours'. They wrap in narrow columns (an
+     organiser card's three buttons on a tablet dashboard) instead of being
+     cut off by the card's overflow-hidden */
   .event-card-actions {
-    @apply relative z-10 mt-auto flex items-center gap-3 pt-2;
+    @apply relative z-10 mt-auto flex flex-wrap items-center gap-3 pt-2;
   }
 
   /* Same 34px circle as the icon buttons, tinted with its own red like the
@@ -961,12 +963,13 @@
       @apply col-span-1;
     }
 
+    /* Two columns on tablets, one below 640px (max-sm) */
     .events-grid-three,
     .events-grid-two {
-      @apply grid-cols-1;
+      @apply grid-cols-2 max-sm:grid-cols-1;
     }
 
-    /* Every layout is one column here, so the switcher would do nothing */
+    /* Three and two columns look the same here, so the switcher is hidden */
     .events-view-switcher {
       @apply hidden;
     }
