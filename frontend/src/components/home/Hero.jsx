@@ -64,9 +64,12 @@ export default function Hero() {
           type="search"
           placeholder={search.placeholder}
         />
-        <Button type="submit" variant="primary" size="md" className="rounded-lg!">
+        {/* Icon only on phones (a 50px circle), so the placeholder fits; the
+            label stays for screen readers. The padding is a utility here
+            because App.css component classes lose to Button's own px-5 */}
+        <Button type="submit" variant="primary" size="md" className="max-sm:px-3.5">
           <SearchIcon aria-hidden="true" />
-          {search.button.label}
+          <span className="home-search-button-label">{search.button.label}</span>
         </Button>
       </form>
     </section>
