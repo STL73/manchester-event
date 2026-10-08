@@ -12,6 +12,8 @@
   --color-card: #121a31;
   --color-accent: #8e98f3;
   --color-accent-hover: #aab3fd;
+  /* Errors and destructive actions (Tailwind's red-400) */
+  --color-danger: #f87171;
   --font-sans: "Poppins", system-ui, sans-serif;
 
   /* --color-green-accent: #c2fec9;
@@ -131,11 +133,11 @@
   }
 
   .navbar-link.is-active {
-    @apply bg-foreground/8 text-foreground lg:bg-transparent;
+    @apply bg-accent/15 text-foreground ring-1 ring-inset ring-accent/30 lg:bg-transparent lg:ring-0;
   }
 
   .navbar-pill {
-    @apply pointer-events-none absolute left-0 top-0 hidden h-full rounded-full bg-foreground/8 opacity-0 ring-1 ring-inset ring-foreground/10 lg:block;
+    @apply pointer-events-none absolute left-0 top-0 hidden h-full rounded-full bg-accent/15 opacity-0 ring-1 ring-inset ring-accent/30 lg:block;
   }
 
   .navbar-pill.is-visible {
@@ -1222,7 +1224,7 @@
   }
 
   .dashboard-card-accent-red .dashboard-card-number {
-    @apply text-red-400;
+    @apply text-danger;
   }
 
   .dashboard-insights {
@@ -1403,7 +1405,7 @@
 
   .status-suspended,
   .status-rejected {
-    @apply border-red-400/40 bg-red-400/10 text-red-400;
+    @apply border-danger/40 bg-danger/10 text-danger;
   }
 
   /* Event status colours match the PHP input.css */
@@ -1636,7 +1638,7 @@
 
   /* FieldError: the icon sits on the first line of the text */
   .profile-error {
-    @apply flex items-start gap-1.5 text-sm text-red-400 [&_svg]:mt-0.5 [&_svg]:size-4 [&_svg]:shrink-0;
+    @apply flex items-start gap-1.5 text-sm text-danger [&_svg]:mt-0.5 [&_svg]:size-4 [&_svg]:shrink-0;
   }
 
   /* StatusMessage: one box for success and error, icon beside the text */
@@ -1649,7 +1651,7 @@
   }
 
   .status-message-error {
-    @apply border-red-400/40 bg-red-400/10 text-red-400;
+    @apply border-danger/40 bg-danger/10 text-danger;
   }
 
   .status-message-text {
@@ -1687,7 +1689,7 @@
   /* Compact choice cards: the radio dot is visually hidden (still focusable
      and announced), the border and corner tick show which one is chosen */
   .radio-card {
-    @apply relative flex flex-col cursor-pointer rounded-lg border border-border bg-background py-2 pl-3 pr-9 transition-colors hover:border-accent/60 has-checked:border-accent has-checked:bg-accent/10 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent has-aria-invalid:border-red-400 motion-reduce:transition-none;
+    @apply relative flex flex-col cursor-pointer rounded-lg border border-border bg-background py-2 pl-3 pr-9 transition-colors hover:border-accent/60 has-checked:border-accent has-checked:bg-accent/10 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent has-aria-invalid:border-danger motion-reduce:transition-none;
   }
 
   .radio-card-input {
@@ -1711,7 +1713,7 @@
   }
 
   .contact-field [aria-invalid="true"] {
-    @apply border-red-400 focus:border-red-400;
+    @apply border-danger focus:border-danger;
   }
 
   /* auth styles: log in and sign up share one card, form beside an image.
