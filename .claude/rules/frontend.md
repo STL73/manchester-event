@@ -8,7 +8,8 @@ functions record behaviour being matched on purpose: keep that parity unless tol
 - React 19, Vite 8, React Router 7 (`BrowserRouter` in `src/main.jsx`), plain JSX with no TypeScript
 - Tailwind CSS v4 through `@tailwindcss/vite`. There is **no `tailwind.config.js`**: theme tokens
   live in the `@theme` block at the top of `src/App.css`
-- Icons: **lucide-react first**. `react-icons` is installed but unused, so don't introduce it
+- Icons: **lucide-react first**. `react-icons` is used only for the brand icons lucide doesn't
+  have (the footer's social links, `data/socialLinks.js`). Don't use it for anything else
 - Charts: Recharts, **only** inside the analytics pages, which `App.jsx` lazy-loads so Recharts
   stays out of the main bundle. Keep any new chart page lazy too
 - Data fetching: none yet. Every page runs on mock data (see below)
@@ -45,9 +46,12 @@ frontend/src/
   `DashboardCard` or `Button`? Add an optional prop. `Button` already does links (`to`), five
   variants and four sizes
 - **Styling:** use the theme colour tokens (`bg-card`, `text-muted`, `border-border`, `text-accent`,
-  `bg-background`, `text-foreground`), never raw hex. Repeated multi-utility patterns get a
-  semantic class in `App.css` built with `@apply` (e.g. `.event-card`, `.status-badge`), which is
-  how most components are styled
+  `bg-background`, `text-foreground`, `text-danger` for errors and destructive actions,
+  `text-favourite` for the favourite heart), never raw hex. Tailwind's own palette appears only
+  for status colours: one per status badge (green, yellow, orange, cyan, grey), green for the
+  success message and a faint slate for past rows in tables.
+  Repeated multi-utility patterns get a semantic class in `App.css` built with `@apply` (e.g.
+  `.event-card`, `.status-badge`), which is how most components are styled
 - Dates use `Intl.DateTimeFormat("en-GB", …)`
 - Respect `motion-reduce:` and visible `focus-visible:` states, as `Button` does
 
@@ -60,7 +64,9 @@ frontend/src/
 ## Protected files
 
 - `src/App.css` `@theme` block: the palette and font for the whole app. Change it only on request
-- `src/components/UI/Button.jsx`: size/variant maps are tuned so every variant is the same height
+- `src/components/UI/Button.jsx`: size/variant maps are tuned so every variant is the same height.
+  Buttons are pills, like the site's other controls; the two search buttons keep `rounded-lg!` to
+  match their inputs. `type` defaults to `"button"`, so pass `type="submit"` on form buttons
 - `src/data/eventsData.js`: single source of truth for events (see above)
 
 ## Commands
