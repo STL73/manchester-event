@@ -1,7 +1,8 @@
 import { LogIn, UserPlus } from "lucide-react";
 
-import mediacityGlobeNight from "../images/events/mediacity-globe-night.jpg";
-import salfordQuaysDusk from "../images/events/salford-quays-dusk.jpg";
+// Resized copies for this page; the events keep their own full-size files
+import mediacityWaterfrontNight from "../images/site/mediacity-waterfront-night.webp";
+import oldTraffordNight from "../images/site/old-trafford-night.webp";
 
 // The backend applies the same rule; the check here only gives quick feedback
 export const PASSWORD_MIN_LENGTH = 8;
@@ -14,11 +15,11 @@ export const authPageData = {
   login: {
     title: "Welcome back",
     subtitle: "Log in to your Manchester Event Portal account",
-    image: { src: mediacityGlobeNight, alt: "MediaCityUK lit up at night" },
+    image: { src: oldTraffordNight, alt: "Old Trafford lit up at night across the water" },
     // Over the photo, so only seen from md up (the photo is hidden below)
     caption: {
-      place: "MediaCityUK",
-      text: "See what's on tonight and pick up where you left off",
+      place: "Old Trafford",
+      text: "Gigs, markets and match days across Greater Manchester",
     },
     // Each row is one field, or an array of fields shown side by side
     fields: [
@@ -44,10 +45,10 @@ export const authPageData = {
   "sign-up": {
     title: "Create your account",
     subtitle: "Discover events across Greater Manchester, or promote your own",
-    image: { src: salfordQuaysDusk, alt: "Salford Quays at dusk" },
+    image: { src: mediacityWaterfrontNight, alt: "Salford Quays and the Millennium Bridge at night" },
     caption: {
       place: "Salford Quays",
-      text: "Gigs, markets and match days across Greater Manchester",
+      text: "See what's on tonight, save the events you love, or list your own",
     },
     // Hints sit on the label row, so they stay short. maxLength already
     // enforces the display name limit, and the verification email is

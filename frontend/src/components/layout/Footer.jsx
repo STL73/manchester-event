@@ -5,7 +5,7 @@ import LogoMark from "../UI/LogoMark";
 import Tooltip from "../UI/Tooltip";
 import { footerNav, footerText } from "../../data/navigationData";
 import { socialLinks } from "../../data/socialLinks";
-import manchesterFireworksNight from "../../images/events/manchester-fireworks-night.jpg";
+import stageConfetti from "../../images/events/stage-confetti.jpg";
 
 function scrollToTop() {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -60,7 +60,7 @@ export default function Footer() {
           and ends with the city's name */}
       <p
         className="footer-wordmark"
-        style={{ backgroundImage: `url(${manchesterFireworksNight})` }}
+        style={{ backgroundImage: `url(${stageConfetti})` }}
         aria-hidden="true"
       >
         {footerText.wordmark}
