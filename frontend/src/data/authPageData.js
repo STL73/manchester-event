@@ -15,6 +15,11 @@ export const authPageData = {
     title: "Welcome back",
     subtitle: "Log in to your Manchester Event Portal account",
     image: { src: mediacityGlobeNight, alt: "MediaCityUK lit up at night" },
+    // Over the photo, so only seen from md up (the photo is hidden below)
+    caption: {
+      place: "MediaCityUK",
+      text: "See what's on tonight and pick up where you left off",
+    },
     // Each row is one field, or an array of fields shown side by side
     fields: [
       {
@@ -40,6 +45,10 @@ export const authPageData = {
     title: "Create your account",
     subtitle: "Discover events across Greater Manchester, or promote your own",
     image: { src: salfordQuaysDusk, alt: "Salford Quays at dusk" },
+    caption: {
+      place: "Salford Quays",
+      text: "Gigs, markets and match days across Greater Manchester",
+    },
     // Hints sit on the label row, so they stay short. maxLength already
     // enforces the display name limit, and the verification email is
     // explained in the success message instead

@@ -98,30 +98,27 @@ export default function EventDetails({ events, inDashboard = false }) {
 
   if (!event) {
     return (
-      <main>
-        <section className="section-content">
-          <h1 className="section-title">Event not found</h1>
-          <Button to="/events" variant="primary" size="md">
-            Back to Events
-          </Button>
-        </section>
-      </main>
+      <section className="section-content">
+        <h1 className="section-title">Event not found</h1>
+        <Button to="/events" variant="primary" size="md">
+          Back to Events
+        </Button>
+      </section>
     );
   }
 
+  // No <main> of its own: App already wraps every page in one
   return (
-    <main>
-      <section
-        className="section-content event-details-page"
-        aria-labelledby="event-details-title"
-      >
-        <EventDetailsBody event={event} TitleTag="h1" titleId="event-details-title" />
-        <div className="event-details-content">
-          <Link className="event-details-back" to="/events">
-            Back to all events
-          </Link>
-        </div>
-      </section>
-    </main>
+    <section
+      className="section-content event-details-page"
+      aria-labelledby="event-details-title"
+    >
+      <EventDetailsBody event={event} TitleTag="h1" titleId="event-details-title" />
+      <div className="event-details-content">
+        <Link className="event-details-back" to="/events">
+          Back to all events
+        </Link>
+      </div>
+    </section>
   );
 }

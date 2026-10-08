@@ -1707,7 +1707,14 @@
      card sits centred; a taller form scrolls the page like every other page
      (the html scrollbar-gutter keeps the navbar from shifting) */
   .auth-section {
-    @apply md:min-h-[calc(100dvh-4rem)] md:py-8;
+    @apply relative isolate md:min-h-[calc(100dvh-4rem)] md:py-8;
+  }
+
+  /* The page's honeycomb, on the empty space around the card. Stronger and
+     wider than on the page headers, since the card covers its centre */
+  .auth-texture {
+    @apply opacity-20;
+    mask-image: radial-gradient(ellipse at center, black 35%, transparent 75%);
   }
 
   /* One minimum height for log in and sign up (sign up's natural height), so
@@ -1737,11 +1744,25 @@
   /* The image is absolute so its own height never stretches the card:
      the form sets the height and the image fills it. Hidden on small screens */
   .auth-media {
-    @apply relative hidden grow basis-1/2 min-w-0 md:block;
+    @apply relative isolate hidden grow basis-1/2 min-w-0 md:block;
   }
 
   .auth-image {
-    @apply absolute inset-0 w-full h-full object-cover;
+    @apply absolute inset-0 -z-20 w-full h-full object-cover;
+  }
+
+  /* Darkens the bottom of the photo so the caption keeps its contrast,
+     as the page headers do */
+  .auth-media::before {
+    @apply absolute inset-0 -z-10 bg-linear-to-t from-background via-background/60 via-40% to-transparent to-75% content-[''];
+  }
+
+  .auth-caption {
+    @apply absolute inset-x-0 bottom-0 flex flex-col gap-2 p-8;
+  }
+
+  .auth-caption-text {
+    @apply text-2xl leading-tight font-semibold text-balance text-foreground;
   }
 
   @media (max-width: 768px) {
