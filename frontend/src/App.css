@@ -569,8 +569,21 @@
     @apply inline-flex items-center gap-2 text-sm font-medium text-foreground [&>svg]:size-4 [&>svg]:text-accent;
   }
 
+  /* Side by side, the two cards stretch to the same height. The form takes
+     up the difference by growing its message box, so the card ends with the
+     form rather than empty space. Only here: the dashboard forms share
+     .contact-form-container */
   .contact-layout {
-    @apply grid w-full grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)];
+    @apply grid w-full grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)];
+  }
+
+  .contact-layout .contact-form-container {
+    @apply flex;
+  }
+
+  .contact-layout .contact-field:has(textarea),
+  .contact-layout textarea {
+    @apply grow;
   }
 
   .contact-aside {
