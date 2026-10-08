@@ -6,7 +6,7 @@ Free licences used here:
   free for commercial and non-commercial use, no permission needed. Credit is not required but is
   given here.
 
-## `site/`: page photos (About, Home areas)
+## `site/`: page photos (About, Home areas, log in and sign up)
 
 | File | Shows | Photographer | Source |
 | --- | --- | --- | --- |
@@ -18,6 +18,8 @@ Free licences used here:
 | `mediacity-dusk.webp` | MediaCityUK at dusk | Orry Verducci | [Unsplash](https://unsplash.com/photos/city-skyline-across-body-of-water-during-night-time-o1nfIn7rKH4) |
 | `salford-quays-day.webp` | Salford Quays by day | Khaleelah Ajibola | [Unsplash](https://unsplash.com/photos/a-large-body-of-water-with-buildings-in-the-background-Oi51abdWi8I) |
 | `heaton-park-temple.webp` | Domed temple on a hill (believed to be Heaton Park; not confirmed by the source) | Ben Marler | [Unsplash](https://unsplash.com/photos/a-dome-shaped-building-stands-on-a-hill-MQeCz-dV-Cc) |
+| `old-trafford-night.webp` | Old Trafford at night across the Ship Canal (log in). A 1600px copy of `events/old-trafford-night.jpg` | Slav Lambov (own photo) | - |
+| `mediacity-waterfront-night.webp` | Salford Quays and the Millennium Bridge at night (sign up). A 1600px copy of `events/mediacity-waterfront-night.jpg` | Andrei Photo | [Pexels 6199030](https://www.pexels.com/photo/city-waterfront-at-night-6199030/) |
 
 ## `events/`: event photos
 
