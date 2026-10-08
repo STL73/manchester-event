@@ -90,7 +90,7 @@ export default function SearchBar({
       {/* Extra fields, e.g. the status and sort dropdowns on My Events */}
       {children}
 
-      {/* rounded-lg! matches the fields' 8px corners (md buttons are 12px) */}
+      {/* rounded-lg! matches the fields' 8px corners (buttons are pills) */}
       <Button type="submit" variant="primary" size="md" className="rounded-lg!">
         <SubmitIcon aria-hidden="true" />
         {submitLabel}
