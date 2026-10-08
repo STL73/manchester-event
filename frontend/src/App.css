@@ -847,8 +847,20 @@
     @apply max-w-xl text-base leading-7 text-foreground/85 md:text-lg;
   }
 
+  /* A pill like the chips and buttons around it. The filter bars on Explore
+     and My Events keep 8px fields: they are forms, this is one search box */
   .home-search {
-    @apply flex w-full max-w-3xl gap-3 rounded-2xl border border-border bg-card p-3;
+    @apply flex w-full max-w-3xl gap-2 rounded-full border border-border bg-card p-2;
+  }
+
+  /* Less padding on phones, the right side most (the button is there), so
+     the whole placeholder fits at 390px */
+  .home-search .events-search-input {
+    @apply rounded-full px-5 max-sm:pr-2 max-sm:pl-4;
+  }
+
+  .home-search-button-label {
+    @apply max-sm:sr-only;
   }
 
   .home-section {

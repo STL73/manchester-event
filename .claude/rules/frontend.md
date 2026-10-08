@@ -65,8 +65,10 @@ frontend/src/
 
 - `src/App.css` `@theme` block: the palette and font for the whole app. Change it only on request
 - `src/components/UI/Button.jsx`: size/variant maps are tuned so every variant is the same height.
-  Buttons are pills, like the site's other controls; the two search buttons keep `rounded-lg!` to
-  match their inputs. `type` defaults to `"button"`, so pass `type="submit"` on form buttons
+  Buttons are pills, like the site's other controls (things you click are pills; fields you fill in
+  have 8px corners). The one exception is the filter bar's Apply button (`SearchBar.jsx`), which
+  keeps `rounded-lg!` to sit in its grid of 8px fields; Home's single search box is a pill
+  throughout. `type` defaults to `"button"`, so pass `type="submit"` on form buttons
 - `src/data/eventsData.js`: single source of truth for events (see above)
 
 ## Commands

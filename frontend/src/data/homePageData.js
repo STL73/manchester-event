@@ -25,7 +25,7 @@ export const homePageData = {
     images: [stageConfetti, manchesterFireworksNight, arenaBlueLasers, colourPowderFestival],
     search: {
       label: "Search events",
-      placeholder: "Try jazz, food market, Salford...",
+      placeholder: "Try jazz, markets, Salford…",
       button: { label: "Search", icon: Search },
     },
   },
