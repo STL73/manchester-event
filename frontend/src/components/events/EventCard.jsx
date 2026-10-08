@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { CalendarDays, Eye, Heart, MapPin, Tag } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import Button from "../UI/Button";
@@ -22,6 +23,8 @@ export default function EventCard({
   onDelete,
 }) {
   const { edit, delete: remove } = organiserEventActions;
+  // True from a "like" click until the heart's pop animation ends
+  const [isPopping, setIsPopping] = useState(false);
   // Cards on dashboard pages open the details inside the dashboard
   const { pathname } = useLocation();
   const inDashboard = pathname.startsWith("/dashboard");
@@ -33,11 +36,15 @@ export default function EventCard({
   // card (see .event-card-link), and the action buttons sit above it
   return (
     <article className="event-card">
+      {/* alt="": the title link right below already names the event, so a
+          screen reader would read it twice. Lazy, because Explore lists every
+          upcoming event and most cards start below the screen */}
       <div className="event-card-media">
         <img
           className="event-card-image"
           src={event.image}
-          alt={event.name}
+          alt=""
+          loading="lazy"
           style={{ objectPosition: event.imagePosition }}
         />
       </div>
@@ -80,13 +87,17 @@ export default function EventCard({
           </Button>
           {canFavourite && (
             <button
-              className={`event-favourite-button ${isFavourite ? "is-favourite" : ""}`}
+              className={`event-favourite-button ${isFavourite ? "is-favourite" : ""} ${isPopping ? "is-popping" : ""}`}
               type="button"
               aria-label={
                 isFavourite ? "Remove from favourites" : "Add to favourites"
               }
               aria-pressed={isFavourite}
-              onClick={() => onToggleFavourite(event.eventId)}
+              onClick={() => {
+                if (!isFavourite) setIsPopping(true);
+                onToggleFavourite(event.eventId);
+              }}
+              onAnimationEnd={() => setIsPopping(false)}
             >
               <Heart
                 fill={isFavourite ? "currentColor" : "none"}
