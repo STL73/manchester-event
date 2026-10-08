@@ -49,7 +49,7 @@ function readValues(form) {
 }
 
 function AuthForm({ page }) {
-  const { title, subtitle, image, fields, submit, switchPrompt, success } = page;
+  const { title, subtitle, image, caption, fields, submit, switchPrompt, success } = page;
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
 
@@ -111,8 +111,14 @@ function AuthForm({ page }) {
         </p>
       </form>
 
+      {/* The caption is set like the page headers' eyebrow and heading, but
+          without their honeycomb: the page's one honeycomb is the backdrop */}
       <div className="auth-media">
         <img className="auth-image" src={image.src} alt={image.alt} />
+        <div className="auth-caption">
+          <p className="page-hero-eyebrow">{caption.place}</p>
+          <p className="auth-caption-text">{caption.text}</p>
+        </div>
       </div>
     </div>
   );
@@ -125,12 +131,14 @@ export default function Auth() {
   // Old or mistyped links (/auth/sign-in, /auth/signup...) land on the login form
   if (!page) return <Navigate to="/auth/login" replace />;
 
+  // A section, not a <main>: App already wraps every page in one
   return (
-    <main>
-      <section className="section-content auth-section">
-        {/* key: switching between login and sign-up starts a fresh form */}
-        <AuthForm key={pathname} page={page} />
-      </section>
-    </main>
+    <section className="section-content auth-section">
+      {/* The honeycomb sits on the empty space around the card, so phones,
+          where the photo is hidden, get it too */}
+      <div className="honeycomb-texture auth-texture" aria-hidden="true" />
+      {/* key: switching between login and sign-up starts a fresh form */}
+      <AuthForm key={pathname} page={page} />
+    </section>
   );
 }
