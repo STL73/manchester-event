@@ -1,4 +1,4 @@
-import { Bell, CalendarSearch, Heart, Settings2 } from "lucide-react";
+import { CalendarSearch } from "lucide-react";
 
 import arenaLightBeams from "../images/events/arena-light-beams.jpg";
 
@@ -22,18 +22,13 @@ export const whenOptions = [
 
 export const resultsText = {
   count: (total) => `${total} ${total === 1 ? "event" : "events"}`,
+  pickDate: "Pick a date",
+  showing: (from, to, total) => `Showing ${from}–${to} of ${total} events`,
   clearAll: "Clear all",
   removeFilter: (label) => `Remove filter: ${label}`,
   empty: "No upcoming events match your search.",
   clearFilters: "Clear filters",
 };
-
-// Dashboard version: Quick Actions from explore_events.php
-export const exploreEventsActions = [
-  { label: "My Favourites", to: "/dashboard/my-favourites", icon: Heart },
-  { label: "Update Preferences", to: "/dashboard/preferences", icon: Settings2 },
-  { label: "View Notifications", to: "/dashboard/notifications", icon: Bell },
-];
 
 export const exploreEventsSection = {
   title: "Explore Events",

@@ -39,6 +39,12 @@ export const profileMessages = {
   nothingToSave: "There are no changes to save.",
 };
 
+// The line under the page title: "Member since 14 Mar 2026 · last updated 15 Sept 2026"
+export const accountSummary = {
+  memberSince: "Member since",
+  lastUpdated: "last updated",
+};
+
 // Mock of the users table columns not held in navigationData
 export const accountDetails = {
   status: "active",

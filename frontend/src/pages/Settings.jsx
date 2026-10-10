@@ -5,6 +5,7 @@ import FieldError from "../components/UI/FieldError";
 import StatusMessage from "../components/UI/StatusMessage";
 import {
   accountDetails,
+  accountSummary,
   allowedAvatarTypes,
   passwordFields,
   profileMessages,
@@ -16,8 +17,6 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
   month: "short",
   year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
 });
 
 const emptyPasswords = {
@@ -130,6 +129,19 @@ export default function Settings({ selectedUser }) {
           id="profile-settings-title"
           icon={UserRoundCog}
           title="Profile Settings"
+          summary={
+            <>
+              {accountSummary.memberSince}{" "}
+              <time dateTime={accountDetails.createdAt}>
+                {dateFormatter.format(new Date(accountDetails.createdAt))}
+              </time>
+              <span aria-hidden="true"> · </span>
+              {accountSummary.lastUpdated}{" "}
+              <time dateTime={updatedAt}>
+                {dateFormatter.format(new Date(updatedAt))}
+              </time>
+            </>
+          }
         />
 
         <div className="contact-form-container">
@@ -257,21 +269,6 @@ export default function Settings({ selectedUser }) {
               </Button>
             </div>
           </form>
-        </div>
-
-        <div className="profile-meta">
-          <p>
-            Account created:{" "}
-            <time dateTime={accountDetails.createdAt}>
-              {dateFormatter.format(new Date(accountDetails.createdAt))}
-            </time>
-          </p>
-          <p>
-            Last updated:{" "}
-            <time dateTime={updatedAt}>
-              {dateFormatter.format(new Date(updatedAt))}
-            </time>
-          </p>
         </div>
       </section>
     </div>

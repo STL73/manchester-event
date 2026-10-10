@@ -1,23 +1,10 @@
 import {
   CalendarCheck,
-  CalendarPlus,
-  ChartNoAxesCombined,
   CircleX,
   ClipboardClock,
   Heart,
   SquarePen,
 } from "lucide-react";
-
-export const organiserDashboardActions = [
-  { label: "Create Events", to: "/dashboard/create-events", icon: CalendarPlus },
-  { label: "My Events", to: "/dashboard/my-events", icon: CalendarCheck },
-  { label: "My Drafts", to: "/dashboard/my-drafts", icon: SquarePen },
-  {
-    label: "Event Analytics",
-    to: "/dashboard/event-analytics",
-    icon: ChartNoAxesCombined,
-  },
-];
 
 // Quick Insights: what needs the organiser and how their events are doing.
 // Counted live on the page from their events; this is the copy. Waiting and

@@ -5,7 +5,6 @@ import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import { isUpcoming } from "../lib/eventDates";
 import {
   preferenceCategories,
-  preferencesActions,
   preferencesForm,
   preferencesSummary,
 } from "../data/preferencesData";
@@ -59,7 +58,6 @@ export default function Preferences({ events, interestIds, onSaveInterests }) {
           icon={Settings2}
           title="My Preferences"
           summary={<PreferencesSummary events={events} interestIds={interestIds} />}
-          actions={preferencesActions}
         />
         <div className="contact-form-container">
           <form className="contact-form" onSubmit={handleSubmit}>

@@ -2,7 +2,6 @@ import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import {
   logTableColumns,
   systemLogs,
-  systemLogsActions,
   systemLogsMessages,
   systemLogsSection,
 } from "../data/systemLogsData";
@@ -29,7 +28,6 @@ export default function SystemLogs() {
           id="system-logs-title"
           icon={SectionIcon}
           title={systemLogsSection.title}
-          actions={systemLogsActions}
         />
 
         {systemLogs.length === 0 ? (

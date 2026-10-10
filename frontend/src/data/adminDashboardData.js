@@ -1,9 +1,7 @@
 import {
   CalendarCheck,
   Calendars,
-  ChartNoAxesCombined,
   ClipboardClock,
-  ClipboardList,
   Logs,
   MessageSquareText,
   UserRoundPlus,
@@ -15,17 +13,6 @@ import { systemLogs } from "./systemLogsData";
 
 // Admin accounts in the users mock
 const adminUserIds = [1];
-
-export const adminDashboardActions = [
-  { label: "Manage Users", to: "/dashboard/manage-users", icon: Users },
-  { label: "Manage Events", to: "/dashboard/manage-events", icon: ClipboardList },
-  {
-    label: "Site Analytics",
-    to: "/dashboard/site-analytics",
-    icon: ChartNoAxesCombined,
-  },
-  { label: "System Logs", to: "/dashboard/system-logs", icon: Logs },
-];
 
 const daysLabel = (days) => (days === 1 ? "1 day" : `${days} days`);
 

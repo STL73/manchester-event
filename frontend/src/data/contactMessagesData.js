@@ -1,9 +1,4 @@
-import { Bell, Logs, MessageSquareText } from "lucide-react";
-
-export const contactMessagesActions = [
-  { label: "System Logs", to: "/dashboard/system-logs", icon: Logs },
-  { label: "Notifications", to: "/dashboard/notifications", icon: Bell },
-];
+import { MessageSquareText } from "lucide-react";
 
 export const contactMessagesPage = {
   title: "Contact Messages",

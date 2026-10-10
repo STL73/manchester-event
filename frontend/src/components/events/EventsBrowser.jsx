@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
-import { Grid2X2, Grid3X3, Square, X } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { CalendarDays, Grid2X2, Grid3X3, Square, X } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import Button from "../UI/Button";
+import Pagination from "../UI/Pagination";
 import EventCard from "./EventCard";
 import SearchBar from "./SearchBar";
 import { eventCategories, eventLocations } from "../../data/eventsData";
@@ -10,6 +11,8 @@ import { bySoonest, isUpcoming, matchesWhen } from "../../lib/eventDates";
 
 const defaultFilters = { q: "", when: "", date: "", category: "", location: "" };
 const validViews = ["three", "two", "one"];
+// 12 fills whole rows in the three-, two- and one-column views
+const PAGE_SIZE = 12;
 const validWhens = whenOptions.map((option) => option.id);
 
 const chipDate = new Intl.DateTimeFormat("en-GB", {
@@ -28,6 +31,12 @@ function readFilters(searchParams) {
     category: searchParams.get("category") ?? "",
     location: searchParams.get("location") ?? "",
   };
+}
+
+// yyyy-mm-dd in local time, for the date picker's earliest day
+function localDate(date) {
+  const pad = (number) => String(number).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
 function nameOf(list, id) {
@@ -94,9 +103,17 @@ export default function EventsBrowser({
   }, [events, filters, now]);
 
   const chips = filterChips(filters);
+  const dateInputRef = useRef(null);
+  const resultsRef = useRef(null);
 
-  // Filters apply as they change; the URL follows so the result can be
-  // shared or bookmarked
+  // The page lives in the URL like the filters; out-of-range numbers clamp
+  const pageCount = Math.max(1, Math.ceil(filteredEvents.length / PAGE_SIZE));
+  const page = Math.min(Math.max(Number(searchParams.get("page")) || 1, 1), pageCount);
+  const firstIndex = (page - 1) * PAGE_SIZE;
+  const pageEvents = filteredEvents.slice(firstIndex, firstIndex + PAGE_SIZE);
+
+  // The URL follows the filters so the result can be shared or bookmarked.
+  // Not carrying "page" over means a new filter starts again at page 1
   function applyFilters(nextFilters) {
     const nextParams = new URLSearchParams();
 
@@ -124,8 +141,33 @@ export default function EventsBrowser({
     applyFilters(filters);
   }
 
+  // Every date pill, "Any date" included, replaces a picked date
   function handleWhenChange(when) {
-    applyFilters({ ...filters, when, date: when ? "" : filters.date });
+    applyFilters({ ...filters, when, date: "" });
+  }
+
+  // "Pick a date" opens the browser's own calendar from a hidden date input
+  function openDatePicker() {
+    const input = dateInputRef.current;
+    try {
+      input.showPicker();
+    } catch {
+      input.focus();
+    }
+  }
+
+  function handleDatePick(event) {
+    applyFilters({ ...filters, date: event.target.value, when: "" });
+  }
+
+  function handlePageChange(nextPage) {
+    const nextParams = new URLSearchParams(searchParams);
+    if (nextPage > 1) nextParams.set("page", String(nextPage));
+    else nextParams.delete("page");
+    setSyncedSearch(nextParams.toString());
+    setSearchParams(nextParams);
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    resultsRef.current?.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
   }
 
   function handleViewChange(nextView) {
@@ -148,32 +190,27 @@ export default function EventsBrowser({
   // dashboard layout around them
   return (
     <>
-      <SearchBar filters={filters} categories={eventCategories} locations={eventLocations} onChange={handleFilterChange} onSubmit={handleSearchSubmit} />
+      <SearchBar filters={filters} categories={eventCategories} locations={eventLocations} onChange={handleFilterChange} onSubmit={handleSearchSubmit} showDate={false} className="events-search-no-date" />
 
-      <div className="events-when" role="group" aria-label="When">
-        {whenOptions.map(({ id, label }) => (
-          <button className={`events-when-option ${filters.when === id ? "is-active" : ""}`} type="button" aria-pressed={filters.when === id} onClick={() => handleWhenChange(id)} key={id || "any"}>
-            {label}
-          </button>
-        ))}
-      </div>
-
-      <div className="events-toolbar">
-        <div className="events-results">
-          <p className="events-count" aria-live="polite">
-            {resultsText.count(filteredEvents.length)}
-          </p>
-          {chips.map(({ key, label }) => (
-            <button className="filter-chip" type="button" aria-label={resultsText.removeFilter(label)} onClick={() => removeFilter(key)} key={key}>
-              {label}
-              <X aria-hidden="true" />
+      {/* Date pills and the layout switch share one row */}
+      <div className="events-when-row">
+        <div className="events-when" role="group" aria-label="When">
+          {whenOptions.map(({ id, label }) => {
+            // "Any date" is only selected when no date has been picked either
+            const isActive = filters.when === id && !(id === "" && filters.date);
+            return (
+              <button className={`events-when-option ${isActive ? "is-active" : ""}`} type="button" aria-pressed={isActive} onClick={() => handleWhenChange(id)} key={id || "any"}>
+                {label}
+              </button>
+            );
+          })}
+          <span className="events-when-date">
+            <button className={`events-when-option ${filters.date ? "is-active" : ""}`} type="button" aria-pressed={Boolean(filters.date)} onClick={openDatePicker}>
+              <CalendarDays aria-hidden="true" />
+              {filters.date ? chipDate.format(new Date(`${filters.date}T00:00:00`)) : resultsText.pickDate}
             </button>
-          ))}
-          {chips.length > 1 && (
-            <button className="filter-chip-clear" type="button" onClick={resetFilters}>
-              {resultsText.clearAll}
-            </button>
-          )}
+            <input ref={dateInputRef} className="events-when-date-input" type="date" min={localDate(now)} value={filters.date} onChange={handleDatePick} tabIndex={-1} aria-hidden="true" />
+          </span>
         </div>
         <div className="events-view-switcher" role="group" aria-label="Event layout view">
           {[
@@ -188,6 +225,23 @@ export default function EventsBrowser({
         </div>
       </div>
 
+      <div className="events-results" ref={resultsRef}>
+        <p className="events-count" aria-live="polite">
+          {resultsText.count(filteredEvents.length)}
+        </p>
+        {chips.map(({ key, label }) => (
+          <button className="filter-chip" type="button" aria-label={resultsText.removeFilter(label)} onClick={() => removeFilter(key)} key={key}>
+            {label}
+            <X aria-hidden="true" />
+          </button>
+        ))}
+        {chips.length > 1 && (
+          <button className="filter-chip-clear" type="button" onClick={resetFilters}>
+            {resultsText.clearAll}
+          </button>
+        )}
+      </div>
+
       <div className={`events-grid events-grid-${view}`}>
         {filteredEvents.length === 0 ? (
           <div className="events-empty-state">
@@ -199,11 +253,22 @@ export default function EventsBrowser({
             )}
           </div>
         ) : (
-          filteredEvents.map((event) => (
+          pageEvents.map((event) => (
             <EventCard key={event.eventId} event={event} canFavourite={canFavourite} isFavourite={favouriteIds.includes(event.eventId)} onToggleFavourite={onToggleFavourite} />
           ))
         )}
       </div>
+
+      <Pagination
+        page={page}
+        pageCount={pageCount}
+        onPageChange={handlePageChange}
+        summary={resultsText.showing(
+          firstIndex + 1,
+          firstIndex + pageEvents.length,
+          filteredEvents.length,
+        )}
+      />
     </>
   );
 }

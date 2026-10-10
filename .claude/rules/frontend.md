@@ -59,10 +59,12 @@ frontend/src/
 - **Selected vs action:** a selected option (navbar and sidebar links, date pills, range toggle,
   view switcher) gets the accent tint: `bg-accent/15`, an `accent/30` ring, bright text. Solid
   accent is only for buttons that do something (Search, Save, Submit)
-- **Dashboard pages** open with a title row: the page's title, with its shortcuts as small
-  secondary buttons beside it (`DashboardShortcuts`, no visible "Quick actions" label). Inner pages
-  use `DashboardPageHeading`; on Home the greeting is the title. The PHP pages put a Quick Actions
-  block above the title; changed 2026-10-10
+- **Dashboard pages** open with a title row: the page's title (`DashboardPageHeading`; on Home the
+  greeting), and beside it only the page's own actions, e.g. "Create event" on My Events and My
+  Drafts, Go Back, Mark All as Read. **No navigation shortcuts:** the sidebar already links every
+  page. The PHP pages had a Quick Actions block of links; removed 2026-10-10
+- **Pagination:** `components/UI/Pagination.jsx`, page number in the URL (`?page=`), back to page 1
+  when a filter changes. Explore Events shows 12 per page (whole rows in every view)
 - **Dashboard headings** (decided 2026-10-10): the page title is the page's only `<h1>`, 24px white
   with its icon (`DashboardPageHeading`, or the greeting on Home); the sidebar's "… Dashboard" is
   plain text. Section headings are `<h2>` `.dashboard-title`, 20px muted. Panel titles inside the

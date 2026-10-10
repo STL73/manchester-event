@@ -1,9 +1,4 @@
-import { ClipboardList, Logs, Users } from "lucide-react";
-
-export const systemLogsActions = [
-  { label: "Manage Events", to: "/dashboard/manage-events", icon: ClipboardList },
-  { label: "Manage Users", to: "/dashboard/manage-users", icon: Users },
-];
+import { Logs } from "lucide-react";
 
 export const systemLogsSection = { title: "System Logs", icon: Logs };
 

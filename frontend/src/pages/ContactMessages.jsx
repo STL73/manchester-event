@@ -1,6 +1,5 @@
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import {
-  contactMessagesActions,
   contactMessagesPage,
   contactMessagesSummary,
   contactMessagesText,
@@ -64,7 +63,6 @@ export default function ContactMessages({ contactMessages }) {
           icon={PageIcon}
           title={contactMessagesPage.title}
           summary={<ContactMessagesSummary messages={messages} />}
-          actions={contactMessagesActions}
         />
 
         {messages.length === 0 ? (
