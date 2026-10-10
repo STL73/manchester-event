@@ -558,6 +558,12 @@
     @apply text-2xl font-semibold text-foreground;
   }
 
+  /* In the dashboard a panel sits under the page's 24px title, so its own
+     title is a step smaller. The public Contact form keeps 24px */
+  .dashboard-content .contact-form-title {
+    @apply text-xl;
+  }
+
   .contact-field {
     @apply flex flex-col gap-2;
   }
@@ -1139,12 +1145,15 @@
     @apply h-5 w-px bg-border;
   }
 
+  /* Spacing scale: 16px from a heading to its content (this gap), 48px
+     between sections (16px padding + 16px gap + 16px padding) and 32px
+     under the page's title row (see .dashboard-page-heading) */
   .dashboard-section {
-    @apply w-full p-4 flex flex-col justify-center items-center gap-6;
+    @apply w-full p-4 flex flex-col justify-center items-center gap-4;
   }
 
   .dashboard-home {
-    @apply w-full flex flex-col gap-6;
+    @apply w-full flex flex-col gap-4;
   }
 
   /* Home page greeting: name plus one live status line, then the shortcuts.
@@ -1152,7 +1161,7 @@
      side by side, plus this box's padding. Narrower, they stack, the
      shortcuts under the status line */
   .dashboard-greeting {
-    @apply w-full px-4 pt-6 grid grid-cols-1 gap-x-4 gap-y-1 @min-[67rem]:grid-cols-[minmax(0,1fr)_auto];
+    @apply w-full px-4 pt-4 pb-4 grid grid-cols-1 gap-x-4 gap-y-1 @min-[67rem]:grid-cols-[minmax(0,1fr)_auto];
   }
 
   .dashboard-greeting .dashboard-page-actions {
@@ -1211,7 +1220,7 @@
   /* Stat card: label + quiet icon, one big figure, one line of context.
      Left-aligned so a row of cards scans like a table. */
   .dashboard-card {
-    @apply min-w-0 min-h-32 p-4 flex flex-col gap-2 rounded-xl border border-border/60 bg-card shadow-[inset_0_1px_0_rgb(255_255_255/0.04)];
+    @apply min-w-0 min-h-32 p-4 flex flex-col gap-2 rounded-xl border border-border/60 bg-card bg-linear-to-b from-white/5 to-transparent shadow-[inset_0_1px_0_rgb(255_255_255/0.04)];
   }
 
   .dashboard-card-header {
@@ -1235,8 +1244,9 @@
   }
 
   /* The context line sits at the bottom, so figures line up across a row */
+  /* 13px: muted grey on the card is hard to read at 12px */
   .dashboard-card-context {
-    @apply mt-auto flex items-center gap-1.5 text-xs text-muted tabular-nums;
+    @apply mt-auto flex items-center gap-1.5 text-[13px]/[18px] text-muted tabular-nums;
   }
 
   .dashboard-card-context-icon {
@@ -1257,16 +1267,9 @@
     @apply text-danger;
   }
 
-  .dashboard-insights {
-    @apply w-full flex flex-col gap-4;
-  }
-
-  .dashboard-grid-three {
-    @apply grid-cols-3;
-  }
-
-  .dashboard-grid-two {
-    @apply grid-cols-2;
+  /* Organiser Home's five cards, one row where each still gets ~190px */
+  .dashboard-grid-five {
+    @apply grid-cols-5;
   }
 
   .event-card-status {
@@ -1299,10 +1302,6 @@
   }
 
   /* notifications styles */
-  .notification-toolbar {
-    @apply w-full flex justify-end mb-4;
-  }
-
   .notification-list {
     @apply w-full flex flex-col gap-4 list-none;
   }
@@ -1413,8 +1412,9 @@
     @apply flex flex-col;
   }
 
+  /* 13px, like the cards' context line: 12px muted grey was hard to read */
   .table-cell-secondary {
-    @apply text-xs text-muted;
+    @apply text-[13px]/[18px] text-muted;
   }
 
   .table-message {
@@ -1464,10 +1464,35 @@
     @apply w-full flex items-center justify-between gap-4;
   }
 
-  /* Inner dashboard pages: the shortcuts wrap under the title when the row
-     runs out of room */
+  /* Inner dashboard pages: the page's title row, 32px above the content
+     (this margin plus the section's 16px gap). The shortcuts wrap under the
+     title when the row runs out of room */
   .dashboard-page-heading {
+    @apply w-full mb-4 flex flex-col gap-1;
+  }
+
+  .dashboard-page-heading-row {
     @apply flex-wrap gap-y-3;
+  }
+
+  /* The page title matches Home's greeting; section headings below it
+     stay smaller and muted (.dashboard-title) */
+  .dashboard-page-title {
+    @apply min-w-0 flex items-center gap-2 text-2xl text-foreground font-semibold;
+  }
+
+  .dashboard-page-title-icon {
+    @apply size-6 shrink-0 text-accent;
+  }
+
+  /* One line under the title with what matters on this page, like the
+     status line under Home's greeting; indented to the title text */
+  .dashboard-page-summary {
+    @apply pl-8 text-muted;
+  }
+
+  .dashboard-page-summary strong {
+    @apply font-semibold text-foreground tabular-nums;
   }
 
   .dashboard-page-actions {
@@ -1531,8 +1556,9 @@
     @apply text-accent;
   }
 
+  /* break-all: on a phone a long address otherwise runs off the card */
   .contact-message-email {
-    @apply font-normal text-accent hover:text-accent-hover;
+    @apply font-normal break-all text-accent hover:text-accent-hover;
   }
 
   /* Keep the line breaks the sender typed (PHP used nl2br) */
@@ -1827,6 +1853,12 @@
      the container), not the window: beside a 256px sidebar a 820px window
      leaves under 500px, and the window rules kept tablet pages at full
      desktop layout. 48rem is the old 768px phone step */
+  @container (max-width: 60rem) {
+    .dashboard-grid-five {
+      @apply grid-cols-3;
+    }
+  }
+
   @container (max-width: 48rem) {
     .analytics-grid {
       @apply grid-cols-1;
@@ -1838,6 +1870,11 @@
 
     .dashboard-grid {
       @apply grid-cols-2;
+    }
+
+    /* Five cards in two columns: the last one takes the whole row */
+    .dashboard-grid-five > :last-child:nth-child(odd) {
+      @apply col-span-2;
     }
   }
 
@@ -1864,6 +1901,10 @@
   @container (max-width: 28rem) {
     .dashboard-grid {
       @apply grid-cols-1;
+    }
+
+    .dashboard-grid-five > :last-child:nth-child(odd) {
+      @apply col-span-1;
     }
   }
 

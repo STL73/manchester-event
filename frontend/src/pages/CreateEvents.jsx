@@ -14,6 +14,7 @@ import {
 } from "../data/createEventsData";
 import { organiserEventActions } from "../data/organiserEventsData";
 import placeholder from "../images/events/placeholder.jpg";
+import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 
 const emptyForm = {
   eventName: "",
@@ -317,18 +318,18 @@ function EventFormPage({
         className="dashboard-section"
         aria-labelledby="create-event-title"
       >
-        <div className="section-heading-row">
-          <h2 className="dashboard-title" id="create-event-title">
-            <HeadingIcon className="dashboard-title-icon" aria-hidden="true" />
-            {page.heading}
-          </h2>
+        <DashboardPageHeading
+          id="create-event-title"
+          icon={HeadingIcon}
+          title={page.heading}
+        >
           {isEdit && (
             <Button type="button" variant="primary" size="sm" onClick={handleGoBack}>
               <goBack.icon aria-hidden="true" />
               {goBack.label}
             </Button>
           )}
-        </div>
+        </DashboardPageHeading>
 
         {isEdit && !event ? (
           <div className="dashboard-empty-state">

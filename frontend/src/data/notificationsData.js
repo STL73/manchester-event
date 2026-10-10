@@ -1,8 +1,10 @@
-import { Bell, Eye, MailOpen } from "lucide-react";
+import { Eye, MailOpen } from "lucide-react";
 
-export const notificationsInsight = {
-  title: "Unread Notifications",
-  icon: Bell,
+// The line under the page title: "3 unread · newest 27 Sept"
+export const notificationsSummary = {
+  unread: "unread",
+  newest: "newest",
+  caughtUp: "You're all caught up",
 };
 
 export const notificationActions = {

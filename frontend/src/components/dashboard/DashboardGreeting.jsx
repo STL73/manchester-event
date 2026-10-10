@@ -1,7 +1,8 @@
 import { Fragment } from "react";
 import { Link } from "react-router-dom";
 import { dashboardGreeting } from "../../data/dashboardGreetingData";
-import { eventDetailsPath, isPublicEvent } from "../../data/eventsData";
+import { eventDetailsPath } from "../../data/eventsData";
+import { getNextFavourite } from "../../data/myFavouritesData";
 import { getSiteTotals } from "../../lib/analytics";
 import DashboardShortcuts from "./DashboardShortcuts";
 
@@ -10,19 +11,6 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
   month: "long",
 });
-
-// Soonest approved favourite that has not started yet
-function getNextFavourite(events, favouriteIds) {
-  const now = new Date();
-  return events
-    .filter(
-      (event) =>
-        favouriteIds.includes(event.eventId) &&
-        isPublicEvent(event) &&
-        new Date(event.startDatetime) > now,
-    )
-    .sort((a, b) => a.startDatetime.localeCompare(b.startDatetime))[0];
-}
 
 function NextFavouriteLine({ events, favouriteIds }) {
   const text = dashboardGreeting.nextFavourite;
@@ -96,10 +84,10 @@ export default function DashboardGreeting({ selectedUser, actions, ...data }) {
     // Shortcuts last, so a narrow screen keeps the status line under the
     // greeting; App.css moves them up beside it when there is room
     <header className="dashboard-greeting">
-      <h2 className="dashboard-greeting-title">
+      <h1 className="dashboard-greeting-title">
         {dashboardGreeting.title}{" "}
         <span className="dashboard-greeting-name">{selectedUser.user}</span>
-      </h2>
+      </h1>
       <p className="dashboard-greeting-status">
         {selectedUser.type === "user" ? (
           <NextFavouriteLine events={data.events} favouriteIds={data.favouriteIds} />

@@ -21,6 +21,7 @@ import {
   timelineStatuses,
 } from "../data/eventAnalyticsData";
 import { eventStatuses } from "../data/manageEventsData";
+import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 
 const statusLabels = Object.fromEntries(
   eventStatuses.map(({ value, label }) => [value, label]),
@@ -88,10 +89,11 @@ export default function EventAnalytics({ organiserEvents }) {
         className="dashboard-section"
         aria-labelledby="event-analytics-title"
       >
-        <h2 className="dashboard-title" id="event-analytics-title">
-          <SectionIcon className="dashboard-title-icon" aria-hidden="true" />
-          {eventAnalyticsSection.title}
-        </h2>
+        <DashboardPageHeading
+          id="event-analytics-title"
+          icon={SectionIcon}
+          title={eventAnalyticsSection.title}
+        />
 
         <div className="dashboard-grid">
           {cards.map((card) => (

@@ -1,13 +1,10 @@
 import {
   CalendarCheck,
-  CalendarClock,
   CalendarPlus,
-  CalendarX,
   ChartNoAxesCombined,
-  CircleCheck,
   CircleX,
   ClipboardClock,
-  History,
+  Heart,
   SquarePen,
 } from "lucide-react";
 
@@ -22,52 +19,42 @@ export const organiserDashboardActions = [
   },
 ];
 
-// One card per get_event_status_count() call, in the PHP status colours
-export const statusInsights = [
-  {
-    status: "approved",
-    title: "Approved Events",
-    icon: CircleCheck,
+// Quick Insights: what needs the organiser and how their events are doing.
+// Counted live on the page from their events; this is the copy. Waiting and
+// rejected keep the PHP status colours
+export const organiserInsights = {
+  live: {
+    title: "Live events",
+    icon: CalendarCheck,
+    next: "Next:",
+    none: "Nothing live yet",
   },
-  {
-    status: "rejected",
-    title: "Rejected Events",
-    icon: CircleX,
-    tone: "dashboard-card-accent-red",
-    action: { label: "Edit and resubmit", to: "/dashboard/my-events" },
-  },
-  {
-    status: "pending",
-    title: "Pending Events",
+  pending: {
+    title: "Awaiting approval",
     icon: ClipboardClock,
     tone: "dashboard-card-accent-yellow",
-    action: { label: "View", to: "/dashboard/my-events" },
+    oldest: (days) => `Oldest: ${days === 1 ? "1 day" : `${days} days`}`,
+    to: "/dashboard/my-events?status=pending",
+    none: "Nothing waiting",
   },
-  {
-    status: "cancelled",
-    title: "Cancelled Events",
-    icon: CalendarX,
+  rejected: {
+    title: "Rejected",
+    icon: CircleX,
+    tone: "dashboard-card-accent-red",
+    action: { label: "Edit and resubmit", to: "/dashboard/my-events?status=rejected" },
+    none: "Nothing to fix",
   },
-  {
-    status: "draft",
-    title: "Draft Events",
+  drafts: {
+    title: "Drafts",
     icon: SquarePen,
+    oldest: (days) => `Oldest: ${days === 1 ? "1 day" : `${days} days`}`,
+    to: "/dashboard/my-drafts",
+    none: "No drafts",
   },
-  {
-    status: "past",
-    title: "Past Events",
-    icon: History,
+  saved: {
+    title: "Saved by users",
+    icon: Heart,
+    mostSaved: "Most saved:",
+    none: "Not saved by anyone yet",
   },
-];
-
-export const lastCreatedInsight = {
-  title: "Last Created Event",
-  icon: CalendarPlus,
-  emptyValue: "No events yet",
-};
-
-export const nextEventInsight = {
-  title: "Next Event",
-  icon: CalendarClock,
-  emptyValue: "No upcoming events",
 };

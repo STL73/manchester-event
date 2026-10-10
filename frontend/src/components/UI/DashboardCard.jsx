@@ -6,7 +6,8 @@ import { Link } from "react-router-dom";
 // - item.trend  = { current, previous, label, note }: arrow from current vs
 //   previous, "+4 in the last 30 days", with the note as a tooltip
 // - item.action = { label, to }: a link to where the count is dealt with,
-//   only shown when there is something to deal with (count > 0)
+//   only shown when there is something to deal with (count > 0), unless
+//   action.always is set (e.g. "Choose your interests" on a zero)
 // - item.detail: plain text, e.g. the date on text cards
 function Trend({ trend }) {
   const Arrow =
@@ -46,7 +47,7 @@ export default function DashboardCard({ item }) {
       )}
       {item.trend ? (
         <Trend trend={item.trend} />
-      ) : item.action && needsAction ? (
+      ) : item.action && (needsAction || item.action.always) ? (
         <Link to={item.action.to} className="dashboard-card-action">
           {item.action.label}
           <ArrowRight aria-hidden="true" />

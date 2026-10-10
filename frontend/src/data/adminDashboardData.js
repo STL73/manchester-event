@@ -1,9 +1,12 @@
 import {
+  CalendarCheck,
   Calendars,
   ChartNoAxesCombined,
   ClipboardClock,
   ClipboardList,
   Logs,
+  MessageSquareText,
+  UserRoundPlus,
   UserRoundSearch,
   Users,
 } from "lucide-react";
@@ -24,8 +27,43 @@ export const adminDashboardActions = [
   { label: "System Logs", to: "/dashboard/system-logs", icon: Logs },
 ];
 
-// Admin home Quick Insights, reused by Site Analytics. No counts here:
-// both pages fill them in live with getSiteTotals() (lib/analytics.js)
+const daysLabel = (days) => (days === 1 ? "1 day" : `${days} days`);
+
+// Admin home Quick Insights: what needs the admin and how the site is doing.
+// Counted live on the page from the shared users, events and messages
+export const adminInsights = {
+  review: {
+    title: "Events to review",
+    icon: ClipboardClock,
+    tone: "dashboard-card-accent-yellow",
+    oldest: (days) => `Oldest: ${daysLabel(days)}`,
+    resubmitted: "resubmitted",
+    to: "/dashboard/manage-events",
+    none: "Nothing waiting",
+  },
+  messages: {
+    title: "Unread messages",
+    icon: MessageSquareText,
+    oldest: (days) => `Oldest: ${daysLabel(days)}`,
+    to: "/dashboard/contact-messages",
+    none: "All read",
+  },
+  newUsers: {
+    title: "New users",
+    icon: UserRoundPlus,
+    total: (count) => `${count} in total`,
+    note: (previous) => `${previous} in the 30 days before`,
+  },
+  live: {
+    title: "Live events",
+    icon: CalendarCheck,
+    total: (count) => `${count} in total`,
+    weekend: (count) => `${count} this weekend`,
+  },
+};
+
+// Site Analytics' total cards. No counts here: the page fills them in live
+// with getSiteTotals() (lib/analytics.js)
 export const siteTotalsCards = [
   {
     id: "events",

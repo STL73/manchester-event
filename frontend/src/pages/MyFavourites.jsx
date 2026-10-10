@@ -1,13 +1,40 @@
-import { CalendarHeart, CalendarSearch, Heart } from "lucide-react";
+import { CalendarSearch, Heart } from "lucide-react";
 import Button from "../components/UI/Button";
-import DashboardCard from "../components/UI/DashboardCard";
 import EventCard from "../components/events/EventCard";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import {
-  favouritesInsight,
+  favouritesSummary,
   getFavouriteEvents,
+  getNextFavourite,
   myFavouritesActions,
 } from "../data/myFavouritesData";
+
+const nextDateFormatter = new Intl.DateTimeFormat("en-GB", {
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+});
+
+// "3 saved · next one Sun 18 Oct"; the date only when one is still to come
+function FavouritesSummary({ events, favouriteIds, count }) {
+  if (count === 0) return favouritesSummary.none;
+
+  const next = getNextFavourite(events, favouriteIds);
+  return (
+    <>
+      <strong>
+        {count} {favouritesSummary.saved}
+      </strong>
+      {next && (
+        <>
+          <span aria-hidden="true"> · </span>
+          {favouritesSummary.nextOne}{" "}
+          {nextDateFormatter.format(new Date(next.startDatetime))}
+        </>
+      )}
+    </>
+  );
+}
 
 // Favourites live in App so every page shows the same hearts
 export default function MyFavourites({ events, favouriteIds, onToggleFavourite }) {
@@ -23,23 +50,15 @@ export default function MyFavourites({ events, favouriteIds, onToggleFavourite }
           id="my-favourites-title"
           icon={Heart}
           title="My Favourites"
+          summary={
+            <FavouritesSummary
+              events={events}
+              favouriteIds={favouriteIds}
+              count={favourites.length}
+            />
+          }
           actions={myFavouritesActions}
         />
-        <div className="dashboard-grid">
-          <DashboardCard
-            item={{ ...favouritesInsight, count: favourites.length }}
-          />
-        </div>
-      </section>
-
-      <section
-        className="dashboard-section"
-        aria-labelledby="favourite-events-title"
-      >
-        <h2 className="dashboard-title" id="favourite-events-title">
-          <CalendarHeart className="dashboard-title-icon" aria-hidden="true" />
-          Favourite Events
-        </h2>
         <div className="events-grid events-grid-three">
           {favourites.length === 0 ? (
             <div className="dashboard-empty-state">

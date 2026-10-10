@@ -5,15 +5,18 @@ export const contactMessagesActions = [
   { label: "Notifications", to: "/dashboard/notifications", icon: Bell },
 ];
 
-export const contactMessagesSection = {
-  title: "Contact Messages from Users",
+export const contactMessagesPage = {
+  title: "Contact Messages",
   icon: MessageSquareText,
 };
 
-// Indigo like the other total cards (orange means "cancelled" in this app)
-export const contactMessagesInsight = {
-  title: "Contact Messages",
-  icon: MessageSquareText,
+// The line under the page title: "3 messages · 2 unread · newest 26 Sept"
+export const contactMessagesSummary = {
+  message: "message",
+  messages: "messages",
+  unread: "unread",
+  newest: "newest",
+  none: "No messages yet",
 };
 
 // Messages from contact_messages_view and contact_view PHP files
@@ -35,6 +38,7 @@ export const initialContactMessages = [
     message:
       "Hi, is there a way to get reminders for events in my favourite categories by email as well?\nThanks!",
     sentAt: "2026-09-26T19:40:00",
+    readAt: null,
   },
   {
     messageId: 2,
@@ -44,6 +48,7 @@ export const initialContactMessages = [
     message:
       "I run a small community choir in Levenshulme. Can we list free concerts on the portal, and how do we become an organiser?",
     sentAt: "2026-09-24T11:05:00",
+    readAt: null,
   },
   {
     messageId: 3,
@@ -52,5 +57,6 @@ export const initialContactMessages = [
     email: "sam.k@email.com",
     message: "The map on Live at MediaCity shows the wrong entrance. It should be the Plaza side.",
     sentAt: "2026-09-19T08:52:00",
+    readAt: "2026-09-19T10:30:00",
   },
 ];

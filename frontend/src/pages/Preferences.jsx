@@ -1,20 +1,38 @@
 import { useState } from "react";
-import { ListChecks, Settings2 } from "lucide-react";
+import { Settings2 } from "lucide-react";
 import Button from "../components/UI/Button";
-import DashboardCard from "../components/UI/DashboardCard";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
+import { isUpcoming } from "../lib/eventDates";
 import {
-  interestsInsight,
   preferenceCategories,
   preferencesActions,
   preferencesForm,
-  userCategoryIds,
+  preferencesSummary,
 } from "../data/preferencesData";
 
-export default function Preferences() {
-  const [savedCategoryIds, setSavedCategoryIds] = useState(userCategoryIds);
-  const [selectedCategoryIds, setSelectedCategoryIds] =
-    useState(userCategoryIds);
+// "2 interests · 14 upcoming events match them"
+function PreferencesSummary({ events, interestIds }) {
+  if (interestIds.length === 0) return preferencesSummary.none;
+
+  const now = new Date();
+  const matching = events.filter(
+    (event) => interestIds.includes(event.categoryId) && isUpcoming(event, now),
+  ).length;
+  return (
+    <>
+      <strong>
+        {interestIds.length}{" "}
+        {interestIds.length === 1 ? preferencesSummary.interest : preferencesSummary.interests}
+      </strong>
+      <span aria-hidden="true"> · </span>
+      {matching} {preferencesSummary.matching}
+    </>
+  );
+}
+
+// Saved interests live in App, so the user dashboard counts the same ones
+export default function Preferences({ events, interestIds, onSaveInterests }) {
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState(interestIds);
   const SubmitIcon = preferencesForm.submit.icon;
 
   function toggleCategory(categoryId) {
@@ -27,7 +45,7 @@ export default function Preferences() {
 
   function handleSubmit(event) {
     event.preventDefault();
-    setSavedCategoryIds(selectedCategoryIds);
+    onSaveInterests(selectedCategoryIds);
   }
 
   return (
@@ -40,23 +58,9 @@ export default function Preferences() {
           id="my-preferences-title"
           icon={Settings2}
           title="My Preferences"
+          summary={<PreferencesSummary events={events} interestIds={interestIds} />}
           actions={preferencesActions}
         />
-        <div className="dashboard-grid">
-          <DashboardCard
-            item={{ ...interestsInsight, count: savedCategoryIds.length }}
-          />
-        </div>
-      </section>
-
-      <section
-        className="dashboard-section"
-        aria-labelledby="set-preferences-title"
-      >
-        <h2 className="dashboard-title" id="set-preferences-title">
-          <ListChecks className="dashboard-title-icon" aria-hidden="true" />
-          Set Preferences
-        </h2>
         <div className="contact-form-container">
           <form className="contact-form" onSubmit={handleSubmit}>
             <fieldset className="contents">

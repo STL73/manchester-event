@@ -10,6 +10,7 @@ import {
   profileMessages,
   profileSettingsForm,
 } from "../data/profileSettingsData";
+import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -125,10 +126,11 @@ export default function Settings({ selectedUser }) {
         className="dashboard-section"
         aria-labelledby="profile-settings-title"
       >
-        <h2 className="dashboard-title" id="profile-settings-title">
-          <UserRoundCog className="dashboard-title-icon" aria-hidden="true" />
-          Profile Settings
-        </h2>
+        <DashboardPageHeading
+          id="profile-settings-title"
+          icon={UserRoundCog}
+          title="Profile Settings"
+        />
 
         <div className="contact-form-container">
           <form className="contact-form" onSubmit={handleSubmit} noValidate>
