@@ -1,8 +1,9 @@
-import { CalendarCheck, CalendarPlus } from "lucide-react";
+import { CalendarPlus } from "lucide-react";
 
+// The page's one action: making an event is the organiser's main job,
+// so it stays on the page (navigation lives in the sidebar)
 export const myDraftsActions = [
-  { label: "Create Events", to: "/dashboard/create-events", icon: CalendarPlus },
-  { label: "My Events", to: "/dashboard/my-events", icon: CalendarCheck },
+  { label: "Create event", to: "/dashboard/create-events", icon: CalendarPlus },
 ];
 
 export const draftTableColumns = [

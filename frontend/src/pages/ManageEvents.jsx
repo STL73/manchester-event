@@ -7,7 +7,6 @@ import {
   eventActions,
   eventStatuses,
   eventTableColumns,
-  manageEventsActions,
   manageEventsMessages,
 } from "../data/manageEventsData";
 
@@ -41,7 +40,6 @@ export default function ManageEvents({ events }) {
           id="manage-events-title"
           icon={ClipboardList}
           title="Manage Events"
-          actions={manageEventsActions}
         />
 
         {events.length === 0 ? (

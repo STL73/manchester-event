@@ -350,13 +350,36 @@
     @apply col-span-2;
   }
 
-  /* Quick date ranges: a segmented row under the search bar */
+  /* Explore Events: no date field (the date pills pick it), so Keywords (2)
+     | Category | Location | Search */
+  .events-search-no-date {
+    @apply grid-cols-[minmax(0,2fr)_repeat(2,minmax(0,1fr))_auto];
+  }
+
+  /* Date pills on the left, the layout switch on the right */
+  .events-when-row {
+    @apply w-full max-w-7xl flex items-center justify-between gap-4;
+  }
+
+  /* Quick date ranges. 32px and unfilled, lighter than the 46px fields
+     above, so they read as options rather than more fields */
   .events-when {
-    @apply w-full max-w-7xl flex flex-wrap gap-2;
+    @apply flex flex-wrap gap-2;
   }
 
   .events-when-option {
-    @apply rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-muted transition-colors hover:border-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none;
+    @apply inline-flex h-8 items-center gap-1.5 rounded-full border border-border px-3.5 text-[13px] font-medium text-muted transition-colors hover:border-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none [&_svg]:size-3.5 [&_svg]:text-accent;
+  }
+
+  /* "Pick a date": the browser's calendar opens from a date input kept
+     invisible under the pill, so it appears where the pill is */
+  .events-when-date {
+    @apply relative inline-flex;
+  }
+
+  .events-when-date-input {
+    @apply pointer-events-none absolute bottom-0 left-0 h-px w-full opacity-0;
+    color-scheme: dark;
   }
 
   /* Selected, not an action: the navbar and sidebar's accent tint. Solid
@@ -365,13 +388,10 @@
     @apply border-accent/30 bg-accent/15 text-foreground;
   }
 
-  .events-toolbar {
-    @apply w-full max-w-7xl flex items-center justify-between gap-4;
-  }
-
-  /* Result count, then one chip per filter in use */
+  /* Result count, then one chip per filter in use. Pagination scrolls
+     back here */
   .events-results {
-    @apply flex flex-wrap items-center gap-2;
+    @apply w-full max-w-7xl flex flex-wrap items-center gap-2 scroll-mt-4;
   }
 
   .events-count {
@@ -409,6 +429,41 @@
 
   .events-grid {
     @apply w-full max-w-7xl grid gap-6;
+  }
+
+  /* Pagination: "Showing 1–12 of 26" on the left, the pages on the right.
+     Circles and pills like the view switch; the current page gets the
+     selected tint, not solid accent */
+  .pagination {
+    @apply w-full max-w-7xl flex flex-wrap items-center justify-between gap-4;
+  }
+
+  .pagination-summary {
+    @apply text-sm text-muted tabular-nums;
+  }
+
+  .pagination-controls {
+    @apply flex items-center gap-2;
+  }
+
+  .pagination-pages {
+    @apply flex items-center gap-1;
+  }
+
+  .pagination-page {
+    @apply inline-flex size-[34px] items-center justify-center rounded-full text-sm font-medium text-muted tabular-nums transition-colors hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none;
+  }
+
+  .pagination-page.is-active {
+    @apply bg-accent/15 text-foreground ring-1 ring-inset ring-accent/30;
+  }
+
+  .pagination-gap {
+    @apply px-1 text-muted;
+  }
+
+  .pagination-step {
+    @apply inline-flex h-[34px] items-center gap-1 rounded-full border border-border px-3.5 text-sm font-medium text-foreground transition-colors hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none [&_svg]:size-4;
   }
 
   .events-grid-three {
@@ -1156,16 +1211,10 @@
     @apply w-full flex flex-col gap-4;
   }
 
-  /* Home page greeting: name plus one live status line, then the shortcuts.
-     67rem is the greeting (~320px) and a role's shortcuts (up to ~690px)
-     side by side, plus this box's padding. Narrower, they stack, the
-     shortcuts under the status line */
+  /* Home page greeting: name, then one live status line. 8px between them,
+     like an inner page's title and summary */
   .dashboard-greeting {
-    @apply w-full px-4 pt-4 pb-4 grid grid-cols-1 gap-x-4 gap-y-1 @min-[67rem]:grid-cols-[minmax(0,1fr)_auto];
-  }
-
-  .dashboard-greeting .dashboard-page-actions {
-    @apply mt-3 @min-[67rem]:col-start-2 @min-[67rem]:row-start-1 @min-[67rem]:mt-0 @min-[67rem]:self-center;
+    @apply w-full px-4 pt-4 pb-4 flex flex-col gap-2;
   }
 
   .dashboard-greeting-title {
@@ -1176,9 +1225,8 @@
     @apply text-accent-hover;
   }
 
-  /* Beside the shortcuts, the status line still runs full width under both */
   .dashboard-greeting-status {
-    @apply text-muted @min-[67rem]:col-span-full;
+    @apply text-muted;
   }
 
   .dashboard-greeting-link {
@@ -1468,7 +1516,7 @@
      (this margin plus the section's 16px gap). The shortcuts wrap under the
      title when the row runs out of room */
   .dashboard-page-heading {
-    @apply w-full mb-4 flex flex-col gap-1;
+    @apply w-full mb-4 flex flex-col gap-2;
   }
 
   .dashboard-page-heading-row {
@@ -1727,10 +1775,6 @@
     @apply flex flex-col gap-1;
   }
 
-  .profile-meta {
-    @apply w-full mt-4 flex flex-col gap-1 text-sm text-muted;
-  }
-
   /* shared form field extras (FormField) */
   /* Label on the left, short hint on the right: the hint costs no height */
   .field-label-row {
@@ -1957,6 +2001,11 @@
       @apply col-span-2;
     }
 
+    /* Without the date field: Keywords | Category, then Location | Search */
+    .events-search-no-date .events-search-keywords {
+      @apply col-span-1;
+    }
+
     .events-grid-three {
       @apply grid-cols-2;
     }
@@ -1981,6 +2030,15 @@
     .events-grid-three,
     .events-grid-two {
       @apply grid-cols-1;
+    }
+
+    /* Phones: the summary over the pages, arrows without their words */
+    .pagination {
+      @apply justify-center;
+    }
+
+    .pagination-step-label {
+      @apply sr-only;
     }
   }
 

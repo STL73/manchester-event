@@ -1,7 +1,4 @@
 import DashboardGreeting from "../components/dashboard/DashboardGreeting";
-import { adminDashboardActions } from "../data/adminDashboardData";
-import { organiserDashboardActions } from "../data/organiserDashboardData";
-import { dashboardActions } from "../data/userDashboardData";
 import AdminDashboardHome from "./AdminDashboardHome";
 import OrganiserDashboardHome from "./OrganiserDashboardHome";
 import UserDashboardHome from "./UserDashboardHome";
@@ -10,12 +7,6 @@ const dashboardByRole = {
   user: UserDashboardHome,
   organiser: OrganiserDashboardHome,
   admin: AdminDashboardHome,
-};
-
-const actionsByRole = {
-  user: dashboardActions,
-  organiser: organiserDashboardActions,
-  admin: adminDashboardActions,
 };
 
 export default function DashboardHome({ selectedUser, ...props }) {
@@ -38,7 +29,6 @@ export default function DashboardHome({ selectedUser, ...props }) {
     <>
       <DashboardGreeting
         selectedUser={selectedUser}
-        actions={actionsByRole[selectedUser.type]}
         users={props.users}
         events={props.events}
         organiserEvents={props.organiserEvents}

@@ -1,10 +1,11 @@
-import { CalendarPlus, ListFilter, SquarePen } from "lucide-react";
+import { CalendarPlus, ListFilter } from "lucide-react";
 
 import { eventStatuses } from "./manageEventsData";
 
+// The page's one action: making an event is the organiser's main job,
+// so it stays on the page (navigation lives in the sidebar)
 export const myEventsActions = [
-  { label: "Create Events", to: "/dashboard/create-events", icon: CalendarPlus },
-  { label: "My Drafts", to: "/dashboard/my-drafts", icon: SquarePen },
+  { label: "Create event", to: "/dashboard/create-events", icon: CalendarPlus },
 ];
 
 export const myEventsFilterIntro =

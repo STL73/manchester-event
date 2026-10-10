@@ -6,7 +6,6 @@ import StatusMessage from "../components/UI/StatusMessage";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import {
   accountStatuses,
-  manageUsersActions,
   manageUsersMessages,
   userActions,
   userTableColumns,
@@ -44,7 +43,6 @@ export default function ManageUsers({ users, onDeleteUser }) {
           id="manage-users-title"
           icon={Users}
           title="Manage Users"
-          actions={manageUsersActions}
         />
 
         {message && (

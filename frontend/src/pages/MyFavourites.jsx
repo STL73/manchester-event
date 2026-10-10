@@ -6,7 +6,6 @@ import {
   favouritesSummary,
   getFavouriteEvents,
   getNextFavourite,
-  myFavouritesActions,
 } from "../data/myFavouritesData";
 
 const nextDateFormatter = new Intl.DateTimeFormat("en-GB", {
@@ -57,7 +56,6 @@ export default function MyFavourites({ events, favouriteIds, onToggleFavourite }
               count={favourites.length}
             />
           }
-          actions={myFavouritesActions}
         />
         <div className="events-grid events-grid-three">
           {favourites.length === 0 ? (

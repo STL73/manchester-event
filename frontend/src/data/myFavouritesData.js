@@ -1,11 +1,4 @@
-import { CalendarSearch, Settings2 } from "lucide-react";
-
 import { isPublicEvent } from "./eventsData";
-
-export const myFavouritesActions = [
-  { label: "Explore Events", to: "/dashboard/explore-events", icon: CalendarSearch },
-  { label: "Update Preferences", to: "/dashboard/preferences", icon: Settings2 },
-];
 
 // The line under the page title: "3 saved · next one Sun 18 Oct"
 export const favouritesSummary = {

@@ -4,7 +4,6 @@ import { dashboardGreeting } from "../../data/dashboardGreetingData";
 import { eventDetailsPath } from "../../data/eventsData";
 import { getNextFavourite } from "../../data/myFavouritesData";
 import { getSiteTotals } from "../../lib/analytics";
-import DashboardShortcuts from "./DashboardShortcuts";
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   weekday: "long",
@@ -77,12 +76,12 @@ function PendingLine({ role, users, events, organiserEvents }) {
   );
 }
 
-// Home's title row: the greeting where inner pages have their title, with
-// the same shortcuts beside it
-export default function DashboardGreeting({ selectedUser, actions, ...data }) {
+// Home's title row: the greeting where inner pages have their title, and
+// the status line where they have their summary. No shortcuts: the sidebar
+// already links every page, and the status line and cards link to what
+// needs attention (changed 2026-10-10; the PHP had a Quick Actions block)
+export default function DashboardGreeting({ selectedUser, ...data }) {
   return (
-    // Shortcuts last, so a narrow screen keeps the status line under the
-    // greeting; App.css moves them up beside it when there is room
     <header className="dashboard-greeting">
       <h1 className="dashboard-greeting-title">
         {dashboardGreeting.title}{" "}
@@ -95,7 +94,6 @@ export default function DashboardGreeting({ selectedUser, actions, ...data }) {
           <PendingLine role={dashboardGreeting.roles[selectedUser.type]} {...data} />
         )}
       </p>
-      <DashboardShortcuts actions={actions} />
     </header>
   );
 }

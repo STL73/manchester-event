@@ -1,8 +1,4 @@
-import { ChevronLeft, ClipboardList, ClipboardPen, Save, Trash2 } from "lucide-react";
-
-export const manageUsersActions = [
-  { label: "Manage Events", to: "/dashboard/manage-events", icon: ClipboardList },
-];
+import { ChevronLeft, ClipboardPen, Save, Trash2 } from "lucide-react";
 
 export const userTableColumns = [
   "ID",

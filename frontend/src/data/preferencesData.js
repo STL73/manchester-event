@@ -1,11 +1,6 @@
-import { CalendarSearch, Heart, SquareCheck } from "lucide-react";
+import { SquareCheck } from "lucide-react";
 
 import { eventCategories } from "./eventsData";
-
-export const preferencesActions = [
-  { label: "Explore Events", to: "/dashboard/explore-events", icon: CalendarSearch },
-  { label: "My Favourites", to: "/dashboard/my-favourites", icon: Heart },
-];
 
 // The line under the page title: "2 interests · 14 upcoming events match them"
 export const preferencesSummary = {

@@ -10,6 +10,8 @@ export default function SearchBar({
   children,
   submitLabel = "Search",
   submitIcon: SubmitIcon = Search,
+  // Explore Events picks its date with the date pills instead
+  showDate = true,
   className = "",
 }) {
   return (
@@ -34,22 +36,26 @@ export default function SearchBar({
         onChange={onChange}
       />
 
-      <label className="sr-only" htmlFor="event-date">
-        Date
-      </label>
-      {/* The browser's calendar button is made invisible but stays clickable
-          on top of a Lucide icon in the accent colour */}
-      <div className="date-field">
-        <input
-          id="event-date"
-          name="date"
-          type="date"
-          value={filters.date}
-          className="events-search-input"
-          onChange={onChange}
-        />
-        <CalendarDays className="date-field-icon" aria-hidden="true" />
-      </div>
+      {showDate && (
+        <>
+          <label className="sr-only" htmlFor="event-date">
+            Date
+          </label>
+          {/* The browser's calendar button is made invisible but stays
+              clickable on top of a Lucide icon in the accent colour */}
+          <div className="date-field">
+            <input
+              id="event-date"
+              name="date"
+              type="date"
+              value={filters.date}
+              className="events-search-input"
+              onChange={onChange}
+            />
+            <CalendarDays className="date-field-icon" aria-hidden="true" />
+          </div>
+        </>
+      )}
 
       <label className="sr-only" htmlFor="event-category">
         Category

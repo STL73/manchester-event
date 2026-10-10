@@ -2,7 +2,6 @@ import PageHero from "../components/UI/PageHero";
 import EventsBrowser from "../components/events/EventsBrowser";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import {
-  exploreEventsActions,
   exploreEventsSection,
   publicIntro,
 } from "../data/exploreEventsData";
@@ -53,7 +52,6 @@ export default function ExploreEvents({
           id="explore-events-title"
           icon={SectionIcon}
           title={exploreEventsSection.title}
-          actions={exploreEventsActions}
         />
         <div className="dashboard-events-browser">{browser}</div>
       </section>
