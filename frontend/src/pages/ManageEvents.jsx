@@ -1,7 +1,8 @@
-import { ClipboardList, Zap } from "lucide-react";
+import { ClipboardList } from "lucide-react";
 import Button from "../components/UI/Button";
 import { eventDetailsPath } from "../data/eventsData";
 import Tooltip from "../components/UI/Tooltip";
+import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import {
   eventActions,
   eventStatuses,
@@ -34,30 +35,14 @@ export default function ManageEvents({ events }) {
     <div className="dashboard-home">
       <section
         className="dashboard-section"
-        aria-labelledby="quick-actions-title"
-      >
-        <h2 className="dashboard-title" id="quick-actions-title">
-          <Zap className="dashboard-title-icon" aria-hidden="true" />
-          Quick Actions
-        </h2>
-        <div className="dashboard-actions">
-          {manageEventsActions.map(({ label, to, icon: Icon }) => (
-            <Button key={label} to={to} variant="primary" size="md">
-              <Icon aria-hidden="true" />
-              {label}
-            </Button>
-          ))}
-        </div>
-      </section>
-
-      <section
-        className="dashboard-section"
         aria-labelledby="manage-events-title"
       >
-        <h2 className="dashboard-title" id="manage-events-title">
-          <ClipboardList className="dashboard-title-icon" aria-hidden="true" />
-          Manage Events
-        </h2>
+        <DashboardPageHeading
+          id="manage-events-title"
+          icon={ClipboardList}
+          title="Manage Events"
+          actions={manageEventsActions}
+        />
 
         {events.length === 0 ? (
           <div className="dashboard-empty-state">

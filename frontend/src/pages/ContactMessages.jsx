@@ -1,6 +1,5 @@
-import { Zap } from "lucide-react";
-import Button from "../components/UI/Button";
 import DashboardCard from "../components/UI/DashboardCard";
+import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import {
   contactMessagesActions,
   contactMessagesInsight,
@@ -29,29 +28,14 @@ export default function ContactMessages({ contactMessages }) {
     <div className="dashboard-home">
       <section
         className="dashboard-section"
-        aria-labelledby="quick-actions-title"
-      >
-        <h2 className="dashboard-title" id="quick-actions-title">
-          <Zap className="dashboard-title-icon" aria-hidden="true" />
-          Quick Actions
-        </h2>
-        <div className="dashboard-actions">
-          {contactMessagesActions.map(({ label, to, icon: Icon }) => (
-            <Button key={label} to={to} variant="primary" size="md">
-              <Icon aria-hidden="true" />
-              {label}
-            </Button>
-          ))}
-        </div>
-      </section>
-
-      <section
-        className="dashboard-section"
         aria-labelledby="contact-count-title"
       >
-        <h2 className="sr-only" id="contact-count-title">
-          {contactMessagesInsight.title}
-        </h2>
+        <DashboardPageHeading
+          id="contact-count-title"
+          icon={contactMessagesInsight.icon}
+          title={contactMessagesInsight.title}
+          actions={contactMessagesActions}
+        />
         <div className="dashboard-grid">
           <DashboardCard
             item={{ ...contactMessagesInsight, count: messages.length }}

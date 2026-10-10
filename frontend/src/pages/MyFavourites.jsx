@@ -1,7 +1,8 @@
-import { CalendarHeart, CalendarSearch, Heart, Zap } from "lucide-react";
+import { CalendarHeart, CalendarSearch, Heart } from "lucide-react";
 import Button from "../components/UI/Button";
 import DashboardCard from "../components/UI/DashboardCard";
 import EventCard from "../components/events/EventCard";
+import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import {
   favouritesInsight,
   getFavouriteEvents,
@@ -16,30 +17,14 @@ export default function MyFavourites({ events, favouriteIds, onToggleFavourite }
     <div className="dashboard-home">
       <section
         className="dashboard-section"
-        aria-labelledby="quick-actions-title"
-      >
-        <h2 className="dashboard-title" id="quick-actions-title">
-          <Zap className="dashboard-title-icon" aria-hidden="true" />
-          Quick Actions
-        </h2>
-        <div className="dashboard-actions">
-          {myFavouritesActions.map(({ label, to, icon: Icon }) => (
-            <Button key={label} to={to} variant="primary" size="md">
-              <Icon aria-hidden="true" />
-              {label}
-            </Button>
-          ))}
-        </div>
-      </section>
-
-      <section
-        className="dashboard-section"
         aria-labelledby="my-favourites-title"
       >
-        <h2 className="dashboard-title" id="my-favourites-title">
-          <Heart className="dashboard-title-icon" aria-hidden="true" />
-          My Favourites
-        </h2>
+        <DashboardPageHeading
+          id="my-favourites-title"
+          icon={Heart}
+          title="My Favourites"
+          actions={myFavouritesActions}
+        />
         <div className="dashboard-grid">
           <DashboardCard
             item={{ ...favouritesInsight, count: favourites.length }}

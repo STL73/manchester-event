@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { dashboardGreeting } from "../../data/dashboardGreetingData";
 import { eventDetailsPath, isPublicEvent } from "../../data/eventsData";
 import { getSiteTotals } from "../../lib/analytics";
+import DashboardShortcuts from "./DashboardShortcuts";
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   weekday: "long",
@@ -88,8 +89,12 @@ function PendingLine({ role, users, events, organiserEvents }) {
   );
 }
 
-export default function DashboardGreeting({ selectedUser, ...data }) {
+// Home's title row: the greeting where inner pages have their title, with
+// the same shortcuts beside it
+export default function DashboardGreeting({ selectedUser, actions, ...data }) {
   return (
+    // Shortcuts last, so a narrow screen keeps the status line under the
+    // greeting; App.css moves them up beside it when there is room
     <header className="dashboard-greeting">
       <h2 className="dashboard-greeting-title">
         {dashboardGreeting.title}{" "}
@@ -102,6 +107,7 @@ export default function DashboardGreeting({ selectedUser, ...data }) {
           <PendingLine role={dashboardGreeting.roles[selectedUser.type]} {...data} />
         )}
       </p>
+      <DashboardShortcuts actions={actions} />
     </header>
   );
 }

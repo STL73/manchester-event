@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { SquarePen, Zap } from "lucide-react";
+import { SquarePen } from "lucide-react";
 import Button from "../components/UI/Button";
 import Tooltip from "../components/UI/Tooltip";
 import StatusMessage from "../components/UI/StatusMessage";
+import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import {
   draftTableColumns,
   draftTooltips,
@@ -51,30 +52,14 @@ export default function MyDrafts({
     <div className="dashboard-home">
       <section
         className="dashboard-section"
-        aria-labelledby="quick-actions-title"
-      >
-        <h2 className="dashboard-title" id="quick-actions-title">
-          <Zap className="dashboard-title-icon" aria-hidden="true" />
-          Quick Actions
-        </h2>
-        <div className="dashboard-actions">
-          {myDraftsActions.map(({ label, to, icon: Icon }) => (
-            <Button key={label} to={to} variant="primary" size="md">
-              <Icon aria-hidden="true" />
-              {label}
-            </Button>
-          ))}
-        </div>
-      </section>
-
-      <section
-        className="dashboard-section"
         aria-labelledby="my-drafts-title"
       >
-        <h2 className="dashboard-title" id="my-drafts-title">
-          <SquarePen className="dashboard-title-icon" aria-hidden="true" />
-          My Draft Events
-        </h2>
+        <DashboardPageHeading
+          id="my-drafts-title"
+          icon={SquarePen}
+          title="My Draft Events"
+          actions={myDraftsActions}
+        />
 
         {message && (
           <StatusMessage className="table-message">{message}</StatusMessage>

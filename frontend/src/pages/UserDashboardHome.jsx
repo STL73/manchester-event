@@ -1,8 +1,8 @@
-import { CalendarHeart, CalendarSearch, ChartNoAxesColumn, Zap } from "lucide-react";
+import { CalendarHeart, CalendarSearch, ChartNoAxesColumn } from "lucide-react";
 import Button from "../components/UI/Button";
 import DashboardCard from "../components/UI/DashboardCard";
 import EventCard from "../components/events/EventCard";
-import { dashboardActions, dashboardInsights } from "../data/userDashboardData";
+import { dashboardInsights } from "../data/userDashboardData";
 import { getFavouriteEvents } from "../data/myFavouritesData";
 
 export default function UserDashboardHome({
@@ -15,24 +15,6 @@ export default function UserDashboardHome({
 
   return (
     <div className="dashboard-home">
-      <section
-        className="dashboard-section"
-        aria-labelledby="quick-actions-title"
-      >
-        <h2 className="dashboard-title" id="quick-actions-title">
-          <Zap className="dashboard-title-icon" aria-hidden="true" />
-          Quick Actions
-        </h2>
-        <div className="dashboard-actions">
-          {dashboardActions.map(({ label, to, icon: Icon }) => (
-            <Button key={label} to={to} variant="primary" size="md">
-              <Icon aria-hidden="true" />
-              {label}
-            </Button>
-          ))}
-        </div>
-      </section>
-
       <section
         className="dashboard-section"
         aria-labelledby="quick-insights-title"

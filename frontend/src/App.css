@@ -311,13 +311,16 @@
     @apply flex items-start gap-3 rounded-xl border border-accent/40 bg-accent/10 p-4 text-sm leading-6 text-foreground [&>svg]:mt-0.5 [&>svg]:size-5 [&>svg]:shrink-0 [&>svg]:text-accent;
   }
 
-  /* Keywords gets double width; the Search button is only as wide as it needs */
+  /* Keywords gets double width; the Search button is only as wide as it needs.
+     Pill fields, like Home's search. 40px corners = the fields' 24px radius
+     plus the 16px padding, so the bar curves evenly round them in one row,
+     two rows (My Events) or stacked on phones */
   .events-search {
-    @apply w-full max-w-7xl p-4 grid grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto] gap-3 rounded-xl bg-card;
+    @apply w-full max-w-7xl p-4 grid grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto] gap-3 rounded-[40px] bg-card;
   }
 
   .events-search-input {
-    @apply w-full min-w-0 rounded-lg border border-border bg-background px-4 py-3 text-foreground outline-none focus:border-accent;
+    @apply w-full min-w-0 rounded-full border border-border bg-background px-5 py-2.5 text-foreground outline-none focus:border-accent;
     accent-color: #8e98f3;
     color-scheme: dark;
   }
@@ -334,7 +337,7 @@
   }
 
   .date-field-icon {
-    @apply pointer-events-none absolute right-4 top-1/2 size-5 -translate-y-1/2 text-accent;
+    @apply pointer-events-none absolute right-5 top-1/2 size-5 -translate-y-1/2 text-accent;
   }
 
   /* My Events, 4 columns: Keywords (2) | Date | Category,
@@ -356,8 +359,10 @@
     @apply rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-muted transition-colors hover:border-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none;
   }
 
+  /* Selected, not an action: the navbar and sidebar's accent tint. Solid
+     accent is kept for buttons that do something (Search, Save) */
   .events-when-option.is-active {
-    @apply border-accent bg-accent text-background;
+    @apply border-accent/30 bg-accent/15 text-foreground;
   }
 
   .events-toolbar {
@@ -389,13 +394,13 @@
     @apply flex items-center gap-2;
   }
 
-  /* Same 34px square and 8px corners as the icon buttons */
+  /* 34px circles: things you click are pills */
   .events-view-switcher button {
-    @apply inline-flex size-[34px] items-center justify-center rounded-lg text-muted transition-colors hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+    @apply inline-flex size-[34px] items-center justify-center rounded-full text-muted transition-colors hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
   }
 
   .events-view-switcher button.is-active {
-    @apply bg-accent text-background;
+    @apply bg-accent/15 text-foreground ring-1 ring-inset ring-accent/30;
   }
 
   .events-view-switcher svg {
@@ -849,8 +854,8 @@
     @apply max-w-xl text-base leading-7 text-foreground/85 md:text-lg;
   }
 
-  /* A pill like the chips and buttons around it. The filter bars on Explore
-     and My Events keep 8px fields: they are forms, this is one search box */
+  /* A pill like the chips and buttons around it. One row only, so the whole
+     bar is a pill; the filter bars use the same pill fields in a 40px panel */
   .home-search {
     @apply flex w-full max-w-3xl gap-2 rounded-full border border-border bg-card p-2;
   }
@@ -954,44 +959,12 @@
       @apply max-w-none;
     }
 
-    .events-search {
-      @apply grid-cols-1;
-    }
-
-    .events-search-keywords,
-    .events-search-wide .events-search-keywords {
-      @apply col-span-1;
-    }
-
-    /* Two columns on tablets, one below 640px (max-sm) */
-    .events-grid-three,
-    .events-grid-two {
-      @apply grid-cols-2 max-sm:grid-cols-1;
-    }
-
-    /* Three and two columns look the same here, so the switcher is hidden */
-    .events-view-switcher {
-      @apply hidden;
-    }
-
     .dashboard-container {
       @apply m-1 p-1 gap-1;
     }
 
     .dashboard-content {
       @apply m-1;
-    }
-
-    .dashboard-utility-bar {
-      @apply items-start flex-wrap gap-3 px-4;
-    }
-
-    .dashboard-utility-items {
-      @apply ml-0 flex-wrap gap-3;
-    }
-
-    .dashboard-utility-divider {
-      @apply hidden;
     }
   }
 
@@ -1013,24 +986,33 @@
     @apply flex-1 min-h-0;
   }
 
+  /* As tall as its links; scrolls if the screen is too short for them */
   .sidebar-group-main .sidebar-menu {
-    @apply flex-1 min-h-0 overflow-y-auto;
+    @apply min-h-0 overflow-y-auto;
+  }
+
+  /* Fills whatever space the links leave, so the pattern never sits behind
+     one. isolate keeps the texture's -z-10 inside this box */
+  .sidebar-honeycomb {
+    @apply relative isolate flex-1 min-h-0 overflow-hidden;
   }
 
   .sidebar-group-secondary {
     @apply shrink-0;
   }
 
+  /* px-6: the title starts where the link icons do */
   .sidebar-title {
-    @apply px-8 py-2 flex text-lg text-foreground;
+    @apply px-6 py-2 flex text-lg text-foreground;
   }
 
   .sidebar-menu {
     @apply px-2 py-2 flex flex-col items-start gap-2;
   }
 
+  /* Pills, like the navbar's links */
   .menu-item {
-    @apply px-4 py-1 w-full flex items-center justify-start gap-3 rounded-lg text-base text-muted hover:text-foreground hover:bg-background;
+    @apply px-4 py-1 w-full flex items-center justify-start gap-3 rounded-full text-base text-muted transition-colors duration-200 hover:text-foreground hover:bg-background motion-reduce:transition-none;
   }
 
   .menu-icon {
@@ -1038,12 +1020,20 @@
   }
 
   .sidebar-link {
-    @apply block w-full rounded-lg focus-visible:outline-2 focus-visible:outline-accent;
+    @apply block w-full rounded-full focus-visible:outline-2 focus-visible:outline-accent;
   }
 
-  /* Logo at the top of the sidebar: the way back to the public site */
+  /* Logo at the top of the sidebar: the way back to the public site.
+     px-2 puts the logo on the link pills' left edge; any wider and the name
+     no longer fits beside a full-size logo */
   .sidebar-brand {
-    @apply px-4 py-3 text-base whitespace-nowrap rounded-lg focus-visible:outline-2 focus-visible:outline-accent;
+    @apply px-2 py-3 text-base whitespace-nowrap rounded-lg focus-visible:outline-2 focus-visible:outline-accent;
+  }
+
+  /* The name is too long to share 256px with a 32px logo, and without this
+     the logo was the one squeezed (17px wide, the bee squashed) */
+  .sidebar-brand .navbar-icon {
+    @apply shrink-0;
   }
 
   /* Signed-in user at the bottom of the sidebar */
@@ -1075,9 +1065,9 @@
     @apply mx-2;
   }
 
-  /* Current page: darker background, bright text and an accent bar */
+  /* Current page: the navbar's accent pill, so both menus mark it the same way */
   .menu-item.is-active {
-    @apply bg-background text-foreground font-medium shadow-[inset_3px_0_0_var(--color-accent)];
+    @apply bg-accent/15 text-foreground font-medium ring-1 ring-inset ring-accent/30;
   }
 
   /* tooltip styles */
@@ -1107,8 +1097,10 @@
     @apply relative flex items-start gap-2 p-2 m-2 h-[calc(100vh-16px)] overflow-y-auto overflow-x-hidden rounded-2xl bg-card;
   }
 
+  /* @container: pages size their layout by this box, not the window, since
+     the sidebar takes a different share of the window at each size */
   .dashboard-content {
-    @apply flex-1 m-2 min-w-0 min-h-[calc(100vh-48px)] flex flex-col rounded-2xl bg-background text-foreground;
+    @apply @container flex-1 m-2 min-w-0 min-h-[calc(100vh-48px)] flex flex-col rounded-2xl bg-background text-foreground;
   }
 
   .dashboard-utility-bar {
@@ -1155,9 +1147,16 @@
     @apply w-full flex flex-col gap-6;
   }
 
-  /* Home page greeting: name plus one live status line */
+  /* Home page greeting: name plus one live status line, then the shortcuts.
+     67rem is the greeting (~320px) and a role's shortcuts (up to ~690px)
+     side by side, plus this box's padding. Narrower, they stack, the
+     shortcuts under the status line */
   .dashboard-greeting {
-    @apply w-full px-4 pt-6 flex flex-col gap-1;
+    @apply w-full px-4 pt-6 grid grid-cols-1 gap-x-4 gap-y-1 @min-[67rem]:grid-cols-[minmax(0,1fr)_auto];
+  }
+
+  .dashboard-greeting .dashboard-page-actions {
+    @apply mt-3 @min-[67rem]:col-start-2 @min-[67rem]:row-start-1 @min-[67rem]:mt-0 @min-[67rem]:self-center;
   }
 
   .dashboard-greeting-title {
@@ -1168,8 +1167,9 @@
     @apply text-accent-hover;
   }
 
+  /* Beside the shortcuts, the status line still runs full width under both */
   .dashboard-greeting-status {
-    @apply text-muted;
+    @apply text-muted @min-[67rem]:col-span-full;
   }
 
   .dashboard-greeting-link {
@@ -1206,10 +1206,6 @@
 
   .dashboard-grid {
     @apply w-full grid grid-cols-4 gap-4;
-  }
-
-  .dashboard-actions {
-    @apply w-full flex flex-wrap items-center gap-4;
   }
 
   /* Stat card: label + quiet icon, one big figure, one line of context.
@@ -1351,9 +1347,10 @@
     @apply mt-2 flex flex-wrap items-center gap-3;
   }
 
-  /* activity log styles */
+  /* activity log styles. Panels that hold a page's content are 16px, like the
+     public detail panels; cards in a grid stay 12px */
   .activity-log {
-    @apply w-full p-4 flex flex-col items-start gap-4 rounded-xl bg-card;
+    @apply w-full p-4 flex flex-col items-start gap-4 rounded-2xl bg-card;
   }
 
   .activity-list {
@@ -1376,7 +1373,7 @@
     @apply font-semibold text-accent;
   }
 
-  @media (max-width: 768px) {
+  @container (max-width: 40rem) {
     .activity-item {
       @apply flex-col gap-1;
     }
@@ -1384,7 +1381,7 @@
 
   /* table styles */
   .table-wrapper {
-    @apply w-full overflow-x-auto rounded-xl border border-border/60 bg-card shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] focus-visible:outline-2 focus-visible:outline-accent;
+    @apply w-full overflow-x-auto rounded-2xl border border-border/60 bg-card shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] focus-visible:outline-2 focus-visible:outline-accent;
   }
 
   .data-table {
@@ -1467,6 +1464,16 @@
     @apply w-full flex items-center justify-between gap-4;
   }
 
+  /* Inner dashboard pages: the shortcuts wrap under the title when the row
+     runs out of room */
+  .dashboard-page-heading {
+    @apply flex-wrap gap-y-3;
+  }
+
+  .dashboard-page-actions {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
   .section-heading-row .dashboard-title {
     @apply w-auto min-w-0;
   }
@@ -1543,16 +1550,18 @@
   }
 
   /* analytics styles */
+  /* Things you click are pills */
   .period-switcher {
-    @apply flex flex-wrap items-center gap-1 rounded-xl border border-border bg-background p-1;
+    @apply flex flex-wrap items-center gap-1 rounded-full border border-border bg-background p-1;
   }
 
   .period-switcher button {
-    @apply rounded-lg px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+    @apply rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
   }
 
+  /* Selected: the same accent tint as the date pills and the navbar */
   .period-switcher button.is-active {
-    @apply bg-accent text-background;
+    @apply bg-accent/15 text-foreground ring-1 ring-inset ring-accent/30;
   }
 
   .analytics-grid {
@@ -1560,7 +1569,7 @@
   }
 
   .chart-card {
-    @apply min-w-0 p-4 flex flex-col gap-4 rounded-xl border border-border/60 bg-card shadow-[inset_0_1px_0_rgb(255_255_255/0.04)];
+    @apply min-w-0 p-4 flex flex-col gap-4 rounded-2xl border border-border/60 bg-card shadow-[inset_0_1px_0_rgb(255_255_255/0.04)];
   }
 
   .chart-card-wide {
@@ -1647,7 +1656,7 @@
   }
 
   .contact-field input.profile-file-input {
-    @apply px-3 py-2 text-sm text-muted cursor-pointer file:mr-4 file:rounded-lg file:border-0 file:bg-accent file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-background hover:file:bg-accent-hover;
+    @apply px-3 py-2 text-sm text-muted cursor-pointer file:mr-4 file:rounded-full file:border-0 file:bg-accent file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-background hover:file:bg-accent-hover;
   }
 
   .profile-avatar {
@@ -1814,18 +1823,34 @@
     @apply text-2xl leading-tight font-semibold text-balance text-foreground;
   }
 
-  @media (max-width: 768px) {
+  /* The dashboard sizes its layout by its content box (.dashboard-content is
+     the container), not the window: beside a 256px sidebar a 820px window
+     leaves under 500px, and the window rules kept tablet pages at full
+     desktop layout. 48rem is the old 768px phone step */
+  @container (max-width: 48rem) {
     .analytics-grid {
       @apply grid-cols-1;
     }
 
-    /* Chart controls take the full width, buttons in an even grid of two */
+    .profile-form-grid {
+      @apply grid-cols-1;
+    }
+
+    .dashboard-grid {
+      @apply grid-cols-2;
+    }
+  }
+
+  @container (max-width: 32rem) {
+    /* Chart controls take the full width, buttons in an even grid of two.
+       18px corners: the buttons' 14px radius plus the 4px padding, so the
+       two rows sit evenly inside */
     .chart-card-actions {
       @apply w-full;
     }
 
     .period-switcher {
-      @apply w-full grid grid-cols-2;
+      @apply w-full grid grid-cols-2 rounded-[18px];
     }
 
     /* Chart cards can be ~190px wide here: smaller text, and a long label may
@@ -1833,16 +1858,88 @@
     .period-switcher button {
       @apply px-1.5 text-xs leading-tight text-center;
     }
+  }
 
-
-    .profile-form-grid {
+  /* Stat cards one per row on phones, where two left ~110px each */
+  @container (max-width: 28rem) {
+    .dashboard-grid {
       @apply grid-cols-1;
     }
   }
 
-  @media (max-width: 1024px) {
-    .dashboard-grid {
+  /* Weather bar: wraps when the three items no longer fit on one line */
+  @container (max-width: 46rem) {
+    .dashboard-utility-bar {
+      @apply items-start flex-wrap gap-3 px-4;
+    }
+
+    .dashboard-utility-items {
+      @apply ml-0 flex-wrap gap-x-5 gap-y-1.5;
+    }
+
+    .dashboard-utility-divider {
+      @apply hidden;
+    }
+  }
+
+  /* Phones: one item per line; the text beside each icon may wrap between
+     its parts ("Manchester, UK" / "14°C" / "Partly cloudy") */
+  @container (max-width: 28rem) {
+    .dashboard-utility-items {
+      @apply w-full flex-col items-start;
+    }
+
+    .dashboard-utility-item {
+      @apply items-start whitespace-normal;
+    }
+
+    .dashboard-utility-icon {
+      @apply mt-0.5;
+    }
+
+    .dashboard-utility-text {
+      @apply flex-wrap gap-y-0.5;
+    }
+  }
+
+  /* Filter bar and event grid, shared by the public Explore page (<main> is
+     its container, about the window's width) and the dashboard. 56rem: the
+     narrowest three cards still read well in; 36rem: one card per row */
+  @container (max-width: 56rem) {
+    .events-search,
+    .events-search-wide {
       @apply grid-cols-2;
+    }
+
+    .events-search-keywords,
+    .events-search-wide .events-search-keywords {
+      @apply col-span-2;
+    }
+
+    .events-grid-three {
+      @apply grid-cols-2;
+    }
+
+    /* Three and two columns look the same here, so the switcher is hidden */
+    .events-view-switcher {
+      @apply hidden;
+    }
+  }
+
+  @container (max-width: 36rem) {
+    .events-search,
+    .events-search-wide {
+      @apply grid-cols-1;
+    }
+
+    .events-search-keywords,
+    .events-search-wide .events-search-keywords {
+      @apply col-span-1;
+    }
+
+    .events-grid-three,
+    .events-grid-two {
+      @apply grid-cols-1;
     }
   }
 
@@ -1875,33 +1972,6 @@
 
     .sidebar:not(.sidebar-collapsed) .sidebar-user-row {
       @apply flex-col px-0;
-    }
-
-    .dashboard-utility-bar {
-      @apply items-start flex-wrap gap-3 px-4;
-    }
-
-    .dashboard-utility-divider {
-      @apply hidden;
-    }
-
-    /* Weather bar: one item per line; the text beside each icon may wrap
-       between its parts ("Manchester, UK" / "14°C" / "Partly cloudy").
-       These live here, after the base rules, so they win the cascade. */
-    .dashboard-utility-items {
-      @apply ml-0 w-full flex-col items-start gap-1.5;
-    }
-
-    .dashboard-utility-item {
-      @apply items-start whitespace-normal;
-    }
-
-    .dashboard-utility-icon {
-      @apply mt-0.5;
-    }
-
-    .dashboard-utility-text {
-      @apply flex-wrap gap-y-0.5;
     }
 
     .dashboard-intro {
