@@ -29,6 +29,7 @@ import {
   siteRangeOptions,
   siteTrendCards,
 } from "../data/siteAnalyticsData";
+import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 
 const eventStatusLabels = Object.fromEntries(
   eventStatuses.map(({ value, label }) => [value, label]),
@@ -89,10 +90,11 @@ export default function SiteAnalytics({ users, events }) {
         className="dashboard-section"
         aria-labelledby="site-analytics-title"
       >
-        <h2 className="dashboard-title" id="site-analytics-title">
-          <SectionIcon className="dashboard-title-icon" aria-hidden="true" />
-          {siteAnalyticsSection.title}
-        </h2>
+        <DashboardPageHeading
+          id="site-analytics-title"
+          icon={SectionIcon}
+          title={siteAnalyticsSection.title}
+        />
 
         <div className="dashboard-grid">
           {cards.map((card) => (

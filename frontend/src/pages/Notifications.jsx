@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { Bell, Inbox, Mail, MailOpen } from "lucide-react";
+import { Bell, Mail, MailOpen } from "lucide-react";
 import Button from "../components/UI/Button";
+import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import { eventDetailsPath } from "../data/eventsData";
-import DashboardCard from "../components/UI/DashboardCard";
 import {
   allNotifications,
   notificationActions,
   notificationTypeLabels,
-  notificationsInsight,
+  notificationsSummary,
 } from "../data/notificationsData";
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
@@ -16,6 +16,11 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   year: "numeric",
   hour: "2-digit",
   minute: "2-digit",
+});
+
+const summaryDateFormatter = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
 });
 
 export default function Notifications({ selectedUser, events }) {
@@ -34,6 +39,11 @@ export default function Notifications({ selectedUser, events }) {
   const unreadCount = notifications.filter(
     (notification) => !readIds.has(notification.notificationId),
   ).length;
+  const newest = new Date(
+    Math.max(
+      ...notifications.map((notification) => new Date(notification.scheduledAt)),
+    ),
+  );
   const { markAllRead, markRead, viewEvent } = notificationActions;
 
   function markAsRead(notificationId) {
@@ -63,23 +73,37 @@ export default function Notifications({ selectedUser, events }) {
         className="dashboard-section"
         aria-labelledby="notifications-title"
       >
-        <h2 className="dashboard-title" id="notifications-title">
-          <Bell className="dashboard-title-icon" aria-hidden="true" />
-          Notifications
-        </h2>
-        <div className="dashboard-grid">
-          <DashboardCard item={{ ...notificationsInsight, count: unreadCount }} />
-        </div>
-      </section>
-
-      <section
-        className="dashboard-section"
-        aria-labelledby="notifications-list-title"
-      >
-        <h2 className="dashboard-title" id="notifications-list-title">
-          <Inbox className="dashboard-title-icon" aria-hidden="true" />
-          Notifications List
-        </h2>
+        <DashboardPageHeading
+          id="notifications-title"
+          icon={Bell}
+          title="Notifications"
+          summary={
+            unreadCount === 0 ? (
+              notificationsSummary.caughtUp
+            ) : (
+              <>
+                <strong>
+                  {unreadCount} {notificationsSummary.unread}
+                </strong>
+                <span aria-hidden="true"> · </span>
+                {notificationsSummary.newest} {summaryDateFormatter.format(newest)}
+              </>
+            )
+          }
+        >
+          {notifications.length > 0 && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={markAllAsRead}
+              disabled={unreadCount === 0}
+            >
+              <markAllRead.icon aria-hidden="true" />
+              {markAllRead.label}
+            </Button>
+          )}
+        </DashboardPageHeading>
 
         {notifications.length === 0 ? (
           <div className="dashboard-empty-state">
@@ -87,19 +111,6 @@ export default function Notifications({ selectedUser, events }) {
           </div>
         ) : (
           <>
-            <div className="notification-toolbar">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={markAllAsRead}
-                disabled={unreadCount === 0}
-              >
-                <markAllRead.icon aria-hidden="true" />
-                {markAllRead.label}
-              </Button>
-            </div>
-
             <ul className="notification-list">
               {notifications.map((notification) => {
                 const isRead = readIds.has(notification.notificationId);

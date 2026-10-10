@@ -8,6 +8,7 @@ import {
   eventStatuses,
   manageEventsMessages,
 } from "../data/manageEventsData";
+import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -49,16 +50,12 @@ export default function EditEventStatus({ events, onUpdateEventStatus }) {
         className="dashboard-section"
         aria-labelledby="edit-event-title"
       >
-        <div className="section-heading-row">
-          <h2 className="dashboard-title" id="edit-event-title">
-            <edit.icon className="dashboard-title-icon" aria-hidden="true" />
-            Edit Event Status
-          </h2>
+        <DashboardPageHeading id="edit-event-title" icon={edit.icon} title="Edit Event Status">
           <Button to={goBack.to} variant="primary" size="sm">
             <goBack.icon aria-hidden="true" />
             {goBack.label}
           </Button>
-        </div>
+        </DashboardPageHeading>
 
         {!event ? (
           <div className="dashboard-empty-state">

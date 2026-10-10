@@ -2,6 +2,7 @@ import { CalendarDays, MapPin, Tag } from "lucide-react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Button from "../components/UI/Button";
 import { eventDetailsPage } from "../data/eventsData";
+import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -67,16 +68,16 @@ export default function EventDetails({ events, inDashboard = false }) {
           className="dashboard-section"
           aria-labelledby="event-details-heading"
         >
-          <div className="section-heading-row">
-            <h2 className="dashboard-title" id="event-details-heading">
-              <TitleIcon className="dashboard-title-icon" aria-hidden="true" />
-              {dashboardTitle}
-            </h2>
+          <DashboardPageHeading
+            id="event-details-heading"
+            icon={TitleIcon}
+            title={dashboardTitle}
+          >
             <Button type="button" variant="primary" size="sm" onClick={handleGoBack}>
               <goBack.icon aria-hidden="true" />
               {goBack.label}
             </Button>
-          </div>
+          </DashboardPageHeading>
 
           {event ? (
             <div className="event-details-body">

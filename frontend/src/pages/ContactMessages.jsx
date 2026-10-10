@@ -1,9 +1,8 @@
-import DashboardCard from "../components/UI/DashboardCard";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import {
   contactMessagesActions,
-  contactMessagesInsight,
-  contactMessagesSection,
+  contactMessagesPage,
+  contactMessagesSummary,
   contactMessagesText,
 } from "../data/contactMessagesData";
 
@@ -15,10 +14,40 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   minute: "2-digit",
 });
 
+const summaryDateFormatter = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short",
+});
+
+// "3 messages · 2 unread · newest 26 Sept"; messages arrive newest first
+function ContactMessagesSummary({ messages }) {
+  const text = contactMessagesSummary;
+  if (messages.length === 0) return text.none;
+
+  const unread = messages.filter((message) => !message.readAt).length;
+  return (
+    <>
+      <strong>
+        {messages.length} {messages.length === 1 ? text.message : text.messages}
+      </strong>
+      {unread > 0 && (
+        <>
+          <span aria-hidden="true"> · </span>
+          <strong>
+            {unread} {text.unread}
+          </strong>
+        </>
+      )}
+      <span aria-hidden="true"> · </span>
+      {text.newest} {summaryDateFormatter.format(new Date(messages[0].sentAt))}
+    </>
+  );
+}
+
 // Admin page from contact_messages.php. Messages come from App state, so
 // ones sent through the public Contact form appear here straight away.
 export default function ContactMessages({ contactMessages }) {
-  const SectionIcon = contactMessagesSection.icon;
+  const PageIcon = contactMessagesPage.icon;
   // Matches get_all_contact_messages(): newest first
   const messages = [...contactMessages].sort((a, b) =>
     b.sentAt.localeCompare(a.sentAt),
@@ -28,29 +57,15 @@ export default function ContactMessages({ contactMessages }) {
     <div className="dashboard-home">
       <section
         className="dashboard-section"
-        aria-labelledby="contact-count-title"
-      >
-        <DashboardPageHeading
-          id="contact-count-title"
-          icon={contactMessagesInsight.icon}
-          title={contactMessagesInsight.title}
-          actions={contactMessagesActions}
-        />
-        <div className="dashboard-grid">
-          <DashboardCard
-            item={{ ...contactMessagesInsight, count: messages.length }}
-          />
-        </div>
-      </section>
-
-      <section
-        className="dashboard-section"
         aria-labelledby="contact-messages-title"
       >
-        <h2 className="dashboard-title" id="contact-messages-title">
-          <SectionIcon className="dashboard-title-icon" aria-hidden="true" />
-          {contactMessagesSection.title}
-        </h2>
+        <DashboardPageHeading
+          id="contact-messages-title"
+          icon={PageIcon}
+          title={contactMessagesPage.title}
+          summary={<ContactMessagesSummary messages={messages} />}
+          actions={contactMessagesActions}
+        />
 
         {messages.length === 0 ? (
           <div className="dashboard-empty-state">
@@ -61,7 +76,7 @@ export default function ContactMessages({ contactMessages }) {
             {messages.map((message) => (
               <li className="notification-card contact-message-card" key={message.messageId}>
                 <div className="notification-header">
-                  <SectionIcon
+                  <PageIcon
                     className="notification-status-icon"
                     aria-hidden="true"
                   />

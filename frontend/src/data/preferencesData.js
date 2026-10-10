@@ -1,4 +1,4 @@
-import { CalendarSearch, Heart, Settings2, SquareCheck } from "lucide-react";
+import { CalendarSearch, Heart, SquareCheck } from "lucide-react";
 
 import { eventCategories } from "./eventsData";
 
@@ -7,9 +7,12 @@ export const preferencesActions = [
   { label: "My Favourites", to: "/dashboard/my-favourites", icon: Heart },
 ];
 
-export const interestsInsight = {
-  title: "Interests",
-  icon: Settings2,
+// The line under the page title: "2 interests · 14 upcoming events match them"
+export const preferencesSummary = {
+  interest: "interest",
+  interests: "interests",
+  matching: "upcoming events match them",
+  none: "Choose at least one interest to get event alerts",
 };
 
 export const preferencesForm = {

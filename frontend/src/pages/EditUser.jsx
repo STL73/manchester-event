@@ -7,6 +7,7 @@ import {
   manageUsersMessages,
   userActions,
 } from "../data/manageUsersData";
+import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -35,16 +36,12 @@ export default function EditUser({ users, onUpdateUserStatus }) {
         className="dashboard-section"
         aria-labelledby="edit-user-title"
       >
-        <div className="section-heading-row">
-          <h2 className="dashboard-title" id="edit-user-title">
-            <edit.icon className="dashboard-title-icon" aria-hidden="true" />
-            Edit User Status
-          </h2>
+        <DashboardPageHeading id="edit-user-title" icon={edit.icon} title="Edit User Status">
           <Button to={goBack.to} variant="primary" size="sm">
             <goBack.icon aria-hidden="true" />
             {goBack.label}
           </Button>
-        </div>
+        </DashboardPageHeading>
 
         {!user ? (
           <div className="dashboard-empty-state">

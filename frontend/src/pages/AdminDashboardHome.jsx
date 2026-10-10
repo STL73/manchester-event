@@ -2,11 +2,94 @@ import { ChartNoAxesColumn, Logs } from "lucide-react";
 import Button from "../components/UI/Button";
 import DashboardCard from "../components/UI/DashboardCard";
 import {
+  adminInsights,
   recentAdminActions,
-  siteTotalsCards,
   viewAllLogsAction,
 } from "../data/adminDashboardData";
-import { getSiteTotals } from "../lib/analytics";
+import { isPublicEvent } from "../data/eventsData";
+import { countTrend, getRangeBounds } from "../lib/analytics";
+import { isUpcoming, matchesWhen } from "../lib/eventDates";
+
+const DAY = 24 * 60 * 60 * 1000;
+
+function daysSince(date, now) {
+  return Math.floor((now - new Date(date)) / DAY);
+}
+
+// The four Quick Insights cards, from the shared users, events and messages
+function getAdminInsights({ users, events, contactMessages }) {
+  const now = new Date();
+  const text = adminInsights;
+
+  // Oldest first by when it was sent for review. A pending event that an
+  // admin has already decided on once is a resubmission (schema rule)
+  const pending = events
+    .filter((event) => event.status === "pending")
+    .sort((a, b) =>
+      (a.orgUpdatedAt ?? a.createdAt).localeCompare(b.orgUpdatedAt ?? b.createdAt),
+    );
+  const resubmitted = pending.filter((event) => event.adminUpdatedAt).length;
+  const oldestPending = pending[0];
+
+  const unread = contactMessages
+    .filter((message) => !message.readAt)
+    .sort((a, b) => a.sentAt.localeCompare(b.sentAt));
+
+  // Sign-ups in the last 30 days against the 30 days before
+  const signUps = countTrend(
+    users,
+    (user) => user.createdAt,
+    getRangeBounds({ days: 30 }, now),
+    now,
+  );
+
+  const live = events.filter((event) => isPublicEvent(event) && isUpcoming(event, now));
+  const thisWeekend = live.filter((event) => matchesWhen(event, "weekend", now)).length;
+  // Everything Manage Events lists: drafts stay with their organiser
+  const listed = events.filter((event) => event.status !== "draft").length;
+
+  return [
+    {
+      ...text.review,
+      count: pending.length,
+      action: oldestPending && {
+        label: [
+          text.review.oldest(
+            daysSince(oldestPending.orgUpdatedAt ?? oldestPending.createdAt, now),
+          ),
+          resubmitted > 0 && `${resubmitted} ${text.review.resubmitted}`,
+        ]
+          .filter(Boolean)
+          .join(" · "),
+        to: text.review.to,
+      },
+      detail: text.review.none,
+    },
+    {
+      ...text.messages,
+      count: unread.length,
+      action: unread[0] && {
+        label: text.messages.oldest(daysSince(unread[0].sentAt, now)),
+        to: text.messages.to,
+      },
+      detail: text.messages.none,
+    },
+    {
+      ...text.newUsers,
+      count: signUps.current,
+      trend: {
+        ...signUps,
+        label: text.newUsers.total(users.length),
+        note: text.newUsers.note(signUps.previous),
+      },
+    },
+    {
+      ...text.live,
+      count: live.length,
+      detail: `${text.live.total(listed)} · ${text.live.weekend(thisWeekend)}`,
+    },
+  ];
+}
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -16,10 +99,9 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   minute: "2-digit",
 });
 
-// Quick Insights are counted live from the shared users and events lists
-export default function AdminDashboardHome({ users, events }) {
+export default function AdminDashboardHome({ users, events, contactMessages }) {
   const ViewAllIcon = viewAllLogsAction.icon;
-  const totals = getSiteTotals(users, events);
+  const insights = getAdminInsights({ users, events, contactMessages });
 
   return (
     <div className="dashboard-home">
@@ -35,8 +117,8 @@ export default function AdminDashboardHome({ users, events }) {
           Quick Insights
         </h2>
         <div className="dashboard-grid">
-          {siteTotalsCards.map((card) => (
-            <DashboardCard key={card.id} item={{ ...card, count: totals[card.id] }} />
+          {insights.map((item) => (
+            <DashboardCard key={item.title} item={item} />
           ))}
         </div>
       </section>

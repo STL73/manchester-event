@@ -63,6 +63,18 @@ frontend/src/
   secondary buttons beside it (`DashboardShortcuts`, no visible "Quick actions" label). Inner pages
   use `DashboardPageHeading`; on Home the greeting is the title. The PHP pages put a Quick Actions
   block above the title; changed 2026-10-10
+- **Dashboard headings** (decided 2026-10-10): the page title is the page's only `<h1>`, 24px white
+  with its icon (`DashboardPageHeading`, or the greeting on Home); the sidebar's "… Dashboard" is
+  plain text. Section headings are `<h2>` `.dashboard-title`, 20px muted. Panel titles inside the
+  dashboard (`.contact-form-title`) are 20px; the public Contact form keeps 24px. Page-specific
+  buttons (Go Back, Mark All as Read) go in the title row as `DashboardPageHeading`'s children
+- **Dashboard spacing:** 32px under the title row, 48px between sections, 16px from a heading to
+  its content (`.dashboard-home` / `.dashboard-section` gaps, see the comment in `App.css`)
+- **Stat cards only on the three Home pages.** Each card answers "what needs me, what's coming, or
+  how am I doing", and always has one context line (`trend`, `action` or `detail` in
+  `DashboardCard`); no bare figures. Inner pages get a one-line summary under the title instead
+  (`DashboardPageHeading`'s `summary`, figures in `<strong>`), with its own wording when empty.
+  Cards have a 5% white top gradient, never a hue. Decided 2026-10-10
 - **Responsive layout inside the dashboard** uses container queries (`@container (max-width: …)`
   in `App.css`), not window breakpoints: `.dashboard-content` is the container, so a page responds
   to the space beside the sidebar. `<main>` is a container too, so the parts shared with public pages
