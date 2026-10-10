@@ -1,8 +1,7 @@
-import { ChartNoAxesColumn, Logs, Zap } from "lucide-react";
+import { ChartNoAxesColumn, Logs } from "lucide-react";
 import Button from "../components/UI/Button";
 import DashboardCard from "../components/UI/DashboardCard";
 import {
-  adminDashboardActions,
   recentAdminActions,
   siteTotalsCards,
   viewAllLogsAction,
@@ -24,24 +23,6 @@ export default function AdminDashboardHome({ users, events }) {
 
   return (
     <div className="dashboard-home">
-      <section
-        className="dashboard-section"
-        aria-labelledby="quick-actions-title"
-      >
-        <h2 className="dashboard-title" id="quick-actions-title">
-          <Zap className="dashboard-title-icon" aria-hidden="true" />
-          Quick Actions
-        </h2>
-        <div className="dashboard-actions">
-          {adminDashboardActions.map(({ label, to, icon: Icon }) => (
-            <Button key={label} to={to} variant="primary" size="md">
-              <Icon aria-hidden="true" />
-              {label}
-            </Button>
-          ))}
-        </div>
-      </section>
-
       <section
         className="dashboard-section"
         aria-labelledby="quick-insights-title"

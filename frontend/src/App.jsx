@@ -230,7 +230,9 @@ function App() {
       {showNavbar && (
         <Navbar isUser={isUser} onToggleUserMode={toggleUserMode} />
       )}
-      <main className={`flex-1 ${showNavbar ? "pt-16" : ""}`}>
+      {/* @container: shared parts (filter bar, event grid) size themselves by
+          the space they have, here or in the dashboard's content box */}
+      <main className={`@container flex-1 ${showNavbar ? "pt-16" : ""}`}>
         <Routes>
           {/* The landing page is for guests: signed-in users go to their
               dashboard. The other public pages stay open to everyone, so a

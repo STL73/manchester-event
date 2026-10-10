@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CalendarCheck, ChartNoAxesColumn, Zap } from "lucide-react";
+import { CalendarCheck, ChartNoAxesColumn } from "lucide-react";
 import Button from "../components/UI/Button";
 import DashboardCard from "../components/UI/DashboardCard";
 import EventCard from "../components/events/EventCard";
@@ -7,7 +7,6 @@ import StatusMessage from "../components/UI/StatusMessage";
 import {
   lastCreatedInsight,
   nextEventInsight,
-  organiserDashboardActions,
   statusInsights,
 } from "../data/organiserDashboardData";
 import {
@@ -55,24 +54,6 @@ export default function OrganiserDashboardHome({ organiserEvents: events, onDele
 
   return (
     <div className="dashboard-home">
-      <section
-        className="dashboard-section"
-        aria-labelledby="quick-actions-title"
-      >
-        <h2 className="dashboard-title" id="quick-actions-title">
-          <Zap className="dashboard-title-icon" aria-hidden="true" />
-          Quick Actions
-        </h2>
-        <div className="dashboard-actions">
-          {organiserDashboardActions.map(({ label, to, icon: Icon }) => (
-            <Button key={label} to={to} variant="primary" size="md">
-              <Icon aria-hidden="true" />
-              {label}
-            </Button>
-          ))}
-        </div>
-      </section>
-
       <section
         className="dashboard-section"
         aria-labelledby="quick-insights-title"

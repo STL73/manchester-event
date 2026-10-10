@@ -52,6 +52,22 @@ frontend/src/
   success message and a faint slate for past rows in tables.
   Repeated multi-utility patterns get a semantic class in `App.css` built with `@apply` (e.g.
   `.event-card`, `.status-badge`), which is how most components are styled
+- **Corner radius:** panels that hold a page's content (forms, tables, chart cards, detail and
+  activity panels) are 16px (`rounded-2xl`), public and dashboard alike. Cards in a grid, list
+  items and small boxes are 12px (`rounded-xl`). The filter bar is 40px round its pill fields.
+  Decided 2026-10-10
+- **Selected vs action:** a selected option (navbar and sidebar links, date pills, range toggle,
+  view switcher) gets the accent tint: `bg-accent/15`, an `accent/30` ring, bright text. Solid
+  accent is only for buttons that do something (Search, Save, Submit)
+- **Dashboard pages** open with a title row: the page's title, with its shortcuts as small
+  secondary buttons beside it (`DashboardShortcuts`, no visible "Quick actions" label). Inner pages
+  use `DashboardPageHeading`; on Home the greeting is the title. The PHP pages put a Quick Actions
+  block above the title; changed 2026-10-10
+- **Responsive layout inside the dashboard** uses container queries (`@container (max-width: …)`
+  in `App.css`), not window breakpoints: `.dashboard-content` is the container, so a page responds
+  to the space beside the sidebar. `<main>` is a container too, so the parts shared with public pages
+  (filter bar, event grid) follow the same rules on both. Window `@media` rules stay for the page
+  frame: navbar, sidebar rail, outer margins
 - Dates use `Intl.DateTimeFormat("en-GB", …)`
 - Respect `motion-reduce:` and visible `focus-visible:` states, as `Button` does
 
@@ -65,10 +81,10 @@ frontend/src/
 
 - `src/App.css` `@theme` block: the palette and font for the whole app. Change it only on request
 - `src/components/UI/Button.jsx`: size/variant maps are tuned so every variant is the same height.
-  Buttons are pills, like the site's other controls (things you click are pills; fields you fill in
-  have 8px corners). The one exception is the filter bar's Apply button (`SearchBar.jsx`), which
-  keeps `rounded-lg!` to sit in its grid of 8px fields; Home's single search box is a pill
-  throughout. `type` defaults to `"button"`, so pass `type="submit"` on form buttons
+  Buttons are pills, like the site's other controls (things you click are pills; form fields have
+  8px corners). Search and filter bars are the exception the other way: their fields are pills
+  too, on Home, Explore Events and My Events, since they read as one control rather than a form.
+  `type` defaults to `"button"`, so pass `type="submit"` on form buttons
 - `src/data/eventsData.js`: single source of truth for events (see above)
 
 ## Commands

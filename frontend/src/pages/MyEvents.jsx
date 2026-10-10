@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
-import { CalendarCheck, Zap } from "lucide-react";
+import { CalendarCheck } from "lucide-react";
 import Button from "../components/UI/Button";
 import EventCard from "../components/events/EventCard";
 import SearchBar from "../components/events/SearchBar";
 import StatusMessage from "../components/UI/StatusMessage";
+import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import { eventCategories, eventLocations } from "../data/eventsData";
 import {
   applyFiltersAction,
@@ -106,30 +107,14 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
     <div className="dashboard-home">
       <section
         className="dashboard-section"
-        aria-labelledby="quick-actions-title"
-      >
-        <h2 className="dashboard-title" id="quick-actions-title">
-          <Zap className="dashboard-title-icon" aria-hidden="true" />
-          Quick Actions
-        </h2>
-        <div className="dashboard-actions">
-          {myEventsActions.map(({ label, to, icon: Icon }) => (
-            <Button key={label} to={to} variant="primary" size="md">
-              <Icon aria-hidden="true" />
-              {label}
-            </Button>
-          ))}
-        </div>
-      </section>
-
-      <section
-        className="dashboard-section"
         aria-labelledby="my-events-title"
       >
-        <h2 className="dashboard-title" id="my-events-title">
-          <CalendarCheck className="dashboard-title-icon" aria-hidden="true" />
-          My Events
-        </h2>
+        <DashboardPageHeading
+          id="my-events-title"
+          icon={CalendarCheck}
+          title="My Events"
+          actions={myEventsActions}
+        />
 
         <div className="filter-panel">
           <p className="content-p">{myEventsFilterIntro}</p>

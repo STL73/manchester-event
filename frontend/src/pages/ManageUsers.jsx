@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Users, Zap } from "lucide-react";
+import { Users } from "lucide-react";
 import Button from "../components/UI/Button";
 import Tooltip from "../components/UI/Tooltip";
 import StatusMessage from "../components/UI/StatusMessage";
+import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import {
   accountStatuses,
   manageUsersActions,
@@ -37,30 +38,14 @@ export default function ManageUsers({ users, onDeleteUser }) {
     <div className="dashboard-home">
       <section
         className="dashboard-section"
-        aria-labelledby="quick-actions-title"
-      >
-        <h2 className="dashboard-title" id="quick-actions-title">
-          <Zap className="dashboard-title-icon" aria-hidden="true" />
-          Quick Actions
-        </h2>
-        <div className="dashboard-actions">
-          {manageUsersActions.map(({ label, to, icon: Icon }) => (
-            <Button key={label} to={to} variant="primary" size="md">
-              <Icon aria-hidden="true" />
-              {label}
-            </Button>
-          ))}
-        </div>
-      </section>
-
-      <section
-        className="dashboard-section"
         aria-labelledby="manage-users-title"
       >
-        <h2 className="dashboard-title" id="manage-users-title">
-          <Users className="dashboard-title-icon" aria-hidden="true" />
-          Manage Users
-        </h2>
+        <DashboardPageHeading
+          id="manage-users-title"
+          icon={Users}
+          title="Manage Users"
+          actions={manageUsersActions}
+        />
 
         {message && (
           <StatusMessage className="table-message">{message}</StatusMessage>

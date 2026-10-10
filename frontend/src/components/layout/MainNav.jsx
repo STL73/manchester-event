@@ -16,6 +16,11 @@ export default function MainNav({ items, activePath, pathname }) {
           />
         ))}
       </div>
+      {/* The dashboards' honeycomb: the empty space under the links, which
+          is the one spot on every dashboard page with nothing to read */}
+      <div className="sidebar-honeycomb" aria-hidden="true">
+        <div className="honeycomb-texture" />
+      </div>
     </div>
   );
 }

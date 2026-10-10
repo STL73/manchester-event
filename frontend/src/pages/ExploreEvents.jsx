@@ -1,7 +1,6 @@
-import { Zap } from "lucide-react";
-import Button from "../components/UI/Button";
 import PageHero from "../components/UI/PageHero";
 import EventsBrowser from "../components/events/EventsBrowser";
+import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import {
   exploreEventsActions,
   exploreEventsSection,
@@ -48,30 +47,14 @@ export default function ExploreEvents({
     <div className="dashboard-home">
       <section
         className="dashboard-section"
-        aria-labelledby="quick-actions-title"
-      >
-        <h2 className="dashboard-title" id="quick-actions-title">
-          <Zap className="dashboard-title-icon" aria-hidden="true" />
-          Quick Actions
-        </h2>
-        <div className="dashboard-actions">
-          {exploreEventsActions.map(({ label, to, icon: Icon }) => (
-            <Button key={label} to={to} variant="primary" size="md">
-              <Icon aria-hidden="true" />
-              {label}
-            </Button>
-          ))}
-        </div>
-      </section>
-
-      <section
-        className="dashboard-section"
         aria-labelledby="explore-events-title"
       >
-        <h2 className="dashboard-title" id="explore-events-title">
-          <SectionIcon className="dashboard-title-icon" aria-hidden="true" />
-          {exploreEventsSection.title}
-        </h2>
+        <DashboardPageHeading
+          id="explore-events-title"
+          icon={SectionIcon}
+          title={exploreEventsSection.title}
+          actions={exploreEventsActions}
+        />
         <div className="dashboard-events-browser">{browser}</div>
       </section>
     </div>
