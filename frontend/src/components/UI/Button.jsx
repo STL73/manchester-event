@@ -30,6 +30,10 @@ export const Button = forwardRef(
       // A text link that shrinks when pressed looks broken, so no scale
       link: "border-transparent text-accent underline decoration-transparent underline-offset-4 hover:decoration-current active:scale-100",
       danger: "border-danger/40 bg-card text-danger hover:border-danger hover:bg-danger/10",
+      // Solid red, built like primary: only for the step that can't be undone
+      // (Delete permanently). The step before it stays the outlined danger
+      destructive:
+        "border-transparent bg-danger text-background shadow-[inset_0_1px_0_rgb(255_255_255/0.3)] hover:bg-danger-hover hover:shadow-[inset_0_1px_0_rgb(255_255_255/0.3),0_8px_24px_-8px_var(--color-danger)]",
     };
 
     // Pills, like every other control on the site (navbar pill, chips, the

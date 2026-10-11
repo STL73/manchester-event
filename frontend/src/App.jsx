@@ -37,6 +37,7 @@ import { initialFavouriteIds } from "./data/myFavouritesData";
 import { userCategoryIds } from "./data/preferencesData";
 import { initialContactMessages } from "./data/contactMessagesData";
 import { initialNotifications } from "./data/notificationsData";
+import { passwordChangedNotification } from "./data/profileSettingsData";
 
 import "./App.css";
 
@@ -86,6 +87,10 @@ function App() {
   // Read on the Notifications page and counted on the user dashboard, so
   // marking one read shows everywhere
   const [notifications, setNotifications] = useState(initialNotifications);
+  // Changes made on Settings (display name, picture, email switch), kept per
+  // test role and laid over navigationData's mock user, so the sidebar and
+  // greeting show the new name straight away
+  const [profileChanges, setProfileChanges] = useState({});
 
   // Sets read_at on the ones not read yet; a read notification keeps its time
   function markNotificationsRead(notificationIds) {
@@ -129,7 +134,45 @@ function App() {
   }
   const data = getData();
   const userTypes = data[0].role.map(({ type }) => type);
-  const selectedUser = getUserData(userType);
+  const selectedUser = { ...getUserData(userType), ...profileChanges[userType] };
+  // Ever public = approved, cancelled or past: such an organiser can't
+  // delete their own account (the schema's deletion rule)
+  const hasPublicEvents = organiserEvents.some((event) =>
+    ["approved", "cancelled", "past"].includes(event.status),
+  );
+
+  function updateProfile(changes) {
+    setProfileChanges((current) => ({
+      ...current,
+      [userType]: { ...current[userType], ...changes },
+    }));
+  }
+
+  // A password change is a password_changed notification, as the backend
+  // will send; newest first, like the rest of the list
+  function addPasswordChangedNotification() {
+    setNotifications((current) => [
+      {
+        notificationId: Math.max(0, ...current.map((item) => item.notificationId)) + 1,
+        recipient: userType,
+        eventId: null,
+        type: "password_changed",
+        subject: passwordChangedNotification.subject,
+        body: passwordChangedNotification.body,
+        createdAt: new Date().toISOString(),
+        readAt: null,
+      },
+      ...current,
+    ]);
+  }
+
+  // Until the API exists: the account leaves Manage Users and you are
+  // signed out to the public home page
+  function deleteAccount() {
+    setUsers((currentUsers) => currentUsers.filter((user) => user.email !== selectedUser.email));
+    setIsUser(false);
+    navigate("/");
+  }
 
   function deleteUser(userId) {
     setUsers((currentUsers) =>
@@ -292,7 +335,21 @@ function App() {
             <Route path="events/:eventId" element={<EventDetails inDashboard events={events} />} />
             <Route path="preferences" element={<Preferences events={publicEvents} interestIds={interestIds} onSaveInterests={setInterestIds} />} />
             <Route path="notifications" element={<Notifications selectedUser={selectedUser} notifications={notifications} onMarkRead={markNotificationsRead} />} />
-            <Route path="settings" element={<Settings selectedUser={selectedUser} />} />
+            {/* key: a new test role starts the forms from that role's details */}
+            <Route
+              path="settings"
+              element={
+                <Settings
+                  key={userType}
+                  selectedUser={selectedUser}
+                  hasPublicEvents={hasPublicEvents}
+                  onSaveProfile={updateProfile}
+                  onPasswordChanged={addPasswordChangedNotification}
+                  onEmailNotificationsChange={(emailNotifications) => updateProfile({ emailNotifications })}
+                  onDeleteAccount={deleteAccount}
+                />
+              }
+            />
             <Route path="create-events" element={<CreateEvents onCreateEvent={createOrganiserEvent} />} />
             <Route path="my-events" element={<MyEvents organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} />} />
             <Route path="my-events/:eventId/edit" element={<ResetOnParam param="eventId"><CreateEvents mode="edit" events={organiserEvents} onUpdateEvent={updateOrganiserEvent} onCancelEvent={cancelOrganiserEvent} /></ResetOnParam>} />

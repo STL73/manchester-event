@@ -10,7 +10,12 @@ export default function UserNav({ items, onLogout, onSwitchUserType }) {
   return (
     <div className="sidebar-user">
       <div className="sidebar-user-row">
-        <Avatar className="sidebar-user-avatar" aria-hidden="true" />
+        {/* A picture saved on Settings replaces the default icon */}
+        {items.avatarUrl ? (
+          <img className="sidebar-user-avatar sidebar-user-photo" src={items.avatarUrl} alt="" />
+        ) : (
+          <Avatar className="sidebar-user-avatar" aria-hidden="true" />
+        )}
         <div className="sidebar-user-details">
           <p className="sidebar-user-name">{items.user}</p>
           <p className="sidebar-user-email">{items.email}</p>
