@@ -1140,10 +1140,32 @@
     @apply pointer-events-none absolute bottom-full right-0 z-20 mb-2.5 px-2.5 py-1.5 whitespace-nowrap rounded-lg border-2 border-accent/70 bg-border text-xs font-medium text-foreground shadow-lg shadow-black/40 opacity-0 translate-y-1 transition duration-150 motion-reduce:transition-none;
   }
 
-  /* Arrow: a rotated square sharing the tooltip border, centred on the button */
+  /* Arrow: a rotated square sharing the tooltip border, centred on the
+     button. A wider trigger sets --tooltip-arrow-offset to half its width,
+     less the arrow's 5px, to keep the arrow on its middle */
   .tooltip::after {
     content: "";
-    @apply absolute top-full right-[11px] -mt-[5px] w-2.5 h-2.5 rotate-45 border-r-2 border-b-2 border-accent/70 bg-border;
+    @apply absolute top-full right-[var(--tooltip-arrow-offset,11px)] -mt-[5px] w-2.5 h-2.5 rotate-45 border-r-2 border-b-2 border-accent/70 bg-border;
+  }
+
+  .tooltip-start {
+    @apply left-0 right-auto;
+  }
+
+  .tooltip-start::after {
+    @apply left-[var(--tooltip-arrow-offset,11px)] right-auto;
+  }
+
+  .tooltip-center {
+    @apply left-1/2 right-auto -translate-x-1/2;
+  }
+
+  .tooltip-center::after {
+    @apply left-1/2 right-auto -ml-[5px];
+  }
+
+  .tooltip-wrap {
+    @apply w-max max-w-56 whitespace-normal text-center leading-snug;
   }
 
   .tooltip-wrapper:hover .tooltip,
@@ -1333,20 +1355,202 @@
   }
 
   /* preferences styles */
-  .preferences-options {
-    @apply flex flex-wrap gap-4 py-6 border-y border-dashed border-border;
+  /* The honeycomb, with Your picks beside it. Below 64rem the panel becomes
+     a bar pinned above the honeycomb (see the @container rules further down).
+     Sticky positions are measured from .dashboard-container, the scroll area */
+  .preferences-layout {
+    @apply grid w-full grid-cols-[minmax(0,1fr)_18.75rem] items-start gap-8;
   }
 
-  .preferences-option {
-    @apply px-4 py-2 flex items-center gap-2 rounded-full border border-border bg-background text-foreground font-medium cursor-pointer transition-colors hover:border-accent has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent-hover;
+  .preferences-picker {
+    @apply min-w-0 flex flex-col gap-1;
   }
 
-  .preferences-option:has(input:checked) {
-    @apply border-accent bg-accent text-background;
+  .preferences-picks {
+    @apply sticky top-4 z-10 flex flex-col gap-5 rounded-2xl border border-border bg-card p-6;
   }
 
-  .preferences-option input {
-    @apply w-4 h-4 accent-background cursor-pointer;
+  .preferences-picks-head {
+    @apply flex flex-col gap-1;
+  }
+
+  .preferences-picks-figures {
+    @apply text-sm text-muted [&_strong]:font-semibold [&_strong]:text-foreground;
+  }
+
+  /* Save goes last on wide screens, under the events */
+  .preferences-picks-actions {
+    @apply order-last flex border-t border-dashed border-border pt-5;
+  }
+
+  .preferences-picks-saved {
+    @apply order-last;
+  }
+
+  /* Only the narrow bar folds the events away */
+  .preferences-coming-toggle {
+    @apply hidden;
+  }
+
+  .preferences-coming {
+    @apply flex flex-col gap-3;
+  }
+
+  .preferences-coming-title {
+    @apply text-xs font-medium uppercase tracking-wider text-muted;
+  }
+
+  .preferences-coming-empty {
+    @apply text-sm text-muted;
+  }
+
+  .preferences-coming-list {
+    @apply flex flex-col gap-1 list-none;
+  }
+
+  .preferences-coming-item {
+    @apply -mx-2 grid grid-cols-[2.75rem_minmax(0,1fr)] items-center gap-3 rounded-xl p-2 transition-colors hover:bg-foreground/5 focus-visible:outline-2 focus-visible:outline-accent motion-reduce:transition-none;
+  }
+
+  .preferences-coming-date {
+    @apply flex flex-col items-center rounded-lg border border-border py-1 leading-tight;
+  }
+
+  .preferences-coming-day {
+    @apply text-base font-semibold text-foreground;
+  }
+
+  .preferences-coming-month {
+    @apply text-[10px] uppercase text-muted;
+  }
+
+  .preferences-coming-text {
+    @apply flex min-w-0 flex-col;
+  }
+
+  .preferences-coming-name {
+    @apply truncate text-sm font-medium text-foreground;
+  }
+
+  .preferences-coming-location {
+    @apply truncate text-xs text-muted;
+  }
+
+  /* Category honeycomb: lucide's hexagon (the logo's cell), drawn as a
+     border-coloured hexagon with a card-coloured one 1.5px inside it.
+     CategoryHoneycomb sets --honeycomb-cell (the width); the height keeps the
+     cell's 10:11 ratio, and each row tucks up by a quarter of that height so
+     it nests into the row above, less the gap measured along the slope */
+  .honeycomb {
+    --honeycomb-gap: 8px;
+    --tooltip-arrow-offset: calc(var(--honeycomb-cell) / 2 - 5px);
+    @apply flex w-full flex-col items-center pt-4 pb-2;
+  }
+
+  .honeycomb-row {
+    @apply flex;
+    gap: var(--honeycomb-gap);
+  }
+
+  .honeycomb-row + .honeycomb-row {
+    margin-top: calc(var(--honeycomb-cell) * -0.275 + var(--honeycomb-gap) * 0.87);
+  }
+
+  .honeycomb-gap {
+    width: var(--honeycomb-cell);
+  }
+
+  .honeycomb-cell {
+    @apply relative block cursor-pointer transition-[filter] duration-150 motion-reduce:transition-none;
+  }
+
+  /* The mask clips outlines, so the focus ring is a glow round the shape */
+  .honeycomb-cell:has(:focus-visible) {
+    filter: drop-shadow(0 0 1px var(--color-accent-hover)) drop-shadow(0 0 2px var(--color-accent-hover));
+  }
+
+  .honeycomb-hex {
+    @apply hex-cell relative grid place-items-center bg-border transition-colors duration-200 motion-reduce:transition-none;
+    width: var(--honeycomb-cell);
+    height: calc(var(--honeycomb-cell) * 1.1);
+  }
+
+  .honeycomb-hex::before {
+    @apply hex-cell absolute inset-[1.5px] bg-card transition-colors duration-200 content-[''] motion-reduce:transition-none;
+  }
+
+  .honeycomb-body {
+    @apply relative flex flex-col items-center gap-1 px-3.5 pt-[8%] text-center;
+  }
+
+  .honeycomb-icon {
+    @apply size-[22px] text-muted transition-[color,transform] duration-200 motion-reduce:transition-none;
+  }
+
+  .honeycomb-name {
+    @apply max-w-24 text-[13px] font-medium leading-tight text-foreground;
+  }
+
+  .honeycomb-count {
+    @apply text-[11px] text-muted;
+  }
+
+  /* In the top point, clear of the icon at every cell size (the body's
+     top padding makes the room) */
+  .honeycomb-tick {
+    @apply absolute top-[5%] left-1/2 hidden size-3.5 -translate-x-1/2 text-accent-hover;
+  }
+
+  .honeycomb-cell:hover .honeycomb-hex {
+    @apply bg-accent;
+  }
+
+  .honeycomb-cell:hover .honeycomb-icon {
+    @apply -translate-y-0.5 motion-reduce:translate-y-0;
+  }
+
+  /* Selected: the accent tint and ring every selected option gets; solid
+     accent stays for Save */
+  .honeycomb-cell:has(:checked) .honeycomb-hex {
+    @apply bg-accent/70;
+  }
+
+  .honeycomb-cell:has(:checked) .honeycomb-hex::before {
+    background: color-mix(in srgb, var(--color-accent) 15%, var(--color-card));
+  }
+
+  .honeycomb-cell:has(:checked) .honeycomb-icon {
+    @apply text-accent-hover;
+  }
+
+  .honeycomb-cell:has(:checked) .honeycomb-tick {
+    @apply block;
+  }
+
+  /* Phone-sized cells (three to a row, about 93px) */
+  .honeycomb[data-size="small"] .honeycomb-body {
+    @apply gap-0.5 px-2;
+  }
+
+  .honeycomb[data-size="small"] .honeycomb-icon {
+    @apply size-[18px];
+  }
+
+  .honeycomb[data-size="small"] .honeycomb-name {
+    @apply max-w-[4.6rem] text-[11px];
+  }
+
+  .honeycomb[data-size="small"] .honeycomb-count {
+    @apply text-[10px];
+  }
+
+  .honeycomb[data-size="small"] .honeycomb-tick {
+    @apply size-3;
+  }
+
+  /* Two cells wide at most, so a description fits a phone's honeycomb */
+  .honeycomb[data-size="small"] .tooltip-wrap {
+    max-width: calc(var(--honeycomb-cell) * 2);
   }
 
   /* notifications styles */
@@ -1897,6 +2101,65 @@
      the container), not the window: beside a 256px sidebar a 820px window
      leaves under 500px, and the window rules kept tablet pages at full
      desktop layout. 48rem is the old 768px phone step */
+  /* Preferences: no room for Your picks beside the honeycomb, so it becomes
+     a compact bar pinned above it (counts and Save), with the events folded
+     behind a toggle. The honeycomb scrolls underneath */
+  @container (max-width: 64rem) {
+    .preferences-layout {
+      @apply grid-cols-[minmax(0,1fr)] gap-4;
+    }
+
+    .preferences-picks {
+      @apply -order-1 top-2 flex-row flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3.5 shadow-[0_12px_24px_-8px_rgb(0_0_0/0.6)];
+    }
+
+    .preferences-picks-head {
+      @apply flex-1;
+    }
+
+    .preferences-picks-title,
+    .preferences-coming-title {
+      @apply sr-only;
+    }
+
+    .preferences-picks-actions {
+      @apply order-none border-0 pt-0;
+    }
+
+    .preferences-picks-saved {
+      @apply w-full;
+    }
+
+    .preferences-coming-toggle {
+      @apply flex w-full items-center gap-1.5 text-sm text-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-accent [&_svg]:size-4 [&_svg]:transition-transform motion-reduce:[&_svg]:transition-none;
+    }
+
+    .preferences-picks[data-coming-up="open"] .preferences-coming-toggle svg {
+      @apply rotate-180;
+    }
+
+    .preferences-picks[data-coming-up="closed"] .preferences-coming {
+      @apply hidden;
+    }
+
+    .preferences-coming {
+      @apply w-full;
+    }
+  }
+
+  /* Phone: every pixel goes to the hexagons, so the honeycomb loses its
+     card, and Save takes the bar's full width */
+  @container (max-width: 32rem) {
+    .preferences-picker {
+      @apply border-0 bg-transparent p-0;
+    }
+
+    .preferences-picks-actions,
+    .preferences-picks-actions > button {
+      @apply w-full;
+    }
+  }
+
   @container (max-width: 60rem) {
     .dashboard-grid-five {
       @apply grid-cols-3;
