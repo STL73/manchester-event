@@ -564,6 +564,23 @@
     @apply w-5 h-5;
   }
 
+  /* Add to calendar (My Favourites): the heart's 34px circle, in the
+     neutral colours of an icon action rather than the heart's red */
+  .event-calendar-button {
+    @apply inline-flex size-[34px] items-center justify-center rounded-full text-muted transition-colors hover:bg-accent/15 hover:text-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none [&_svg]:size-5;
+  }
+
+  /* A favourite that has finished or been cancelled: photo in greyscale and
+     the text faded, while the status badge and the heart stay at full
+     strength so the label reads and the event can still be removed */
+  .event-card-muted .event-card-image {
+    @apply opacity-50 grayscale;
+  }
+
+  .event-card-muted :is(.event-card-category, .event-card-title, .event-card-detail) {
+    @apply opacity-60;
+  }
+
   .event-favourite-button.is-favourite {
     @apply bg-favourite/16;
   }
@@ -2212,6 +2229,19 @@
 
     .dashboard-grid-five > :last-child:nth-child(odd) {
       @apply col-span-1;
+    }
+  }
+
+  /* The dashboard on a phone, beside the icon rail (about 15rem): cards
+     trim their padding and button gaps so View, the heart and Add to
+     calendar stay on one line */
+  @container (max-width: 20rem) {
+    .event-card-content {
+      @apply p-4;
+    }
+
+    .event-card-actions {
+      @apply gap-2;
     }
   }
 

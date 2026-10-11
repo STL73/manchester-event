@@ -69,6 +69,11 @@ frontend/src/
   `preferencesData.js`, `Tag` for a category without one. "Your picks" sits beside it on wide
   screens at a fixed height (counts, next 3 events, Save; no interest chips, the hexagons show
   them) and becomes a bar pinned above it below 64rem
+- **My Favourites** (decided 2026-10-11): upcoming favourites soonest first, then a "Past and
+  cancelled" section of greyed cards (`EventCard`'s `muted` prop plus the status badge), heart
+  kept so they can be removed. **Add to calendar** downloads an `.ics` from `lib/calendar.js`
+  (Europe/London times, no invented end time), icon `CalendarArrowDown`. It sits on upcoming
+  My Favourites cards only (`onAddToCalendar`); Event details gets a labelled button in its redesign
 - **Pagination:** `components/UI/Pagination.jsx`, page number in the URL (`?page=`), back to page 1
   when a filter changes. Explore Events shows 12 per page (whole rows in every view)
 - **Dashboard headings** (decided 2026-10-10): the page title is the page's only `<h1>`, 24px white
