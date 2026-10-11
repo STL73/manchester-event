@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { CalendarDays, Eye, Heart, MapPin, Tag } from "lucide-react";
+import { CalendarArrowDown, CalendarDays, Eye, Heart, MapPin, Tag } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import Button from "../UI/Button";
+import Tooltip from "../UI/Tooltip";
 import { eventDetailsPath } from "../../data/eventsData";
 import { organiserEventActions } from "../../data/organiserEventsData";
+import { addToCalendar } from "../../data/myFavouritesData";
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -21,6 +23,8 @@ export default function EventCard({
   status,
   editTo,
   onDelete,
+  muted = false,
+  onAddToCalendar,
 }) {
   const { edit, delete: remove } = organiserEventActions;
   // True from a "like" click until the heart's pop animation ends
@@ -33,9 +37,10 @@ export default function EventCard({
   const detailsPath = eventDetailsPath(event.eventId, inDashboard);
 
   // The whole card opens the event: the title link is stretched over the
-  // card (see .event-card-link), and the action buttons sit above it
+  // card (see .event-card-link), and the action buttons sit above it.
+  // muted greys out an event that has finished or been cancelled
   return (
-    <article className="event-card">
+    <article className={`event-card ${muted ? "event-card-muted" : ""}`.trim()}>
       {/* alt="": the title link right below already names the event, so a
           screen reader would read it twice. Lazy, because Explore lists every
           upcoming event and most cards start below the screen */}
@@ -104,6 +109,18 @@ export default function EventCard({
                 aria-hidden="true"
               />
             </button>
+          )}
+          {onAddToCalendar && (
+            <Tooltip text={addToCalendar.label}>
+              <button
+                className="event-calendar-button"
+                type="button"
+                aria-label={`${addToCalendar.label}: ${event.name}`}
+                onClick={() => onAddToCalendar(event)}
+              >
+                <CalendarArrowDown aria-hidden="true" />
+              </button>
+            </Tooltip>
           )}
           {/* Organiser actions, shown when the page passes editTo/onDelete */}
           {editTo &&

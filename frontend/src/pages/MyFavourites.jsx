@@ -2,10 +2,14 @@ import { CalendarSearch, Heart } from "lucide-react";
 import Button from "../components/UI/Button";
 import EventCard from "../components/events/EventCard";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
+import { eventDetailsPath } from "../data/eventsData";
+import { downloadEventIcs } from "../lib/calendar";
 import {
+  endedFavourites,
+  favouritesEmpty,
   favouritesSummary,
-  getFavouriteEvents,
   getNextFavourite,
+  splitFavourites,
 } from "../data/myFavouritesData";
 
 const nextDateFormatter = new Intl.DateTimeFormat("en-GB", {
@@ -35,9 +39,15 @@ function FavouritesSummary({ events, favouriteIds, count }) {
   );
 }
 
+// The calendar entry links to the public event page
+function addEventToCalendar(event) {
+  downloadEventIcs(event, `${window.location.origin}${eventDetailsPath(event.eventId, false)}`);
+}
+
 // Favourites live in App so every page shows the same hearts
 export default function MyFavourites({ events, favouriteIds, onToggleFavourite }) {
-  const favourites = getFavouriteEvents(events, favouriteIds);
+  const { upcoming, ended } = splitFavourites(events, favouriteIds, new Date());
+  const EndedIcon = endedFavourites.icon;
 
   return (
     <div className="dashboard-home">
@@ -53,15 +63,15 @@ export default function MyFavourites({ events, favouriteIds, onToggleFavourite }
             <FavouritesSummary
               events={events}
               favouriteIds={favouriteIds}
-              count={favourites.length}
+              count={upcoming.length + ended.length}
             />
           }
         />
         <div className="events-grid events-grid-three">
-          {favourites.length === 0 ? (
+          {upcoming.length === 0 ? (
             <div className="dashboard-empty-state">
               <p className="dashboard-empty-text">
-                You do not have any favourite events yet.
+                {ended.length === 0 ? favouritesEmpty.none : favouritesEmpty.noneUpcoming}
               </p>
               <Button
                 to="/dashboard/explore-events"
@@ -73,18 +83,46 @@ export default function MyFavourites({ events, favouriteIds, onToggleFavourite }
               </Button>
             </div>
           ) : (
-            favourites.map((event) => (
+            upcoming.map((event) => (
               <EventCard
                 key={event.eventId}
                 event={event}
                 canFavourite
                 isFavourite
                 onToggleFavourite={onToggleFavourite}
+                onAddToCalendar={addEventToCalendar}
               />
             ))
           )}
         </div>
       </section>
+
+      {/* Kept, greyed and labelled, as the schema agreed; the heart still
+          removes them */}
+      {ended.length > 0 && (
+        <section
+          className="dashboard-section"
+          aria-labelledby="ended-favourites-title"
+        >
+          <h2 className="dashboard-title" id="ended-favourites-title">
+            <EndedIcon className="dashboard-title-icon" aria-hidden="true" />
+            {endedFavourites.title}
+          </h2>
+          <div className="events-grid events-grid-three">
+            {ended.map((event) => (
+              <EventCard
+                key={event.eventId}
+                event={event}
+                status={event.status === "cancelled" ? "cancelled" : "past"}
+                muted
+                canFavourite
+                isFavourite
+                onToggleFavourite={onToggleFavourite}
+              />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
