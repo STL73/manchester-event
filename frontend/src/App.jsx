@@ -36,6 +36,7 @@ import { privacyPage, termsPage } from "./data/legalPagesData";
 import { initialFavouriteIds } from "./data/myFavouritesData";
 import { userCategoryIds } from "./data/preferencesData";
 import { initialContactMessages } from "./data/contactMessagesData";
+import { initialNotifications } from "./data/notificationsData";
 
 import "./App.css";
 
@@ -82,6 +83,21 @@ function App() {
   const [interestIds, setInterestIds] = useState(userCategoryIds);
   // Sent from the public Contact form, read on the admin Contact Messages page
   const [contactMessages, setContactMessages] = useState(initialContactMessages);
+  // Read on the Notifications page and counted on the user dashboard, so
+  // marking one read shows everywhere
+  const [notifications, setNotifications] = useState(initialNotifications);
+
+  // Sets read_at on the ones not read yet; a read notification keeps its time
+  function markNotificationsRead(notificationIds) {
+    const readAt = new Date().toISOString();
+    setNotifications((current) =>
+      current.map((notification) =>
+        notificationIds.includes(notification.notificationId) && !notification.readAt
+          ? { ...notification, readAt }
+          : notification,
+      ),
+    );
+  }
 
   // Matches save_contact_message(): the user ID is stored when signed in
   function sendContactMessage({ name, email, message }) {
@@ -270,12 +286,12 @@ function App() {
             }
           >
             <Route index element={<Navigate to="home" replace />} />
-            <Route path="home" element={<DashboardHome selectedUser={selectedUser} users={users} events={events} organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} interestIds={interestIds} contactMessages={contactMessages} />} />
+            <Route path="home" element={<DashboardHome selectedUser={selectedUser} users={users} events={events} organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} interestIds={interestIds} contactMessages={contactMessages} notifications={notifications} />} />
             <Route path="explore-events" element={<ExploreEvents inDashboard events={publicEvents} selectedUser={selectedUser} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
             <Route path="my-favourites" element={<MyFavourites events={events} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
             <Route path="events/:eventId" element={<EventDetails inDashboard events={events} />} />
             <Route path="preferences" element={<Preferences events={publicEvents} interestIds={interestIds} onSaveInterests={setInterestIds} />} />
-            <Route path="notifications" element={<Notifications selectedUser={selectedUser} events={events} />} />
+            <Route path="notifications" element={<Notifications selectedUser={selectedUser} notifications={notifications} onMarkRead={markNotificationsRead} />} />
             <Route path="settings" element={<Settings selectedUser={selectedUser} />} />
             <Route path="create-events" element={<CreateEvents onCreateEvent={createOrganiserEvent} />} />
             <Route path="my-events" element={<MyEvents organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} />} />
