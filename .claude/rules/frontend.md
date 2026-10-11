@@ -63,6 +63,12 @@ frontend/src/
   greeting), and beside it only the page's own actions, e.g. "Create event" on My Events and My
   Drafts, Go Back, Mark All as Read. **No navigation shortcuts:** the sidebar already links every
   page. The PHP pages had a Quick Actions block of links; removed 2026-10-10
+- **Preferences is a honeycomb** (decided 2026-10-11): one hexagon per category
+  (`components/dashboard/CategoryHoneycomb.jsx`, rows from `lib/honeycomb.js`: 3-4-5-4-3 for 19,
+  interlocking rows for any other count or width, 1-2-1 on phones). Icons per slug in
+  `preferencesData.js`, `Tag` for a category without one. "Your picks" sits beside it on wide
+  screens at a fixed height (counts, next 3 events, Save; no interest chips, the hexagons show
+  them) and becomes a bar pinned above it below 64rem
 - **Pagination:** `components/UI/Pagination.jsx`, page number in the URL (`?page=`), back to page 1
   when a filter changes. Explore Events shows 12 per page (whole rows in every view)
 - **Dashboard headings** (decided 2026-10-10): the page title is the page's only `<h1>`, 24px white
