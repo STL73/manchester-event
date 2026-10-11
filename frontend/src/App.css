@@ -1570,7 +1570,8 @@
     max-width: calc(var(--honeycomb-cell) * 2);
   }
 
-  /* notifications styles */
+  /* Message cards: Contact Messages uses these. Notifications moved to the
+     collapsible rows below on 2026-10-11 */
   .notification-list {
     @apply w-full flex flex-col gap-4 list-none;
   }
@@ -1613,6 +1614,182 @@
 
   .notification-actions {
     @apply mt-2 flex flex-wrap items-center gap-3;
+  }
+
+  /* Notifications: rows grouped by day, collapsed to icon, subject and time
+     (64px, so a page of 10 fits a desktop or tablet screen). The list has no
+     overflow-hidden, which would clip the first row's tooltip, so the end
+     rows round their own corners instead */
+  .notification-groups {
+    @apply w-full flex flex-col gap-7;
+  }
+
+  /* All / Unread: lined up with the list, not centred like the section */
+  .notification-view-switch {
+    @apply self-start;
+  }
+
+  .notification-group {
+    @apply flex flex-col gap-2.5;
+  }
+
+  /* Date dividers inside one list, not page sections, so they are small
+     labels rather than the 20px section heading */
+  .notification-group-title {
+    @apply px-1 text-xs font-medium uppercase tracking-wider text-muted;
+  }
+
+  .notification-rows {
+    @apply w-full list-none rounded-2xl border border-border bg-card;
+  }
+
+  .notification-row {
+    @apply transition-colors first:rounded-t-2xl last:rounded-b-2xl hover:bg-foreground/4 motion-reduce:transition-none;
+  }
+
+  .notification-row + .notification-row {
+    @apply border-t border-border/70;
+  }
+
+  .notification-row.is-unread {
+    @apply bg-accent/6 hover:bg-accent/10;
+  }
+
+  .notification-row-head {
+    @apply flex items-center gap-2 py-2.5 pr-3;
+  }
+
+  .notification-row-heading {
+    @apply min-w-0 flex-1 text-base font-normal;
+  }
+
+  .notification-row-toggle {
+    @apply w-full grid grid-cols-[36px_minmax(0,1fr)_18px] items-center gap-3.5 rounded-xl py-1 pl-4 text-left cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  }
+
+  .notification-type-icon {
+    @apply grid size-9 place-items-center rounded-xl border border-border bg-background text-muted [&_svg]:size-[18px];
+  }
+
+  .notification-row.is-unread .notification-type-icon {
+    @apply border-accent/30 text-accent-hover;
+  }
+
+  .notification-type-icon.is-cancelled,
+  .notification-row.is-unread .notification-type-icon.is-cancelled {
+    @apply text-orange-400;
+  }
+
+  .notification-row-text {
+    @apply min-w-0 flex items-center gap-4;
+  }
+
+  .notification-row-subject {
+    @apply min-w-0 flex-1 flex items-center gap-2 text-[15px] font-medium text-muted;
+  }
+
+  .notification-row.is-unread .notification-row-subject {
+    @apply font-semibold text-foreground;
+  }
+
+  .notification-row-subject-text {
+    @apply truncate;
+  }
+
+  .notification-unread-dot {
+    @apply size-2 shrink-0 rounded-full bg-accent;
+  }
+
+  .notification-row-time {
+    @apply shrink-0 whitespace-nowrap text-xs text-muted tabular-nums;
+  }
+
+  .notification-row-chevron {
+    @apply size-[18px] text-muted transition-transform motion-reduce:transition-none;
+  }
+
+  .notification-row.is-open .notification-row-chevron {
+    @apply rotate-180;
+  }
+
+  /* Closed envelope while unread; it opens on hover or focus to show what
+     a click does. Once read, a faint open envelope that isn't a button */
+  .notification-mark-read {
+    @apply grid size-8 place-items-center rounded-full text-accent-hover transition-colors hover:bg-accent/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none [&_svg]:size-[18px];
+  }
+
+  .notification-envelope-open {
+    @apply hidden;
+  }
+
+  .notification-mark-read:is(:hover, :focus-visible) .notification-envelope-closed {
+    @apply hidden;
+  }
+
+  .notification-mark-read:is(:hover, :focus-visible) .notification-envelope-open {
+    @apply block;
+  }
+
+  .notification-read-icon {
+    @apply size-8 shrink-0 p-[7px] text-muted opacity-45;
+  }
+
+  /* Opened: the message lines up with the subject (16px padding, 36px icon,
+     14px gap) */
+  .notification-row-detail {
+    @apply pb-4 pl-[66px] pr-4;
+  }
+
+  .notification-row-body {
+    @apply max-w-[70ch] text-sm leading-relaxed text-muted;
+  }
+
+  .notification-row-foot {
+    @apply mt-3 flex flex-wrap items-center justify-between gap-3;
+  }
+
+  .notification-row-type {
+    @apply text-xs text-muted;
+  }
+
+  /* Phones: the subject gets two lines and the time moves under it; the
+     message uses the full width */
+  @container (max-width: 24rem) {
+    .notification-row-head {
+      @apply pr-1.5;
+    }
+
+    /* No type icon: at 240px it left the subject about 95px, too little for
+       one word of it. The type still shows once the row is opened */
+    .notification-row-toggle {
+      @apply grid-cols-[minmax(0,1fr)_18px] gap-2.5 pl-3;
+    }
+
+    .notification-type-icon {
+      @apply hidden;
+    }
+
+    /* Stretch, not start: a start-aligned subject sizes to its text and runs
+       under the chevron instead of wrapping */
+    .notification-row-text {
+      @apply flex-col items-stretch gap-0.5;
+    }
+
+    .notification-row-subject {
+      @apply items-start text-sm;
+    }
+
+    .notification-row-subject-text {
+      @apply whitespace-normal line-clamp-2 leading-snug;
+    }
+
+    .notification-unread-dot {
+      @apply mt-1.5;
+    }
+
+    .notification-row-detail {
+      @apply px-3 pb-3.5;
+    }
   }
 
   /* activity log styles. Panels that hold a page's content are 16px, like the
@@ -1846,8 +2023,10 @@
 
   /* analytics styles */
   /* Things you click are pills */
+  /* w-fit so it keeps its size in a page column (Notifications), not only
+     in a chart header's row */
   .period-switcher {
-    @apply flex flex-wrap items-center gap-1 rounded-full border border-border bg-background p-1;
+    @apply w-fit flex flex-wrap items-center gap-1 rounded-full border border-border bg-background p-1;
   }
 
   .period-switcher button {

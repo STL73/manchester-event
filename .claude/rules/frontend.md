@@ -74,6 +74,15 @@ frontend/src/
   kept so they can be removed. **Add to calendar** downloads an `.ics` from `lib/calendar.js`
   (Europe/London times, no invented end time), icon `CalendarArrowDown`. It sits on upcoming
   My Favourites cards only (`onAddToCalendar`); Event details gets a labelled button in its redesign
+- **Notifications** (decided 2026-10-11): read state lives in `App.jsx` (`readAt`), so Home's
+  unread card agrees. Rows grouped Today / Earlier this week / Earlier, collapsed to type icon,
+  subject and time (64px); opening one shows the message and marks it read, one open at a time,
+  with View event only when there is an `eventId` (cancelled events open too). The envelope shows
+  state: closed while unread (opens on hover, marks read), faint open once read. 10 per page:
+  fits a desktop or tablet screen, a laptop scrolls about 3 rows. Below 24rem the type icon hides
+  so the subject gets two lines. An All / Unread (n) switch (`PeriodSwitcher`, `?show=unread`)
+  sits above the list; rows read while Unread is showing stay until the view or page changes. No
+  type filter or search for now. Contact Messages still uses the old `.notification-card` styles
 - **Pagination:** `components/UI/Pagination.jsx`, page number in the URL (`?page=`), back to page 1
   when a filter changes. Explore Events shows 12 per page (whole rows in every view)
 - **Dashboard headings** (decided 2026-10-10): the page title is the page's only `<h1>`, 24px white

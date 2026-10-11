@@ -5,7 +5,6 @@ import EventCard from "../components/events/EventCard";
 import { userInsights } from "../data/userDashboardData";
 import { getFavouriteEvents, getNextFavourite } from "../data/myFavouritesData";
 import { eventCategories, eventDetailsPath, isPublicEvent } from "../data/eventsData";
-import { allNotifications } from "../data/notificationsData";
 import { isUpcoming, matchesWhen } from "../lib/eventDates";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -23,7 +22,7 @@ const dayMonth = new Intl.DateTimeFormat("en-GB", {
 
 // The four Quick Insights cards: what's coming for this user, each with
 // one line of context (see DashboardCard)
-function getUserInsights({ events, favouriteIds, interestIds }) {
+function getUserInsights({ events, favouriteIds, interestIds, notifications }) {
   const now = new Date();
   const text = userInsights;
   const live = events.filter((event) => isPublicEvent(event) && isUpcoming(event, now));
@@ -44,10 +43,8 @@ function getUserInsights({ events, favouriteIds, interestIds }) {
     (event) => now - new Date(event.adminUpdatedAt) <= 7 * DAY,
   );
 
-  // Notifications keep their read state on their own page for now, so this
-  // counts the mock's unread flags
-  const unread = allNotifications.filter(
-    (notification) => notification.recipient === "user" && !notification.isRead,
+  const unread = notifications.filter(
+    (notification) => notification.recipient === "user" && !notification.readAt,
   );
 
   return [
@@ -76,9 +73,9 @@ function getUserInsights({ events, favouriteIds, interestIds }) {
     {
       ...text.unread,
       count: unread.length,
-      // allNotifications is newest first
+      // App keeps notifications newest first
       action: unread[0] && {
-        label: `${text.unread.newest} ${dayMonth.format(new Date(unread[0].scheduledAt))}`,
+        label: `${text.unread.newest} ${dayMonth.format(new Date(unread[0].createdAt))}`,
         to: text.unread.to,
       },
       detail: text.unread.none,
@@ -90,11 +87,12 @@ export default function UserDashboardHome({
   events,
   favouriteIds,
   interestIds,
+  notifications,
   onToggleFavourite,
 }) {
   // Matches get_recent_favourites(): limit 3
   const recentFavourites = getFavouriteEvents(events, favouriteIds).slice(0, 3);
-  const insights = getUserInsights({ events, favouriteIds, interestIds });
+  const insights = getUserInsights({ events, favouriteIds, interestIds, notifications });
 
   return (
     <div className="dashboard-home">
