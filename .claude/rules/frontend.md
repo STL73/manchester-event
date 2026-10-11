@@ -43,8 +43,9 @@ frontend/src/
 - **Page copy and config live in `data/`**, not inline in the page: titles, nav, form fields,
   action labels. The `navigationData.js` role model (`user`, `organiser`, `admin`) drives the sidebar
 - **Extend shared components, don't wrap or copy them.** Need a variant of `EventCard`,
-  `DashboardCard` or `Button`? Add an optional prop. `Button` already does links (`to`), five
-  variants and four sizes
+  `DashboardCard` or `Button`? Add an optional prop. `Button` already does links (`to`), six
+  variants and four sizes. `destructive` (solid red, `danger` / `danger-hover` tokens) is only for
+  the final step that can't be undone; the step before it uses the outlined `danger`
 - **Styling:** use the theme colour tokens (`bg-card`, `text-muted`, `border-border`, `text-accent`,
   `bg-background`, `text-foreground`, `text-danger` for errors and destructive actions,
   `text-favourite` for the favourite heart), never raw hex. Tailwind's own palette appears only
@@ -83,6 +84,15 @@ frontend/src/
   so the subject gets two lines. An All / Unread (n) switch (`PeriodSwitcher`, `?show=unread`)
   sits above the list; rows read while Unread is showing stay until the view or page changes. No
   type filter or search for now. Contact Messages still uses the old `.notification-card` styles
+- **Settings** (decided 2026-10-11): four sections (`SettingsSection`), each with its title and
+  explanation in a 240px column beside its panel, above it below 44rem, and each saving on its
+  own: Profile (picture up to 5 MB with Remove, editable display name, locked email with a
+  Verified chip), Password (`UI/PasswordInput` eye, 8-character and match rules, adds a Password
+  changed notification), Email notifications (one `UI/Switch`, wording per role, saves at once),
+  Delete account (confirmed in the page with the password; organisers whose events have been
+  public get a contact link; no section for admins). Banners only for an unverified email or a
+  suspension, never for admins. Name, picture and the switch live in App (`profileChanges`) so
+  the sidebar and greeting follow
 - **Pagination:** `components/UI/Pagination.jsx`, page number in the URL (`?page=`), back to page 1
   when a filter changes. Explore Events shows 12 per page (whole rows in every view)
 - **Dashboard headings** (decided 2026-10-10): the page title is the page's only `<h1>`, 24px white

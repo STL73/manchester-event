@@ -1,17 +1,19 @@
 import { useState } from "react";
-import { UserRoundCog } from "lucide-react";
+import { Link } from "react-router-dom";
+import { MailWarning, Send, ShieldAlert, UserRoundCog } from "lucide-react";
 import Button from "../components/UI/Button";
-import FieldError from "../components/UI/FieldError";
-import StatusMessage from "../components/UI/StatusMessage";
+import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
+import SettingsSection from "../components/dashboard/SettingsSection";
+import ProfileSettings from "../components/dashboard/ProfileSettings";
+import PasswordSettings from "../components/dashboard/PasswordSettings";
+import EmailSettings from "../components/dashboard/EmailSettings";
+import DeleteAccount from "../components/dashboard/DeleteAccount";
 import {
+  accountBanners,
   accountDetails,
   accountSummary,
-  allowedAvatarTypes,
-  passwordFields,
-  profileMessages,
-  profileSettingsForm,
+  settingsSections,
 } from "../data/profileSettingsData";
-import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -19,256 +21,117 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   year: "numeric",
 });
 
-const emptyPasswords = {
-  old_password: "",
-  new_password: "",
-  confirm_password: "",
-};
+// Only when something limits the account: an unverified email or a
+// suspension. Admins never get either
+function AccountBanner({ role, details }) {
+  const [resent, setResent] = useState(false);
 
-// Mirrors validate_profile_settings(): only checked when a password field is filled
-function validatePasswords(passwords) {
-  const errors = {};
-  const isChangingPassword = Object.values(passwords).some(Boolean);
+  if (role === "admin") return null;
 
-  if (!isChangingPassword) return errors;
-  if (!passwords.old_password)
-    errors.old_password = profileMessages.oldPasswordRequired;
-  if (!passwords.new_password)
-    errors.new_password = profileMessages.newPasswordRequired;
-  if (!passwords.confirm_password) {
-    errors.confirm_password = profileMessages.confirmPasswordRequired;
-  } else if (
-    passwords.new_password &&
-    passwords.new_password !== passwords.confirm_password
-  ) {
-    errors.confirm_password = profileMessages.passwordsDoNotMatch;
+  if (details.suspendedUntil !== null || details.suspensionReason) {
+    const { suspended } = accountBanners;
+    const until = details.suspendedUntil && dateFormatter.format(new Date(details.suspendedUntil));
+    return (
+      <div className="settings-banner is-danger" role="status">
+        <ShieldAlert aria-hidden="true" />
+        <div>
+          <p className="settings-banner-title">{suspended.title(until)}</p>
+          {details.suspensionReason && (
+            <p>
+              {suspended.reason} {details.suspensionReason}
+            </p>
+          )}
+          <p>
+            {suspended.text}{" "}
+            <Link className="settings-link" to="/contact">{suspended.contact}</Link>
+          </p>
+        </div>
+      </div>
+    );
   }
 
-  return errors;
+  if (!details.emailVerifiedAt) {
+    const { unverified } = accountBanners;
+    return (
+      <div className="settings-banner is-warning" role="status">
+        <MailWarning aria-hidden="true" />
+        <div>
+          <p className="settings-banner-title">{unverified.title}</p>
+          <p>{unverified.text[role] ?? unverified.text.user}</p>
+          {resent ? (
+            <p className="settings-banner-done">{unverified.sent}</p>
+          ) : (
+            <Button variant="secondary" size="sm" onClick={() => setResent(true)}>
+              <Send aria-hidden="true" />
+              {unverified.resend}
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 }
 
-export default function Settings({ selectedUser }) {
-  const [passwords, setPasswords] = useState(emptyPasswords);
-  const [avatarFile, setAvatarFile] = useState(null);
-  const [avatarPreview, setAvatarPreview] = useState("");
-  const [savedAvatar, setSavedAvatar] = useState("");
-  const [errors, setErrors] = useState({});
-  const [messages, setMessages] = useState([]);
-  const [updatedAt, setUpdatedAt] = useState(accountDetails.updatedAt);
-  const DefaultAvatar = selectedUser?.avatar;
-  const SubmitIcon = profileSettingsForm.submit.icon;
-  const shownAvatar = avatarPreview || savedAvatar;
-
-  function handlePasswordChange(event) {
-    const { name, value } = event.target;
-    setPasswords((current) => ({ ...current, [name]: value }));
-  }
-
-  function handleAvatarChange(event) {
-    const [file] = event.target.files;
-    setMessages([]);
-
-    if (!file) return;
-    // Free the previous unsaved preview before replacing it
-    if (avatarPreview) URL.revokeObjectURL(avatarPreview);
-    if (!allowedAvatarTypes.includes(file.type)) {
-      setAvatarFile(null);
-      setAvatarPreview("");
-      setErrors((current) => ({
-        ...current,
-        avatar: profileMessages.invalidImage,
-      }));
-      event.target.value = "";
-      return;
-    }
-
-    setErrors((current) => ({ ...current, avatar: undefined }));
-    setAvatarFile(file);
-    setAvatarPreview(URL.createObjectURL(file));
-  }
-
-  function handleSubmit(event) {
-    event.preventDefault();
-    const passwordErrors = validatePasswords(passwords);
-    const nextMessages = [];
-
-    setErrors(passwordErrors);
-    if (Object.keys(passwordErrors).length > 0) {
-      setMessages([]);
-      return;
-    }
-
-    if (avatarFile) {
-      if (savedAvatar) URL.revokeObjectURL(savedAvatar);
-      setSavedAvatar(avatarPreview);
-      setAvatarFile(null);
-      setAvatarPreview("");
-      event.target.elements.avatar.value = "";
-      nextMessages.push(profileMessages.avatarUpdated);
-    }
-    if (passwords.old_password) {
-      setPasswords(emptyPasswords);
-      nextMessages.push(profileMessages.passwordUpdated);
-    }
-
-    if (nextMessages.length > 0) {
-      setUpdatedAt(new Date().toISOString());
-      setMessages(nextMessages);
-    } else {
-      setMessages([profileMessages.nothingToSave]);
-    }
-  }
+// Four sections, each saving on its own. What a role sees differs in the
+// email wording and in Delete: none for admins, a contact link for an
+// organiser whose events have been public
+export default function Settings({
+  selectedUser,
+  hasPublicEvents,
+  onSaveProfile,
+  onPasswordChanged,
+  onEmailNotificationsChange,
+  onDeleteAccount,
+}) {
+  const role = selectedUser.type;
 
   return (
     <div className="dashboard-home">
-      <section
-        className="dashboard-section"
-        aria-labelledby="profile-settings-title"
-      >
+      <section className="dashboard-section" aria-labelledby="settings-title">
         <DashboardPageHeading
-          id="profile-settings-title"
+          id="settings-title"
           icon={UserRoundCog}
-          title="Profile Settings"
+          title="Settings"
           summary={
             <>
               {accountSummary.memberSince}{" "}
               <time dateTime={accountDetails.createdAt}>
                 {dateFormatter.format(new Date(accountDetails.createdAt))}
               </time>
-              <span aria-hidden="true"> · </span>
-              {accountSummary.lastUpdated}{" "}
-              <time dateTime={updatedAt}>
-                {dateFormatter.format(new Date(updatedAt))}
-              </time>
             </>
           }
         />
 
-        <div className="contact-form-container">
-          <form className="contact-form" onSubmit={handleSubmit} noValidate>
-            <h3 className="contact-form-title">{profileSettingsForm.title}</h3>
-            <p className="content-p">{profileSettingsForm.description}</p>
+        <div className="settings-layout">
+          <AccountBanner role={role} details={accountDetails} />
 
-            {messages.length > 0 && (
-              <StatusMessage>
-                {messages.map((message) => (
-                  <p key={message}>{message}</p>
-                ))}
-              </StatusMessage>
-            )}
+          <SettingsSection id="settings-profile" section={settingsSections.profile}>
+            <ProfileSettings
+              selectedUser={selectedUser}
+              emailVerified={Boolean(accountDetails.emailVerifiedAt)}
+              onSave={onSaveProfile}
+            />
+          </SettingsSection>
 
-            <div className="profile-form-grid">
-              <div className="profile-form-column">
-                <div className="contact-field">
-                  <label htmlFor="username">Username:</label>
-                  <input
-                    className="profile-readonly"
-                    id="username"
-                    type="text"
-                    autoComplete="username"
-                    value={selectedUser?.user ?? ""}
-                    readOnly
-                  />
-                </div>
-                <div className="contact-field">
-                  <label htmlFor="email">Email:</label>
-                  <input
-                    className="profile-readonly"
-                    id="email"
-                    type="email"
-                    value={selectedUser?.email ?? ""}
-                    readOnly
-                  />
-                </div>
-                <div className="contact-field">
-                  <label htmlFor="avatar">
-                    {profileSettingsForm.avatarLabel}:
-                  </label>
-                  <input
-                    className="profile-file-input"
-                    id="avatar"
-                    name="avatar"
-                    type="file"
-                    accept={allowedAvatarTypes.join(",")}
-                    aria-describedby={errors.avatar ? "avatar-error" : undefined}
-                    aria-invalid={Boolean(errors.avatar)}
-                    onChange={handleAvatarChange}
-                  />
-                  {errors.avatar && (
-                    <FieldError id="avatar-error">{errors.avatar}</FieldError>
-                  )}
-                  <div className="profile-avatar">
-                    {shownAvatar ? (
-                      <img
-                        className="profile-avatar-image"
-                        src={shownAvatar}
-                        alt="Profile picture preview"
-                      />
-                    ) : (
-                      DefaultAvatar && (
-                        <DefaultAvatar
-                          className="profile-avatar-icon"
-                          aria-hidden="true"
-                        />
-                      )
-                    )}
-                  </div>
-                </div>
-              </div>
+          <SettingsSection id="settings-password" section={settingsSections.password}>
+            <PasswordSettings email={selectedUser.email} onChange={onPasswordChanged} />
+          </SettingsSection>
 
-              <div className="profile-form-column">
-                <div className="contact-field">
-                  <label htmlFor="account-status">Account Status:</label>
-                  <input
-                    className="profile-readonly capitalize"
-                    id="account-status"
-                    type="text"
-                    value={accountDetails.status}
-                    readOnly
-                  />
-                </div>
-                <fieldset className="contact-field">
-                  <legend className="profile-legend">
-                    {profileSettingsForm.passwordLabel}:
-                  </legend>
-                  {passwordFields.map((field) => (
-                    <div className="profile-password-field" key={field.id}>
-                      <label className="sr-only" htmlFor={field.id}>
-                        {field.label}
-                      </label>
-                      <input
-                        id={field.id}
-                        name={field.id}
-                        type="password"
-                        autoComplete={
-                          field.id === "old_password"
-                            ? "current-password"
-                            : "new-password"
-                        }
-                        placeholder={field.placeholder}
-                        value={passwords[field.id]}
-                        aria-describedby={
-                          errors[field.id] ? `${field.id}-error` : undefined
-                        }
-                        aria-invalid={Boolean(errors[field.id])}
-                        onChange={handlePasswordChange}
-                      />
-                      {errors[field.id] && (
-                        <FieldError id={`${field.id}-error`}>{errors[field.id]}</FieldError>
-                      )}
-                    </div>
-                  ))}
-                </fieldset>
-              </div>
-            </div>
+          <SettingsSection id="settings-emails" section={settingsSections.emails}>
+            <EmailSettings
+              role={role}
+              enabled={selectedUser.emailNotifications ?? true}
+              onChange={onEmailNotificationsChange}
+            />
+          </SettingsSection>
 
-            <div className="dashboard-flex">
-              <Button type="submit" variant="primary" size="md">
-                <SubmitIcon aria-hidden="true" />
-                {profileSettingsForm.submit.label}
-              </Button>
-            </div>
-          </form>
+          {role !== "admin" && (
+            <SettingsSection id="settings-delete" section={settingsSections.deleteAccount} danger>
+              <DeleteAccount role={role} hasPublicEvents={hasPublicEvents} onDelete={onDeleteAccount} />
+            </SettingsSection>
+          )}
         </div>
       </section>
     </div>

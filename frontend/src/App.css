@@ -14,6 +14,8 @@
   --color-accent-hover: #aab3fd;
   /* Errors and destructive actions (Tailwind's red-400) */
   --color-danger: #f87171;
+  /* Hover for the solid red button, a shade lighter like accent-hover (red-300) */
+  --color-danger-hover: #fca5a5;
   /* The favourite heart (Tailwind's red-500): a liked event, not an error */
   --color-favourite: #ef4444;
   --font-sans: "Poppins", system-ui, sans-serif;
@@ -1127,6 +1129,10 @@
     @apply w-8 h-8 shrink-0 text-accent;
   }
 
+  .sidebar-user-photo {
+    @apply rounded-full object-cover;
+  }
+
   .sidebar-user-details {
     @apply flex-1 min-w-0;
   }
@@ -2151,6 +2157,245 @@
 
   .profile-password-field {
     @apply flex flex-col gap-1;
+  }
+
+  /* Settings (decided 2026-10-11): each section's title and explanation sit
+     in a 240px column beside its panel, above it below 44rem. Every panel
+     saves on its own */
+  .settings-layout {
+    @apply w-full max-w-[980px] self-start flex flex-col gap-10;
+  }
+
+  .settings-row {
+    @apply grid grid-cols-[240px_minmax(0,1fr)] gap-8;
+  }
+
+  .settings-row + .settings-row {
+    @apply border-t border-border/60 pt-10;
+  }
+
+  .settings-row-head {
+    @apply flex flex-col gap-1.5;
+  }
+
+  .settings-row-title svg {
+    @apply size-5 shrink-0 text-accent;
+  }
+
+  .settings-row.is-danger .settings-row-title svg {
+    @apply text-danger;
+  }
+
+  .settings-row-text {
+    @apply text-sm leading-relaxed text-muted;
+  }
+
+  .settings-panel {
+    @apply min-w-0 rounded-2xl border border-border bg-card p-6;
+  }
+
+  .settings-row.is-danger .settings-panel {
+    @apply border-danger/35;
+  }
+
+  .settings-form {
+    @apply flex flex-col gap-5;
+  }
+
+  .settings-label {
+    @apply text-sm font-medium text-foreground;
+  }
+
+  .settings-hint {
+    @apply text-[13px] leading-relaxed text-muted;
+  }
+
+  .settings-counter {
+    @apply self-end text-xs text-muted tabular-nums;
+  }
+
+  .settings-avatar-row {
+    @apply flex flex-wrap items-center gap-5;
+  }
+
+  .settings-avatar {
+    @apply grid size-22 shrink-0 place-items-center overflow-hidden rounded-full border border-border bg-background [&_img]:size-full [&_img]:object-cover [&_svg]:size-12 [&_svg]:text-muted;
+  }
+
+  .settings-avatar-actions {
+    @apply min-w-0 flex flex-col gap-2;
+  }
+
+  .settings-avatar-buttons {
+    @apply flex flex-wrap gap-2;
+  }
+
+  /* The email can't be edited, so it isn't drawn as a field: dashed, with
+     a lock and whether it is verified */
+  .settings-locked {
+    @apply flex flex-wrap items-center gap-2.5 rounded-lg border border-dashed border-border px-4 py-2.5 text-muted [&>svg]:size-4 [&>svg]:shrink-0;
+  }
+
+  .settings-locked-value {
+    @apply min-w-0 wrap-anywhere;
+  }
+
+  .settings-chip {
+    @apply inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium [&_svg]:size-3.5;
+  }
+
+  .settings-chip.is-verified {
+    @apply border-green-400/40 bg-green-400/10 text-green-400;
+  }
+
+  .settings-chip.is-unverified {
+    @apply border-yellow-400/40 bg-yellow-400/10 text-yellow-400;
+  }
+
+  .settings-two {
+    @apply grid grid-cols-2 gap-4;
+  }
+
+  .settings-rule {
+    @apply flex items-center gap-1.5 text-[13px] text-muted [&_svg]:size-[15px] [&_svg]:shrink-0;
+  }
+
+  .settings-rule.is-met {
+    @apply text-green-400;
+  }
+
+  .settings-rule.is-unmet {
+    @apply text-danger;
+  }
+
+  .settings-foot {
+    @apply flex flex-wrap items-center justify-end gap-3 border-t border-border/70 pt-4;
+  }
+
+  .settings-saved {
+    @apply mr-auto inline-flex items-center gap-1.5 text-[13px] text-green-400 [&_svg]:size-4 [&_svg]:shrink-0;
+  }
+
+  .settings-saved:empty {
+    @apply hidden;
+  }
+
+  .settings-switch-row {
+    @apply flex items-start justify-between gap-4;
+  }
+
+  .settings-switch-title {
+    @apply font-medium text-foreground;
+  }
+
+  .settings-note {
+    @apply flex items-start gap-2 rounded-xl border border-border/70 bg-background px-3.5 py-3 text-[13px] text-muted [&_svg]:mt-0.5 [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-accent;
+  }
+
+  .settings-link {
+    @apply rounded-sm text-accent underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  }
+
+  .settings-delete-start {
+    @apply flex justify-end;
+  }
+
+  .settings-confirm {
+    @apply flex flex-col gap-3 rounded-xl border border-danger/35 bg-danger/6 p-4;
+  }
+
+  .settings-confirm-title {
+    @apply font-semibold text-foreground;
+  }
+
+  .settings-confirm-list {
+    @apply ml-5 list-disc text-[13px] leading-7 text-muted;
+  }
+
+  .settings-confirm-actions {
+    @apply flex flex-wrap justify-end gap-2;
+  }
+
+  /* Only when something limits the account: yellow for an unverified
+     email, red for a suspension */
+  .settings-banner {
+    @apply flex items-start gap-3 rounded-xl border px-4 py-3.5 text-sm leading-relaxed text-muted [&>svg]:mt-0.5 [&>svg]:size-5 [&>svg]:shrink-0 [&>div]:flex [&>div]:flex-col [&>div]:items-start [&>div]:gap-1.5;
+  }
+
+  .settings-banner.is-warning {
+    @apply border-yellow-400/40 bg-yellow-400/8 [&>svg]:text-yellow-400;
+  }
+
+  .settings-banner.is-danger {
+    @apply border-danger/40 bg-danger/8 [&>svg]:text-danger;
+  }
+
+  .settings-banner-title {
+    @apply font-semibold text-foreground;
+  }
+
+  .settings-banner-done {
+    @apply text-green-400;
+  }
+
+  /* PasswordInput: the eye sits inside the field's right edge */
+  .password-input {
+    @apply relative;
+  }
+
+  .contact-field .password-input input {
+    @apply pr-12;
+  }
+
+  .password-input-toggle {
+    @apply absolute right-1.5 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-muted transition-colors hover:bg-foreground/8 hover:text-foreground focus-visible:outline-2 focus-visible:outline-accent motion-reduce:transition-none [&_svg]:size-[18px];
+  }
+
+  /* Switch: on is the accent tint, like other selected options */
+  .switch {
+    @apply relative h-[26px] w-[46px] shrink-0 cursor-pointer rounded-full border border-border bg-background transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none;
+  }
+
+  .switch::after {
+    content: "";
+    @apply absolute left-[3px] top-[3px] size-[18px] rounded-full bg-muted transition-transform motion-reduce:transition-none;
+  }
+
+  .switch[aria-checked="true"] {
+    @apply border-accent/50 bg-accent/25;
+  }
+
+  .switch[aria-checked="true"]::after {
+    @apply translate-x-5 bg-accent-hover;
+  }
+
+  @container (max-width: 44rem) {
+    .settings-row {
+      @apply grid-cols-1 gap-3.5;
+    }
+
+    .settings-two {
+      @apply grid-cols-1;
+    }
+  }
+
+  /* Phones: tighter panels, the Save buttons full width */
+  @container (max-width: 24rem) {
+    .settings-panel {
+      @apply p-4;
+    }
+
+    .settings-foot > button {
+      @apply flex-1;
+    }
+
+    .settings-saved {
+      @apply w-full;
+    }
+
+    .settings-avatar {
+      @apply size-18;
+    }
   }
 
   /* FieldError: the icon sits on the first line of the text */
