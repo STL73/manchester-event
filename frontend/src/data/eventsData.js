@@ -36,7 +36,18 @@ import oldTraffordMatchCrowd from "../images/events/old-trafford-match-crowd.jpg
 import manchesterFireworksNight from "../images/events/manchester-fireworks-night.jpg";
 import manchesterOutdoorDiningLights from "../images/events/manchester-outdoor-dining-lights.jpg";
 import manchesterCanalReflections from "../images/events/manchester-canal-reflections.jpg";
-import { ChevronLeft, Eye } from "lucide-react";
+import {
+  CalendarX2,
+  ChevronLeft,
+  CircleX,
+  Clock,
+  ExternalLink,
+  Eye,
+  History,
+  Info,
+  SquarePen,
+  Ticket,
+} from "lucide-react";
 
 // Dashboard pages open event details inside the dashboard;
 // the public Events page opens them full screen
@@ -51,7 +62,51 @@ export const eventDetailsPage = {
   goBack: { label: "Go Back", icon: ChevronLeft },
   // Used when the page was opened directly and there is nothing to go back to
   goBackFallback: "/dashboard/home",
+  // The public page's way back
+  allEvents: { label: "All events", icon: ChevronLeft, to: "/events" },
+  about: { title: "About this event", icon: Info },
+  organiserLabel: "Organiser",
+  maps: { label: "Open in Google Maps", icon: ExternalLink },
+  tickets: { label: "Tickets and info", icon: Ticket, linkIcon: ExternalLink },
+  // Organisers and admins check the link rather than follow it
+  ticketLink: { label: "Ticket link", icon: Ticket },
+  saved: "Saved",
+  save: "Save",
+  logInToSave: { link: "Log in", text: "to save it to your favourites", to: "/auth/login" },
+  // One banner at most, by what the event is now. `viewer` lines differ by role
+  banners: {
+    cancelled: {
+      icon: CalendarX2,
+      title: "This event has been cancelled",
+      text: "It won't go ahead.",
+      user: "It won't go ahead. It stays in your favourites until you remove it.",
+    },
+    past: { icon: History, title: "This event has ended", text: "It took place on" },
+    pending: {
+      icon: Clock,
+      title: "Waiting for approval",
+      text: "An admin will review it. It isn't public yet.",
+      admin: "It isn't public until you approve it.",
+    },
+    rejected: {
+      icon: CircleX,
+      title: "Rejected",
+      text: "An admin rejected this event. Edit it from My Events and submit it again.",
+      admin: "You rejected this event. The organiser can edit it and submit it again.",
+    },
+    draft: { icon: SquarePen, title: "Draft", text: "Only you can see it until you submit it from My Drafts." },
+  },
 };
+
+// Who may open which event, as the API will check it: everyone sees what
+// has been public (approved, past or cancelled); an organiser also sees
+// their own; an admin sees everything but other people's drafts, as on
+// Manage Events. Anything else reads as not found
+export function canViewEvent(event, role, organiserId) {
+  if (["approved", "past", "cancelled"].includes(event.status)) return true;
+  if (role === "admin") return event.status !== "draft";
+  return role === "organiser" && event.organiserId === organiserId;
+}
 
 // The categories table from the PHP project's insert data, in the same order
 export const eventCategories = [
@@ -121,7 +176,7 @@ export function isPublicEvent(event) {
 // The one master mock of the events table, joined with the organiser's and
 // admin's usernames. App holds it in state; every page reads a view of it:
 // public pages (approved), the organiser's pages (their organiserId),
-// Manage Events (everything but drafts) and event details (any event).
+// Manage Events (everything but drafts) and event details (canViewEvent).
 export const initialEvents = [
   {
     eventId: 1,

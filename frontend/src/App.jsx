@@ -312,7 +312,7 @@ function App() {
           <Route path="/privacy" element={<LegalPage page={privacyPage} titleId="privacy-title" />} />
           <Route path="/terms" element={<LegalPage page={termsPage} titleId="terms-title" />} />
           <Route path="/events" element={<ExploreEvents events={publicEvents} />} />
-          <Route path="/events/:eventId" element={<EventDetails events={publicEvents} />} />
+          <Route path="/events/:eventId" element={<EventDetails events={events} role={isUser ? userType : "guest"} organiserId={currentOrganiser.id} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
           <Route
             path="/dashboard"
             element={
@@ -332,7 +332,7 @@ function App() {
             <Route path="home" element={<DashboardHome selectedUser={selectedUser} users={users} events={events} organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} interestIds={interestIds} contactMessages={contactMessages} notifications={notifications} />} />
             <Route path="explore-events" element={<ExploreEvents inDashboard events={publicEvents} selectedUser={selectedUser} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
             <Route path="my-favourites" element={<MyFavourites events={events} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
-            <Route path="events/:eventId" element={<EventDetails inDashboard events={events} />} />
+            <Route path="events/:eventId" element={<EventDetails inDashboard events={events} role={userType} organiserId={currentOrganiser.id} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
             <Route path="preferences" element={<Preferences events={publicEvents} interestIds={interestIds} onSaveInterests={setInterestIds} />} />
             <Route path="notifications" element={<Notifications selectedUser={selectedUser} notifications={notifications} onMarkRead={markNotificationsRead} />} />
             {/* key: a new test role starts the forms from that role's details */}

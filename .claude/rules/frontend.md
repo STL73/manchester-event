@@ -74,7 +74,17 @@ frontend/src/
   cancelled" section of greyed cards (`EventCard`'s `muted` prop plus the status badge), heart
   kept so they can be removed. **Add to calendar** downloads an `.ics` from `lib/calendar.js`
   (Europe/London times, no invented end time), icon `CalendarArrowDown`. It sits on upcoming
-  My Favourites cards only (`onAddToCalendar`); Event details gets a labelled button in its redesign
+  My Favourites cards (`onAddToCalendar`) and as a labelled button on Event details
+- **Event details** (decided 2026-10-12): layout A, shared by the public page and the dashboard.
+  Photo (21:8, at most 320px), then the name and "About this event" beside a panel with when
+  (start to end), where (area, address, Open in Google Maps), organiser and the actions; below
+  52rem the panel moves under the name. Users and guests get Tickets and info, Add to calendar
+  and Save (guests a log-in line instead) while the event is to come; an ended or cancelled
+  favourite keeps only its heart. Organisers and admins check rather than attend: a status badge
+  and the ticket link as a fact, no buttons. One banner at most, in the status colour: cancelled,
+  ended, pending, rejected, draft. `canViewEvent` (in `eventsData.js`) decides who may open
+  what; anything else reads as not found. The map stays a link until the backend has the venue's
+  coordinates
 - **Notifications** (decided 2026-10-11): read state lives in `App.jsx` (`readAt`), so Home's
   unread card agrees. Rows grouped Today / Earlier this week / Earlier, collapsed to type icon,
   subject and time (64px); opening one shows the message and marks it read, one open at a time,
