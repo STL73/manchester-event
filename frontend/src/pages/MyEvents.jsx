@@ -349,7 +349,7 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
             </EmptyState>
           ) : (
             pageEvents.map(({ event, state }) => {
-              const { canEdit, canDelete } = organiserCardActions(state);
+              const { canEdit, canDelete } = organiserCardActions(state, event);
               return (
                 <EventCard
                   key={event.eventId}

@@ -108,6 +108,19 @@ frontend/src/
   applies at once (a pending event can still be edited) and the message links to My Events'
   Pending view. A draft whose date has passed gets a notice in Submit's place (`notice`), so an
   admin is never asked to approve an event that is already over
+- **Create / Edit Event** (decided 2026-10-12, layout A): one form in five numbered groups
+  (The basics, When, Where, Tickets, Photo; numbers in the logo's cell) and, beside it, a sticky
+  column with the live card (`EventCard`'s `preview`), a "3 of 6 needed to submit" checklist and
+  the buttons; below 56rem only the buttons show, pinned to the bottom of the screen. Labels
+  carry no ":" or "*"; the one optional field says "Optional". The area is picked from
+  `eventLocations` (Explore's filter uses it). The end must be after the start; Submit refuses
+  a start that has passed (a draft may keep one). The photo is a drop box (JPG, PNG, WebP, GIF,
+  5 MB) with Replace and Remove. Edit opens with a banner saying what saving does and ends with
+  a danger zone asked in the page: Cancel for an event that has been public (`hasBeenPublic`),
+  Delete for one that never was. Saving leads on: Submit to My Events' Pending view, a new
+  draft to My Drafts, Save draft on an existing draft stays. Editing a live event keeps its
+  last approved version public with its favourites (`approvedSnapshot`, `publicVersion`, the
+  schema's option b) until an admin approves the edit
 - **Notifications** (decided 2026-10-11): read state lives in `App.jsx` (`readAt`), so Home's
   unread card agrees. Rows grouped Today / Earlier this week / Earlier, collapsed to type icon,
   subject and time (64px); opening one shows the message and marks it read, one open at a time,

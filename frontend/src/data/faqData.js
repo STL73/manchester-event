@@ -52,7 +52,7 @@ export const faqGroups = [
       {
         question: "How do I list my event?",
         answer:
-          "Sign up as an organiser, then choose Create Events in your dashboard. You can save it as a draft or submit it for approval straight away.",
+          "Sign up as an organiser, then choose Create Event in your dashboard. You can save it as a draft or submit it for approval straight away.",
         featured: true,
       },
       {

@@ -107,6 +107,40 @@ export function eventState(event, now) {
   return event.status;
 }
 
+// The fields the public sees. Editing a live event copies them into
+// approvedSnapshot (approved_snapshot in the schema), so the last approved
+// version stays public, favourites and all, until an admin approves the edit
+const publicFields = [
+  "name",
+  "description",
+  "startDatetime",
+  "endDatetime",
+  "categoryId",
+  "category",
+  "locationId",
+  "location",
+  "address",
+  "externalLink",
+  "image",
+  "imagePosition",
+];
+
+export function snapshotOf(event) {
+  return Object.fromEntries(publicFields.map((field) => [field, event[field]]));
+}
+
+// What users and guests see: an edit waiting for approval (or rejected)
+// shows as its last approved version
+export function publicVersion(event) {
+  if (!event.approvedSnapshot || !["pending", "rejected"].includes(event.status)) return event;
+  return { ...event, ...event.approvedSnapshot, status: "approved", approvedSnapshot: null };
+}
+
+// Once public, an event can only be cancelled, never deleted
+export function hasBeenPublic(event) {
+  return Boolean(event.approvedSnapshot) || ["approved", "past", "cancelled"].includes(event.status);
+}
+
 // Who may open which event, as the API will check it: everyone sees what
 // has been public (approved, past or cancelled); an organiser also sees
 // their own; an admin sees everything but other people's drafts, as on

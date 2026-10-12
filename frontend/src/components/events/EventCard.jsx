@@ -32,6 +32,8 @@ export default function EventCard({
   note,
   primaryAction,
   notice,
+  // Create/Edit Event's live card: the same look, nothing to click
+  preview = false,
 }) {
   const { edit, delete: remove, confirmDelete } = organiserEventActions;
   // True from a "like" click until the heart's pop animation ends
@@ -60,7 +62,7 @@ export default function EventCard({
   // card (see .event-card-link), and the action buttons sit above it.
   // muted greys out an event that has finished or been cancelled
   return (
-    <article className={`event-card ${muted ? "event-card-muted" : ""}`.trim()}>
+    <article className={`event-card ${muted ? "event-card-muted" : ""} ${preview ? "event-card-preview" : ""}`.trim()}>
       {/* alt="": the title link right below already names the event, so a
           screen reader would read it twice. Lazy, because Explore lists every
           upcoming event and most cards start below the screen */}
@@ -69,7 +71,7 @@ export default function EventCard({
           className="event-card-image"
           src={event.image}
           alt=""
-          loading="lazy"
+          loading={preview ? "eager" : "lazy"}
           style={{ objectPosition: event.imagePosition }}
         />
       </div>
@@ -84,18 +86,24 @@ export default function EventCard({
           {event.category}
         </p>
         <h2 className="event-card-title">
-          <Link to={detailsPath} state={{ from: pathname }} className="event-card-link">
-            {event.name}
-          </Link>
+          {preview ? (
+            event.name
+          ) : (
+            <Link to={detailsPath} state={{ from: pathname }} className="event-card-link">
+              {event.name}
+            </Link>
+          )}
         </h2>
         <p className="event-card-detail">
           <MapPin className="event-card-icon" aria-hidden="true" />
           {event.location}
         </p>
-        <p className="event-card-detail">
-          <CalendarDays className="event-card-icon" aria-hidden="true" />
-          {dateFormatter.format(new Date(event.startDatetime))}
-        </p>
+        {event.startDatetime && (
+          <p className="event-card-detail">
+            <CalendarDays className="event-card-icon" aria-hidden="true" />
+            {dateFormatter.format(new Date(event.startDatetime))}
+          </p>
+        )}
         {note && (
           <p className="event-card-detail">
             <note.icon className="event-card-icon" aria-hidden="true" />
@@ -123,7 +131,7 @@ export default function EventCard({
             {notice.text}
           </p>
         )}
-        {!isConfirming && (
+        {!isConfirming && !preview && (
           <div className="event-card-actions">
             {/* A visible cue for mouse users; out of the Tab order and hidden
                 from screen readers, because the title link already goes there */}
