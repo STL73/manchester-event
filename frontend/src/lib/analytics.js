@@ -173,6 +173,8 @@ export function getSiteTotals(users, events) {
     events: events.length,
     pendingEvents: events.filter((event) => event.status === "pending").length,
     users: users.length,
-    pendingUsers: users.filter((user) => user.accStatus === "pending").length,
+    // Not get_pending_users(): the schema has no pending account status;
+    // an unverified email is something only the user can fix
+    unverifiedUsers: users.filter((user) => !user.emailVerifiedAt).length,
   };
 }

@@ -7,7 +7,7 @@ import StatusMessage from "../components/UI/StatusMessage";
 import EventCard from "../components/events/EventCard";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import EmptyState from "../components/UI/EmptyState";
-import { eventCategories, eventLocations, hasBeenPublic } from "../data/eventsData";
+import { eventCategories, eventDetailsPage, eventLocations, hasBeenPublic } from "../data/eventsData";
 import {
   afterSave,
   allowedImageTypes,
@@ -462,6 +462,11 @@ function EventFormPage({
                 <p>
                   <strong>{banner.title}</strong>
                   {banner.text}
+                  {event.status === "rejected" && event.rejectionReason && (
+                    <span className="event-details-banner-reason">
+                      {eventDetailsPage.rejectionReason} “{event.rejectionReason}”
+                    </span>
+                  )}
                 </p>
               </div>
             )}

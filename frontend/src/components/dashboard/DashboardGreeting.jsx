@@ -42,13 +42,12 @@ function NextFavouriteLine({ events, favouriteIds }) {
 }
 
 // Counted live from the shared state, so the line changes as soon as an
-// event is approved or a user is activated
+// event is approved. No unverified users here: only they can verify
 function PendingLine({ role, users, events, organiserEvents }) {
-  const { pendingUsers, pendingEvents } = getSiteTotals(users, events);
+  const { pendingEvents } = getSiteTotals(users, events);
   const counts = {
     pendingOwnEvents: organiserEvents.filter((event) => event.status === "pending")
       .length,
-    pendingUsers,
     pendingEvents,
   };
   const items = (role?.items ?? []).filter((item) => counts[item.id] > 0);

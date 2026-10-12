@@ -31,12 +31,6 @@ export const dashboardGreeting = {
       suffix: "waiting for your review",
       items: [
         {
-          id: "pendingUsers",
-          url: "/dashboard/manage-users",
-          singular: "user",
-          plural: "users",
-        },
-        {
           id: "pendingEvents",
           url: "/dashboard/manage-events",
           singular: "event",

@@ -1,6 +1,8 @@
 import { Fragment, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
-import { ArrowDownUp, CalendarCheck, CalendarDays, X } from "lucide-react";
+import { CalendarCheck, CalendarDays, X } from "lucide-react";
+import FilterPills from "../components/UI/FilterPills";
+import SortSelect from "../components/UI/SortSelect";
 import Button from "../components/UI/Button";
 import EventCard from "../components/events/EventCard";
 import SearchBar from "../components/events/SearchBar";
@@ -153,14 +155,7 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
   // Only statuses the organiser has, plus All and whichever is selected
   const statusOptions = statusViews.options
     .filter((option) => option.value === "all" || counts[option.value] > 0 || option.value === status)
-    .map((option) => ({
-      value: option.value,
-      label: (
-        <>
-          {option.label} <span className="events-when-count">{counts[option.value] ?? 0}</span>
-        </>
-      ),
-    }));
+    .map((option) => ({ ...option, count: counts[option.value] ?? 0 }));
 
   function handleFilterChange(event) {
     const { name, value } = event.target;
@@ -198,10 +193,10 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
     setSearchParams(nextParams);
   }
 
-  function handleSortChange(event) {
+  function handleSortChange(nextSort) {
     const nextParams = new URLSearchParams(searchParams);
-    if (event.target.value === "newest") nextParams.delete("sort");
-    else nextParams.set("sort", event.target.value);
+    if (nextSort === "newest") nextParams.delete("sort");
+    else nextParams.set("sort", nextSort);
     nextParams.delete("page");
     setSearchParams(nextParams);
   }
@@ -262,19 +257,12 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
 
             {/* Where Explore has its date pills and view switcher */}
             <div className="events-when-row">
-              <div className="events-when" role="group" aria-label={statusViews.label}>
-                {statusOptions.map((option) => (
-                  <button
-                    className={`events-when-option ${status === option.value ? "is-active" : ""}`}
-                    type="button"
-                    aria-pressed={status === option.value}
-                    onClick={() => handleStatusChange(option.value)}
-                    key={option.value}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
+              <FilterPills
+                label={statusViews.label}
+                options={statusOptions}
+                value={status}
+                onChange={handleStatusChange}
+              />
               {/* A second filter beside the sort, apart from the status pills
                   so it reads as "and", not one more status */}
               <div className="events-when-tools">
@@ -308,17 +296,7 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
                     <X aria-hidden="true" />
                   </button>
                 )}
-                <label className="toolbar-select">
-                  <span className="sr-only">{sortLabel}</span>
-                  <ArrowDownUp aria-hidden="true" />
-                  <select value={sort} onChange={handleSortChange}>
-                    {sortOptions.map(({ value, label }) => (
-                      <option value={value} key={value}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <SortSelect label={sortLabel} options={sortOptions} value={sort} onChange={handleSortChange} />
               </div>
             </div>
           </>

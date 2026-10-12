@@ -121,6 +121,19 @@ frontend/src/
   draft to My Drafts, Save draft on an existing draft stays. Editing a live event keeps its
   last approved version public with its favourites (`approvedSnapshot`, `publicVersion`, the
   schema's option b) until an admin approves the edit
+- **Manage Events / Manage Users** (decided 2026-10-12, layout A): Explore's search bar
+  (keywords alone on Users, `SearchBar`'s `showFilters`), `UI/FilterPills` with counts and
+  `UI/SortSelect` under it (My Events uses the same two), 15 per page, then a list of rows
+  (`.admin-list`; the name button is stretched over the row) that become cards below 52rem.
+  A row opens `UI/SidePanel` (a `<dialog>`; the open item is `?open=` in the URL, so links and
+  the old `/:id/edit` addresses open it). Events open on "Needs review", oldest waiting first;
+  the panel shows the whole event, what changed since approval for an edit of a live event,
+  and Approve / Reject, a reason required (`rejectionReason`, shown to the organiser on Edit
+  Event and Event details). Users: only Active / Suspended can be set (`emailVerifiedAt` NULL is
+  a read-only "Unverified" label, never a status); suspending asks how long (`suspendedUntil`,
+  NULL = until lifted) and why; a suspended organiser's events leave the public lists; Delete
+  only where the schema allows (not admins, not yourself, not an organiser whose events have
+  been public), asked in the panel
 - **Notifications** (decided 2026-10-11): read state lives in `App.jsx` (`readAt`), so Home's
   unread card agrees. Rows grouped Today / Earlier this week / Earlier, collapsed to type icon,
   subject and time (64px); opening one shows the message and marks it read, one open at a time,
