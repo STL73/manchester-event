@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { SquarePen } from "lucide-react";
 import EventCard from "../components/events/EventCard";
 import StatusMessage from "../components/UI/StatusMessage";
@@ -29,8 +29,12 @@ export default function MyDrafts({
   onSubmitDraft,
   onDeleteEvent,
 }) {
-  // { type: "submitted" } or { type: "deleted" }; the submitted one links
-  const [message, setMessage] = useState(null);
+  // { type: "submitted" | "deleted" }, or { text } passed from Create Event
+  // (a new draft) or Edit Event (a deleted one); the submitted one links
+  const location = useLocation();
+  const [message, setMessage] = useState(() =>
+    location.state?.message ? { text: location.state.message } : null,
+  );
   const { submitDraft } = organiserEventActions;
   const now = new Date();
 
@@ -89,7 +93,7 @@ export default function MyDrafts({
                 .
               </>
             ) : (
-              myDraftsMessages.draftDeleted
+              (message.text ?? myDraftsMessages.draftDeleted)
             )}
           </StatusMessage>
         )}

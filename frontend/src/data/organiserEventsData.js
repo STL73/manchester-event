@@ -21,12 +21,13 @@ export const organiserEventMessages = {
 };
 
 // Which buttons an organiser's event card shows, by eventState(). An event
-// can be deleted only before it has ever been public; once live it can be
-// edited (cancelling is on the edit page); past and cancelled are view only
-export function organiserCardActions(state) {
+// can be deleted only before it has ever been public (a pending edit of a
+// live event has been); once live it can be edited (cancelling is on the
+// edit page); past and cancelled are view only
+export function organiserCardActions(state, event) {
   return {
     canEdit: ["draft", "pending", "rejected", "approved"].includes(state),
-    canDelete: ["draft", "pending", "rejected"].includes(state),
+    canDelete: ["draft", "pending", "rejected"].includes(state) && !event?.approvedSnapshot,
   };
 }
 

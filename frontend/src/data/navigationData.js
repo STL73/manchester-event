@@ -51,7 +51,7 @@ const navigationData = [
         mainNav: [
           { title: "Home", url: "/dashboard/home", icon: Home },
           {
-            title: "Create Events",
+            title: "Create Event",
             url: "/dashboard/create-events",
             icon: CalendarPlus,
           },

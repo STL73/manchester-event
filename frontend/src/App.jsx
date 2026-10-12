@@ -16,7 +16,7 @@ import { TEST_USER_TYPE, getData, getUserData } from "./data/navigationData";
 import { mockUsers } from "./data/manageUsersData";
 import { currentAdmin, getManagedEvents } from "./data/manageEventsData";
 import { currentOrganiser } from "./data/organiserEventsData";
-import { initialEvents, isPublicEvent } from "./data/eventsData";
+import { hasBeenPublic, initialEvents, isPublicEvent, publicVersion, snapshotOf } from "./data/eventsData";
 import { privacyPage, termsPage } from "./data/legalPagesData";
 import { initialFavouriteIds } from "./data/myFavouritesData";
 import { userCategoryIds } from "./data/preferencesData";
@@ -72,7 +72,10 @@ function App() {
   const [users, setUsers] = useState(mockUsers);
   // The one events list; every page reads a view of it (see eventsData.js)
   const [events, setEvents] = useState(initialEvents);
-  const publicEvents = events.filter(isPublicEvent);
+  // Users and guests see an edit waiting for approval as its last approved
+  // version (publicVersion); organisers and admins see the real record
+  const audienceEvents = events.map(publicVersion);
+  const publicEvents = audienceEvents.filter(isPublicEvent);
   const organiserEvents = events.filter(
     (event) => event.organiserId === currentOrganiser.id,
   );
@@ -135,11 +138,9 @@ function App() {
   const data = getData();
   const userTypes = data[0].role.map(({ type }) => type);
   const selectedUser = { ...getUserData(userType), ...profileChanges[userType] };
-  // Ever public = approved, cancelled or past: such an organiser can't
-  // delete their own account (the schema's deletion rule)
-  const hasPublicEvents = organiserEvents.some((event) =>
-    ["approved", "cancelled", "past"].includes(event.status),
-  );
+  // An organiser whose events have ever been public can't delete their own
+  // account (the schema's deletion rule)
+  const hasPublicEvents = organiserEvents.some(hasBeenPublic);
 
   function updateProfile(changes) {
     setProfileChanges((current) => ({
@@ -189,7 +190,8 @@ function App() {
     );
   }
 
-  // Matches update_event_status(): records which admin changed it and when
+  // Matches update_event_status(): records which admin changed it and when.
+  // Approving publishes a pending edit, so the old public copy goes
   function updateEventStatus(eventId, status) {
     const adminUpdatedAt = new Date().toISOString();
     setEvents((currentEvents) =>
@@ -198,6 +200,7 @@ function App() {
           ? {
               ...event,
               status,
+              approvedSnapshot: status === "approved" ? null : event.approvedSnapshot,
               adminId: currentAdmin.id,
               adminName: currentAdmin.name,
               adminUpdatedAt,
@@ -236,18 +239,26 @@ function App() {
 
   // Matches update_event(): saves the organiser's changes. Drafts keep the
   // status the organiser chose; any other edit goes back to pending for the
-  // admin to approve again, and (like remove_favourite_after_update()) the
-  // event is removed from everyone's favourites
+  // admin to approve again. Unlike the PHP (remove_favourite_after_update()),
+  // a live event keeps its last approved version public and its favourites
+  // until the edit is approved (schema option b, agreed 2026-10-05)
   function updateOrganiserEvent(eventId, changes, status) {
     const now = new Date().toISOString();
     setEvents((currentEvents) =>
       currentEvents.map((event) =>
         event.eventId === eventId
-          ? { ...event, ...changes, status, orgUpdatedAt: now, updatedAt: now }
+          ? {
+              ...event,
+              ...changes,
+              status,
+              approvedSnapshot:
+                event.approvedSnapshot ?? (event.status === "approved" ? snapshotOf(event) : null),
+              orgUpdatedAt: now,
+              updatedAt: now,
+            }
           : event,
       ),
     );
-    setFavouriteIds((currentIds) => currentIds.filter((id) => id !== eventId));
   }
 
   // Matches the Cancel Event button in edit_event.php
@@ -255,8 +266,9 @@ function App() {
     const now = new Date().toISOString();
     setEvents((currentEvents) =>
       currentEvents.map((event) =>
+        // An edit still waiting is dropped: the public version is cancelled
         event.eventId === eventId
-          ? { ...event, status: "cancelled", orgUpdatedAt: now, updatedAt: now }
+          ? { ...publicVersion(event), status: "cancelled", approvedSnapshot: null, orgUpdatedAt: now, updatedAt: now }
           : event,
       ),
     );
@@ -312,7 +324,7 @@ function App() {
           <Route path="/privacy" element={<LegalPage page={privacyPage} titleId="privacy-title" />} />
           <Route path="/terms" element={<LegalPage page={termsPage} titleId="terms-title" />} />
           <Route path="/events" element={<ExploreEvents events={publicEvents} />} />
-          <Route path="/events/:eventId" element={<EventDetails events={events} role={isUser ? userType : "guest"} organiserId={currentOrganiser.id} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
+          <Route path="/events/:eventId" element={<EventDetails events={audienceEvents} role={isUser ? userType : "guest"} organiserId={currentOrganiser.id} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
           <Route
             path="/dashboard"
             element={
@@ -331,10 +343,10 @@ function App() {
             }
           >
             <Route index element={<Navigate to="home" replace />} />
-            <Route path="home" element={<DashboardHome selectedUser={selectedUser} users={users} events={events} organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} interestIds={interestIds} contactMessages={contactMessages} notifications={notifications} />} />
+            <Route path="home" element={<DashboardHome selectedUser={selectedUser} users={users} events={userType === "user" ? audienceEvents : events} organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} interestIds={interestIds} contactMessages={contactMessages} notifications={notifications} />} />
             <Route path="explore-events" element={<ExploreEvents inDashboard events={publicEvents} selectedUser={selectedUser} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
-            <Route path="my-favourites" element={<MyFavourites events={events} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
-            <Route path="events/:eventId" element={<EventDetails inDashboard events={events} role={userType} organiserId={currentOrganiser.id} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
+            <Route path="my-favourites" element={<MyFavourites events={audienceEvents} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
+            <Route path="events/:eventId" element={<EventDetails inDashboard events={userType === "user" ? audienceEvents : events} role={userType} organiserId={currentOrganiser.id} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
             <Route path="preferences" element={<Preferences events={publicEvents} interestIds={interestIds} onSaveInterests={setInterestIds} />} />
             <Route path="notifications" element={<Notifications selectedUser={selectedUser} notifications={notifications} onMarkRead={markNotificationsRead} />} />
             {/* key: a new test role starts the forms from that role's details */}
@@ -354,7 +366,7 @@ function App() {
             />
             <Route path="create-events" element={<CreateEvents onCreateEvent={createOrganiserEvent} />} />
             <Route path="my-events" element={<MyEvents organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} />} />
-            <Route path="my-events/:eventId/edit" element={<ResetOnParam param="eventId"><CreateEvents mode="edit" events={organiserEvents} onUpdateEvent={updateOrganiserEvent} onCancelEvent={cancelOrganiserEvent} /></ResetOnParam>} />
+            <Route path="my-events/:eventId/edit" element={<ResetOnParam param="eventId"><CreateEvents mode="edit" events={organiserEvents} onUpdateEvent={updateOrganiserEvent} onCancelEvent={cancelOrganiserEvent} onDeleteEvent={deleteOrganiserEvent} /></ResetOnParam>} />
             <Route path="my-drafts" element={<MyDrafts organiserEvents={organiserEvents} onSubmitDraft={submitDraft} onDeleteEvent={deleteOrganiserEvent} />} />
             <Route path="event-analytics" element={<EventAnalytics organiserEvents={organiserEvents} />} />
             <Route path="manage-users" element={<ManageUsers users={users} onDeleteUser={deleteUser} />} />

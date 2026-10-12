@@ -165,7 +165,7 @@ export default function OrganiserDashboardHome({ organiserEvents: events, onDele
             recentEvents.map((event) => {
               // Same buttons as on My Events, by what the event is now
               const state = eventState(event, now);
-              const { canEdit, canDelete } = organiserCardActions(state);
+              const { canEdit, canDelete } = organiserCardActions(state, event);
               return (
                 <EventCard
                   key={event.eventId}
