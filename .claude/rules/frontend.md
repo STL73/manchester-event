@@ -12,6 +12,10 @@ functions record behaviour being matched on purpose: keep that parity unless tol
   have (the footer's social links, `data/socialLinks.js`). Don't use it for anything else
 - Charts: Recharts, **only** inside the analytics pages, which `App.jsx` lazy-loads so Recharts
   stays out of the main bundle. Keep any new chart page lazy too
+- **Dashboard routes are role-guarded** (2026-10-12): each role's pages sit inside
+  `<Route element={<RoleOnly allow="…" />}>` in `App.jsx`, the same pages its sidebar lists;
+  another role typing the address goes to its Home. Home, Event details, Notifications and
+  Settings are everyone's. A new role-only page goes inside its role's group
 - **Dashboard pages are lazy** (2026-10-12): `App.jsx` `lazy()`-imports the dashboard frame and
   every page only the dashboard uses, and `Dashboard` wraps its `<Outlet>` in `Suspense` with
   `UI/PageLoading`. A new dashboard page is lazy too. Explore Events and Event details stay eager:
