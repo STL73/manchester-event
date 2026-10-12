@@ -23,20 +23,16 @@ export default function SidePanel({ open, title, titleId, onClose, footer, child
 
   // Escape fires "cancel". The page's state closes the panel, never the
   // browser alone: a panel opened from a link (no click first) gets a
-  // cancel without a close event, which left the page thinking it was open
+  // cancel without a close event. No "close" listener either: the browser
+  // can deliver it late, after the next item has opened, and close that
   useEffect(() => {
     const dialog = dialogRef.current;
     const handleCancel = (cancelEvent) => {
       cancelEvent.preventDefault();
       onCloseRef.current();
     };
-    const handleClose = () => onCloseRef.current();
     dialog.addEventListener("cancel", handleCancel);
-    dialog.addEventListener("close", handleClose);
-    return () => {
-      dialog.removeEventListener("cancel", handleCancel);
-      dialog.removeEventListener("close", handleClose);
-    };
+    return () => dialog.removeEventListener("cancel", handleCancel);
   }, []);
 
   return (

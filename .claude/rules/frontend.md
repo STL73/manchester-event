@@ -146,7 +146,18 @@ frontend/src/
   fits a desktop or tablet screen, a laptop scrolls about 3 rows. Below 24rem the type icon hides
   so the subject gets two lines. An All / Unread (n) switch (`PeriodSwitcher`, `?show=unread`)
   sits above the list; rows read while Unread is showing stay until the view or page changes. No
-  type filter or search for now. Contact Messages still uses the old `.notification-card` styles
+  type filter or search for now
+- **Contact Messages** (decided 2026-10-12, layout A): the admin list and `UI/SidePanel`, like
+  Manage Events and Users. Opening a message reads it (`readAt`, once per opening, so Admin
+  Home's unread card agrees); the panel replies in the page (`replyBody`, `repliedAt`,
+  `repliedBy`; the email itself is the backend's job) or marks it unread. Pills: All, Unread,
+  Replied, From guests; the sender links to their account in Manage Users
+- **System Logs** (decided 2026-10-12, layout A): an activity feed under day headings, 25 per
+  page. `lib/systemLogs.js` `describeLog()` turns a row (`details` is an object, like the
+  schema's jsonb; `role` is the copied column) into a sentence with links to the event or
+  account it names; `components/dashboard/LogEntry` draws it, and Admin Home's Recent Admin
+  Actions uses the same entries. Pills: Events, Accounts, Sign-ins, Failed sign-ins (red, the
+  `danger` tone on `FilterPills`), Admins only
 - **Settings** (decided 2026-10-11): four sections (`SettingsSection`), each with its title and
   explanation in a 240px column beside its panel, above it below 44rem, and each saving on its
   own: Profile (picture up to 5 MB with Remove, editable display name, locked email with a
