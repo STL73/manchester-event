@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CalendarArrowDown, CalendarDays, Eye, Heart, MapPin, Tag } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import Button from "../UI/Button";
@@ -21,14 +21,29 @@ export default function EventCard({
   canFavourite = false,
   onToggleFavourite,
   status,
+  // The badge text when it differs from the status (organisers see "live")
+  statusLabel,
   editTo,
   onDelete,
   muted = false,
   onAddToCalendar,
 }) {
-  const { edit, delete: remove } = organiserEventActions;
+  const { edit, delete: remove, confirmDelete } = organiserEventActions;
   // True from a "like" click until the heart's pop animation ends
   const [isPopping, setIsPopping] = useState(false);
+  // Delete asks first; focus moves to "Keep it" and back to Delete after
+  const [isConfirming, setIsConfirming] = useState(false);
+  const deleteRef = useRef(null);
+  const keepRef = useRef(null);
+
+  useEffect(() => {
+    if (isConfirming) keepRef.current?.focus();
+  }, [isConfirming]);
+
+  function closeConfirm() {
+    setIsConfirming(false);
+    requestAnimationFrame(() => deleteRef.current?.focus());
+  }
   // Cards on dashboard pages open the details inside the dashboard
   const { pathname } = useLocation();
   const inDashboard = pathname.startsWith("/dashboard");
@@ -56,7 +71,7 @@ export default function EventCard({
       <div className="event-card-content">
         {status && (
           <span className={`status-badge status-${status} event-card-status`}>
-            {status}
+            {statusLabel ?? status}
           </span>
         )}
         <p className="event-card-category">
@@ -76,85 +91,109 @@ export default function EventCard({
           <CalendarDays className="event-card-icon" aria-hidden="true" />
           {dateFormatter.format(new Date(event.startDatetime))}
         </p>
-        <div className="event-card-actions">
-          {/* A visible cue for mouse users; out of the Tab order and hidden
-              from screen readers, because the title link already goes there */}
-          <Button
-            to={detailsPath}
-            state={{ from: pathname }}
-            variant="secondary"
-            size="sm"
-            tabIndex={-1}
-            aria-hidden="true"
-          >
-            <Eye aria-hidden="true" />
-            View
-          </Button>
-          {canFavourite && (
-            <button
-              className={`event-favourite-button ${isFavourite ? "is-favourite" : ""} ${isPopping ? "is-popping" : ""}`}
-              type="button"
-              aria-label={
-                isFavourite ? "Remove from favourites" : "Add to favourites"
-              }
-              aria-pressed={isFavourite}
-              onClick={() => {
-                if (!isFavourite) setIsPopping(true);
-                onToggleFavourite(event.eventId);
-              }}
-              onAnimationEnd={() => setIsPopping(false)}
-            >
-              <Heart
-                fill={isFavourite ? "currentColor" : "none"}
-                aria-hidden="true"
-              />
-            </button>
-          )}
-          {onAddToCalendar && (
-            <Tooltip text={addToCalendar.label}>
-              <button
-                className="event-calendar-button"
-                type="button"
-                aria-label={`${addToCalendar.label}: ${event.name}`}
-                onClick={() => onAddToCalendar(event)}
-              >
-                <CalendarArrowDown aria-hidden="true" />
-              </button>
-            </Tooltip>
-          )}
-          {/* Organiser actions, shown when the page passes editTo/onDelete */}
-          {editTo &&
-            (isPast ? (
-              <Button type="button" variant="secondary" size="sm" disabled>
-                <edit.icon aria-hidden="true" />
-                {edit.label}
-              </Button>
-            ) : (
-              <Button
-                to={editTo}
-                state={{ from: pathname }}
-                variant="secondary"
-                size="sm"
-                aria-label={`${edit.label} ${event.name}`}
-              >
-                <edit.icon aria-hidden="true" />
-                {edit.label}
-              </Button>
-            ))}
-          {onDelete && (
+        {!isConfirming && (
+          <div className="event-card-actions">
+            {/* A visible cue for mouse users; out of the Tab order and hidden
+                from screen readers, because the title link already goes there */}
             <Button
-              type="button"
-              variant="danger"
+              to={detailsPath}
+              state={{ from: pathname }}
+              variant="secondary"
               size="sm"
-              aria-label={`${remove.label} ${event.name}`}
-              disabled={isPast}
-              onClick={() => onDelete(event)}
+              tabIndex={-1}
+              aria-hidden="true"
             >
-              <remove.icon aria-hidden="true" />
-              {remove.label}
+              <Eye aria-hidden="true" />
+              View
             </Button>
-          )}
-        </div>
+            {canFavourite && (
+              <button
+                className={`event-favourite-button ${isFavourite ? "is-favourite" : ""} ${isPopping ? "is-popping" : ""}`}
+                type="button"
+                aria-label={
+                  isFavourite ? "Remove from favourites" : "Add to favourites"
+                }
+                aria-pressed={isFavourite}
+                onClick={() => {
+                  if (!isFavourite) setIsPopping(true);
+                  onToggleFavourite(event.eventId);
+                }}
+                onAnimationEnd={() => setIsPopping(false)}
+              >
+                <Heart
+                  fill={isFavourite ? "currentColor" : "none"}
+                  aria-hidden="true"
+                />
+              </button>
+            )}
+            {onAddToCalendar && (
+              <Tooltip text={addToCalendar.label}>
+                <button
+                  className="event-calendar-button"
+                  type="button"
+                  aria-label={`${addToCalendar.label}: ${event.name}`}
+                  onClick={() => onAddToCalendar(event)}
+                >
+                  <CalendarArrowDown aria-hidden="true" />
+                </button>
+              </Tooltip>
+            )}
+            {/* Organiser actions, shown when the page passes editTo/onDelete */}
+            {editTo &&
+              (isPast ? (
+                <Button type="button" variant="secondary" size="sm" disabled>
+                  <edit.icon aria-hidden="true" />
+                  {edit.label}
+                </Button>
+              ) : (
+                <Button
+                  to={editTo}
+                  state={{ from: pathname }}
+                  variant="secondary"
+                  size="sm"
+                  aria-label={`${edit.label} ${event.name}`}
+                >
+                  <edit.icon aria-hidden="true" />
+                  {edit.label}
+                </Button>
+              ))}
+            {onDelete && (
+              <Button
+                ref={deleteRef}
+                type="button"
+                variant="danger"
+                size="sm"
+                aria-label={`${remove.label} ${event.name}`}
+                disabled={isPast}
+                onClick={() => setIsConfirming(true)}
+              >
+                <remove.icon aria-hidden="true" />
+                {remove.label}
+              </Button>
+            )}
+          </div>
+        )}
+        {/* Asked in the card, in place of the PHP confirm() pop-up: it takes
+            the button row's place until answered. Escape keeps the event */}
+        {isConfirming && (
+          <div
+            className="event-card-confirm"
+            role="group"
+            aria-label={`${confirmDelete.question} ${event.name}`}
+            onKeyDown={(keyEvent) => keyEvent.key === "Escape" && closeConfirm()}
+          >
+            <p className="event-card-confirm-text">{confirmDelete.question}</p>
+            <div className="event-card-confirm-actions">
+              <Button ref={keepRef} type="button" variant="secondary" size="sm" onClick={closeConfirm}>
+                {confirmDelete.cancel}
+              </Button>
+              <Button type="button" variant="destructive" size="sm" onClick={() => onDelete(event)}>
+                <remove.icon aria-hidden="true" />
+                {confirmDelete.confirm}
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </article>
   );

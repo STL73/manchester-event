@@ -48,6 +48,7 @@ import {
   SquarePen,
   Ticket,
 } from "lucide-react";
+import { isUpcoming } from "../lib/eventDates";
 
 // Dashboard pages open event details inside the dashboard;
 // the public Events page opens them full screen
@@ -97,6 +98,14 @@ export const eventDetailsPage = {
     draft: { icon: SquarePen, title: "Draft", text: "Only you can see it until you submit it from My Drafts." },
   },
 };
+
+// What an event is now. Past is worked out from the dates, as the database
+// will (the mock data also stores "past"), so an approved event whose time
+// has gone reads as past everywhere
+export function eventState(event, now) {
+  if (event.status === "approved" && !isUpcoming(event, now)) return "past";
+  return event.status;
+}
 
 // Who may open which event, as the API will check it: everyone sees what
 // has been public (approved, past or cancelled); an organiser also sees

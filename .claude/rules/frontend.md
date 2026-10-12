@@ -12,6 +12,10 @@ functions record behaviour being matched on purpose: keep that parity unless tol
   have (the footer's social links, `data/socialLinks.js`). Don't use it for anything else
 - Charts: Recharts, **only** inside the analytics pages, which `App.jsx` lazy-loads so Recharts
   stays out of the main bundle. Keep any new chart page lazy too
+- **Dashboard pages are lazy** (2026-10-12): `App.jsx` `lazy()`-imports the dashboard frame and
+  every page only the dashboard uses, and `Dashboard` wraps its `<Outlet>` in `Suspense` with
+  `UI/PageLoading`. A new dashboard page is lazy too. Explore Events and Event details stay eager:
+  the public site uses them
 - Data fetching: none yet. Every page runs on mock data (see below)
 
 ## Layout
@@ -85,6 +89,18 @@ frontend/src/
   ended, pending, rejected, draft. `canViewEvent` (in `eventsData.js`) decides who may open
   what; anything else reads as not found. The map stays a link until the backend has the venue's
   coordinates
+- **My Events** (decided 2026-10-12): submitted events only; drafts live on My Drafts and the
+  summary links to them ("6 live · 2 waiting for approval · 1 rejected · 3 drafts"). The search
+  bar is Explore's (keywords, category, location, Search), and the row under it holds status
+  pills with counts in Explore's date-pill style (`?status=`, values are `eventState()`, so an
+  approved event that has ended counts as past) and, on the right where Explore has its view
+  switcher, a Pick a date pill (any day, past too, `?date=`, with an x to clear) and a sort
+  dropdown. All of them apply at once. 12 per page. Organisers see "approved" as
+  "live" (`organiserStatusLabels`, `EventCard`'s `statusLabel`, Event details); admins keep
+  "approved". Card buttons follow `organiserCardActions`: Delete only
+  before an event has been public (draft, pending, rejected), Edit until it is over, past and
+  cancelled are View only and greyed. Delete asks inside the card (`EventCard`, "Keep it" /
+  "Delete permanently"), never `window.confirm`; Organiser Home's cards follow the same rules
 - **Notifications** (decided 2026-10-11): read state lives in `App.jsx` (`readAt`), so Home's
   unread card agrees. Rows grouped Today / Earlier this week / Earlier, collapsed to type icon,
   subject and time (64px); opening one shows the message and marks it read, one open at a time,

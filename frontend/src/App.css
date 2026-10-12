@@ -359,8 +359,10 @@
   }
 
   /* Date pills on the left, the layout switch on the right */
+  /* Wraps when the pills and the control on the right don't fit (My
+     Events' sort on a phone); the control then sits on its own line */
   .events-when-row {
-    @apply w-full max-w-7xl flex items-center justify-between gap-4;
+    @apply w-full max-w-7xl flex flex-wrap items-center justify-between gap-x-4 gap-y-3;
   }
 
   /* Quick date ranges. 32px and unfilled, lighter than the 46px fields
@@ -554,6 +556,20 @@
      cut off by the card's overflow-hidden */
   .event-card-actions {
     @apply relative z-10 mt-auto flex flex-wrap items-center gap-3 pt-2;
+  }
+
+  /* Delete's question, in the button row's place; above the stretched
+     title link like the row it replaces */
+  .event-card-confirm {
+    @apply relative z-10 mt-auto flex flex-col gap-2.5 pt-2;
+  }
+
+  .event-card-confirm-text {
+    @apply text-sm font-medium text-danger;
+  }
+
+  .event-card-confirm-actions {
+    @apply flex flex-wrap items-center gap-3;
   }
 
   /* Same 34px circle as the icon buttons, tinted with its own red like the
@@ -1826,6 +1842,36 @@
   /* All / Unread: lined up with the list, not centred like the section */
   .notification-view-switch {
     @apply self-start;
+  }
+
+  /* My Events' status pills (Explore's date pills) carry a count */
+  .events-when-count {
+    @apply tabular-nums text-muted;
+  }
+
+  .events-when-option.is-active .events-when-count {
+    @apply text-accent-hover;
+  }
+
+  /* The controls on the right of the pills row (My Events' date and
+     sort); after a wrap they keep to the right */
+  .events-when-tools {
+    @apply ml-auto flex flex-wrap items-center justify-end gap-2;
+  }
+
+  /* Clears a picked date: a round 32px button, the height of the pills */
+  .events-when-clear {
+    @apply grid size-8 place-items-center rounded-full border border-border text-muted transition-colors hover:border-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none [&_svg]:size-3.5;
+  }
+
+  /* A small dropdown beside the pills (My Events' sort), framed like them
+     so the row reads as one toolbar, where Explore has its view switcher */
+  .toolbar-select {
+    @apply relative inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-border pl-3 pr-1 text-[13px] font-medium text-muted transition-colors hover:border-accent focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent [&>svg]:size-3.5 [&>svg]:text-accent;
+  }
+
+  .toolbar-select select {
+    @apply h-full cursor-pointer rounded-full bg-transparent pr-2 text-foreground outline-none [&>option]:bg-card;
   }
 
   .notification-group {

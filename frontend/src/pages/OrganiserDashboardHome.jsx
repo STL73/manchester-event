@@ -4,13 +4,15 @@ import Button from "../components/UI/Button";
 import DashboardCard from "../components/UI/DashboardCard";
 import EventCard from "../components/events/EventCard";
 import StatusMessage from "../components/UI/StatusMessage";
-import { eventDetailsPath } from "../data/eventsData";
+import { eventDetailsPath, eventState } from "../data/eventsData";
 import { favouriteCounts } from "../data/myFavouritesData";
 import { organiserInsights } from "../data/organiserDashboardData";
 import {
   editEventPath,
+  organiserCardActions,
   organiserEventActions,
   organiserEventMessages,
+  organiserStatusLabels,
 } from "../data/organiserEventsData";
 import { bySoonest, isUpcoming } from "../lib/eventDates";
 import EmptyState from "../components/UI/EmptyState";
@@ -110,9 +112,10 @@ export default function OrganiserDashboardHome({ organiserEvents: events, onDele
   // Matches get_recent_events()
   const recentEvents = [...events].sort(newestFirst).slice(0, 3);
   const insights = getOrganiserInsights(events);
+  const now = new Date();
 
+  // The card has already asked (see EventCard)
   function handleDelete(event) {
-    if (!window.confirm(organiserEventMessages.confirmDelete)) return;
     onDeleteEvent(event.eventId);
     setMessage(organiserEventMessages.eventDeleted);
   }
@@ -159,15 +162,21 @@ export default function OrganiserDashboardHome({ organiserEvents: events, onDele
               </Button>
             </EmptyState>
           ) : (
-            recentEvents.map((event) => (
-              <EventCard
-                key={event.eventId}
-                event={event}
-                status={event.status}
-                editTo={editEventPath(event.eventId)}
-                onDelete={handleDelete}
-              />
-            ))
+            recentEvents.map((event) => {
+              // Same buttons as on My Events, by what the event is now
+              const state = eventState(event, now);
+              const { canEdit, canDelete } = organiserCardActions(state);
+              return (
+                <EventCard
+                  key={event.eventId}
+                  event={event}
+                  status={state}
+                  statusLabel={organiserStatusLabels[state]}
+                  editTo={canEdit ? editEventPath(event.eventId) : undefined}
+                  onDelete={canDelete ? handleDelete : undefined}
+                />
+              );
+            })
           )}
         </div>
       </section>

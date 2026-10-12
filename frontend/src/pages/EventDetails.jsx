@@ -1,10 +1,10 @@
 import { CalendarArrowDown, CalendarDays, Heart, MapPin, Tag, UserRound } from "lucide-react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Button from "../components/UI/Button";
-import { canViewEvent, eventDetailsPage, eventDetailsPath } from "../data/eventsData";
+import { canViewEvent, eventDetailsPage, eventDetailsPath, eventState } from "../data/eventsData";
 import { addToCalendar } from "../data/myFavouritesData";
+import { organiserStatusLabels } from "../data/organiserEventsData";
 import { downloadEventIcs } from "../lib/calendar";
-import { isUpcoming } from "../lib/eventDates";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import EmptyState from "../components/UI/EmptyState";
 
@@ -27,15 +27,6 @@ const endDayFormatter = new Intl.DateTimeFormat("en-GB", {
   hour: "2-digit",
   minute: "2-digit",
 });
-
-// What the event is now. Past is worked out from the dates, as the
-// database will (the mock data also stores "past")
-function eventState(event, now) {
-  if (event.status === "cancelled") return "cancelled";
-  if (event.status === "past") return "past";
-  if (event.status === "approved" && !isUpcoming(event, now)) return "past";
-  return event.status;
-}
 
 // "19:30 – 23:00", or the end's day too when it finishes on another one
 function timeRange(event) {
@@ -162,7 +153,11 @@ function EventDetailsBody({ event, TitleTag, titleId, role, favouriteIds, onTogg
               <Tag className="event-card-icon" aria-hidden="true" />
               {event.category}
             </p>
-            {isStaff && <span className={`status-badge status-${state}`}>{state}</span>}
+            {isStaff && (
+              <span className={`status-badge status-${state}`}>
+                {(role === "organiser" && organiserStatusLabels[state]) || state}
+              </span>
+            )}
           </div>
           <TitleTag className="event-details-title" id={titleId}>
             {event.name}
