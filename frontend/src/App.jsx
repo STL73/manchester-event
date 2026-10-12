@@ -1,7 +1,6 @@
 import { Fragment, lazy, Suspense, useState } from "react";
 import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import Home from "./pages/Home";
-import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -12,20 +11,6 @@ import EventDetails from "./pages/EventDetails";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import ScrollToTop from "./components/layout/ScrollToTop";
-import DashboardHome from "./pages/DashboardHome";
-import MyFavourites from "./pages/MyFavourites";
-import Preferences from "./pages/Preferences";
-import Notifications from "./pages/Notifications";
-import Settings from "./pages/Settings";
-import CreateEvents from "./pages/CreateEvents";
-import MyEvents from "./pages/MyEvents";
-import MyDrafts from "./pages/MyDrafts";
-import ManageUsers from "./pages/ManageUsers";
-import EditUser from "./pages/EditUser";
-import ManageEvents from "./pages/ManageEvents";
-import EditEventStatus from "./pages/EditEventStatus";
-import SystemLogs from "./pages/SystemLogs";
-import ContactMessages from "./pages/ContactMessages";
 import NotFound from "./pages/NotFound";
 import { TEST_USER_TYPE, getData, getUserData } from "./data/navigationData";
 import { mockUsers } from "./data/manageUsersData";
@@ -39,15 +24,30 @@ import { initialContactMessages } from "./data/contactMessagesData";
 import { initialNotifications } from "./data/notificationsData";
 import { passwordChangedNotification } from "./data/profileSettingsData";
 
+import PageLoading from "./components/UI/PageLoading";
 import "./App.css";
 
-// Analytics pages load Recharts, so they are only downloaded when opened
+// The dashboard and its pages download only when someone signs in, so a
+// visitor to the public site never loads them. Explore Events and Event
+// details stay in the main bundle: the public pages use them too. The
+// analytics pages also keep Recharts out of everything else
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const DashboardHome = lazy(() => import("./pages/DashboardHome"));
+const MyFavourites = lazy(() => import("./pages/MyFavourites"));
+const Preferences = lazy(() => import("./pages/Preferences"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const Settings = lazy(() => import("./pages/Settings"));
+const CreateEvents = lazy(() => import("./pages/CreateEvents"));
+const MyEvents = lazy(() => import("./pages/MyEvents"));
+const MyDrafts = lazy(() => import("./pages/MyDrafts"));
+const ManageUsers = lazy(() => import("./pages/ManageUsers"));
+const EditUser = lazy(() => import("./pages/EditUser"));
+const ManageEvents = lazy(() => import("./pages/ManageEvents"));
+const EditEventStatus = lazy(() => import("./pages/EditEventStatus"));
+const SystemLogs = lazy(() => import("./pages/SystemLogs"));
+const ContactMessages = lazy(() => import("./pages/ContactMessages"));
 const EventAnalytics = lazy(() => import("./pages/EventAnalytics"));
 const SiteAnalytics = lazy(() => import("./pages/SiteAnalytics"));
-
-function PageLoading() {
-  return <p className="dashboard-empty-text p-4">Loading…</p>;
-}
 
 // React reuses a page when only a URL parameter changes, so an edit form
 // would keep the previous record's status and message. A new key per ID
@@ -317,12 +317,14 @@ function App() {
             path="/dashboard"
             element={
               isUser ? (
-                <Dashboard
-                  selectedUser={selectedUser}
-                  secondaryNav={data[1].secondaryNav}
-                  onLogout={toggleUserMode}
-                  onSwitchUserType={switchUserType}
-                />
+                <Suspense fallback={<PageLoading />}>
+                  <Dashboard
+                    selectedUser={selectedUser}
+                    secondaryNav={data[1].secondaryNav}
+                    onLogout={toggleUserMode}
+                    onSwitchUserType={switchUserType}
+                  />
+                </Suspense>
               ) : (
                 <Navigate to="/" replace />
               )
@@ -354,12 +356,12 @@ function App() {
             <Route path="my-events" element={<MyEvents organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} />} />
             <Route path="my-events/:eventId/edit" element={<ResetOnParam param="eventId"><CreateEvents mode="edit" events={organiserEvents} onUpdateEvent={updateOrganiserEvent} onCancelEvent={cancelOrganiserEvent} /></ResetOnParam>} />
             <Route path="my-drafts" element={<MyDrafts organiserEvents={organiserEvents} onSubmitDraft={submitDraft} onDeleteEvent={deleteOrganiserEvent} />} />
-            <Route path="event-analytics" element={<Suspense fallback={<PageLoading />}><EventAnalytics organiserEvents={organiserEvents} /></Suspense>} />
+            <Route path="event-analytics" element={<EventAnalytics organiserEvents={organiserEvents} />} />
             <Route path="manage-users" element={<ManageUsers users={users} onDeleteUser={deleteUser} />} />
             <Route path="manage-users/:userId/edit" element={<ResetOnParam param="userId"><EditUser users={users} onUpdateUserStatus={updateUserStatus} /></ResetOnParam>} />
             <Route path="manage-events" element={<ManageEvents events={managedEvents} />} />
             <Route path="manage-events/:eventId/edit" element={<ResetOnParam param="eventId"><EditEventStatus events={managedEvents} onUpdateEventStatus={updateEventStatus} /></ResetOnParam>} />
-            <Route path="site-analytics" element={<Suspense fallback={<PageLoading />}><SiteAnalytics users={users} events={events} /></Suspense>} />
+            <Route path="site-analytics" element={<SiteAnalytics users={users} events={events} />} />
             <Route path="system-logs" element={<SystemLogs />} />
             <Route path="contact-messages" element={<ContactMessages contactMessages={contactMessages} />} />
             <Route path="*" element={<NotFound inDashboard />} />

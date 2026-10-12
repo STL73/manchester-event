@@ -1,7 +1,8 @@
 import { Outlet } from "react-router-dom";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Sidebar from "../components/layout/Sidebar";
 import WeatherDateBar from "../components/dashboard/WeatherDateBar";
+import PageLoading from "../components/UI/PageLoading";
 
 export default function Dashboard({
   selectedUser,
@@ -27,7 +28,11 @@ export default function Dashboard({
           isSidebarCollapsed={isSidebarCollapsed}
           onToggleSidebar={() => setIsSidebarCollapsed((collapsed) => !collapsed)}
         />
-        <Outlet />
+        {/* Each page is its own download (see App); the sidebar and the
+            weather bar stay while it arrives */}
+        <Suspense fallback={<PageLoading />}>
+          <Outlet />
+        </Suspense>
       </div>
     </div>
   );
