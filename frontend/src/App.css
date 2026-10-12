@@ -593,30 +593,142 @@
     animation: heart-pop 350ms ease-out;
   }
 
+  /* Event details (layout A, decided 2026-10-12): photo, then the title
+     and description beside a panel with when, where, who and the actions.
+     The public page and the dashboard share it; below 52rem the panel moves
+     up under the title (see the @container rules further down) */
   .event-details-page {
     @apply items-stretch;
   }
 
-  .event-details-image-container,
-  .event-details-content {
-    @apply w-full max-w-5xl mx-auto;
+  .event-details-back {
+    @apply w-full max-w-6xl mx-auto;
   }
 
+  .event-details {
+    @apply w-full max-w-6xl mx-auto flex flex-col gap-6;
+  }
+
+  /* 21:8 and at most 320px tall, so the facts and Tickets reach a laptop's
+     first screen */
   .event-details-image-container {
-    @apply overflow-hidden rounded-2xl;
-    aspect-ratio: 16 / 7;
+    @apply max-h-80 overflow-hidden rounded-2xl border border-border/60;
+    aspect-ratio: 21 / 8;
   }
 
   .event-details-image {
     @apply block w-full h-full object-cover;
   }
 
-  .event-details-content {
-    @apply flex flex-col items-start gap-4;
+  /* Over: greyed like My Favourites' ended cards */
+  .event-details.is-over .event-details-image {
+    @apply grayscale-[85%] brightness-75;
   }
 
-  .event-details-back {
-    @apply text-accent hover:text-accent-hover;
+  .event-details-layout {
+    @apply grid grid-cols-[minmax(0,1fr)_340px] gap-x-8;
+    grid-template-areas: "head panel" "about panel";
+    grid-template-rows: auto 1fr;
+  }
+
+  .event-details-head {
+    @apply flex flex-col gap-2.5;
+    grid-area: head;
+  }
+
+  .event-details-chips {
+    @apply flex flex-wrap items-center gap-2.5 [&_.event-card-category]:flex [&_.event-card-category]:items-center [&_.event-card-category]:gap-1.5;
+  }
+
+  .event-details-title {
+    @apply text-3xl/tight font-semibold text-foreground;
+  }
+
+  .event-details.is-over .event-details-title {
+    @apply text-muted;
+  }
+
+  .event-details.is-cancelled .event-details-title {
+    @apply line-through decoration-orange-400/60;
+  }
+
+  .event-details-about {
+    @apply mt-7 flex flex-col gap-3;
+    grid-area: about;
+  }
+
+  .event-details-about-title {
+    @apply text-lg;
+  }
+
+  .event-details-description {
+    @apply max-w-[64ch] whitespace-pre-line leading-relaxed text-foreground/85;
+  }
+
+  .event-details-panel {
+    @apply self-start flex flex-col gap-5 rounded-2xl border border-border bg-card p-5;
+    grid-area: panel;
+  }
+
+  .event-details-facts {
+    @apply flex flex-col gap-4;
+  }
+
+  .event-details-fact {
+    @apply grid grid-cols-[20px_minmax(0,1fr)] gap-3 text-sm leading-relaxed text-muted [&>svg]:mt-0.5 [&>svg]:size-5 [&>svg]:text-accent;
+  }
+
+  .event-details-fact strong {
+    @apply block font-medium text-foreground;
+  }
+
+  .event-details-fact-link {
+    @apply mt-1 flex w-fit items-center gap-1 break-all rounded-sm text-[13px] font-medium text-accent hover:text-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent [&_svg]:size-3.5 [&_svg]:shrink-0;
+  }
+
+  .event-details-actions {
+    @apply flex flex-col gap-2.5 border-t border-border/60 pt-5 [&>a]:w-full [&>button]:w-full;
+  }
+
+  .event-details-actions-row {
+    @apply flex flex-wrap gap-2.5 [&>button]:flex-[1_1_140px];
+  }
+
+  .event-details-heart.is-saved {
+    @apply fill-favourite text-favourite;
+  }
+
+  .event-details-login {
+    @apply text-center text-xs text-muted [&_a]:font-medium [&_a]:text-accent [&_a]:hover:text-accent-hover;
+  }
+
+  /* One banner at most, in the event's status colour */
+  .event-details-banner {
+    @apply flex items-start gap-3 rounded-xl border px-4 py-3.5 text-sm leading-relaxed [&>svg]:mt-0.5 [&>svg]:size-5 [&>svg]:shrink-0;
+  }
+
+  .event-details-banner strong {
+    @apply block text-foreground;
+  }
+
+  .event-details-banner.is-cancelled {
+    @apply border-orange-400/40 bg-orange-400/10 text-orange-200 [&>svg]:text-orange-400;
+  }
+
+  .event-details-banner.is-past {
+    @apply border-gray-300/30 bg-gray-300/10 text-gray-300 [&>svg]:text-gray-300;
+  }
+
+  .event-details-banner.is-pending {
+    @apply border-yellow-400/35 bg-yellow-400/10 text-yellow-200 [&>svg]:text-yellow-400;
+  }
+
+  .event-details-banner.is-rejected {
+    @apply border-danger/40 bg-danger/10 text-red-200 [&>svg]:text-danger;
+  }
+
+  .event-details-banner.is-draft {
+    @apply border-cyan-300/35 bg-cyan-300/10 text-cyan-100 [&>svg]:text-cyan-300;
   }
 
   /* contact styles */
@@ -2058,10 +2170,6 @@
     @apply w-full flex flex-col items-center gap-6;
   }
 
-  .event-details-body {
-    @apply w-full mt-4 flex flex-col gap-6;
-  }
-
   .form-select {
     @apply w-full rounded-lg border border-border bg-background px-4 py-2.5 text-foreground outline-none transition-colors focus:border-accent cursor-pointer;
   }
@@ -2779,6 +2887,27 @@
 
   /* Phones: one item per line; the text beside each icon may wrap between
      its parts ("Manchester, UK" / "14°C" / "Partly cloudy") */
+  @container (max-width: 52rem) {
+    .event-details-layout {
+      @apply grid-cols-1 gap-y-5;
+      grid-template-areas: "head" "panel" "about";
+    }
+
+    .event-details-about {
+      @apply mt-2;
+    }
+  }
+
+  @container (max-width: 28rem) {
+    .event-details-image-container {
+      aspect-ratio: 4 / 3;
+    }
+
+    .event-details-title {
+      @apply text-2xl/tight;
+    }
+  }
+
   @container (max-width: 28rem) {
     .dashboard-utility-items {
       @apply w-full flex-col items-start;

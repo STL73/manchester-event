@@ -8,6 +8,7 @@ export const Button = forwardRef(
       variant = "primary",
       size = "md",
       to,
+      href,
       type = "button",
       children,
       ...props
@@ -62,6 +63,16 @@ export const Button = forwardRef(
         <Link ref={ref} to={to} className={buttonClassName} {...props}>
           {children}
         </Link>
+      );
+    }
+
+    // Off-site links (an event's tickets): a plain <a>, which the router
+    // would otherwise treat as a path inside the app
+    if (href) {
+      return (
+        <a ref={ref} href={href} className={buttonClassName} {...props}>
+          {children}
+        </a>
       );
     }
 
