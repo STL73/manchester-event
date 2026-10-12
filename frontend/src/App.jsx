@@ -1,5 +1,5 @@
 import { Fragment, lazy, Suspense, useState } from "react";
-import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import About from "./pages/About";
@@ -50,6 +50,13 @@ const SiteAnalytics = lazy(() => import("./pages/SiteAnalytics"));
 // React reuses a page when only a URL parameter changes, so an edit form
 // would keep the previous record's status and message. A new key per ID
 // starts the page fresh
+// A role's own pages: anyone else who types the address goes to their Home,
+// as the API will refuse them. Home, Event details, Notifications and
+// Settings are everyone's
+function RoleOnly({ allow, userType }) {
+  return userType === allow ? <Outlet /> : <Navigate to="/dashboard/home" replace />;
+}
+
 // The old Edit Status / Edit User addresses open the item's side panel
 // on the list instead (Manage Events and Manage Users, decided 2026-10-12)
 function OpenInPanel({ param, to }) {
@@ -368,10 +375,12 @@ function App() {
           >
             <Route index element={<Navigate to="home" replace />} />
             <Route path="home" element={<DashboardHome selectedUser={selectedUser} users={users} events={userType === "user" ? audienceEvents : events} organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} interestIds={interestIds} contactMessages={contactMessages} notifications={notifications} />} />
-            <Route path="explore-events" element={<ExploreEvents inDashboard events={publicEvents} selectedUser={selectedUser} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
-            <Route path="my-favourites" element={<MyFavourites events={audienceEvents} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
+            <Route element={<RoleOnly allow="user" userType={userType} />}>
+              <Route path="explore-events" element={<ExploreEvents inDashboard events={publicEvents} selectedUser={selectedUser} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
+              <Route path="my-favourites" element={<MyFavourites events={audienceEvents} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
+              <Route path="preferences" element={<Preferences events={publicEvents} interestIds={interestIds} onSaveInterests={setInterestIds} />} />
+            </Route>
             <Route path="events/:eventId" element={<EventDetails inDashboard events={userType === "user" ? audienceEvents : events} role={userType} organiserId={currentOrganiser.id} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
-            <Route path="preferences" element={<Preferences events={publicEvents} interestIds={interestIds} onSaveInterests={setInterestIds} />} />
             <Route path="notifications" element={<Notifications selectedUser={selectedUser} notifications={notifications} onMarkRead={markNotificationsRead} />} />
             {/* key: a new test role starts the forms from that role's details */}
             <Route
@@ -388,18 +397,22 @@ function App() {
                 />
               }
             />
-            <Route path="create-events" element={<CreateEvents onCreateEvent={createOrganiserEvent} />} />
-            <Route path="my-events" element={<MyEvents organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} />} />
-            <Route path="my-events/:eventId/edit" element={<ResetOnParam param="eventId"><CreateEvents mode="edit" events={organiserEvents} onUpdateEvent={updateOrganiserEvent} onCancelEvent={cancelOrganiserEvent} onDeleteEvent={deleteOrganiserEvent} /></ResetOnParam>} />
-            <Route path="my-drafts" element={<MyDrafts organiserEvents={organiserEvents} onSubmitDraft={submitDraft} onDeleteEvent={deleteOrganiserEvent} />} />
-            <Route path="event-analytics" element={<EventAnalytics organiserEvents={organiserEvents} />} />
-            <Route path="manage-users" element={<ManageUsers users={users} events={events} currentUserId={currentAdmin.id} onUpdateUser={updateUserStatus} onDeleteUser={deleteUser} />} />
-            <Route path="manage-users/:userId/edit" element={<OpenInPanel param="userId" to="/dashboard/manage-users" />} />
-            <Route path="manage-events" element={<ManageEvents events={managedEvents} onUpdateEventStatus={updateEventStatus} />} />
-            <Route path="manage-events/:eventId/edit" element={<OpenInPanel param="eventId" to="/dashboard/manage-events" />} />
-            <Route path="site-analytics" element={<SiteAnalytics users={users} events={events} />} />
-            <Route path="system-logs" element={<SystemLogs />} />
-            <Route path="contact-messages" element={<ContactMessages contactMessages={contactMessages} />} />
+            <Route element={<RoleOnly allow="organiser" userType={userType} />}>
+              <Route path="create-events" element={<CreateEvents onCreateEvent={createOrganiserEvent} />} />
+              <Route path="my-events" element={<MyEvents organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} />} />
+              <Route path="my-events/:eventId/edit" element={<ResetOnParam param="eventId"><CreateEvents mode="edit" events={organiserEvents} onUpdateEvent={updateOrganiserEvent} onCancelEvent={cancelOrganiserEvent} onDeleteEvent={deleteOrganiserEvent} /></ResetOnParam>} />
+              <Route path="my-drafts" element={<MyDrafts organiserEvents={organiserEvents} onSubmitDraft={submitDraft} onDeleteEvent={deleteOrganiserEvent} />} />
+              <Route path="event-analytics" element={<EventAnalytics organiserEvents={organiserEvents} />} />
+            </Route>
+            <Route element={<RoleOnly allow="admin" userType={userType} />}>
+              <Route path="manage-users" element={<ManageUsers users={users} events={events} currentUserId={currentAdmin.id} onUpdateUser={updateUserStatus} onDeleteUser={deleteUser} />} />
+              <Route path="manage-users/:userId/edit" element={<OpenInPanel param="userId" to="/dashboard/manage-users" />} />
+              <Route path="manage-events" element={<ManageEvents events={managedEvents} onUpdateEventStatus={updateEventStatus} />} />
+              <Route path="manage-events/:eventId/edit" element={<OpenInPanel param="eventId" to="/dashboard/manage-events" />} />
+              <Route path="site-analytics" element={<SiteAnalytics users={users} events={events} />} />
+              <Route path="system-logs" element={<SystemLogs />} />
+              <Route path="contact-messages" element={<ContactMessages contactMessages={contactMessages} />} />
+            </Route>
             <Route path="*" element={<NotFound inDashboard />} />
           </Route>
           {/* Any other address, e.g. a mistyped /home, gets a proper 404
