@@ -27,6 +27,11 @@ export default function EventCard({
   onDelete,
   muted = false,
   onAddToCalendar,
+  // My Drafts: an extra line under the date ({ icon, text }), the card's
+  // main action ({ label, icon, onClick }) or a notice in its place
+  note,
+  primaryAction,
+  notice,
 }) {
   const { edit, delete: remove, confirmDelete } = organiserEventActions;
   // True from a "like" click until the heart's pop animation ends
@@ -91,6 +96,33 @@ export default function EventCard({
           <CalendarDays className="event-card-icon" aria-hidden="true" />
           {dateFormatter.format(new Date(event.startDatetime))}
         </p>
+        {note && (
+          <p className="event-card-detail">
+            <note.icon className="event-card-icon" aria-hidden="true" />
+            {note.text}
+          </p>
+        )}
+        {/* The card's main job, labelled and full width (My Drafts' Submit),
+            or the reason it can't be done right now */}
+        {!isConfirming && primaryAction && (
+          <Button
+            className="event-card-primary"
+            type="button"
+            variant="primary"
+            size="sm"
+            aria-label={`${primaryAction.label}: ${event.name}`}
+            onClick={() => primaryAction.onClick(event)}
+          >
+            <primaryAction.icon aria-hidden="true" />
+            {primaryAction.label}
+          </Button>
+        )}
+        {!isConfirming && notice && (
+          <p className="event-card-notice">
+            <notice.icon aria-hidden="true" />
+            {notice.text}
+          </p>
+        )}
         {!isConfirming && (
           <div className="event-card-actions">
             {/* A visible cue for mouse users; out of the Tab order and hidden

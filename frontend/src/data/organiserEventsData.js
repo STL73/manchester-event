@@ -6,7 +6,7 @@ export const organiserEventActions = {
   delete: { label: "Delete", icon: Trash2 },
   // The card asks before deleting, in place of the PHP confirm() pop-up
   confirmDelete: { question: "Delete this event?", cancel: "Keep it", confirm: "Delete permanently" },
-  submitDraft: { label: "Submit for Approval", icon: CalendarArrowUp },
+  submitDraft: { label: "Submit for approval", icon: CalendarArrowUp },
   createFirst: {
     label: "Create First Event",
     to: "/dashboard/create-events",
@@ -18,7 +18,6 @@ export const organiserEventActions = {
 export const organiserEventMessages = {
   noEvents: "You haven't created any events yet.",
   eventDeleted: "Event deleted successfully!",
-  draftSubmitted: "Draft submitted for approval!",
 };
 
 // Which buttons an organiser's event card shows, by eventState(). An event

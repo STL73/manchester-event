@@ -101,6 +101,13 @@ frontend/src/
   before an event has been public (draft, pending, rejected), Edit until it is over, past and
   cancelled are View only and greyed. Delete asks inside the card (`EventCard`, "Keep it" /
   "Delete permanently"), never `window.confirm`; Organiser Home's cards follow the same rules
+- **My Drafts** (decided 2026-10-12): the same `EventCard` grid as My Events (the PHP had a
+  table), titled like the sidebar link, summary "3 drafts · last edited 27 Sept", most recently
+  edited first. Each card adds a "Last edited" line (`note`) and Submit for approval as its
+  labelled, full-width main action (`primaryAction`), with View, Edit and Delete under it. Submit
+  applies at once (a pending event can still be edited) and the message links to My Events'
+  Pending view. A draft whose date has passed gets a notice in Submit's place (`notice`), so an
+  admin is never asked to approve an event that is already over
 - **Notifications** (decided 2026-10-11): read state lives in `App.jsx` (`readAt`), so Home's
   unread card agrees. Rows grouped Today / Earlier this week / Earlier, collapsed to type icon,
   subject and time (64px); opening one shows the message and marks it read, one open at a time,

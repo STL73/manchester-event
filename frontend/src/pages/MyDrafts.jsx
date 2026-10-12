@@ -1,53 +1,57 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { SquarePen } from "lucide-react";
-import Button from "../components/UI/Button";
-import Tooltip from "../components/UI/Tooltip";
+import EventCard from "../components/events/EventCard";
 import StatusMessage from "../components/UI/StatusMessage";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import EmptyState from "../components/UI/EmptyState";
+import { isUpcoming } from "../lib/eventDates";
 import {
-  draftTableColumns,
-  draftTooltips,
+  datePassedNotice,
+  lastEditedNote,
   myDraftsActions,
   myDraftsMessages,
+  myDraftsSummary,
+  myDraftsTitle,
 } from "../data/myDraftsData";
-import {
-  editEventPath,
-  organiserEventActions,
-  organiserEventMessages,
-} from "../data/organiserEventsData";
+import { editEventPath, organiserEventActions } from "../data/organiserEventsData";
 
-const dateFormatter = new Intl.DateTimeFormat("en-GB", {
+const editedFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
   month: "short",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
 });
 
+// The same cards as My Events (decided 2026-10-12; the PHP had a table), so
+// a draft looks the way it will once live. Submit is each card's labelled
+// main action; Edit and Delete sit under it, and Delete asks in the card
 export default function MyDrafts({
   organiserEvents,
   onSubmitDraft,
   onDeleteEvent,
 }) {
-  const [message, setMessage] = useState("");
-  const { edit, submitDraft, delete: remove } = organiserEventActions;
+  // { type: "submitted" } or { type: "deleted" }; the submitted one links
+  const [message, setMessage] = useState(null);
+  const { submitDraft } = organiserEventActions;
+  const now = new Date();
 
-  // Matches get_draft_events(): drafts only, newest first
+  // Matches get_draft_events(): drafts only, most recently edited first
   const drafts = organiserEvents
     .filter((event) => event.status === "draft")
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  const lastEdited = drafts[0] && new Date(drafts[0].updatedAt);
 
-  function handleSubmitDraft(eventId) {
-    onSubmitDraft(eventId);
-    setMessage(organiserEventMessages.draftSubmitted);
+  function handleSubmit(event) {
+    onSubmitDraft(event.eventId);
+    setMessage({ type: "submitted" });
   }
 
-  function handleDelete(eventId) {
-    if (!window.confirm(myDraftsMessages.confirmDelete)) return;
-    onDeleteEvent(eventId);
-    setMessage(myDraftsMessages.draftDeleted);
+  // The card has already asked (see EventCard)
+  function handleDelete(event) {
+    onDeleteEvent(event.eventId);
+    setMessage({ type: "deleted" });
   }
+
+  const { submitted } = myDraftsMessages;
 
   return (
     <div className="dashboard-home">
@@ -58,92 +62,66 @@ export default function MyDrafts({
         <DashboardPageHeading
           id="my-drafts-title"
           icon={SquarePen}
-          title="My Draft Events"
+          title={myDraftsTitle}
           actions={myDraftsActions}
+          summary={
+            drafts.length === 0 ? (
+              myDraftsSummary.none
+            ) : (
+              <>
+                <strong>{drafts.length}</strong>{" "}
+                {drafts.length === 1 ? myDraftsSummary.one : myDraftsSummary.many}
+                <span aria-hidden="true"> · </span>
+                {myDraftsSummary.lastEdited} {editedFormatter.format(lastEdited)}
+              </>
+            )
+          }
         />
 
         {message && (
-          <StatusMessage className="table-message">{message}</StatusMessage>
+          <StatusMessage className="table-message">
+            {message.type === "submitted" ? (
+              <>
+                {submitted.text}{" "}
+                <Link to={submitted.to} className="dashboard-greeting-link">
+                  {submitted.link}
+                </Link>
+                .
+              </>
+            ) : (
+              myDraftsMessages.draftDeleted
+            )}
+          </StatusMessage>
         )}
 
-        {drafts.length === 0 ? (
-          <EmptyState icon={SquarePen} text={myDraftsMessages.noDrafts} />
-        ) : (
-          <div
-            className="table-wrapper"
-            tabIndex="0"
-            role="region"
-            aria-labelledby="my-drafts-title"
-          >
-            <table className="data-table">
-              <thead>
-                <tr>
-                  {draftTableColumns.map((column) => (
-                    <th scope="col" key={column}>
-                      {column}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {drafts.map((draft) => (
-                  <tr key={draft.eventId}>
-                    <td className="table-cell-wrap">{draft.name}</td>
-                    <td>{draft.category}</td>
-                    <td>{dateFormatter.format(new Date(draft.createdAt))}</td>
-                    <td>{dateFormatter.format(new Date(draft.updatedAt))}</td>
-                    <td>
-                      <div className="table-actions">
-                        <Tooltip text={draftTooltips.edit}>
-                          <Button
-                            to={editEventPath(draft.eventId)}
-                            state={{ from: "/dashboard/my-drafts" }}
-                            variant="secondary"
-                            size="icon"
-                            aria-label={`${draftTooltips.edit}: ${draft.name}`}
-                          >
-                            <edit.icon
-                             
-                              aria-hidden="true"
-                            />
-                          </Button>
-                        </Tooltip>
-                        <Tooltip text={draftTooltips.submit}>
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            size="icon"
-                            aria-label={`${draftTooltips.submit}: ${draft.name}`}
-                            onClick={() => handleSubmitDraft(draft.eventId)}
-                          >
-                            <submitDraft.icon
-                             
-                              aria-hidden="true"
-                            />
-                          </Button>
-                        </Tooltip>
-                        <Tooltip text={draftTooltips.delete}>
-                          <Button
-                            type="button"
-                            variant="danger"
-                            size="icon"
-                            aria-label={`${draftTooltips.delete}: ${draft.name}`}
-                            onClick={() => handleDelete(draft.eventId)}
-                          >
-                            <remove.icon
-                             
-                              aria-hidden="true"
-                            />
-                          </Button>
-                        </Tooltip>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <div className="events-grid events-grid-three">
+          {drafts.length === 0 ? (
+            <EmptyState icon={SquarePen} text={myDraftsMessages.noDrafts} />
+          ) : (
+            drafts.map((draft) => {
+              const canSubmit = isUpcoming(draft, now);
+              return (
+                <EventCard
+                  key={draft.eventId}
+                  event={draft}
+                  status="draft"
+                  note={{
+                    icon: lastEditedNote.icon,
+                    text: `${lastEditedNote.text} ${editedFormatter.format(new Date(draft.updatedAt))}`,
+                  }}
+                  primaryAction={
+                    canSubmit
+                      ? { label: submitDraft.label, icon: submitDraft.icon, onClick: handleSubmit }
+                      : undefined
+                  }
+                  notice={canSubmit ? undefined : datePassedNotice}
+                  editTo={editEventPath(draft.eventId)}
+                  onDelete={handleDelete}
+                />
+              );
+            })
+          )}
+        </div>
       </section>
     </div>
   );
