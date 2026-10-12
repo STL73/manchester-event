@@ -93,6 +93,15 @@ frontend/src/
   public get a contact link; no section for admins). Banners only for an unverified email or a
   suspension, never for admins. Name, picture and the switch live in App (`profileChanges`) so
   the sidebar and greeting follow
+- **Hexagons in the dashboard** (decided 2026-10-11, extended 2026-10-12): each frames something
+  that is already there, so the logo shows without overusing it. Every page title's icon sits in
+  the logo's cell (`DashboardPageHeading`, 36 x 40); on Home the greeting's picture does
+  (`DashboardGreeting`, 58 x 64, the default icon without a picture, above the text below 28rem).
+  Every stat card's icon sits in a small cell (`DashboardCard`, 30 x 33, accent icon), on Home and
+  the analytics pages alike. Every "nothing here" box is `UI/EmptyState` (a three-cell honeycomb
+  with the page's icon, the message, an optional action). No corner watermarks, hexagon
+  section-heading icons, honeycomb dividers between dashboard sections or hexagon pagination:
+  the sidebar pattern and Preferences already carry the rest
 - **Pagination:** `components/UI/Pagination.jsx`, page number in the URL (`?page=`), back to page 1
   when a filter changes. Explore Events shows 12 per page (whole rows in every view)
 - **Dashboard headings** (decided 2026-10-10): the page title is the page's only `<h1>`, 24px white

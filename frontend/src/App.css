@@ -1255,11 +1255,36 @@
   .dashboard-home {
     @apply w-full flex flex-col gap-4;
   }
-
   /* Home page greeting: name, then one live status line. 8px between them,
      like an inner page's title and summary */
   .dashboard-greeting {
-    @apply w-full px-4 pt-4 pb-4 flex flex-col gap-2;
+    @apply w-full px-4 pt-4 pb-4 flex items-center gap-4;
+  }
+
+  .dashboard-greeting-text {
+    @apply min-w-0 flex flex-col gap-2;
+  }
+
+  /* The picture in the logo's cell, outlined like the title hexagons;
+     the default icon when there is no picture */
+  .dashboard-greeting-avatar {
+    @apply hex-cell relative grid h-16 w-[58px] shrink-0 place-items-center bg-accent/35;
+  }
+
+  .dashboard-greeting-avatar::before {
+    @apply hex-cell absolute inset-[1.5px] bg-card content-[''];
+  }
+
+  .dashboard-greeting-avatar svg {
+    @apply relative size-[30px] text-accent;
+  }
+
+  .dashboard-greeting-avatar.has-photo {
+    @apply bg-accent/60;
+  }
+
+  .dashboard-greeting-avatar img {
+    @apply hex-cell absolute inset-0.5 size-[calc(100%-4px)] object-cover;
   }
 
   .dashboard-greeting-title {
@@ -1310,7 +1335,7 @@
     @apply w-full grid grid-cols-4 gap-4;
   }
 
-  /* Stat card: label + quiet icon, one big figure, one line of context.
+  /* Stat card: label + hexagon icon, one big figure, one line of context.
      Left-aligned so a row of cards scans like a table. */
   .dashboard-card {
     @apply min-w-0 min-h-32 p-4 flex flex-col gap-2 rounded-xl border border-border/60 bg-card bg-linear-to-b from-white/5 to-transparent shadow-[inset_0_1px_0_rgb(255_255_255/0.04)];
@@ -1324,8 +1349,18 @@
     @apply text-sm font-medium text-muted;
   }
 
+  /* The icon in the logo's cell, outlined like the title hexagons. Pulled
+     into the corner so the card's label row keeps its height */
+  .dashboard-card-hex {
+    @apply hex-cell relative -mt-1 -mr-1 grid h-[33px] w-[30px] shrink-0 place-items-center bg-accent/35;
+  }
+
+  .dashboard-card-hex::before {
+    @apply hex-cell absolute inset-[1.5px] bg-card content-[''];
+  }
+
   .dashboard-card-icon {
-    @apply size-4 shrink-0 text-muted;
+    @apply relative size-[15px] text-accent;
   }
 
   .dashboard-card-number {
@@ -1375,6 +1410,52 @@
 
   .dashboard-empty-text {
     @apply text-sm text-muted;
+  }
+
+  /* An empty state's button may wrap on a phone rather than stick out of
+     the box. Button's whitespace-nowrap is a utility, which beats this
+     layer, hence the ! */
+  .dashboard-empty-state > :is(a, button) {
+    @apply max-w-full text-center whitespace-normal!;
+  }
+
+  /* Phones: less padding and smaller button text, so a long label takes
+     two lines at most, with softer corners than a pill while it wraps */
+  @container (max-width: 24rem) {
+    .dashboard-empty-state {
+      @apply px-4;
+    }
+
+    .dashboard-empty-state > :is(a, button) {
+      @apply rounded-2xl! px-4! text-sm! leading-snug!;
+    }
+  }
+
+  /* EmptyState's honeycomb: two faint cells behind, the front one with the
+     page's icon, interlocked like the logo (the front cell sits 3/4 of a
+     cell lower, half a cell across) */
+  .empty-honeycomb {
+    @apply relative h-[72px] w-[76px];
+  }
+
+  .empty-hex {
+    @apply hex-cell absolute grid h-10 w-9 place-items-center bg-accent/15;
+  }
+
+  .empty-hex::before {
+    @apply hex-cell absolute inset-[1.5px] bg-card content-[''];
+  }
+
+  .empty-hex-left {
+    @apply left-0 top-0;
+  }
+
+  .empty-hex-right {
+    @apply left-10 top-0;
+  }
+
+  .empty-hex-front {
+    @apply left-5 top-8 bg-accent/40 [&_svg]:relative [&_svg]:size-[18px] [&_svg]:text-accent;
   }
 
   /* preferences styles */
@@ -1930,17 +2011,29 @@
   /* The page title matches Home's greeting; section headings below it
      stay smaller and muted (.dashboard-title) */
   .dashboard-page-title {
-    @apply min-w-0 flex items-center gap-2 text-2xl text-foreground font-semibold;
+    @apply min-w-0 flex items-center gap-3 text-2xl text-foreground font-semibold;
   }
 
-  .dashboard-page-title-icon {
-    @apply size-6 shrink-0 text-accent;
+  /* The title icon in the logo's cell (decided 2026-10-11): an accent-tinted
+     hexagon with a card-coloured one 1.5px inside, like the Preferences cells
+     and the footer's hex buttons. 36 x 40, the logo's 10:11 */
+  .dashboard-page-title-hex {
+    @apply hex-cell relative grid h-10 w-9 shrink-0 place-items-center bg-accent/35;
+  }
+
+  .dashboard-page-title-hex::before {
+    @apply hex-cell absolute inset-[1.5px] bg-card content-[''];
+  }
+
+  .dashboard-page-title-hex svg {
+    @apply relative size-[18px] text-accent;
   }
 
   /* One line under the title with what matters on this page, like the
-     status line under Home's greeting; indented to the title text */
+     status line under Home's greeting; indented to the title text (the
+     36px hexagon plus the 12px gap) */
   .dashboard-page-summary {
-    @apply pl-8 text-muted;
+    @apply pl-12 text-muted;
   }
 
   .dashboard-page-summary strong {
@@ -2701,6 +2794,12 @@
 
     .dashboard-utility-text {
       @apply flex-wrap gap-y-0.5;
+    }
+
+    /* Beside the text, the picture would squeeze the greeting into a
+       narrow column, so it sits above it */
+    .dashboard-greeting {
+      @apply flex-col items-start;
     }
   }
 

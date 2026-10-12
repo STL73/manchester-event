@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Button from "../components/UI/Button";
 import { eventDetailsPage } from "../data/eventsData";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
+import EmptyState from "../components/UI/EmptyState";
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -88,9 +89,7 @@ export default function EventDetails({ events, inDashboard = false }) {
               />
             </div>
           ) : (
-            <div className="dashboard-empty-state">
-              <p className="dashboard-empty-text">{eventDetailsPage.notFound}</p>
-            </div>
+            <EmptyState icon={TitleIcon} text={eventDetailsPage.notFound} />
           )}
         </section>
       </div>

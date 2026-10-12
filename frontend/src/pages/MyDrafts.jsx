@@ -4,6 +4,7 @@ import Button from "../components/UI/Button";
 import Tooltip from "../components/UI/Tooltip";
 import StatusMessage from "../components/UI/StatusMessage";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
+import EmptyState from "../components/UI/EmptyState";
 import {
   draftTableColumns,
   draftTooltips,
@@ -66,9 +67,7 @@ export default function MyDrafts({
         )}
 
         {drafts.length === 0 ? (
-          <div className="dashboard-empty-state">
-            <p className="dashboard-empty-text">{myDraftsMessages.noDrafts}</p>
-          </div>
+          <EmptyState icon={SquarePen} text={myDraftsMessages.noDrafts} />
         ) : (
           <div
             className="table-wrapper"

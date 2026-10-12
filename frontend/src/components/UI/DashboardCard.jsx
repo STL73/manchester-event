@@ -1,7 +1,7 @@
 import { ArrowRight, Minus, TrendingDown, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 
-// Stat card: small label (and quiet icon) on top, one big figure, and at
+// Stat card: small label (and its icon in the logo's cell) on top, one big figure, and at
 // most one line of context at the bottom. The context is, in order:
 // - item.trend  = { current, previous, label, note }: arrow from current vs
 //   previous, "+4 in the last 30 days", with the note as a tooltip
@@ -37,7 +37,11 @@ export default function DashboardCard({ item }) {
     <article className={`dashboard-card ${tone}`}>
       <header className="dashboard-card-header">
         <h3 className="dashboard-card-title">{item.title}</h3>
-        {Icon && <Icon className="dashboard-card-icon" aria-hidden="true" />}
+        {Icon && (
+          <span className="dashboard-card-hex">
+            <Icon className="dashboard-card-icon" aria-hidden="true" />
+          </span>
+        )}
       </header>
       {/* Text cards show a value (e.g. an event name) instead of a count */}
       {hasCount ? (

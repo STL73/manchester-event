@@ -8,6 +8,7 @@ import {
   userActions,
 } from "../data/manageUsersData";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
+import EmptyState from "../components/UI/EmptyState";
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -44,11 +45,7 @@ export default function EditUser({ users, onUpdateUserStatus }) {
         </DashboardPageHeading>
 
         {!user ? (
-          <div className="dashboard-empty-state">
-            <p className="dashboard-empty-text">
-              {manageUsersMessages.userNotFound}
-            </p>
-          </div>
+          <EmptyState icon={edit.icon} text={manageUsersMessages.userNotFound} />
         ) : (
           <div className="contact-form-container">
             <form className="contact-form" onSubmit={handleSubmit}>

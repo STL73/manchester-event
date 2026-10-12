@@ -3,6 +3,7 @@ import Button from "../components/UI/Button";
 import { eventDetailsPath } from "../data/eventsData";
 import Tooltip from "../components/UI/Tooltip";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
+import EmptyState from "../components/UI/EmptyState";
 import {
   eventActions,
   eventStatuses,
@@ -43,11 +44,7 @@ export default function ManageEvents({ events }) {
         />
 
         {events.length === 0 ? (
-          <div className="dashboard-empty-state">
-            <p className="dashboard-empty-text">
-              {manageEventsMessages.noEvents}
-            </p>
-          </div>
+          <EmptyState icon={ClipboardList} text={manageEventsMessages.noEvents} />
         ) : (
           <div
             className="table-wrapper"

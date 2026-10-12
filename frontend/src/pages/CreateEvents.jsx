@@ -15,6 +15,7 @@ import {
 import { organiserEventActions } from "../data/organiserEventsData";
 import placeholder from "../images/events/placeholder.jpg";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
+import EmptyState from "../components/UI/EmptyState";
 
 const emptyForm = {
   eventName: "",
@@ -332,9 +333,7 @@ function EventFormPage({
         </DashboardPageHeading>
 
         {isEdit && !event ? (
-          <div className="dashboard-empty-state">
-            <p className="dashboard-empty-text">{createEventMessages.notFound}</p>
-          </div>
+          <EmptyState icon={HeadingIcon} text={createEventMessages.notFound} />
         ) : lockedMessage ? (
           <StatusMessage variant="error" className="table-message">
             {lockedMessage}

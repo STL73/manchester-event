@@ -9,6 +9,7 @@ import {
 import { isPublicEvent } from "../data/eventsData";
 import { countTrend, getRangeBounds } from "../lib/analytics";
 import { isUpcoming, matchesWhen } from "../lib/eventDates";
+import EmptyState from "../components/UI/EmptyState";
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -132,9 +133,7 @@ export default function AdminDashboardHome({ users, events, contactMessages }) {
           Recent Admin Actions
         </h2>
         {recentAdminActions.length === 0 ? (
-          <div className="dashboard-empty-state">
-            <p className="dashboard-empty-text">No recent admin actions.</p>
-          </div>
+          <EmptyState icon={Logs} text="No recent admin actions." />
         ) : (
           <div className="activity-log">
             <ul className="activity-list">

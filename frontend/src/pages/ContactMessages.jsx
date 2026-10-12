@@ -1,4 +1,5 @@
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
+import EmptyState from "../components/UI/EmptyState";
 import {
   contactMessagesPage,
   contactMessagesSummary,
@@ -66,9 +67,7 @@ export default function ContactMessages({ contactMessages }) {
         />
 
         {messages.length === 0 ? (
-          <div className="dashboard-empty-state">
-            <p className="dashboard-empty-text">{contactMessagesText.noMessages}</p>
-          </div>
+          <EmptyState icon={PageIcon} text={contactMessagesText.noMessages} />
         ) : (
           <ul className="notification-list">
             {messages.map((message) => (

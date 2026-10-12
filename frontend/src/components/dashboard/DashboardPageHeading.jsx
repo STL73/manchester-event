@@ -17,7 +17,10 @@ export default function DashboardPageHeading({
     <header className="dashboard-page-heading">
       <div className="section-heading-row dashboard-page-heading-row">
         <h1 className="dashboard-page-title" id={id}>
-          <Icon className="dashboard-page-title-icon" aria-hidden="true" />
+          {/* The icon sits in the logo's hexagon cell on every page */}
+          <span className="dashboard-page-title-hex" aria-hidden="true">
+            <Icon />
+          </span>
           {title}
         </h1>
         <DashboardShortcuts actions={actions} />
