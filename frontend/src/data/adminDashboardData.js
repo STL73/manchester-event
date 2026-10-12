@@ -11,9 +11,6 @@ import {
 
 import { systemLogs } from "./systemLogsData";
 
-// Admin accounts in the users mock
-const adminUserIds = [1];
-
 const daysLabel = (days) => (days === 1 ? "1 day" : `${days} days`);
 
 // Admin home Quick Insights: what needs the admin and how the site is doing.
@@ -84,8 +81,6 @@ export const viewAllLogsAction = {
   icon: Logs,
 };
 
-// Matches get_recent_admin_actions(): the admin users' system logs,
-// newest first, limit 5 (read from the shared system logs mock)
-export const recentAdminActions = systemLogs
-  .filter((log) => adminUserIds.includes(log.userId))
-  .slice(0, 5);
+// Matches get_recent_admin_actions(): the newest 5 logs by admins, found
+// by the role copied into each row (system_logs.role in the schema)
+export const recentAdminActions = systemLogs.filter((log) => log.role === "admin").slice(0, 5);

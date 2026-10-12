@@ -1159,6 +1159,123 @@
     @apply flex flex-wrap gap-2;
   }
 
+  .admin-chip.is-good {
+    @apply bg-green-400/12 text-green-400;
+  }
+
+  /* System Logs (decided 2026-10-12, layout A) and Admin Home's Recent Admin
+     Actions: entries as sentences, grouped under day headings on System Logs */
+  .log-feed {
+    @apply flex w-full flex-col;
+  }
+
+  .log-day {
+    @apply mt-5 mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-muted first:mt-0;
+  }
+
+  .log-list {
+    @apply w-full overflow-hidden rounded-2xl border border-border bg-card;
+  }
+
+  .log-entry {
+    @apply grid grid-cols-[30px_minmax(0,1fr)_auto] items-center gap-3 border-t border-border/55 px-4 py-2.5 text-sm first:border-t-0;
+  }
+
+  /* The action's icon in the logo's cell, coloured by how it went */
+  .log-entry-icon {
+    @apply hex-cell grid h-[33px] w-[30px] place-items-center bg-accent/18 text-accent [&_svg]:size-[15px];
+  }
+
+  .log-entry-icon.is-good {
+    @apply bg-green-400/14 text-green-400;
+  }
+
+  .log-entry-icon.is-bad {
+    @apply bg-danger/16 text-danger;
+  }
+
+  .log-entry-icon.is-quiet {
+    @apply bg-muted/14 text-muted;
+  }
+
+  .log-entry-text {
+    @apply min-w-0 leading-normal text-muted;
+  }
+
+  .log-entry-link {
+    @apply rounded-sm font-medium text-foreground underline decoration-accent/55 underline-offset-[3px] hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  }
+
+  .log-entry-name {
+    @apply font-medium text-foreground;
+  }
+
+  .log-entry-role {
+    @apply ml-1.5 rounded-full border border-border px-1.5 text-[11px] text-muted;
+  }
+
+  .log-entry-failed {
+    @apply font-medium text-red-300;
+  }
+
+  .log-entry-sub {
+    @apply block truncate text-xs text-muted;
+  }
+
+  .log-entry-time {
+    @apply whitespace-nowrap text-xs tabular-nums text-muted;
+  }
+
+  .dashboard-page-summary .log-summary-failed {
+    @apply text-red-300;
+  }
+
+  /* Contact Messages rows: unread dot, sender, first line, chips and date */
+  .admin-list-messages .admin-row {
+    @apply grid-cols-[10px_minmax(0,220px)_minmax(0,1fr)_auto];
+  }
+
+  .message-dot {
+    @apply size-2 rounded-full;
+  }
+
+  .message-row.is-unread .message-dot {
+    @apply bg-accent;
+  }
+
+  .message-row.is-unread .admin-row-open {
+    @apply font-semibold;
+  }
+
+  .message-snippet {
+    @apply truncate text-[13px] text-muted;
+  }
+
+  .message-row.is-unread .message-snippet {
+    @apply text-foreground/85;
+  }
+
+  .message-meta {
+    @apply flex items-center gap-2 whitespace-nowrap text-xs text-muted;
+  }
+
+  /* The message itself, set off by a line like a quote */
+  .message-body {
+    @apply whitespace-pre-line border-l-2 border-accent/40 pl-3.5 text-sm leading-relaxed text-foreground/90;
+  }
+
+  .message-body-plain {
+    @apply whitespace-pre-line text-sm leading-relaxed text-foreground/90;
+  }
+
+  .message-reply {
+    @apply flex flex-col gap-1.5 rounded-xl border border-green-400/35 bg-green-400/7 px-3.5 py-3;
+  }
+
+  .message-reply-title {
+    @apply flex items-center gap-1.5 text-[13px] font-medium text-green-200 [&_svg]:size-4;
+  }
+
   /* contact styles */
   .contact-form-container {
     @apply w-full rounded-2xl border border-border bg-card p-6;
@@ -2204,48 +2321,6 @@
     max-width: calc(var(--honeycomb-cell) * 2);
   }
 
-  /* Message cards: Contact Messages uses these. Notifications moved to the
-     collapsible rows below on 2026-10-11 */
-  .notification-list {
-    @apply w-full flex flex-col gap-4 list-none;
-  }
-
-  .notification-card {
-    @apply p-4 flex flex-col gap-2 rounded-xl border-l-4 border-border bg-card;
-  }
-
-  .notification-card.is-unread {
-    @apply border-yellow-400;
-  }
-
-  .notification-header {
-    @apply flex items-center gap-3;
-  }
-
-  .notification-status-icon {
-    @apply w-5 h-5 shrink-0 text-green-400;
-  }
-
-  .notification-card.is-unread .notification-status-icon {
-    @apply text-yellow-400;
-  }
-
-  .notification-subject {
-    @apply text-lg text-foreground font-semibold;
-  }
-
-  .notification-card:not(.is-unread) .notification-subject {
-    @apply font-medium text-muted;
-  }
-
-  .notification-body {
-    @apply text-base text-foreground;
-  }
-
-  .notification-meta {
-    @apply text-sm text-muted;
-  }
-
   .notification-actions {
     @apply mt-2 flex flex-wrap items-center gap-3;
   }
@@ -2274,6 +2349,10 @@
 
   .events-when-option.is-attention .events-when-count {
     @apply text-yellow-400;
+  }
+
+  .events-when-option.is-danger .events-when-count {
+    @apply text-red-300;
   }
 
   /* The controls on the right of the pills row (My Events' date and
@@ -2460,36 +2539,10 @@
     }
   }
 
-  /* activity log styles. Panels that hold a page's content are 16px, like the
-     public detail panels; cards in a grid stay 12px */
+  /* Admin Home's Recent Admin Actions: the log list (its own card) and View
+     All Logs under it */
   .activity-log {
-    @apply w-full p-4 flex flex-col items-start gap-4 rounded-2xl bg-card;
-  }
-
-  .activity-list {
-    @apply w-full flex flex-col list-none divide-y divide-border;
-  }
-
-  .activity-item {
-    @apply py-3 flex items-baseline gap-4;
-  }
-
-  .activity-time {
-    @apply w-40 shrink-0 text-sm text-muted;
-  }
-
-  .activity-desc {
-    @apply min-w-0 text-base text-foreground;
-  }
-
-  .activity-action {
-    @apply font-semibold text-accent;
-  }
-
-  @container (max-width: 40rem) {
-    .activity-item {
-      @apply flex-col gap-1;
-    }
+    @apply w-full flex flex-col items-start gap-4;
   }
 
   /* table styles */
@@ -2658,35 +2711,6 @@
 
   .form-actions {
     @apply flex-wrap gap-4;
-  }
-
-  /* contact messages: reuse the notification card, but keep every card
-     bright (messages have no read/unread state) */
-  .notification-card.contact-message-card .notification-subject {
-    @apply font-semibold text-foreground;
-  }
-
-  .notification-card.contact-message-card .notification-status-icon {
-    @apply text-accent;
-  }
-
-  /* break-all: on a phone a long address otherwise runs off the card */
-  .contact-message-email {
-    @apply font-normal break-all text-accent hover:text-accent-hover;
-  }
-
-  /* Keep the line breaks the sender typed (PHP used nl2br) */
-  .contact-message-text {
-    @apply whitespace-pre-line;
-  }
-
-  .info-badge {
-    @apply ml-auto shrink-0 rounded-full border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted;
-  }
-
-  /* System logs: the Details column wraps instead of widening the table */
-  .data-table td.table-cell-details {
-    @apply min-w-64 max-w-md;
   }
 
   /* analytics styles */
@@ -3475,6 +3499,45 @@
     .admin-row-open,
     .admin-row-sub {
       @apply whitespace-normal;
+    }
+  }
+
+  @container (max-width: 52rem) {
+    .admin-list-messages .admin-row {
+      @apply grid-cols-[10px_minmax(0,1fr)_auto] gap-y-1;
+      grid-template-areas: "dot text meta" ". snippet snippet";
+    }
+
+    .message-dot {
+      grid-area: dot;
+    }
+
+    .admin-list-messages .admin-row-text {
+      grid-area: text;
+    }
+
+    .message-meta {
+      grid-area: meta;
+    }
+
+    .message-snippet {
+      grid-area: snippet;
+    }
+  }
+
+  @container (max-width: 28rem) {
+    /* The sender gets the width; chips and date go on the line under */
+    .admin-list-messages .admin-row {
+      @apply grid-cols-[10px_minmax(0,1fr)];
+      grid-template-areas: "dot text" ". meta" ". snippet";
+    }
+
+    .log-entry {
+      @apply grid-cols-[30px_minmax(0,1fr)];
+    }
+
+    .log-entry-time {
+      @apply col-start-2;
     }
   }
 

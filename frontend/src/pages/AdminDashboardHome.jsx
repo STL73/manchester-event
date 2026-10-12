@@ -10,6 +10,8 @@ import { isPublicEvent } from "../data/eventsData";
 import { countTrend, getRangeBounds } from "../lib/analytics";
 import { isUpcoming, matchesWhen } from "../lib/eventDates";
 import EmptyState from "../components/UI/EmptyState";
+import LogEntry from "../components/dashboard/LogEntry";
+import { describeLog, logLookup } from "../lib/systemLogs";
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -103,6 +105,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
 export default function AdminDashboardHome({ users, events, contactMessages }) {
   const ViewAllIcon = viewAllLogsAction.icon;
   const insights = getAdminInsights({ users, events, contactMessages });
+  const lookup = logLookup(events, users);
 
   return (
     <div className="dashboard-home">
@@ -136,17 +139,15 @@ export default function AdminDashboardHome({ users, events, contactMessages }) {
           <EmptyState icon={Logs} text="No recent admin actions." />
         ) : (
           <div className="activity-log">
-            <ul className="activity-list">
-              {recentAdminActions.map((entry) => (
-                <li className="activity-item" key={entry.logId}>
-                  <time className="activity-time" dateTime={entry.createdAt}>
-                    {dateFormatter.format(new Date(entry.createdAt))}
-                  </time>
-                  <p className="activity-desc">
-                    <span className="activity-action">{entry.action}:</span>{" "}
-                    {entry.details}
-                  </p>
-                </li>
+            {/* The same entries as System Logs, with the day in the time */}
+            <ul className="log-list">
+              {recentAdminActions.map((log) => (
+                <LogEntry
+                  key={log.logId}
+                  log={log}
+                  description={describeLog(log, lookup)}
+                  time={dateFormatter.format(new Date(log.createdAt))}
+                />
               ))}
             </ul>
             <Button to={viewAllLogsAction.to} variant="secondary" size="sm">

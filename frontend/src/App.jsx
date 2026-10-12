@@ -141,8 +141,34 @@ function App() {
         message,
         sentAt: new Date().toISOString(),
         readAt: null,
+        repliedAt: null,
+        repliedBy: null,
+        replyBody: null,
       },
     ]);
+  }
+
+  // Contact Messages: opening one reads it (read_at); Mark as unread clears it
+  function setContactMessageRead(messageId, isRead) {
+    const readAt = isRead ? new Date().toISOString() : null;
+    setContactMessages((currentMessages) =>
+      currentMessages.map((item) =>
+        item.messageId === messageId && Boolean(item.readAt) !== isRead ? { ...item, readAt } : item,
+      ),
+    );
+  }
+
+  // The reply is stored on the message (reply_body, replied_at, replied_by);
+  // sending the email itself is the backend's job
+  function replyToContactMessage(messageId, replyBody) {
+    const now = new Date().toISOString();
+    setContactMessages((currentMessages) =>
+      currentMessages.map((item) =>
+        item.messageId === messageId
+          ? { ...item, replyBody, repliedAt: now, repliedBy: currentAdmin.id, readAt: item.readAt ?? now }
+          : item,
+      ),
+    );
   }
 
   // Matches add_favourite / remove_favourites in the PHP
@@ -410,8 +436,8 @@ function App() {
               <Route path="manage-events" element={<ManageEvents events={managedEvents} onUpdateEventStatus={updateEventStatus} />} />
               <Route path="manage-events/:eventId/edit" element={<OpenInPanel param="eventId" to="/dashboard/manage-events" />} />
               <Route path="site-analytics" element={<SiteAnalytics users={users} events={events} />} />
-              <Route path="system-logs" element={<SystemLogs />} />
-              <Route path="contact-messages" element={<ContactMessages contactMessages={contactMessages} />} />
+              <Route path="system-logs" element={<SystemLogs events={events} users={users} />} />
+              <Route path="contact-messages" element={<ContactMessages contactMessages={contactMessages} users={users} onSetRead={setContactMessageRead} onReply={replyToContactMessage} />} />
             </Route>
             <Route path="*" element={<NotFound inDashboard />} />
           </Route>
