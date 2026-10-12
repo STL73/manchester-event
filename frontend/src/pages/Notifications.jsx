@@ -7,6 +7,7 @@ import Tooltip from "../components/UI/Tooltip";
 import PeriodSwitcher from "../components/charts/PeriodSwitcher";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import { eventDetailsPath } from "../data/eventsData";
+import EmptyState from "../components/UI/EmptyState";
 import {
   notificationActions,
   notificationGroup,
@@ -253,11 +254,7 @@ export default function Notifications({ selectedUser, notifications: allNotifica
         )}
 
         {visible.length === 0 ? (
-          <div className="dashboard-empty-state">
-            <p className="dashboard-empty-text">
-              {notifications.length === 0 ? notificationsEmpty : notificationsView.unreadEmpty}
-            </p>
-          </div>
+          <EmptyState icon={Bell} text={notifications.length === 0 ? notificationsEmpty : notificationsView.unreadEmpty} />
         ) : (
           <div className="notification-groups" ref={listRef}>
             {groups.map((group) => (

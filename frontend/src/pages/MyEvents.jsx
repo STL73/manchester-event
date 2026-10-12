@@ -7,6 +7,7 @@ import SearchBar from "../components/events/SearchBar";
 import StatusMessage from "../components/UI/StatusMessage";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import { eventCategories, eventLocations } from "../data/eventsData";
+import EmptyState from "../components/UI/EmptyState";
 import {
   applyFiltersAction,
   myEventsActions,
@@ -170,20 +171,14 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
 
         <div className="events-grid events-grid-three">
           {organiserEvents.length === 0 ? (
-            <div className="dashboard-empty-state">
-              <p className="dashboard-empty-text">
-                {organiserEventMessages.noEvents}
-              </p>
+            <EmptyState icon={CalendarCheck} text={organiserEventMessages.noEvents}>
               <Button to={createFirst.to} variant="primary" size="md">
                 <createFirst.icon aria-hidden="true" />
                 {createFirst.label}
               </Button>
-            </div>
+            </EmptyState>
           ) : filteredEvents.length === 0 ? (
-            <div className="dashboard-empty-state">
-              <p className="dashboard-empty-text">
-                {myEventsMessages.noMatches}
-              </p>
+            <EmptyState icon={CalendarCheck} text={myEventsMessages.noMatches}>
               <Button
                 type="button"
                 variant="secondary"
@@ -192,7 +187,7 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
               >
                 {myEventsMessages.clearFilters}
               </Button>
-            </div>
+            </EmptyState>
           ) : (
             filteredEvents.map((event) => (
               <EventCard

@@ -6,6 +6,7 @@ import { userInsights } from "../data/userDashboardData";
 import { getFavouriteEvents, getNextFavourite } from "../data/myFavouritesData";
 import { eventCategories, eventDetailsPath, isPublicEvent } from "../data/eventsData";
 import { isUpcoming, matchesWhen } from "../lib/eventDates";
+import EmptyState from "../components/UI/EmptyState";
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -121,10 +122,7 @@ export default function UserDashboardHome({
         </h2>
         <div className="events-grid events-grid-three">
           {recentFavourites.length === 0 ? (
-            <div className="dashboard-empty-state">
-              <p className="dashboard-empty-text">
-                You do not have any favourite events yet.
-              </p>
+            <EmptyState icon={CalendarHeart} text="You do not have any favourite events yet.">
               <Button
                 to="/dashboard/explore-events"
                 variant="primary"
@@ -133,7 +131,7 @@ export default function UserDashboardHome({
                 <CalendarSearch aria-hidden="true" />
                 Explore Events
               </Button>
-            </div>
+            </EmptyState>
           ) : (
             recentFavourites.map((event) => (
               <EventCard

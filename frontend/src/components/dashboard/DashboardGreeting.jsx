@@ -80,20 +80,33 @@ function PendingLine({ role, users, events, organiserEvents }) {
 // the status line where they have their summary. No shortcuts: the sidebar
 // already links every page, and the status line and cards link to what
 // needs attention (changed 2026-10-10; the PHP had a Quick Actions block)
+// The picture sits in the logo's cell, Home's own hexagon where inner pages
+// have their title icon; without one, the sidebar's default icon
 export default function DashboardGreeting({ selectedUser, ...data }) {
+  const Avatar = selectedUser.avatar;
+
   return (
     <header className="dashboard-greeting">
-      <h1 className="dashboard-greeting-title">
-        {dashboardGreeting.title}{" "}
-        <span className="dashboard-greeting-name">{selectedUser.user}</span>
-      </h1>
-      <p className="dashboard-greeting-status">
-        {selectedUser.type === "user" ? (
-          <NextFavouriteLine events={data.events} favouriteIds={data.favouriteIds} />
+      <div className={`dashboard-greeting-avatar ${selectedUser.avatarUrl ? "has-photo" : ""}`}>
+        {selectedUser.avatarUrl ? (
+          <img src={selectedUser.avatarUrl} alt="" />
         ) : (
-          <PendingLine role={dashboardGreeting.roles[selectedUser.type]} {...data} />
+          Avatar && <Avatar aria-hidden="true" />
         )}
-      </p>
+      </div>
+      <div className="dashboard-greeting-text">
+        <h1 className="dashboard-greeting-title">
+          {dashboardGreeting.title}{" "}
+          <span className="dashboard-greeting-name">{selectedUser.user}</span>
+        </h1>
+        <p className="dashboard-greeting-status">
+          {selectedUser.type === "user" ? (
+            <NextFavouriteLine events={data.events} favouriteIds={data.favouriteIds} />
+          ) : (
+            <PendingLine role={dashboardGreeting.roles[selectedUser.type]} {...data} />
+          )}
+        </p>
+      </div>
     </header>
   );
 }

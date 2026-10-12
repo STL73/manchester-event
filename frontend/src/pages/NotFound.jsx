@@ -1,6 +1,7 @@
 import Button from "../components/UI/Button";
 import { notFoundPage } from "../data/notFoundData";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
+import EmptyState from "../components/UI/EmptyState";
 
 export default function NotFound({ isUser = false, inDashboard = false }) {
   const { title, titleIcon: TitleIcon, message } = notFoundPage;
@@ -22,10 +23,9 @@ export default function NotFound({ isUser = false, inDashboard = false }) {
       <div className="dashboard-home">
         <section className="dashboard-section" aria-labelledby="not-found-title">
           <DashboardPageHeading id="not-found-title" icon={TitleIcon} title={title} />
-          <div className="dashboard-empty-state">
-            <p className="dashboard-empty-text">{message}</p>
+          <EmptyState icon={TitleIcon} text={message}>
             {actionButton}
-          </div>
+          </EmptyState>
         </section>
       </div>
     );

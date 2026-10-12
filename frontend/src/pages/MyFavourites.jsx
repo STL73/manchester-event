@@ -4,6 +4,7 @@ import EventCard from "../components/events/EventCard";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import { eventDetailsPath } from "../data/eventsData";
 import { downloadEventIcs } from "../lib/calendar";
+import EmptyState from "../components/UI/EmptyState";
 import {
   endedFavourites,
   favouritesEmpty,
@@ -69,10 +70,7 @@ export default function MyFavourites({ events, favouriteIds, onToggleFavourite }
         />
         <div className="events-grid events-grid-three">
           {upcoming.length === 0 ? (
-            <div className="dashboard-empty-state">
-              <p className="dashboard-empty-text">
-                {ended.length === 0 ? favouritesEmpty.none : favouritesEmpty.noneUpcoming}
-              </p>
+            <EmptyState icon={Heart} text={ended.length === 0 ? favouritesEmpty.none : favouritesEmpty.noneUpcoming}>
               <Button
                 to="/dashboard/explore-events"
                 variant="primary"
@@ -81,7 +79,7 @@ export default function MyFavourites({ events, favouriteIds, onToggleFavourite }
                 <CalendarSearch aria-hidden="true" />
                 Explore Events
               </Button>
-            </div>
+            </EmptyState>
           ) : (
             upcoming.map((event) => (
               <EventCard

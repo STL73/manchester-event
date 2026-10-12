@@ -9,6 +9,7 @@ import {
   manageEventsMessages,
 } from "../data/manageEventsData";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
+import EmptyState from "../components/UI/EmptyState";
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -58,11 +59,7 @@ export default function EditEventStatus({ events, onUpdateEventStatus }) {
         </DashboardPageHeading>
 
         {!event ? (
-          <div className="dashboard-empty-state">
-            <p className="dashboard-empty-text">
-              {manageEventsMessages.eventNotFound}
-            </p>
-          </div>
+          <EmptyState icon={edit.icon} text={manageEventsMessages.eventNotFound} />
         ) : (
           <div className="contact-form-container">
             <form className="contact-form" onSubmit={handleSubmit}>

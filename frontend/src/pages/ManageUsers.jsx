@@ -4,6 +4,7 @@ import Button from "../components/UI/Button";
 import Tooltip from "../components/UI/Tooltip";
 import StatusMessage from "../components/UI/StatusMessage";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
+import EmptyState from "../components/UI/EmptyState";
 import {
   accountStatuses,
   manageUsersMessages,
@@ -50,9 +51,7 @@ export default function ManageUsers({ users, onDeleteUser }) {
         )}
 
         {users.length === 0 ? (
-          <div className="dashboard-empty-state">
-            <p className="dashboard-empty-text">{manageUsersMessages.noUsers}</p>
-          </div>
+          <EmptyState icon={Users} text={manageUsersMessages.noUsers} />
         ) : (
           <div
             className="table-wrapper"

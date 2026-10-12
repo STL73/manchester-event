@@ -13,6 +13,7 @@ import {
   organiserEventMessages,
 } from "../data/organiserEventsData";
 import { bySoonest, isUpcoming } from "../lib/eventDates";
+import EmptyState from "../components/UI/EmptyState";
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -151,15 +152,12 @@ export default function OrganiserDashboardHome({ organiserEvents: events, onDele
 
         <div className="events-grid events-grid-three">
           {recentEvents.length === 0 ? (
-            <div className="dashboard-empty-state">
-              <p className="dashboard-empty-text">
-                {organiserEventMessages.noEvents}
-              </p>
+            <EmptyState icon={CalendarCheck} text={organiserEventMessages.noEvents}>
               <Button to={createFirst.to} variant="primary" size="md">
                 <createFirst.icon aria-hidden="true" />
                 {createFirst.label}
               </Button>
-            </div>
+            </EmptyState>
           ) : (
             recentEvents.map((event) => (
               <EventCard
