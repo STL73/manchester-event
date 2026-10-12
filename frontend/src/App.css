@@ -558,6 +558,22 @@
     @apply relative z-10 mt-auto flex flex-wrap items-center gap-3 pt-2;
   }
 
+  /* The card's main job (My Drafts' Submit), above its other buttons and
+     the stretched title link */
+  .event-card-primary {
+    @apply relative z-10 mt-auto w-full;
+  }
+
+  .event-card-primary + .event-card-actions,
+  .event-card-notice + .event-card-actions {
+    @apply mt-0;
+  }
+
+  /* Why the main action isn't offered (a draft whose date has passed) */
+  .event-card-notice {
+    @apply mt-auto flex items-start gap-2 rounded-xl border border-yellow-400/35 bg-yellow-400/10 px-3 py-2 text-[13px] leading-snug text-yellow-200 [&_svg]:mt-px [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-yellow-400;
+  }
+
   /* Delete's question, in the button row's place; above the stretched
      title link like the row it replaces */
   .event-card-confirm {
