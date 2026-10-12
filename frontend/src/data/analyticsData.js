@@ -40,7 +40,7 @@ export const eventStatusOrder = [
 
 // Active and Suspended are 7.7 apart for colour-blind readers (target 8), which
 // is allowed because every bar is also named on the axis and in the table.
-export const accountStatusOrder = ["active", "suspended", "pending"];
+export const accountStatusOrder = ["active", "suspended"];
 
 export const chartText = {
   range: "Time range",

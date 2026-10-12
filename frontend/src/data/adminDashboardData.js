@@ -70,11 +70,11 @@ export const siteTotalsCards = [
     icon: Users,
   },
   {
-    id: "pendingUsers",
-    title: "Pending Users",
+    id: "unverifiedUsers",
+    title: "Unverified Accounts",
     icon: UserRoundSearch,
-    tone: "dashboard-card-accent-yellow",
-    action: { label: "Review", to: "/dashboard/manage-users" },
+    // Nothing for the admin to do: only the user can verify their email
+    detail: "Can't submit events or get emails yet",
   },
 ];
 

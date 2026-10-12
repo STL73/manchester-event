@@ -65,6 +65,8 @@ export const eventDetailsPage = {
   goBackFallback: "/dashboard/home",
   // The public page's way back
   allEvents: { label: "All events", icon: ChevronLeft, to: "/events" },
+  // Before the admin's rejection_reason on a rejected event
+  rejectionReason: "The admin said:",
   about: { title: "About this event", icon: Info },
   organiserLabel: "Organiser",
   maps: { label: "Open in Google Maps", icon: ExternalLink },

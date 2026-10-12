@@ -354,6 +354,10 @@
 
   /* Explore Events: no date field (the date pills pick it), so Keywords (2)
      | Category | Location | Search */
+  .events-search-keywords-only {
+    @apply grid-cols-[minmax(0,1fr)_auto];
+  }
+
   .events-search-no-date {
     @apply grid-cols-[minmax(0,2fr)_repeat(2,minmax(0,1fr))_auto];
   }
@@ -938,6 +942,221 @@
 
   .event-danger-zone-actions {
     @apply flex flex-wrap gap-2.5;
+  }
+
+  /* The admin's reason on a rejected event, under the banner's text */
+  .event-details-banner-reason {
+    @apply mt-1 block italic;
+  }
+
+  /* Manage Events and Manage Users (decided 2026-10-12, layout A): the
+     records as a list of rows, the whole row opening the side panel. Below
+     52rem a row becomes a two-line card */
+  .admin-list {
+    @apply w-full overflow-hidden rounded-2xl border border-border bg-card;
+  }
+
+  .admin-list-head,
+  .admin-row {
+    @apply grid items-center gap-3.5 px-4 py-3;
+  }
+
+  .admin-list-events :is(.admin-list-head, .admin-row) {
+    @apply grid-cols-[minmax(0,2.4fr)_minmax(0,1.1fr)_minmax(0,1fr)_120px_96px];
+  }
+
+  .admin-list-users :is(.admin-list-head, .admin-row) {
+    @apply grid-cols-[minmax(0,2.2fr)_100px_minmax(0,1.3fr)_minmax(0,1.1fr)_96px];
+  }
+
+  .admin-list-head {
+    @apply border-b border-border text-xs font-medium uppercase tracking-[0.06em] text-muted;
+  }
+
+  .admin-row {
+    @apply relative border-t border-border/55 text-sm transition-colors hover:bg-accent/6 motion-reduce:transition-none;
+  }
+
+  .admin-list-head + .admin-row {
+    @apply border-t-0;
+  }
+
+  .admin-row.is-open {
+    @apply bg-accent/12 shadow-[inset_3px_0_0_var(--color-accent)];
+  }
+
+  .admin-row:has(.admin-row-open:focus-visible) {
+    @apply outline-2 -outline-offset-2 outline-accent;
+  }
+
+  .admin-row-main {
+    @apply flex min-w-0 items-center gap-3;
+  }
+
+  .admin-row-thumb {
+    @apply h-10 w-14 shrink-0 rounded-lg object-cover;
+  }
+
+  .admin-row-text {
+    @apply flex min-w-0 flex-col gap-0.5;
+  }
+
+  /* Stretched over the row, like EventCard's title link */
+  .admin-row-open {
+    @apply truncate text-left font-medium text-foreground outline-none after:absolute after:inset-0 after:content-[''];
+  }
+
+  .admin-row-sub {
+    @apply flex min-w-0 items-center gap-1.5 truncate text-xs text-muted;
+  }
+
+  .admin-row-cell {
+    @apply flex min-w-0 flex-col gap-0.5 text-[13px] text-muted;
+  }
+
+  .admin-row-status {
+    @apply flex flex-wrap items-center gap-1.5;
+  }
+
+  .admin-row-action {
+    @apply flex justify-end;
+  }
+
+  /* What a click does, drawn like a small button */
+  .admin-row-cue {
+    @apply inline-flex h-8 items-center rounded-full border border-border bg-card px-3.5 text-[13px] font-medium text-foreground;
+  }
+
+  .admin-row-cue.is-primary {
+    @apply border-transparent bg-accent text-background;
+  }
+
+  .admin-chip {
+    @apply shrink-0 rounded-full bg-accent/14 px-2 py-px text-[11px] font-medium text-accent-hover;
+  }
+
+  /* Initials in the logo's cell, where the user has no picture */
+  .admin-avatar {
+    @apply hex-cell grid h-[38px] w-[34px] shrink-0 place-items-center bg-accent/22 text-xs font-semibold text-accent;
+  }
+
+  .admin-avatar.is-large {
+    @apply h-[58px] w-[52px] text-base;
+  }
+
+  /* The side panel: a <dialog> pinned to the right, the page dimmed */
+  .side-panel {
+    @apply fixed inset-y-0 right-0 left-auto m-0 h-dvh max-h-dvh w-[min(460px,100vw)] max-w-full overflow-hidden border-l border-border bg-card p-0 text-foreground shadow-[-20px_0_40px_-20px_rgb(0_0_0/0.7)] backdrop:bg-[rgb(5_8_18/0.6)];
+  }
+
+  .side-panel[open] {
+    animation: side-panel-in 200ms ease-out;
+  }
+
+  .side-panel-inner {
+    @apply flex h-full flex-col;
+  }
+
+  .side-panel-head {
+    @apply flex items-center justify-between gap-3 border-b border-border px-5 py-4;
+  }
+
+  .side-panel-title {
+    @apply text-base font-semibold;
+  }
+
+  .side-panel-close {
+    @apply grid size-9 place-items-center rounded-full text-muted transition-colors hover:bg-foreground/8 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent [&_svg]:size-5;
+  }
+
+  .side-panel-body {
+    @apply flex-1 overflow-y-auto p-5;
+  }
+
+  .side-panel-foot {
+    @apply flex flex-col gap-3 border-t border-border px-5 py-4 [&>a]:w-full [&>button]:w-full;
+  }
+
+  /* Inside the panel */
+  .admin-review {
+    @apply flex flex-col gap-4;
+  }
+
+  .admin-review-photo {
+    @apply aspect-[2/1] w-full rounded-xl object-cover;
+  }
+
+  .admin-review-head {
+    @apply flex flex-col gap-2;
+  }
+
+  .admin-review-badges {
+    @apply mt-1 flex flex-wrap items-center gap-2;
+  }
+
+  .admin-review-name {
+    @apply text-xl/snug font-semibold text-foreground;
+  }
+
+  .admin-review-description {
+    @apply whitespace-pre-line text-sm leading-relaxed text-foreground/85;
+  }
+
+  .admin-account-head {
+    @apply flex items-center gap-3.5;
+  }
+
+  .admin-changes {
+    @apply flex flex-col gap-2 rounded-xl border border-accent/35 bg-accent/7 px-3.5 py-3 text-[13px];
+  }
+
+  .admin-changes-title {
+    @apply flex items-center gap-2 font-semibold [&_svg]:size-4 [&_svg]:text-accent;
+  }
+
+  .admin-changes ul {
+    @apply flex flex-col gap-1;
+  }
+
+  .admin-changes del {
+    @apply text-muted;
+  }
+
+  .admin-changes ins {
+    @apply text-foreground no-underline;
+  }
+
+  .admin-changes-note,
+  .admin-hint {
+    @apply text-xs font-normal text-muted;
+  }
+
+  .admin-note {
+    @apply flex flex-col gap-0.5 rounded-xl border border-dashed border-border px-3.5 py-2.5 text-[13px] leading-relaxed text-muted;
+  }
+
+  .admin-note strong {
+    @apply font-medium text-foreground;
+  }
+
+  .admin-decision {
+    @apply flex flex-col gap-3;
+  }
+
+  .admin-field {
+    @apply flex flex-col gap-2;
+  }
+
+  .admin-field-label {
+    @apply text-sm font-medium;
+  }
+
+  .admin-danger-line {
+    @apply flex flex-wrap items-center justify-between gap-2.5 border-t border-border/60 pt-3 text-[13px] text-muted;
+  }
+
+  .admin-danger-actions {
+    @apply flex flex-wrap gap-2;
   }
 
   /* contact styles */
@@ -1620,8 +1839,15 @@
     @apply text-muted;
   }
 
-  .dashboard-greeting-link {
+  /* The summary-line button (Manage Events' "3 waiting for review") looks
+     like the greeting's links */
+  .dashboard-greeting-link,
+  .dashboard-summary-link {
     @apply text-foreground font-medium underline decoration-accent/60 underline-offset-4 hover:text-accent rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  }
+
+  .dashboard-summary-link {
+    @apply cursor-pointer;
   }
 
   .dashboard-intro {
@@ -2046,6 +2272,10 @@
     @apply text-accent-hover;
   }
 
+  .events-when-option.is-attention .events-when-count {
+    @apply text-yellow-400;
+  }
+
   /* The controls on the right of the pills row (My Events' date and
      sort); after a wrap they keep to the right */
   .events-when-tools {
@@ -2334,6 +2564,10 @@
 
   .status-past {
     @apply border-gray-300/40 bg-gray-300/10 text-gray-300;
+  }
+
+  .status-unverified {
+    @apply border-dashed border-border bg-transparent text-muted;
   }
 
   .data-table tbody tr.table-row-cancelled {
@@ -3191,6 +3425,59 @@
     }
   }
 
+  @container (max-width: 52rem) {
+    .admin-list-head {
+      @apply hidden;
+    }
+
+    .admin-list :is(.admin-row) {
+      @apply grid-cols-[minmax(0,1fr)_auto] gap-y-2.5;
+      grid-template-areas: "main status" "meta action";
+    }
+
+    .admin-row-main {
+      grid-area: main;
+    }
+
+    .admin-row-status {
+      grid-area: status;
+      @apply justify-end;
+    }
+
+    .admin-row-meta {
+      grid-area: meta;
+    }
+
+    .admin-row-action {
+      grid-area: action;
+    }
+
+    .admin-row-hide {
+      @apply hidden;
+    }
+  }
+
+  /* Phone: the name gets the whole width; date, then status and the button,
+     on the lines under it */
+  @container (max-width: 28rem) {
+    .admin-row-thumb {
+      @apply hidden;
+    }
+
+    .admin-list :is(.admin-row) {
+      grid-template-areas: "main main" "meta meta" "status action";
+    }
+
+    .admin-row-status {
+      @apply justify-start;
+    }
+
+    .admin-row-open,
+    .admin-row-sub {
+      @apply whitespace-normal;
+    }
+  }
+
   /* Filter bar and event grid, shared by the public Explore page (<main> is
      its container, about the window's width) and the dashboard. 56rem: the
      narrowest three cards still read well in; 36rem: one card per row */
@@ -3207,6 +3494,14 @@
 
     /* Without the date field: Keywords | Category, then Location | Search */
     .events-search-no-date .events-search-keywords {
+      @apply col-span-1;
+    }
+
+    .events-search-keywords-only {
+      @apply grid-cols-[minmax(0,1fr)_auto];
+    }
+
+    .events-search-keywords-only .events-search-keywords {
       @apply col-span-1;
     }
 
@@ -3309,6 +3604,19 @@
 @media (prefers-reduced-motion: reduce) {
   .home-hero-word span,
   .event-favourite-button.is-popping svg {
+    animation: none;
+  }
+}
+
+@keyframes side-panel-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .side-panel[open] {
     animation: none;
   }
 }

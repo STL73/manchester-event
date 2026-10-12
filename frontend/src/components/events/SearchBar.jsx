@@ -12,6 +12,9 @@ export default function SearchBar({
   submitIcon: SubmitIcon = Search,
   // Explore Events picks its date with the date pills instead
   showDate = true,
+  // The admin lists search by keywords alone (Manage Users)
+  showFilters = true,
+  placeholder = "Search events, keywords...",
   className = "",
 }) {
   return (
@@ -32,7 +35,7 @@ export default function SearchBar({
         type="search"
         value={filters.q}
         className="events-search-input events-search-keywords"
-        placeholder="Search events, keywords..."
+        placeholder={placeholder}
         onChange={onChange}
       />
 
@@ -57,43 +60,47 @@ export default function SearchBar({
         </>
       )}
 
-      <label className="sr-only" htmlFor="event-category">
-        Category
-      </label>
-      <select
-        id="event-category"
-        name="category"
-        value={filters.category}
-        className="events-search-input"
-        onChange={onChange}
-      >
-        <option value="">All Categories</option>
-        {categories.map((category) => (
-          <option value={category.id} key={category.id}>
-            {category.name}
-          </option>
-        ))}
-      </select>
+      {showFilters && (
+        <>
+          <label className="sr-only" htmlFor="event-category">
+            Category
+          </label>
+          <select
+            id="event-category"
+            name="category"
+            value={filters.category}
+            className="events-search-input"
+            onChange={onChange}
+          >
+            <option value="">All Categories</option>
+            {categories.map((category) => (
+              <option value={category.id} key={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
 
-      <label className="sr-only" htmlFor="event-location">
-        Location
-      </label>
-      <select
-        id="event-location"
-        name="location"
-        value={filters.location}
-        className="events-search-input"
-        onChange={onChange}
-      >
-        <option value="">All Locations</option>
-        {locations.map((location) => (
-          <option value={location.id} key={location.id}>
-            {location.name}
-          </option>
-        ))}
-      </select>
+          <label className="sr-only" htmlFor="event-location">
+            Location
+          </label>
+          <select
+            id="event-location"
+            name="location"
+            value={filters.location}
+            className="events-search-input"
+            onChange={onChange}
+          >
+            <option value="">All Locations</option>
+            {locations.map((location) => (
+              <option value={location.id} key={location.id}>
+                {location.name}
+              </option>
+            ))}
+          </select>
+        </>
+      )}
 
-      {/* Extra fields, e.g. the status and sort dropdowns on My Events */}
+      {/* Extra fields */}
       {children}
 
       <Button type="submit" variant="primary" size="md">

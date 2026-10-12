@@ -55,6 +55,12 @@ function StateBanner({ event, state, role }) {
       <p>
         <strong>{banner.title}</strong>
         {text}
+        {/* rejection_reason: what the admin asked to change */}
+        {state === "rejected" && event.rejectionReason && (
+          <span className="event-details-banner-reason">
+            {eventDetailsPage.rejectionReason} “{event.rejectionReason}”
+          </span>
+        )}
       </p>
     </div>
   );

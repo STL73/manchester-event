@@ -41,9 +41,7 @@ const CreateEvents = lazy(() => import("./pages/CreateEvents"));
 const MyEvents = lazy(() => import("./pages/MyEvents"));
 const MyDrafts = lazy(() => import("./pages/MyDrafts"));
 const ManageUsers = lazy(() => import("./pages/ManageUsers"));
-const EditUser = lazy(() => import("./pages/EditUser"));
 const ManageEvents = lazy(() => import("./pages/ManageEvents"));
-const EditEventStatus = lazy(() => import("./pages/EditEventStatus"));
 const SystemLogs = lazy(() => import("./pages/SystemLogs"));
 const ContactMessages = lazy(() => import("./pages/ContactMessages"));
 const EventAnalytics = lazy(() => import("./pages/EventAnalytics"));
@@ -52,6 +50,13 @@ const SiteAnalytics = lazy(() => import("./pages/SiteAnalytics"));
 // React reuses a page when only a URL parameter changes, so an edit form
 // would keep the previous record's status and message. A new key per ID
 // starts the page fresh
+// The old Edit Status / Edit User addresses open the item's side panel
+// on the list instead (Manage Events and Manage Users, decided 2026-10-12)
+function OpenInPanel({ param, to }) {
+  const params = useParams();
+  return <Navigate to={`${to}?open=${params[param]}`} replace />;
+}
+
 function ResetOnParam({ param, children }) {
   const params = useParams();
   return <Fragment key={params[param]}>{children}</Fragment>;
@@ -68,14 +73,20 @@ function App() {
   const navigate = useNavigate();
   const [isUser, setIsUser] = useState(true);
   const [userType, setUserType] = useState(TEST_USER_TYPE);
-  // Shared by Manage Users and Edit User so changes survive navigating between them
-  const [users, setUsers] = useState(mockUsers);
   // The one events list; every page reads a view of it (see eventsData.js)
   const [events, setEvents] = useState(initialEvents);
   // Users and guests see an edit waiting for approval as its last approved
   // version (publicVersion); organisers and admins see the real record
   const audienceEvents = events.map(publicVersion);
-  const publicEvents = audienceEvents.filter(isPublicEvent);
+  // A suspended organiser's events leave the public lists (the schema's
+  // query filter); favourites and links still find them
+  const [users, setUsers] = useState(mockUsers);
+  const suspendedOrganiserIds = users
+    .filter((user) => user.role === "organiser" && user.accStatus === "suspended")
+    .map((user) => user.userId);
+  const publicEvents = audienceEvents.filter(
+    (event) => isPublicEvent(event) && !suspendedOrganiserIds.includes(event.organiserId),
+  );
   const organiserEvents = events.filter(
     (event) => event.organiserId === currentOrganiser.id,
   );
@@ -181,18 +192,30 @@ function App() {
     );
   }
 
-  function updateUserStatus(userId, accStatus) {
+  // Matches update_user_status(), plus the schema's suspended_until (NULL
+  // = until lifted) and suspension_reason; lifting a suspension clears both
+  function updateUserStatus(userId, { accStatus, suspendedUntil = null, suspensionReason = null }) {
     const updatedAt = new Date().toISOString();
+    const suspended = accStatus === "suspended";
     setUsers((currentUsers) =>
       currentUsers.map((user) =>
-        user.userId === userId ? { ...user, accStatus, updatedAt } : user,
+        user.userId === userId
+          ? {
+              ...user,
+              accStatus,
+              suspendedUntil: suspended ? suspendedUntil : null,
+              suspensionReason: suspended ? suspensionReason : null,
+              updatedAt,
+            }
+          : user,
       ),
     );
   }
 
   // Matches update_event_status(): records which admin changed it and when.
-  // Approving publishes a pending edit, so the old public copy goes
-  function updateEventStatus(eventId, status) {
+  // Approving publishes a pending edit, so the old public copy goes; a
+  // rejection keeps its reason (rejection_reason) for the organiser
+  function updateEventStatus(eventId, status, rejectionReason = null) {
     const adminUpdatedAt = new Date().toISOString();
     setEvents((currentEvents) =>
       currentEvents.map((event) =>
@@ -201,6 +224,7 @@ function App() {
               ...event,
               status,
               approvedSnapshot: status === "approved" ? null : event.approvedSnapshot,
+              rejectionReason: status === "rejected" ? rejectionReason : null,
               adminId: currentAdmin.id,
               adminName: currentAdmin.name,
               adminUpdatedAt,
@@ -369,10 +393,10 @@ function App() {
             <Route path="my-events/:eventId/edit" element={<ResetOnParam param="eventId"><CreateEvents mode="edit" events={organiserEvents} onUpdateEvent={updateOrganiserEvent} onCancelEvent={cancelOrganiserEvent} onDeleteEvent={deleteOrganiserEvent} /></ResetOnParam>} />
             <Route path="my-drafts" element={<MyDrafts organiserEvents={organiserEvents} onSubmitDraft={submitDraft} onDeleteEvent={deleteOrganiserEvent} />} />
             <Route path="event-analytics" element={<EventAnalytics organiserEvents={organiserEvents} />} />
-            <Route path="manage-users" element={<ManageUsers users={users} onDeleteUser={deleteUser} />} />
-            <Route path="manage-users/:userId/edit" element={<ResetOnParam param="userId"><EditUser users={users} onUpdateUserStatus={updateUserStatus} /></ResetOnParam>} />
-            <Route path="manage-events" element={<ManageEvents events={managedEvents} />} />
-            <Route path="manage-events/:eventId/edit" element={<ResetOnParam param="eventId"><EditEventStatus events={managedEvents} onUpdateEventStatus={updateEventStatus} /></ResetOnParam>} />
+            <Route path="manage-users" element={<ManageUsers users={users} events={events} currentUserId={currentAdmin.id} onUpdateUser={updateUserStatus} onDeleteUser={deleteUser} />} />
+            <Route path="manage-users/:userId/edit" element={<OpenInPanel param="userId" to="/dashboard/manage-users" />} />
+            <Route path="manage-events" element={<ManageEvents events={managedEvents} onUpdateEventStatus={updateEventStatus} />} />
+            <Route path="manage-events/:eventId/edit" element={<OpenInPanel param="eventId" to="/dashboard/manage-events" />} />
             <Route path="site-analytics" element={<SiteAnalytics users={users} events={events} />} />
             <Route path="system-logs" element={<SystemLogs />} />
             <Route path="contact-messages" element={<ContactMessages contactMessages={contactMessages} />} />
