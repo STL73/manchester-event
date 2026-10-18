@@ -1,4 +1,7 @@
 import { LogOut } from "lucide-react";
+import { Fragment } from "react";
+import { Link } from "react-router-dom";
+import { legalNav } from "../../data/navigationData";
 import { Button } from "../UI/Button";
 import Tooltip from "../UI/Tooltip";
 
@@ -33,6 +36,16 @@ export default function UserNav({ items, onLogout, onSwitchUserType }) {
           Test role: {items.type}
         </Button>
       </div>
+      <nav className="sidebar-legal" aria-label="About and legal">
+        {legalNav.map((link, index) => (
+          <Fragment key={link.url}>
+            {index > 0 && <span aria-hidden="true">·</span>}
+            <Link to={link.url} className="sidebar-legal-link">
+              {link.title}
+            </Link>
+          </Fragment>
+        ))}
+      </nav>
     </div>
   );
 }

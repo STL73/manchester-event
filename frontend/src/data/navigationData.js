@@ -1,14 +1,17 @@
 import {
+  BadgeCheck,
   Bell,
   CalendarCheck,
   CalendarPlus,
   CalendarSearch,
   ChartNoAxesCombined,
+  CircleHelp,
   CircleUserRound,
   ClipboardList,
   Heart,
   Home,
   Logs,
+  Mail,
   MessageSquareText,
   Settings,
   Settings2,
@@ -16,6 +19,15 @@ import {
   Users,
 } from "lucide-react";
 
+// The public pages a signed-in person still needs; the dashboard hides the
+// public navbar and footer, so these are its only way to them
+const faqLink = { title: "FAQs", url: "/faq", icon: CircleHelp };
+const contactLink = { title: "Contact us", url: "/contact", icon: Mail };
+
+// Sidebar links. `section` puts a small label over a run of links (none for
+// users, who have four). `badge` shows a count from App's navCounts when it
+// is above 0: `label` finishes the screen-reader text ("3 drafts") and
+// `tone` matches the Home card with the same figure
 const navigationData = [
   {
     role: [
@@ -42,6 +54,7 @@ const navigationData = [
             icon: Settings2,
           },
         ],
+        helpNav: [faqLink, contactLink],
       },
       {
         type: "organiser",
@@ -54,18 +67,36 @@ const navigationData = [
             title: "Create Event",
             url: "/dashboard/create-events",
             icon: CalendarPlus,
+            section: "Events",
           },
           {
             title: "My Events",
             url: "/dashboard/my-events",
             icon: CalendarCheck,
+            section: "Events",
+            // Rejected events wait for the organiser to edit them; red like
+            // the Rejected card on Home
+            badge: { count: "rejected", label: "rejected", tone: "danger" },
           },
-          { title: "My Drafts", url: "/dashboard/my-drafts", icon: SquarePen },
+          {
+            title: "My Drafts",
+            url: "/dashboard/my-drafts",
+            icon: SquarePen,
+            section: "Events",
+            badge: { count: "drafts", label: "drafts" },
+          },
           {
             title: "Event Analytics",
             url: "/dashboard/event-analytics",
             icon: ChartNoAxesCombined,
+            section: "Insights",
           },
+        ],
+        helpNav: [
+          // About is built around the approval steps
+          { title: "How approval works", url: "/about", icon: BadgeCheck },
+          faqLink,
+          contactLink,
         ],
       },
       {
@@ -76,36 +107,64 @@ const navigationData = [
         mainNav: [
           { title: "Home", url: "/dashboard/home", icon: Home },
           {
-            title: "Manage Users",
-            url: "/dashboard/manage-users",
-            icon: Users,
-          },
-          {
             title: "Manage Events",
             url: "/dashboard/manage-events",
             icon: ClipboardList,
+            section: "Moderation",
+            // Yellow like the Events to review card on Home
+            badge: { count: "toReview", label: "to review", tone: "warning" },
+          },
+          {
+            title: "Manage Users",
+            url: "/dashboard/manage-users",
+            icon: Users,
+            section: "Moderation",
+          },
+          {
+            title: "Contact Messages",
+            url: "/dashboard/contact-messages",
+            icon: MessageSquareText,
+            section: "Moderation",
+            badge: { count: "unreadMessages", label: "unread" },
           },
           {
             title: "Site Analytics",
             url: "/dashboard/site-analytics",
             icon: ChartNoAxesCombined,
+            section: "Insights",
           },
-          { title: "System Logs", url: "/dashboard/system-logs", icon: Logs },
           {
-            title: "Contact Messages",
-            url: "/dashboard/contact-messages",
-            icon: MessageSquareText,
+            title: "System Logs",
+            url: "/dashboard/system-logs",
+            icon: Logs,
+            section: "Insights",
           },
         ],
+        // Admins read the contact messages rather than send them
+        helpNav: [],
       },
     ],
   },
   {
     secondaryNav: [
-      { title: "Notifications", url: "/dashboard/notifications", icon: Bell },
+      {
+        title: "Notifications",
+        url: "/dashboard/notifications",
+        icon: Bell,
+        badge: { count: "unreadNotifications", label: "unread" },
+      },
       { title: "Settings", url: "/dashboard/settings", icon: Settings },
     ],
   },
+];
+
+export const helpNavTitle = "Help";
+
+// Small print under the signed-in user, for every role
+export const legalNav = [
+  { title: "About", url: "/about" },
+  { title: "Privacy", url: "/privacy" },
+  { title: "Terms", url: "/terms" },
 ];
 
 // Public header links. "end" keeps Home active only on "/". Home is

@@ -1,6 +1,7 @@
 import {
   CalendarDays,
   Clock3,
+  Menu,
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
@@ -23,9 +24,22 @@ function formatTime(date) {
   }).format(date);
 }
 
-export default function WeatherDateBar({ isSidebarCollapsed, onToggleSidebar }) {
+// Phones open the sidebar as a drawer (a menu); wide screens switch between
+// the full sidebar and its icon rail
+export default function WeatherDateBar({
+  isNarrow,
+  isSidebarOpen,
+  onToggleSidebar,
+  toggleRef,
+}) {
   const [now, setNow] = useState(() => new Date());
   const WeatherIcon = mockWeather.icon;
+  let ToggleIcon = isSidebarOpen ? PanelLeftClose : PanelLeftOpen;
+  let toggleLabel = isSidebarOpen ? "Collapse sidebar" : "Expand sidebar";
+  if (isNarrow) {
+    ToggleIcon = Menu;
+    toggleLabel = "Open menu";
+  }
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 60000);
@@ -38,17 +52,15 @@ export default function WeatherDateBar({ isSidebarCollapsed, onToggleSidebar }) 
       aria-label="Weather and date information"
     >
       <button
+        ref={toggleRef}
         className="sidebar-toggle"
         type="button"
         onClick={onToggleSidebar}
-        aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        aria-expanded={!isSidebarCollapsed}
+        aria-label={toggleLabel}
+        aria-controls="dashboard-sidebar"
+        aria-expanded={isSidebarOpen}
       >
-        {isSidebarCollapsed ? (
-          <PanelLeftOpen aria-hidden="true" />
-        ) : (
-          <PanelLeftClose aria-hidden="true" />
-        )}
+        <ToggleIcon aria-hidden="true" />
       </button>
       <div className="dashboard-utility-items">
         {/* Each item: icon + one text block, so on narrow screens the text

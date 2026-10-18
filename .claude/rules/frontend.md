@@ -65,8 +65,9 @@ frontend/src/
   activity panels) are 16px (`rounded-2xl`), public and dashboard alike. Cards in a grid, list
   items and small boxes are 12px (`rounded-xl`). The filter bar is 40px round its pill fields.
   Decided 2026-10-10
-- **Selected vs action:** a selected option (navbar and sidebar links, date pills, range toggle,
-  view switcher) gets the accent tint: `bg-accent/15`, an `accent/30` ring, bright text. Solid
+- **Selected vs action:** a selected option (navbar links, date pills, range toggle, view
+  switcher) gets the accent tint: `bg-accent/15`, an `accent/30` ring, bright text. Sidebar
+  links keep the tint but swap the ring for a 3px accent bar (2026-10-18). Solid
   accent is only for buttons that do something (Search, Save, Submit)
 - **Dashboard pages** open with a title row: the page's title (`DashboardPageHeading`; on Home the
   greeting), and beside it only the page's own actions, e.g. "Create event" on My Events and My
@@ -176,6 +177,26 @@ frontend/src/
   with the page's icon, the message, an optional action). No corner watermarks, hexagon
   section-heading icons, honeycomb dividers between dashboard sections or hexagon pagination:
   the sidebar pattern and Preferences already carry the rest
+- **Sidebar** (decided 2026-10-18): wide screens collapse it to a 64px icon rail (each link's
+  label becomes its tooltip and stays its accessible name; remembered in `localStorage`), never
+  to nothing. At 768px and below it is a drawer over the page opened by the weather bar's menu
+  button (`NARROW_QUERY` in `Dashboard.jsx`, the same width as the `@media` rule): X, Escape, the
+  backdrop or any link shuts it, the page behind is `inert`, focus goes in and comes back. The
+  dashboard hides the public navbar and footer, so the sidebar carries the public pages a
+  signed-in person needs: a **Help** row beside Notifications and Settings that opens a small
+  panel (`HelpMenu`; FAQs and Contact us, plus How approval works for organisers; none for
+  admins, `helpNav` per role), and About · Privacy · Terms under the user (`legalNav`). Help is
+  one row, not a group, so every role fits a 650px-tall laptop window. Short screens scroll the
+  whole sidebar, never the links in a box of their own. Look (layout B, 2026-10-18): the role
+  sits under the brand ("Organiser dashboard"), no title line; small uppercase section labels
+  (`section` in `navigationData.js`: Events / Insights, Moderation / Insights; none for users)
+  and one faint 1px line instead of thick dividers; 14px pill rows, icons `text-muted/70` until
+  hovered or current; the current page is the accent tint plus a 3px accent bar on the inner
+  edge, no ring; the user is a soft card. Badges (`badge` per link, counts from `navCounts` in
+  `App.jsx`, the Home cards' own filters so the two agree) only where something needs you:
+  unread notifications, organisers' drafts and rejected events (red), admins' events to review
+  (yellow) and unread messages; on the rail they sit on the icon's corner. The honeycomb hides
+  when it gets under 48px (a size container query), so a sliver never shows
 - **Pagination:** `components/UI/Pagination.jsx`, page number in the URL (`?page=`), back to page 1
   when a filter changes. Explore Events shows 12 per page (whole rows in every view)
 - **Dashboard headings** (decided 2026-10-10): the page title is the page's only `<h1>`, 24px white
