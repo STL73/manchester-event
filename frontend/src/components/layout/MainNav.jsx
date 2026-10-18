@@ -1,21 +1,35 @@
 import NavItem from "./NavItem";
 
-export default function MainNav({ items, activePath, pathname }) {
+// Runs of links that share a `section` go under one small label
+function groupBySection(items) {
+  return items.reduce((groups, item) => {
+    const last = groups.at(-1);
+    if (last && last.section === item.section) {
+      return [...groups.slice(0, -1), { ...last, items: [...last.items, item] }];
+    }
+    return [...groups, { section: item.section, items: [item] }];
+  }, []);
+}
+
+export default function MainNav({ items, counts, activePath, pathname }) {
   return (
     <div className="sidebar-group sidebar-group-main">
-      <p className="sidebar-title">
-        <span className="capitalize pr-2">{items.type}</span> Dashboard
-      </p>
-      <div className="sidebar-menu border-t-3 border-border">
-        {items.mainNav.map((item) => (
-          <NavItem
-            key={item.title}
-            item={item}
-            activePath={activePath}
-            pathname={pathname}
-          />
-        ))}
-      </div>
+      {groupBySection(items).map(({ section, items: sectionItems }) => (
+        <div key={section ?? "top"}>
+          {section && <p className="sidebar-section-label">{section}</p>}
+          <div className="sidebar-menu">
+            {sectionItems.map((item) => (
+              <NavItem
+                key={item.title}
+                item={item}
+                counts={counts}
+                activePath={activePath}
+                pathname={pathname}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
       {/* The dashboards' honeycomb: the empty space under the links, which
           is the one spot on every dashboard page with nothing to read */}
       <div className="sidebar-honeycomb" aria-hidden="true">

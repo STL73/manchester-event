@@ -182,6 +182,16 @@ function App() {
   const data = getData();
   const userTypes = data[0].role.map(({ type }) => type);
   const selectedUser = { ...getUserData(userType), ...profileChanges[userType] };
+  // The sidebar's badges: the same filters as the Home cards, so the two agree
+  const navCounts = {
+    unreadNotifications: notifications.filter(
+      (notification) => notification.recipient === userType && !notification.readAt,
+    ).length,
+    drafts: organiserEvents.filter((event) => event.status === "draft").length,
+    rejected: organiserEvents.filter((event) => event.status === "rejected").length,
+    toReview: events.filter((event) => event.status === "pending").length,
+    unreadMessages: contactMessages.filter((message) => !message.readAt).length,
+  };
   // An organiser whose events have ever been public can't delete their own
   // account (the schema's deletion rule)
   const hasPublicEvents = organiserEvents.some(hasBeenPublic);
@@ -390,6 +400,7 @@ function App() {
                   <Dashboard
                     selectedUser={selectedUser}
                     secondaryNav={data[1].secondaryNav}
+                    navCounts={navCounts}
                     onLogout={toggleUserMode}
                     onSwitchUserType={switchUserType}
                   />
