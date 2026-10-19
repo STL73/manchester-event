@@ -1,0 +1,1629 @@
+/* Dashboard only, every role: frame, sidebar, weather bar, Home cards, Preferences,
+   Notifications, Create / Edit Event, analytics, Settings */
+@layer components {
+
+  /* Create / Edit Event (layout A, decided 2026-10-12): the form in five
+     numbered groups, and beside it a sticky column with the live card, the
+     checklist and the buttons. Below 56rem the column follows the form and
+     only its buttons show, pinned to the bottom of the screen */
+  .event-form {
+    @apply w-full flex flex-col gap-5;
+  }
+
+  .event-form-layout {
+    @apply grid grid-cols-[minmax(0,1fr)_340px] items-start gap-7;
+  }
+
+  .event-form-main {
+    @apply min-w-0 flex flex-col gap-7;
+  }
+
+  .event-form-panel {
+    @apply rounded-2xl border border-border bg-card px-6 py-1;
+  }
+
+  .event-form-group {
+    @apply flex flex-col gap-4 py-5;
+  }
+
+  .event-form-group + .event-form-group {
+    @apply border-t border-border/60;
+  }
+
+  .event-form-group-title {
+    @apply flex items-center gap-2.5 text-base font-semibold text-foreground;
+  }
+
+  /* The group's number in the logo's cell */
+  .event-form-step {
+    @apply hex-cell relative grid h-[26px] w-6 shrink-0 place-items-center bg-accent/35 text-xs font-semibold text-accent;
+  }
+
+  .event-form-step::before {
+    @apply hex-cell absolute inset-[1.5px] bg-card content-[''];
+  }
+
+  .event-form-step > span {
+    @apply relative;
+  }
+
+  .event-form-fields {
+    @apply flex flex-col gap-4;
+  }
+
+  .event-form-row {
+    @apply grid grid-cols-2 gap-4;
+  }
+
+  .event-field label {
+    @apply flex items-baseline justify-between gap-2;
+  }
+
+  .event-field-optional {
+    @apply text-xs font-normal text-muted;
+  }
+
+  .event-field select {
+    @apply px-4 py-2.5;
+  }
+
+  .event-field-hint {
+    @apply -mt-1 flex justify-between gap-3 text-xs text-muted tabular-nums;
+  }
+
+  /* The photo box: dashed while empty, the photo itself once chosen */
+  .event-image-drop {
+    @apply relative grid min-h-40 place-items-center overflow-hidden rounded-xl border-[1.5px] border-dashed border-accent/45 bg-accent/5 text-center transition-colors hover:border-accent;
+  }
+
+  .event-image-drop.is-dragging {
+    @apply border-accent bg-accent/15;
+  }
+
+  .event-image-drop.has-image {
+    @apply aspect-video min-h-0 border-solid border-border;
+  }
+
+  .event-image-drop:has(.event-image-drop-input:focus-visible) {
+    @apply outline-2 outline-offset-2 outline-accent;
+  }
+
+  .event-image-drop-empty {
+    @apply pointer-events-none flex flex-col items-center gap-1.5 p-5 text-[13px] text-muted [&_svg]:size-7 [&_svg]:text-accent;
+  }
+
+  .event-image-drop-empty strong {
+    @apply text-sm font-medium text-foreground;
+  }
+
+  .event-image-drop-photo {
+    @apply size-full object-cover;
+  }
+
+  .event-image-drop-input {
+    @apply absolute inset-0 cursor-pointer opacity-0;
+  }
+
+  .event-image-drop.has-image .event-image-drop-input {
+    @apply pointer-events-none;
+  }
+
+  .event-image-drop-tools {
+    @apply absolute right-3 bottom-3 flex gap-2;
+  }
+
+  .event-image-drop .profile-error {
+    @apply absolute inset-x-3 top-3 justify-center rounded-lg bg-background/90 px-3 py-2;
+  }
+
+  .event-form-side {
+    @apply sticky top-4 flex flex-col gap-3.5;
+  }
+
+  .event-form-side-label {
+    @apply text-xs font-medium uppercase tracking-[0.08em] text-muted;
+  }
+
+  .event-form-actions {
+    @apply flex flex-col gap-2.5 rounded-2xl border border-border bg-card p-4 [&>button]:w-full;
+  }
+
+  .event-form-actions-note {
+    @apply text-center text-xs leading-relaxed text-muted;
+  }
+
+  .event-form-checklist {
+    @apply mb-1 flex flex-col gap-2 text-[13px] text-muted;
+  }
+
+  .event-form-checklist-title {
+    @apply font-medium text-foreground;
+  }
+
+  .event-form-checklist ul {
+    @apply flex flex-col gap-1.5;
+  }
+
+  .event-form-checklist li {
+    @apply flex items-center gap-2 [&_svg]:size-4 [&_svg]:shrink-0;
+  }
+
+  .event-form-checklist li.is-done {
+    @apply text-foreground [&_svg]:text-green-400;
+  }
+
+  /* Edit only: Cancel or Delete, asked here like Settings' delete */
+  .event-danger-zone {
+    @apply flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-danger/35 px-6 py-5;
+  }
+
+  .event-danger-zone-title {
+    @apply flex items-center gap-2 text-base font-semibold text-foreground [&_svg]:size-5 [&_svg]:text-danger;
+  }
+
+  .event-danger-zone-text {
+    @apply mt-1 max-w-[52ch] text-sm text-muted;
+  }
+
+  .event-danger-zone-actions {
+    @apply flex flex-wrap gap-2.5;
+  }
+
+  /* In the dashboard a panel sits under the page's 24px title, so its own
+     title is a step smaller. The public Contact form keeps 24px */
+  .dashboard-content .contact-form-title {
+    @apply text-xl;
+  }
+
+  @media (max-width: 768px) {
+
+    .dashboard-container {
+      @apply m-1 p-1 gap-1;
+    }
+
+    .dashboard-content {
+      @apply m-1;
+    }
+  }
+
+  /* sidebar styles */
+
+  /* z-10: the icon rail's labels float over the page beside it.
+     Collapsed (the rail) and the phone drawer are in the two @media blocks
+     after the sidebar styles */
+  .sidebar {
+    @apply w-64 shrink-0 sticky top-0 z-10 self-start h-[calc(100vh-32px)] flex flex-col justify-between overflow-x-hidden overflow-y-auto text-foreground transition-[width] duration-200 motion-reduce:transition-none;
+  }
+
+  .sidebar-brand-row {
+    @apply shrink-0 flex items-center gap-1;
+  }
+
+  /* The drawer's own way out; wide screens use the weather bar's toggle */
+  .sidebar-close {
+    @apply hidden ml-auto p-1.5 shrink-0 rounded-lg text-muted hover:bg-background hover:text-foreground focus-visible:outline-2 focus-visible:outline-accent;
+  }
+
+  .sidebar-close svg {
+    @apply w-5 h-5;
+  }
+
+  .sidebar-backdrop {
+    @apply hidden;
+  }
+
+  .sidebar-group {
+    @apply py-2 flex flex-col justify-between gap-2;
+  }
+
+  /* Grows into spare height (the honeycomb takes it) but never below its
+     links: on a short screen the whole sidebar scrolls instead, rather than
+     the links scrolling in a box of their own */
+  .sidebar-group-main {
+    @apply flex-1 gap-0;
+  }
+
+  /* Fills whatever space the links leave, so the pattern never sits behind
+     one. isolate keeps the texture's -z-10 inside this box */
+  .sidebar-honeycomb {
+    @apply relative isolate flex-1 min-h-0 overflow-hidden;
+    container: sidebar-honeycomb / size;
+  }
+
+  /* One faint line, inset from the edges, between the page links and the
+     account links; spacing and section labels do the rest */
+  .sidebar-group-secondary {
+    @apply shrink-0 gap-0;
+  }
+
+  .sidebar-group-secondary::before {
+    content: "";
+    @apply mx-4 mb-2 h-px bg-border/60;
+  }
+
+  /* Events, Insights, Moderation: px-5 lines it up with the link icons */
+  .sidebar-section-label {
+    @apply px-5 pt-4 pb-1.5 text-xs font-semibold uppercase tracking-wider text-muted/70;
+  }
+
+  .sidebar-menu {
+    @apply px-2 py-1 flex flex-col items-start gap-0.5;
+  }
+
+  /* Counts where something needs you; tones match the Home cards */
+  .nav-badge {
+    @apply ml-auto min-w-5 h-5 px-1.5 shrink-0 inline-flex items-center justify-center rounded-full bg-accent/20 text-xs font-semibold text-accent-hover;
+  }
+
+  .nav-badge-warning {
+    @apply bg-yellow-400/15 text-yellow-400;
+  }
+
+  .nav-badge-danger {
+    @apply bg-danger/15 text-danger;
+  }
+
+  /* Help: a row like the links, opening a small panel of public pages over
+     the sidebar above it (beside it on the icon rail) */
+  .sidebar-help {
+    @apply relative w-full;
+  }
+
+  .sidebar-help-chevron {
+    @apply ml-auto w-4 h-4 transition-transform duration-200 motion-reduce:transition-none;
+  }
+
+  .sidebar-help.is-open .sidebar-help-chevron {
+    @apply rotate-180;
+  }
+
+  .sidebar-help.is-open .menu-item {
+    @apply bg-background text-foreground;
+  }
+
+  .sidebar-help-panel {
+    @apply absolute bottom-full inset-x-0 z-20 mb-2 p-1.5 flex flex-col gap-0.5 rounded-xl border border-accent/30 bg-background shadow-xl shadow-black/40;
+  }
+
+  .sidebar-help-link {
+    @apply px-3 py-2 flex items-center gap-3 rounded-lg text-sm text-muted hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:outline-accent;
+  }
+
+  .sidebar-help-icon {
+    @apply w-4 h-4 shrink-0 text-accent;
+  }
+
+  /* Pills, like the navbar's links: 14px in 36px rows */
+  .menu-item {
+    @apply relative px-3 py-2 w-full flex items-center justify-start gap-3 rounded-full text-sm text-muted transition-colors duration-200 hover:text-foreground hover:bg-background motion-reduce:transition-none;
+  }
+
+  /* Quiet until pointed at or current, so the current page is the
+     brightest thing in the sidebar */
+  .menu-icon {
+    @apply w-[18px] h-[18px] shrink-0 text-muted/70 transition-colors duration-200 motion-reduce:transition-none;
+  }
+
+  .sidebar-link:hover .menu-icon,
+  .sidebar-link:focus-visible .menu-icon,
+  .menu-item.is-active .menu-icon,
+  .sidebar-help.is-open .menu-icon {
+    @apply text-accent;
+  }
+
+  .sidebar-link {
+    @apply block w-full rounded-full focus-visible:outline-2 focus-visible:outline-accent;
+  }
+
+  /* Logo at the top of the sidebar, with the role under the name.
+     px-2 puts the logo on the link pills' left edge */
+  .sidebar-brand {
+    @apply px-2 pt-3 pb-4 text-base whitespace-nowrap rounded-lg focus-visible:outline-2 focus-visible:outline-accent;
+  }
+
+  .sidebar-brand-text {
+    @apply min-w-0 flex flex-col leading-tight;
+  }
+
+  .sidebar-brand-role {
+    @apply text-xs font-medium text-accent;
+  }
+
+  /* The name is too long to share 256px with a 32px logo, and without this
+     the logo was the one squeezed (17px wide, the bee squashed) */
+  .sidebar-brand .navbar-icon {
+    @apply shrink-0;
+  }
+
+  /* Signed-in user at the bottom of the sidebar */
+  .sidebar-user {
+    @apply shrink-0 px-2 pt-2 pb-1 flex flex-col gap-2;
+  }
+
+  /* The signed-in person as a soft card, Log out at its edge */
+  .sidebar-user-row {
+    @apply flex items-center gap-3 p-2.5 rounded-xl border border-border/60 bg-background/70;
+  }
+
+  .sidebar-user-avatar {
+    @apply w-8 h-8 shrink-0 text-accent;
+  }
+
+  .sidebar-user-photo {
+    @apply rounded-full object-cover;
+  }
+
+  .sidebar-user-details {
+    @apply flex-1 min-w-0;
+  }
+
+  .sidebar-user-name {
+    @apply text-sm font-medium text-foreground truncate;
+  }
+
+  .sidebar-user-email {
+    @apply text-xs text-muted truncate;
+  }
+
+  .sidebar-test-role {
+    @apply mx-2;
+  }
+
+  /* About · Privacy · Terms: the footer's small print, for signed-in people */
+  .sidebar-legal {
+    @apply flex flex-wrap justify-center gap-x-2 px-2 text-xs text-muted;
+  }
+
+  .sidebar-legal-link {
+    @apply rounded hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-accent;
+  }
+
+  /* Wide screens, collapsed: a 64px icon rail. Each link's label becomes its
+     tooltip (still its accessible name), so the rail lets labels overflow */
+  @media (min-width: 769px) {
+
+    .sidebar-collapsed {
+      @apply w-16 overflow-visible;
+    }
+
+    .sidebar-collapsed .sidebar-brand-row,
+    .sidebar-collapsed .sidebar-brand,
+    .sidebar-collapsed .menu-item {
+      @apply justify-center;
+    }
+
+    .sidebar-collapsed .sidebar-brand-text {
+      @apply sr-only;
+    }
+
+    /* No room for the labels; a little space keeps the groups apart */
+    .sidebar-collapsed .sidebar-section-label {
+      @apply h-3 p-0 overflow-hidden text-transparent;
+    }
+
+    .sidebar-collapsed .sidebar-help-chevron,
+    .sidebar-collapsed .sidebar-user-details,
+    .sidebar-collapsed .sidebar-test-role,
+    .sidebar-collapsed .sidebar-legal {
+      @apply hidden;
+    }
+
+    .sidebar-collapsed .menu-item {
+      @apply px-2;
+    }
+
+    /* The count sits on the icon's corner */
+    .sidebar-collapsed .nav-badge {
+      @apply absolute -top-1 right-0 ml-0 min-w-4 h-4 px-1 text-[10px];
+    }
+
+    /* The same look as UI/Tooltip, opening to the right of the icon */
+    .sidebar-collapsed .menu-label {
+      @apply pointer-events-none absolute left-full top-1/2 ml-3 -translate-y-1/2 px-2.5 py-1.5 whitespace-nowrap rounded-lg border-2 border-accent/70 bg-border text-xs font-medium text-foreground shadow-lg shadow-black/40 opacity-0 transition-opacity duration-150 motion-reduce:transition-none;
+    }
+
+    /* Arrow: a rotated square centred on the tooltip's left border */
+    .sidebar-collapsed .menu-label::after {
+      content: "";
+      @apply absolute -left-1.5 top-1/2 -mt-[5px] w-2.5 h-2.5 rotate-45 border-l-2 border-b-2 border-accent/70 bg-border;
+    }
+
+    .sidebar-collapsed .sidebar-link:hover .menu-label,
+    .sidebar-collapsed .sidebar-link:focus-visible .menu-label {
+      @apply opacity-100;
+    }
+
+    /* Help's panel opens beside the rail, so its "Help" label stays away */
+    .sidebar-collapsed .sidebar-help-panel {
+      @apply left-full right-auto bottom-0 mb-0 ml-3 w-56;
+    }
+
+    .sidebar-collapsed .sidebar-help.is-open .menu-label {
+      @apply opacity-0;
+    }
+
+    /* Avatar over Log out; Log out's tooltip centred, or it runs off the
+       left edge of the window */
+    .sidebar-collapsed .sidebar-user-row {
+      @apply flex-col p-1.5 gap-2;
+    }
+
+    .sidebar-collapsed .sidebar-user .tooltip {
+      @apply left-1/2 right-auto -translate-x-1/2;
+    }
+
+    .sidebar-collapsed .sidebar-user .tooltip::after {
+      @apply left-1/2 right-auto -ml-[5px];
+    }
+  }
+
+  /* Phones and tablets: a drawer over the page, opened by the weather bar's
+     menu button. Keep the width in step with NARROW_QUERY in Dashboard.jsx */
+  @media (max-width: 768px) {
+
+    .sidebar {
+      @apply fixed inset-y-0 left-0 z-40 h-dvh w-80 max-w-[calc(100vw-48px)] p-2 bg-card shadow-2xl shadow-black/50 -translate-x-full invisible transition-[translate,visibility];
+    }
+
+    /* Visible at once when opening, so focus can move into it straight away
+       (mid-transition it still counts as hidden); closing keeps visibility
+       in the transition, so the drawer stays seen while it slides out */
+    .sidebar-drawer-open {
+      @apply translate-x-0 visible transition-[translate];
+    }
+
+    .sidebar-close {
+      @apply flex;
+    }
+
+    /* 320px wide leaves the full name beside the close button from a 360px
+       phone up; narrower than that, the name gives way, never the button */
+    .sidebar-brand {
+      @apply min-w-0;
+    }
+
+    .sidebar-brand-name {
+      @apply truncate;
+    }
+
+    .sidebar-backdrop {
+      @apply block fixed inset-0 z-30 bg-black/60;
+    }
+  }
+
+  /* Current page: the accent tint of selected things, and a 3px accent bar
+     on the sidebar's inner edge (-left-2 reaches past the menu's padding) */
+  .menu-item.is-active {
+    @apply bg-accent/15 text-foreground font-medium;
+  }
+
+  .menu-item.is-active::before {
+    content: "";
+    @apply absolute -left-2 top-2 bottom-2 w-[3px] rounded-r-full bg-accent;
+  }
+
+  /* dashboard main section styles */
+  /* relative keeps absolutely positioned children (sr-only labels, tooltips)
+     inside this scroll area instead of stretching the whole page */
+  .dashboard-container {
+    @apply relative flex items-start gap-2 p-2 m-2 h-[calc(100vh-16px)] overflow-y-auto overflow-x-hidden rounded-2xl bg-card;
+  }
+
+  /* @container: pages size their layout by this box, not the window, since
+     the sidebar takes a different share of the window at each size */
+  .dashboard-content {
+    @apply @container flex-1 m-2 min-w-0 min-h-[calc(100vh-48px)] flex flex-col rounded-2xl bg-background text-foreground;
+  }
+
+  .dashboard-utility-bar {
+    @apply w-full min-h-12 shrink-0 px-5 py-3 flex items-center border-b border-border text-sm text-muted;
+  }
+
+  .sidebar-toggle {
+    @apply mr-4 p-1.5 shrink-0 rounded-lg text-muted hover:bg-card hover:text-foreground;
+  }
+
+  .sidebar-toggle svg {
+    @apply w-5 h-5;
+  }
+
+  .dashboard-utility-items {
+    @apply ml-auto flex items-center gap-5;
+  }
+
+  .dashboard-utility-item {
+    @apply flex items-center gap-2 whitespace-nowrap;
+  }
+
+  .dashboard-utility-text {
+    @apply flex items-center gap-2;
+  }
+
+  .dashboard-utility-item strong {
+    @apply text-foreground font-semibold;
+  }
+
+  .dashboard-utility-icon {
+    @apply w-4 h-4 shrink-0 text-accent;
+  }
+
+  .dashboard-utility-divider {
+    @apply h-5 w-px bg-border;
+  }
+
+  /* Home page greeting: name, then one live status line. 8px between them,
+     like an inner page's title and summary */
+  .dashboard-greeting {
+    @apply w-full px-4 pt-4 pb-4 flex items-center gap-4;
+  }
+
+  .dashboard-greeting-text {
+    @apply min-w-0 flex flex-col gap-2;
+  }
+
+  /* The picture in the logo's cell, outlined like the title hexagons;
+     the default icon when there is no picture */
+  .dashboard-greeting-avatar {
+    @apply hex-cell relative grid h-16 w-[58px] shrink-0 place-items-center bg-accent/35;
+  }
+
+  .dashboard-greeting-avatar::before {
+    @apply hex-cell absolute inset-[1.5px] bg-card content-[''];
+  }
+
+  .dashboard-greeting-avatar svg {
+    @apply relative size-[30px] text-accent;
+  }
+
+  .dashboard-greeting-avatar.has-photo {
+    @apply bg-accent/60;
+  }
+
+  .dashboard-greeting-avatar img {
+    @apply hex-cell absolute inset-0.5 size-[calc(100%-4px)] object-cover;
+  }
+
+  .dashboard-greeting-title {
+    @apply text-2xl text-foreground font-semibold;
+  }
+
+  .dashboard-greeting-name {
+    @apply text-accent-hover;
+  }
+
+  .dashboard-greeting-status {
+    @apply text-muted;
+  }
+
+  /* The summary-line button (Manage Events' "3 waiting for review") looks
+     like the greeting's links */
+  .dashboard-greeting-link,
+  .dashboard-summary-link {
+    @apply text-foreground font-medium underline decoration-accent/60 underline-offset-4 hover:text-accent rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  }
+
+  .dashboard-grid {
+    @apply w-full grid grid-cols-4 gap-4;
+  }
+
+  /* Stat card: label + hexagon icon, one big figure, one line of context.
+     Left-aligned so a row of cards scans like a table. */
+  .dashboard-card {
+    @apply min-w-0 min-h-32 p-4 flex flex-col gap-2 rounded-xl border border-border/60 bg-card bg-linear-to-b from-white/5 to-transparent shadow-[inset_0_1px_0_rgb(255_255_255/0.04)];
+  }
+
+  .dashboard-card-header {
+    @apply flex items-start justify-between gap-3;
+  }
+
+  .dashboard-card-title {
+    @apply text-sm font-medium text-muted;
+  }
+
+  /* The icon in the logo's cell, outlined like the title hexagons. Pulled
+     into the corner so the card's label row keeps its height */
+  .dashboard-card-hex {
+    @apply hex-cell relative -mt-1 -mr-1 grid h-[33px] w-[30px] shrink-0 place-items-center bg-accent/35;
+  }
+
+  .dashboard-card-hex::before {
+    @apply hex-cell absolute inset-[1.5px] bg-card content-[''];
+  }
+
+  .dashboard-card-icon {
+    @apply relative size-[15px] text-accent;
+  }
+
+  .dashboard-card-number {
+    @apply text-3xl font-semibold leading-none text-foreground tabular-nums;
+  }
+
+  .dashboard-card-value {
+    @apply text-lg font-semibold leading-snug text-foreground;
+  }
+
+  /* The context line sits at the bottom, so figures line up across a row */
+  /* 13px: muted grey on the card is hard to read at 12px */
+  .dashboard-card-context {
+    @apply mt-auto flex items-center gap-1.5 text-[13px]/[18px] text-muted tabular-nums;
+  }
+
+  .dashboard-card-context-icon {
+    @apply size-3.5 shrink-0 text-foreground;
+  }
+
+  .dashboard-card-action {
+    @apply mt-auto inline-flex w-fit items-center gap-1 rounded-sm text-sm font-medium text-accent hover:text-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent [&_svg]:size-3.5;
+  }
+
+  /* Colour only for states that need action, matching statusColours:
+     yellow = waiting for approval, red = rejected; only the figure changes */
+  .dashboard-card-accent-yellow .dashboard-card-number {
+    @apply text-yellow-400;
+  }
+
+  .dashboard-card-accent-red .dashboard-card-number {
+    @apply text-danger;
+  }
+
+  /* Organiser Home's five cards, one row where each still gets ~190px */
+  .dashboard-grid-five {
+    @apply grid-cols-5;
+  }
+
+  /* preferences styles */
+  /* The honeycomb, with Your picks beside it. Below 64rem the panel becomes
+     a bar pinned above the honeycomb (see the @container rules further down).
+     Sticky positions are measured from .dashboard-container, the scroll area */
+  .preferences-layout {
+    @apply grid w-full grid-cols-[minmax(0,1fr)_18.75rem] items-start gap-8;
+  }
+
+  .preferences-picker {
+    @apply min-w-0 flex flex-col gap-1;
+  }
+
+  .preferences-picks {
+    @apply sticky top-4 z-10 flex flex-col gap-5 rounded-2xl border border-border bg-card p-6;
+  }
+
+  .preferences-picks-head {
+    @apply flex flex-col gap-1;
+  }
+
+  .preferences-picks-figures {
+    @apply text-sm text-muted [&_strong]:font-semibold [&_strong]:text-foreground;
+  }
+
+  /* Save goes last on wide screens, under the events */
+  .preferences-picks-actions {
+    @apply order-last flex border-t border-dashed border-border pt-5;
+  }
+
+  .preferences-picks-saved {
+    @apply order-last;
+  }
+
+  /* Only the narrow bar folds the events away */
+  .preferences-coming-toggle {
+    @apply hidden;
+  }
+
+  .preferences-coming {
+    @apply flex flex-col gap-3;
+  }
+
+  .preferences-coming-title {
+    @apply text-xs font-medium uppercase tracking-wider text-muted;
+  }
+
+  .preferences-coming-empty {
+    @apply text-sm text-muted;
+  }
+
+  .preferences-coming-list {
+    @apply flex flex-col gap-1 list-none;
+  }
+
+  .preferences-coming-item {
+    @apply -mx-2 grid grid-cols-[2.75rem_minmax(0,1fr)] items-center gap-3 rounded-xl p-2 transition-colors hover:bg-foreground/5 focus-visible:outline-2 focus-visible:outline-accent motion-reduce:transition-none;
+  }
+
+  .preferences-coming-date {
+    @apply flex flex-col items-center rounded-lg border border-border py-1 leading-tight;
+  }
+
+  .preferences-coming-day {
+    @apply text-base font-semibold text-foreground;
+  }
+
+  .preferences-coming-month {
+    @apply text-[10px] uppercase text-muted;
+  }
+
+  .preferences-coming-text {
+    @apply flex min-w-0 flex-col;
+  }
+
+  .preferences-coming-name {
+    @apply truncate text-sm font-medium text-foreground;
+  }
+
+  .preferences-coming-location {
+    @apply truncate text-xs text-muted;
+  }
+
+  /* Category honeycomb: lucide's hexagon (the logo's cell), drawn as a
+     border-coloured hexagon with a card-coloured one 1.5px inside it.
+     CategoryHoneycomb sets --honeycomb-cell (the width); the height keeps the
+     cell's 10:11 ratio, and each row tucks up by a quarter of that height so
+     it nests into the row above, less the gap measured along the slope */
+  .honeycomb {
+    --honeycomb-gap: 8px;
+    --tooltip-arrow-offset: calc(var(--honeycomb-cell) / 2 - 5px);
+    @apply flex w-full flex-col items-center pt-4 pb-2;
+  }
+
+  .honeycomb-row {
+    @apply flex;
+    gap: var(--honeycomb-gap);
+  }
+
+  .honeycomb-row + .honeycomb-row {
+    margin-top: calc(var(--honeycomb-cell) * -0.275 + var(--honeycomb-gap) * 0.87);
+  }
+
+  .honeycomb-gap {
+    width: var(--honeycomb-cell);
+  }
+
+  .honeycomb-cell {
+    @apply relative block cursor-pointer transition-[filter] duration-150 motion-reduce:transition-none;
+  }
+
+  /* The mask clips outlines, so the focus ring is a glow round the shape */
+  .honeycomb-cell:has(:focus-visible) {
+    filter: drop-shadow(0 0 1px var(--color-accent-hover)) drop-shadow(0 0 2px var(--color-accent-hover));
+  }
+
+  .honeycomb-hex {
+    @apply hex-cell relative grid place-items-center bg-border transition-colors duration-200 motion-reduce:transition-none;
+    width: var(--honeycomb-cell);
+    height: calc(var(--honeycomb-cell) * 1.1);
+  }
+
+  .honeycomb-hex::before {
+    @apply hex-cell absolute inset-[1.5px] bg-card transition-colors duration-200 content-[''] motion-reduce:transition-none;
+  }
+
+  .honeycomb-body {
+    @apply relative flex flex-col items-center gap-1 px-3.5 pt-[8%] text-center;
+  }
+
+  .honeycomb-icon {
+    @apply size-[22px] text-muted transition-[color,transform] duration-200 motion-reduce:transition-none;
+  }
+
+  .honeycomb-name {
+    @apply max-w-24 text-[13px] font-medium leading-tight text-foreground;
+  }
+
+  .honeycomb-count {
+    @apply text-[11px] text-muted;
+  }
+
+  /* In the top point, clear of the icon at every cell size (the body's
+     top padding makes the room) */
+  .honeycomb-tick {
+    @apply absolute top-[5%] left-1/2 hidden size-3.5 -translate-x-1/2 text-accent-hover;
+  }
+
+  .honeycomb-cell:hover .honeycomb-hex {
+    @apply bg-accent;
+  }
+
+  .honeycomb-cell:hover .honeycomb-icon {
+    @apply -translate-y-0.5 motion-reduce:translate-y-0;
+  }
+
+  /* Selected: the accent tint and ring every selected option gets; solid
+     accent stays for Save */
+  .honeycomb-cell:has(:checked) .honeycomb-hex {
+    @apply bg-accent/70;
+  }
+
+  .honeycomb-cell:has(:checked) .honeycomb-hex::before {
+    background: color-mix(in srgb, var(--color-accent) 15%, var(--color-card));
+  }
+
+  .honeycomb-cell:has(:checked) .honeycomb-icon {
+    @apply text-accent-hover;
+  }
+
+  .honeycomb-cell:has(:checked) .honeycomb-tick {
+    @apply block;
+  }
+
+  /* Phone-sized cells (three to a row, about 93px) */
+  .honeycomb[data-size="small"] .honeycomb-body {
+    @apply gap-0.5 px-2;
+  }
+
+  .honeycomb[data-size="small"] .honeycomb-icon {
+    @apply size-[18px];
+  }
+
+  .honeycomb[data-size="small"] .honeycomb-name {
+    @apply max-w-[4.6rem] text-[11px];
+  }
+
+  .honeycomb[data-size="small"] .honeycomb-count {
+    @apply text-[10px];
+  }
+
+  .honeycomb[data-size="small"] .honeycomb-tick {
+    @apply size-3;
+  }
+
+  /* Two cells wide at most, so a description fits a phone's honeycomb */
+  .honeycomb[data-size="small"] .tooltip-wrap {
+    max-width: calc(var(--honeycomb-cell) * 2);
+  }
+
+  /* Notifications: rows grouped by day, collapsed to icon, subject and time
+     (64px, so a page of 10 fits a desktop or tablet screen). The list has no
+     overflow-hidden, which would clip the first row's tooltip, so the end
+     rows round their own corners instead */
+  .notification-groups {
+    @apply w-full flex flex-col gap-7;
+  }
+
+  /* All / Unread: lined up with the list, not centred like the section */
+  .notification-view-switch {
+    @apply self-start;
+  }
+
+  /* A small dropdown beside the pills (My Events' sort), framed like them
+     so the row reads as one toolbar, where Explore has its view switcher */
+  .toolbar-select {
+    @apply relative inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-border pl-3 pr-1 text-[13px] font-medium text-muted transition-colors hover:border-accent focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent [&>svg]:size-3.5 [&>svg]:text-accent;
+  }
+
+  .toolbar-select select {
+    @apply h-full cursor-pointer rounded-full bg-transparent pr-2 text-foreground outline-none [&>option]:bg-card;
+  }
+
+  .notification-group {
+    @apply flex flex-col gap-2.5;
+  }
+
+  /* Date dividers inside one list, not page sections, so they are small
+     labels rather than the 20px section heading */
+  .notification-group-title {
+    @apply px-1 text-xs font-medium uppercase tracking-wider text-muted;
+  }
+
+  .notification-rows {
+    @apply w-full list-none rounded-2xl border border-border bg-card;
+  }
+
+  .notification-row {
+    @apply transition-colors first:rounded-t-2xl last:rounded-b-2xl hover:bg-foreground/4 motion-reduce:transition-none;
+  }
+
+  .notification-row + .notification-row {
+    @apply border-t border-border/70;
+  }
+
+  .notification-row.is-unread {
+    @apply bg-accent/6 hover:bg-accent/10;
+  }
+
+  .notification-row-head {
+    @apply flex items-center gap-2 py-2.5 pr-3;
+  }
+
+  .notification-row-heading {
+    @apply min-w-0 flex-1 text-base font-normal;
+  }
+
+  .notification-row-toggle {
+    @apply w-full grid grid-cols-[36px_minmax(0,1fr)_18px] items-center gap-3.5 rounded-xl py-1 pl-4 text-left cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  }
+
+  .notification-type-icon {
+    @apply grid size-9 place-items-center rounded-xl border border-border bg-background text-muted [&_svg]:size-[18px];
+  }
+
+  .notification-row.is-unread .notification-type-icon {
+    @apply border-accent/30 text-accent-hover;
+  }
+
+  .notification-type-icon.is-cancelled,
+  .notification-row.is-unread .notification-type-icon.is-cancelled {
+    @apply text-orange-400;
+  }
+
+  .notification-row-text {
+    @apply min-w-0 flex items-center gap-4;
+  }
+
+  .notification-row-subject {
+    @apply min-w-0 flex-1 flex items-center gap-2 text-[15px] font-medium text-muted;
+  }
+
+  .notification-row.is-unread .notification-row-subject {
+    @apply font-semibold text-foreground;
+  }
+
+  .notification-row-subject-text {
+    @apply truncate;
+  }
+
+  .notification-unread-dot {
+    @apply size-2 shrink-0 rounded-full bg-accent;
+  }
+
+  .notification-row-time {
+    @apply shrink-0 whitespace-nowrap text-xs text-muted tabular-nums;
+  }
+
+  .notification-row-chevron {
+    @apply size-[18px] text-muted transition-transform motion-reduce:transition-none;
+  }
+
+  .notification-row.is-open .notification-row-chevron {
+    @apply rotate-180;
+  }
+
+  /* Closed envelope while unread; it opens on hover or focus to show what
+     a click does. Once read, a faint open envelope that isn't a button */
+  .notification-mark-read {
+    @apply grid size-8 place-items-center rounded-full text-accent-hover transition-colors hover:bg-accent/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none [&_svg]:size-[18px];
+  }
+
+  .notification-envelope-open {
+    @apply hidden;
+  }
+
+  .notification-mark-read:is(:hover, :focus-visible) .notification-envelope-closed {
+    @apply hidden;
+  }
+
+  .notification-mark-read:is(:hover, :focus-visible) .notification-envelope-open {
+    @apply block;
+  }
+
+  .notification-read-icon {
+    @apply size-8 shrink-0 p-[7px] text-muted opacity-45;
+  }
+
+  /* Opened: the message lines up with the subject (16px padding, 36px icon,
+     14px gap) */
+  .notification-row-detail {
+    @apply pb-4 pl-[66px] pr-4;
+  }
+
+  .notification-row-body {
+    @apply max-w-[70ch] text-sm leading-relaxed text-muted;
+  }
+
+  .notification-row-foot {
+    @apply mt-3 flex flex-wrap items-center justify-between gap-3;
+  }
+
+  .notification-row-type {
+    @apply text-xs text-muted;
+  }
+
+  /* Phones: the subject gets two lines and the time moves under it; the
+     message uses the full width */
+  @container (max-width: 24rem) {
+
+    .notification-row-head {
+      @apply pr-1.5;
+    }
+
+    /* No type icon: at 240px it left the subject about 95px, too little for
+       one word of it. The type still shows once the row is opened */
+    .notification-row-toggle {
+      @apply grid-cols-[minmax(0,1fr)_18px] gap-2.5 pl-3;
+    }
+
+    .notification-type-icon {
+      @apply hidden;
+    }
+
+    /* Stretch, not start: a start-aligned subject sizes to its text and runs
+       under the chevron instead of wrapping */
+    .notification-row-text {
+      @apply flex-col items-stretch gap-0.5;
+    }
+
+    .notification-row-subject {
+      @apply items-start text-sm;
+    }
+
+    .notification-row-subject-text {
+      @apply whitespace-normal line-clamp-2 leading-snug;
+    }
+
+    .notification-unread-dot {
+      @apply mt-1.5;
+    }
+
+    .notification-row-detail {
+      @apply px-3 pb-3.5;
+    }
+  }
+
+  /* table styles */
+  .table-wrapper {
+    @apply w-full overflow-x-auto rounded-2xl border border-border/60 bg-card shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] focus-visible:outline-2 focus-visible:outline-accent;
+  }
+
+  .data-table {
+    @apply w-full text-left text-sm;
+  }
+
+  .data-table th {
+    @apply px-4 py-3 whitespace-nowrap bg-background font-semibold text-muted;
+  }
+
+  .data-table td {
+    @apply px-4 py-3 whitespace-nowrap border-t border-border text-foreground;
+  }
+
+  .data-table tbody tr {
+    @apply transition-colors hover:bg-background/60;
+  }
+
+  .table-message {
+    @apply w-full mb-4;
+  }
+
+  /* analytics styles */
+  /* Things you click are pills */
+  /* w-fit so it keeps its size in a page column (Notifications), not only
+     in a chart header's row */
+  .period-switcher {
+    @apply w-fit flex flex-wrap items-center gap-1 rounded-full border border-border bg-background p-1;
+  }
+
+  .period-switcher button {
+    @apply rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  }
+
+  /* Selected: the same accent tint as the date pills and the navbar */
+  .period-switcher button.is-active {
+    @apply bg-accent/15 text-foreground ring-1 ring-inset ring-accent/30;
+  }
+
+  .analytics-grid {
+    @apply w-full grid grid-cols-2 gap-4;
+  }
+
+  .chart-card {
+    @apply min-w-0 p-4 flex flex-col gap-4 rounded-2xl border border-border/60 bg-card shadow-[inset_0_1px_0_rgb(255_255_255/0.04)];
+  }
+
+  .chart-card-wide {
+    @apply col-span-full;
+  }
+
+  /* Title and description left, controls right; controls wrap below when narrow */
+  .chart-card-header {
+    @apply flex flex-wrap items-start justify-between gap-3;
+  }
+
+  .chart-card-heading {
+    @apply min-w-0 flex flex-col gap-1;
+  }
+
+  .chart-card-actions {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .chart-card-title {
+    @apply text-base font-semibold text-foreground;
+  }
+
+  .chart-card-description {
+    @apply text-sm text-muted;
+  }
+
+  /* Recharts draws its own focus box on the SVG; hide it (the table view and
+     tooltips cover keyboard and screen-reader users) */
+  .chart-plot .recharts-surface:focus,
+  .chart-plot .recharts-wrapper:focus {
+    outline: none;
+  }
+
+  .chart-table-toggle summary {
+    @apply w-fit cursor-pointer rounded-sm text-sm text-accent hover:text-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  }
+
+  .chart-table-toggle[open] summary {
+    @apply mb-3;
+  }
+
+  .chart-tooltip {
+    @apply flex flex-col gap-0.5 rounded-lg border-2 border-accent/70 bg-border px-3 py-2 shadow-lg shadow-black/40;
+  }
+
+  .chart-tooltip-value {
+    @apply flex items-center gap-2 text-sm font-semibold text-foreground;
+  }
+
+  /* Short line key, not a box (dataviz guidance) */
+  .chart-tooltip-key {
+    @apply inline-block h-0.5 w-3 rounded-full;
+  }
+
+  /* Legend for charts with more than one series (the timeline) */
+  .chart-legend {
+    @apply mb-2 flex flex-wrap items-center gap-4 text-sm text-muted;
+  }
+
+  .chart-legend li {
+    @apply flex items-center gap-2;
+  }
+
+  .chart-legend-key {
+    @apply inline-block size-3 rounded-sm;
+  }
+
+  .chart-tooltip-label {
+    @apply text-xs text-muted;
+  }
+
+  /* Settings (decided 2026-10-11): each section's title and explanation sit
+     in a 240px column beside its panel, above it below 44rem. Every panel
+     saves on its own */
+  .settings-layout {
+    @apply w-full max-w-[980px] self-start flex flex-col gap-10;
+  }
+
+  .settings-row {
+    @apply grid grid-cols-[240px_minmax(0,1fr)] gap-8;
+  }
+
+  .settings-row + .settings-row {
+    @apply border-t border-border/60 pt-10;
+  }
+
+  .settings-row-head {
+    @apply flex flex-col gap-1.5;
+  }
+
+  .settings-row-title svg {
+    @apply size-5 shrink-0 text-accent;
+  }
+
+  .settings-row.is-danger .settings-row-title svg {
+    @apply text-danger;
+  }
+
+  .settings-row-text {
+    @apply text-sm leading-relaxed text-muted;
+  }
+
+  .settings-panel {
+    @apply min-w-0 rounded-2xl border border-border bg-card p-6;
+  }
+
+  .settings-row.is-danger .settings-panel {
+    @apply border-danger/35;
+  }
+
+  .settings-form {
+    @apply flex flex-col gap-5;
+  }
+
+  .settings-label {
+    @apply text-sm font-medium text-foreground;
+  }
+
+  .settings-hint {
+    @apply text-[13px] leading-relaxed text-muted;
+  }
+
+  .settings-counter {
+    @apply self-end text-xs text-muted tabular-nums;
+  }
+
+  .settings-avatar-row {
+    @apply flex flex-wrap items-center gap-5;
+  }
+
+  .settings-avatar {
+    @apply grid size-22 shrink-0 place-items-center overflow-hidden rounded-full border border-border bg-background [&_img]:size-full [&_img]:object-cover [&_svg]:size-12 [&_svg]:text-muted;
+  }
+
+  .settings-avatar-actions {
+    @apply min-w-0 flex flex-col gap-2;
+  }
+
+  .settings-avatar-buttons {
+    @apply flex flex-wrap gap-2;
+  }
+
+  /* The email can't be edited, so it isn't drawn as a field: dashed, with
+     a lock and whether it is verified */
+  .settings-locked {
+    @apply flex flex-wrap items-center gap-2.5 rounded-lg border border-dashed border-border px-4 py-2.5 text-muted [&>svg]:size-4 [&>svg]:shrink-0;
+  }
+
+  .settings-locked-value {
+    @apply min-w-0 wrap-anywhere;
+  }
+
+  .settings-chip {
+    @apply inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium [&_svg]:size-3.5;
+  }
+
+  .settings-chip.is-verified {
+    @apply border-green-400/40 bg-green-400/10 text-green-400;
+  }
+
+  .settings-chip.is-unverified {
+    @apply border-yellow-400/40 bg-yellow-400/10 text-yellow-400;
+  }
+
+  .settings-two {
+    @apply grid grid-cols-2 gap-4;
+  }
+
+  .settings-rule {
+    @apply flex items-center gap-1.5 text-[13px] text-muted [&_svg]:size-[15px] [&_svg]:shrink-0;
+  }
+
+  .settings-rule.is-met {
+    @apply text-green-400;
+  }
+
+  .settings-rule.is-unmet {
+    @apply text-danger;
+  }
+
+  .settings-foot {
+    @apply flex flex-wrap items-center justify-end gap-3 border-t border-border/70 pt-4;
+  }
+
+  .settings-saved {
+    @apply mr-auto inline-flex items-center gap-1.5 text-[13px] text-green-400 [&_svg]:size-4 [&_svg]:shrink-0;
+  }
+
+  .settings-saved:empty {
+    @apply hidden;
+  }
+
+  .settings-switch-row {
+    @apply flex items-start justify-between gap-4;
+  }
+
+  .settings-switch-title {
+    @apply font-medium text-foreground;
+  }
+
+  .settings-note {
+    @apply flex items-start gap-2 rounded-xl border border-border/70 bg-background px-3.5 py-3 text-[13px] text-muted [&_svg]:mt-0.5 [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-accent;
+  }
+
+  .settings-link {
+    @apply rounded-sm text-accent underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  }
+
+  .settings-delete-start {
+    @apply flex justify-end;
+  }
+
+  .settings-confirm {
+    @apply flex flex-col gap-3 rounded-xl border border-danger/35 bg-danger/6 p-4;
+  }
+
+  .settings-confirm-title {
+    @apply font-semibold text-foreground;
+  }
+
+  .settings-confirm-list {
+    @apply ml-5 list-disc text-[13px] leading-7 text-muted;
+  }
+
+  .settings-confirm-actions {
+    @apply flex flex-wrap justify-end gap-2;
+  }
+
+  /* Only when something limits the account: yellow for an unverified
+     email, red for a suspension */
+  .settings-banner {
+    @apply flex items-start gap-3 rounded-xl border px-4 py-3.5 text-sm leading-relaxed text-muted [&>svg]:mt-0.5 [&>svg]:size-5 [&>svg]:shrink-0 [&>div]:flex [&>div]:flex-col [&>div]:items-start [&>div]:gap-1.5;
+  }
+
+  .settings-banner.is-warning {
+    @apply border-yellow-400/40 bg-yellow-400/8 [&>svg]:text-yellow-400;
+  }
+
+  .settings-banner.is-danger {
+    @apply border-danger/40 bg-danger/8 [&>svg]:text-danger;
+  }
+
+  .settings-banner-title {
+    @apply font-semibold text-foreground;
+  }
+
+  .settings-banner-done {
+    @apply text-green-400;
+  }
+
+  /* PasswordInput: the eye sits inside the field's right edge */
+  .password-input {
+    @apply relative;
+  }
+
+  .password-input-toggle {
+    @apply absolute right-1.5 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-muted transition-colors hover:bg-foreground/8 hover:text-foreground focus-visible:outline-2 focus-visible:outline-accent motion-reduce:transition-none [&_svg]:size-[18px];
+  }
+
+  /* Switch: on is the accent tint, like other selected options */
+  .switch {
+    @apply relative h-[26px] w-[46px] shrink-0 cursor-pointer rounded-full border border-border bg-background transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none;
+  }
+
+  .switch::after {
+    content: "";
+    @apply absolute left-[3px] top-[3px] size-[18px] rounded-full bg-muted transition-transform motion-reduce:transition-none;
+  }
+
+  .switch[aria-checked="true"] {
+    @apply border-accent/50 bg-accent/25;
+  }
+
+  .switch[aria-checked="true"]::after {
+    @apply translate-x-5 bg-accent-hover;
+  }
+
+  @container (max-width: 44rem) {
+
+    .settings-row {
+      @apply grid-cols-1 gap-3.5;
+    }
+
+    .settings-two {
+      @apply grid-cols-1;
+    }
+  }
+
+  /* Phones: tighter panels, the Save buttons full width */
+  @container (max-width: 24rem) {
+
+    .settings-panel {
+      @apply p-4;
+    }
+
+    .settings-foot > button {
+      @apply flex-1;
+    }
+
+    .settings-saved {
+      @apply w-full;
+    }
+
+    .settings-avatar {
+      @apply size-18;
+    }
+  }
+
+  /* The dashboard sizes its layout by its content box (.dashboard-content is
+     the container), not the window: beside a 256px sidebar a 820px window
+     leaves under 500px, and the window rules kept tablet pages at full
+     desktop layout. 48rem is the old 768px phone step */
+  /* Preferences: no room for Your picks beside the honeycomb, so it becomes
+     a compact bar pinned above it (counts and Save), with the events folded
+     behind a toggle. The honeycomb scrolls underneath */
+  @container (max-width: 64rem) {
+
+    .preferences-layout {
+      @apply grid-cols-[minmax(0,1fr)] gap-4;
+    }
+
+    .preferences-picks {
+      @apply -order-1 top-2 flex-row flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3.5 shadow-[0_12px_24px_-8px_rgb(0_0_0/0.6)];
+    }
+
+    .preferences-picks-head {
+      @apply flex-1;
+    }
+
+    .preferences-picks-title,
+    .preferences-coming-title {
+      @apply sr-only;
+    }
+
+    .preferences-picks-actions {
+      @apply order-none border-0 pt-0;
+    }
+
+    .preferences-picks-saved {
+      @apply w-full;
+    }
+
+    .preferences-coming-toggle {
+      @apply flex w-full items-center gap-1.5 text-sm text-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-accent [&_svg]:size-4 [&_svg]:transition-transform motion-reduce:[&_svg]:transition-none;
+    }
+
+    .preferences-picks[data-coming-up="open"] .preferences-coming-toggle svg {
+      @apply rotate-180;
+    }
+
+    .preferences-picks[data-coming-up="closed"] .preferences-coming {
+      @apply hidden;
+    }
+
+    .preferences-coming {
+      @apply w-full;
+    }
+  }
+
+  /* Phone: every pixel goes to the hexagons, so the honeycomb loses its
+     card, and Save takes the bar's full width */
+  @container (max-width: 32rem) {
+
+    .preferences-picker {
+      @apply border-0 bg-transparent p-0;
+    }
+
+    .preferences-picks-actions,
+    .preferences-picks-actions > button {
+      @apply w-full;
+    }
+  }
+
+  @container (max-width: 60rem) {
+
+    .dashboard-grid-five {
+      @apply grid-cols-3;
+    }
+  }
+
+  @container (max-width: 48rem) {
+
+    .analytics-grid {
+      @apply grid-cols-1;
+    }
+
+    .dashboard-grid {
+      @apply grid-cols-2;
+    }
+
+    /* Five cards in two columns: the last one takes the whole row */
+    .dashboard-grid-five > :last-child:nth-child(odd) {
+      @apply col-span-2;
+    }
+  }
+
+  @container (max-width: 32rem) {
+
+    /* Chart controls take the full width, buttons in an even grid of two.
+       18px corners: the buttons' 14px radius plus the 4px padding, so the
+       two rows sit evenly inside */
+    .chart-card-actions {
+      @apply w-full;
+    }
+
+    .period-switcher {
+      @apply w-full grid grid-cols-2 rounded-[18px];
+    }
+
+    /* Chart cards can be ~190px wide here: smaller text, and a long label may
+       wrap to two centred lines rather than spill out of its button */
+    .period-switcher button {
+      @apply px-1.5 text-xs leading-tight text-center;
+    }
+  }
+
+  /* Stat cards one per row on phones, where two left ~110px each */
+  @container (max-width: 28rem) {
+
+    .dashboard-grid {
+      @apply grid-cols-1;
+    }
+
+    .dashboard-grid-five > :last-child:nth-child(odd) {
+      @apply col-span-1;
+    }
+  }
+
+  /* Weather bar: the items wrap beside the menu button when they no longer
+     fit on one line. The button stays in their row, its 20px icon level
+     with the first line of text and with the page's left edge */
+  @container (max-width: 46rem) {
+
+    .dashboard-utility-bar {
+      @apply items-start gap-3 px-4;
+    }
+
+    .sidebar-toggle {
+      @apply -my-1.5 -ml-1.5 mr-0;
+    }
+
+    .dashboard-utility-items {
+      @apply ml-0 flex-wrap gap-x-5 gap-y-1.5;
+    }
+
+    .dashboard-utility-divider {
+      @apply hidden;
+    }
+  }
+
+  @container (max-width: 28rem) {
+
+    .dashboard-utility-items {
+      @apply w-full flex-col items-start;
+    }
+
+    .dashboard-utility-item {
+      @apply items-start whitespace-normal;
+    }
+
+    .dashboard-utility-icon {
+      @apply mt-0.5;
+    }
+
+    .dashboard-utility-text {
+      @apply flex-wrap gap-y-0.5;
+    }
+
+    /* Beside the text, the picture would squeeze the greeting into a
+       narrow column, so it sits above it */
+    .dashboard-greeting {
+      @apply flex-col items-start;
+    }
+  }
+
+  /* Create / Edit Event: no room for the side column, so it follows the
+     form and only its buttons show, pinned to the bottom of the screen until
+     the form ends. 28rem: one field per row */
+  @container (max-width: 56rem) {
+
+    .event-form-layout {
+      @apply grid-cols-1;
+    }
+
+    .event-form-side {
+      @apply top-auto bottom-3;
+    }
+
+    .event-form-side-label,
+    .event-form-preview,
+    .event-form-checklist,
+    .event-form-actions-note {
+      @apply hidden;
+    }
+
+    .event-form-actions {
+      @apply flex-row flex-wrap rounded-3xl shadow-[0_10px_30px_-10px_rgb(0_0_0/0.6)] [&>button]:w-auto [&>button]:flex-[1_1_140px];
+    }
+  }
+
+  @container (max-width: 28rem) {
+
+    .event-form-row {
+      @apply grid-cols-1;
+    }
+
+    .event-form-panel {
+      @apply px-4;
+    }
+
+    .event-danger-zone {
+      @apply px-4;
+    }
+
+    /* One button per line, and a long label may wrap rather than spill out
+       (Button's own whitespace-nowrap needs the !) */
+    .event-form-actions {
+      @apply p-3 [&>button]:basis-full [&>button]:whitespace-normal! [&>button]:rounded-2xl!;
+    }
+  }
+}

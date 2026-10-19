@@ -1,0 +1,99 @@
+/* Clips an element to the logo's honeycomb cell (see --hex-cell) */
+@utility hex-cell {
+  mask: var(--hex-cell) center / 100% 100% no-repeat;
+}
+
+@layer base {
+  * {
+    @apply m-0 p-0 box-border;
+  }
+
+  /* Always reserve the scrollbar's strip, so centred content and the fixed
+     navbar don't shift sideways between pages that scroll and pages that don't */
+  html {
+    scrollbar-gutter: stable;
+  }
+
+  /* The logo's honeycomb cell (lucide's hexagon, rounded corners and all),
+     as a mask. Every hexagon on the site uses it through .hex-cell, which
+     stretches it to the element: keep elements at the cell's 10:11 ratio */
+  :root {
+    --hex-cell: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='2 1 20 22' preserveAspectRatio='none'%3E%3Cpath d='M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z' stroke='%23000' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+
+  * {
+    scrollbar-color: var(--color-muted) var(--color-card);
+    scrollbar-width: auto;
+  }
+
+  *::-webkit-scrollbar {
+    width: 14px;
+    height: 14px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: var(--color-card);
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--color-muted);
+    border: 2px solid var(--color-card);
+    border-radius: 999px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent-hover);
+  }
+
+  body {
+    @apply font-sans bg-background text-foreground antialiased;
+  }
+
+  .app {
+    @apply min-h-screen flex flex-col;
+  }
+}
+
+
+/* Each copy of the hero word is visible for a quarter of the cycle, with a
+   short crossfade either side (four photos; see Hero.jsx) */
+/* The favourite heart, when an event is liked */
+@keyframes heart-pop {
+  40% {
+    transform: scale(1.3);
+  }
+}
+
+@keyframes hero-photo {
+  0%,
+  25% {
+    opacity: 1;
+  }
+  31%,
+  94% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-hero-word span,
+  .event-favourite-button.is-popping svg {
+    animation: none;
+  }
+}
+
+@keyframes side-panel-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .side-panel[open] {
+    animation: none;
+  }
+}
