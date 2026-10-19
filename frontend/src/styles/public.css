@@ -32,15 +32,15 @@
   /* Muted until hovered; the current page is bright. In the panel the
      current page gets its own pill; from lg up the sliding pill does it */
   .navbar-link {
-    @apply relative z-10 whitespace-nowrap rounded-full px-4 py-2 text-[15px] font-medium text-muted transition-colors duration-200 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none;
+    @apply relative z-10 whitespace-nowrap rounded-full px-4 py-2 text-[15px] font-medium text-muted transition-colors duration-200 hover:text-foreground focus-ring motion-reduce:transition-none;
   }
 
   .navbar-link.is-active {
-    @apply bg-accent/15 text-foreground ring-1 ring-inset ring-accent/30 lg:bg-transparent lg:ring-0;
+    @apply selected lg:bg-transparent lg:ring-0;
   }
 
   .navbar-pill {
-    @apply pointer-events-none absolute left-0 top-0 hidden h-full rounded-full bg-accent/15 opacity-0 ring-1 ring-inset ring-accent/30 lg:block;
+    @apply pointer-events-none absolute left-0 top-0 hidden h-full rounded-full selected opacity-0 lg:block;
   }
 
   .navbar-pill.is-visible {
@@ -96,7 +96,7 @@
   }
 
   .footer-link {
-    @apply rounded-sm text-[15px] text-muted transition-colors duration-200 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent motion-reduce:transition-none;
+    @apply rounded-sm text-[15px] text-muted transition-colors duration-200 hover:text-foreground focus-ring-wide motion-reduce:transition-none;
   }
 
   .footer-socials {
@@ -108,7 +108,7 @@
      hover or keyboard focus the whole cell fills with the accent and the icon
      lifts. The mask would hide a focus outline, so focus gets the hover fill */
   .hex-button {
-    @apply hex-cell relative grid h-[46px] w-[42px] place-items-center bg-accent/35 text-muted transition-colors duration-200 outline-none motion-reduce:transition-none;
+    @apply hex-cell relative grid h-11.5 w-10.5 place-items-center bg-accent/35 text-muted transition-colors duration-200 outline-none motion-reduce:transition-none;
   }
 
   .hex-button::before {
@@ -116,7 +116,7 @@
   }
 
   .hex-button svg {
-    @apply relative size-[18px] transition-transform duration-200 ease-out motion-reduce:transition-none;
+    @apply relative size-4.5 transition-transform duration-200 ease-out motion-reduce:transition-none;
   }
 
   .hex-button:hover,
@@ -199,7 +199,7 @@
   }
 
   .contact-details a {
-    @apply min-w-0 text-accent hover:text-accent-hover [overflow-wrap:anywhere];
+    @apply min-w-0 text-accent hover:text-accent-hover wrap-anywhere;
   }
 
   /* contact page: header, then quick answers and the form as two cards */
@@ -246,7 +246,7 @@
   }
 
   .faq-item summary {
-    @apply flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent [&::-webkit-details-marker]:hidden;
+    @apply flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium text-foreground focus-ring [&::-webkit-details-marker]:hidden;
   }
 
   .faq-icon {
@@ -463,7 +463,7 @@
 
   /* The link covers the whole tile */
   .area-tile-link {
-    @apply flex w-full flex-col justify-end gap-1 p-4 md:p-5 focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-accent rounded-2xl;
+    @apply flex w-full flex-col justify-end gap-1 p-4 md:p-5 focus-ring-inset rounded-2xl;
   }
 
   .area-tile-name {
@@ -479,7 +479,7 @@
   }
 
   .category-chip {
-    @apply inline-flex rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground transition-colors hover:border-accent hover:text-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none;
+    @apply inline-flex rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground transition-colors hover:border-accent hover:text-accent-hover focus-ring motion-reduce:transition-none;
   }
 
   .home-audiences {
@@ -563,7 +563,7 @@
      switching between them doesn't resize the card. Log in's shorter form
      centres inside it */
   .auth-card {
-    @apply w-full max-w-5xl flex overflow-hidden rounded-2xl border border-border bg-card md:min-h-[33rem];
+    @apply w-full max-w-5xl flex overflow-hidden rounded-2xl border border-border bg-card md:min-h-132;
   }
 
   .auth-form {

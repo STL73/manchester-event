@@ -3,6 +3,45 @@
   mask: var(--hex-cell) center / 100% 100% no-repeat;
 }
 
+/* The keyboard focus ring: 2px of accent, 2px clear of the element. -wide
+   stands 4px off (logos, footer links), -inset sits 4px inside (a photo tile
+   would cover a ring outside it), -flush sets no offset, so it sits on the
+   edge of rows and boxes (a link keeps the browser's 1px) */
+@utility focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+@utility focus-ring-wide {
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 4px;
+  }
+}
+
+@utility focus-ring-inset {
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -4px;
+  }
+}
+
+@utility focus-ring-flush {
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+  }
+}
+
+/* A selected option (navbar link, view and period switchers, page number):
+   the accent tint with a faint accent ring. Solid accent is for buttons that
+   do something. The sidebar swaps the ring for its 3px bar, and the bordered
+   date and status pills tint their border instead */
+@utility selected {
+  @apply bg-accent/15 text-foreground ring-1 ring-inset ring-accent/30;
+}
+
 @layer base {
   * {
     @apply m-0 p-0 box-border;

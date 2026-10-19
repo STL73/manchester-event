@@ -59,9 +59,12 @@ frontend/src/
   the final step that can't be undone; the step before it uses the outlined `danger`
 - **Styling:** use the theme colour tokens (`bg-card`, `text-muted`, `border-border`, `text-accent`,
   `bg-background`, `text-foreground`, `text-danger` for errors and destructive actions,
-  `text-favourite` for the favourite heart), never raw hex. Tailwind's own palette appears only
-  for status colours: one per status badge (green, yellow, orange, cyan, grey), green for the
-  success message.
+  `text-favourite` for the favourite heart), never raw hex. **Status colours are tokens too**
+  (2026-10-19): `success` (approved, active, done), `warning` (pending, needs attention),
+  `danger` (rejected, errors), `cancelled`, `draft`, `past`, e.g. `border-warning/40
+  bg-warning/10 text-warning`. Badges, chips and messages use 40% border / 10% fill, banners
+  40% border, small fills (log icons, chips, sidebar badges) 15%. Tailwind's palette only
+  for the lighter text on banners (`text-yellow-200`…) and colours with no status meaning.
   Repeated multi-utility patterns get a semantic class in `styles/` built with `@apply` (e.g.
   `.event-card`, `.status-badge`), which is how most components are styled
 - **Corner radius:** panels that hold a page's content (forms, tables, chart cards, detail and
@@ -69,8 +72,9 @@ frontend/src/
   items and small boxes are 12px (`rounded-xl`). The filter bar is 40px round its pill fields.
   Decided 2026-10-10
 - **Selected vs action:** a selected option (navbar links, date pills, range toggle, view
-  switcher) gets the accent tint: `bg-accent/15`, an `accent/30` ring, bright text. Sidebar
-  links keep the tint but swap the ring for a 3px accent bar (2026-10-18). Solid
+  switcher) gets the accent tint: the `selected` utility (`styles/base.css`: `bg-accent/15`,
+  an `accent/30` ring, bright text). Sidebar links keep the tint but swap the ring for a 3px
+  accent bar (2026-10-18); the bordered date and status pills tint their border. Solid
   accent is only for buttons that do something (Search, Save, Submit)
 - **Dashboard pages** open with a title row: the page's title (`DashboardPageHeading`; on Home the
   greeting), and beside it only the page's own actions, e.g. "Create event" on My Events and My
@@ -220,7 +224,10 @@ frontend/src/
   (filter bar, event grid) follow the same rules on both. Window `@media` rules stay for the page
   frame: navbar, sidebar rail, outer margins
 - Dates use `Intl.DateTimeFormat("en-GB", …)`
-- Respect `motion-reduce:` and visible `focus-visible:` states, as `Button` does
+- Respect `motion-reduce:` and give everything clickable a visible keyboard focus ring: the
+  `focus-ring` utility (`styles/base.css`; 2px accent, 2px out), `focus-ring-wide` (4px out:
+  logos, footer links), `focus-ring-inset` (4px in: photo tiles) or `focus-ring-flush` (no
+  offset: rows and boxes). `Button` keeps its own, the same ring
 
 ## Naming
 

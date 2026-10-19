@@ -149,7 +149,7 @@
   }
 
   .event-form-checklist li.is-done {
-    @apply text-foreground [&_svg]:text-green-400;
+    @apply text-foreground [&_svg]:text-success;
   }
 
   /* Edit only: Cancel or Delete, asked here like Settings' delete */
@@ -201,7 +201,7 @@
 
   /* The drawer's own way out; wide screens use the weather bar's toggle */
   .sidebar-close {
-    @apply hidden ml-auto p-1.5 shrink-0 rounded-lg text-muted hover:bg-background hover:text-foreground focus-visible:outline-2 focus-visible:outline-accent;
+    @apply hidden ml-auto p-1.5 shrink-0 rounded-lg text-muted hover:bg-background hover:text-foreground focus-ring-flush;
   }
 
   .sidebar-close svg {
@@ -256,7 +256,7 @@
   }
 
   .nav-badge-warning {
-    @apply bg-yellow-400/15 text-yellow-400;
+    @apply bg-warning/15 text-warning;
   }
 
   .nav-badge-danger {
@@ -286,7 +286,7 @@
   }
 
   .sidebar-help-link {
-    @apply px-3 py-2 flex items-center gap-3 rounded-lg text-sm text-muted hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:outline-accent;
+    @apply px-3 py-2 flex items-center gap-3 rounded-lg text-sm text-muted hover:bg-card hover:text-foreground focus-ring-flush;
   }
 
   .sidebar-help-icon {
@@ -312,13 +312,13 @@
   }
 
   .sidebar-link {
-    @apply block w-full rounded-full focus-visible:outline-2 focus-visible:outline-accent;
+    @apply block w-full rounded-full focus-ring-flush;
   }
 
   /* Logo at the top of the sidebar, with the role under the name.
      px-2 puts the logo on the link pills' left edge */
   .sidebar-brand {
-    @apply px-2 pt-3 pb-4 text-base whitespace-nowrap rounded-lg focus-visible:outline-2 focus-visible:outline-accent;
+    @apply px-2 pt-3 pb-4 text-base whitespace-nowrap rounded-lg focus-ring-flush;
   }
 
   .sidebar-brand-text {
@@ -375,7 +375,7 @@
   }
 
   .sidebar-legal-link {
-    @apply rounded hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-accent;
+    @apply rounded hover:text-foreground hover:underline focus-ring-flush;
   }
 
   /* Wide screens, collapsed: a 64px icon rail. Each link's label becomes its
@@ -599,7 +599,7 @@
      like the greeting's links */
   .dashboard-greeting-link,
   .dashboard-summary-link {
-    @apply text-foreground font-medium underline decoration-accent/60 underline-offset-4 hover:text-accent rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+    @apply text-foreground font-medium underline decoration-accent/60 underline-offset-4 hover:text-accent rounded-sm focus-ring;
   }
 
   .dashboard-grid {
@@ -653,13 +653,13 @@
   }
 
   .dashboard-card-action {
-    @apply mt-auto inline-flex w-fit items-center gap-1 rounded-sm text-sm font-medium text-accent hover:text-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent [&_svg]:size-3.5;
+    @apply mt-auto inline-flex w-fit items-center gap-1 rounded-sm text-sm font-medium text-accent hover:text-accent-hover focus-ring [&_svg]:size-3.5;
   }
 
   /* Colour only for states that need action, matching statusColours:
      yellow = waiting for approval, red = rejected; only the figure changes */
   .dashboard-card-accent-yellow .dashboard-card-number {
-    @apply text-yellow-400;
+    @apply text-warning;
   }
 
   .dashboard-card-accent-red .dashboard-card-number {
@@ -726,7 +726,7 @@
   }
 
   .preferences-coming-item {
-    @apply -mx-2 grid grid-cols-[2.75rem_minmax(0,1fr)] items-center gap-3 rounded-xl p-2 transition-colors hover:bg-foreground/5 focus-visible:outline-2 focus-visible:outline-accent motion-reduce:transition-none;
+    @apply -mx-2 grid grid-cols-[2.75rem_minmax(0,1fr)] items-center gap-3 rounded-xl p-2 transition-colors hover:bg-foreground/5 focus-ring-flush motion-reduce:transition-none;
   }
 
   .preferences-coming-date {
@@ -928,7 +928,7 @@
   }
 
   .notification-row-toggle {
-    @apply w-full grid grid-cols-[36px_minmax(0,1fr)_18px] items-center gap-3.5 rounded-xl py-1 pl-4 text-left cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+    @apply w-full grid grid-cols-[36px_minmax(0,1fr)_18px] items-center gap-3.5 rounded-xl py-1 pl-4 text-left cursor-pointer focus-ring;
   }
 
   .notification-type-icon {
@@ -941,7 +941,7 @@
 
   .notification-type-icon.is-cancelled,
   .notification-row.is-unread .notification-type-icon.is-cancelled {
-    @apply text-orange-400;
+    @apply text-cancelled;
   }
 
   .notification-row-text {
@@ -979,7 +979,7 @@
   /* Closed envelope while unread; it opens on hover or focus to show what
      a click does. Once read, a faint open envelope that isn't a button */
   .notification-mark-read {
-    @apply grid size-8 place-items-center rounded-full text-accent-hover transition-colors hover:bg-accent/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none [&_svg]:size-[18px];
+    @apply grid size-8 place-items-center rounded-full text-accent-hover transition-colors hover:bg-accent/15 focus-ring motion-reduce:transition-none [&_svg]:size-[18px];
   }
 
   .notification-envelope-open {
@@ -1059,7 +1059,7 @@
 
   /* table styles */
   .table-wrapper {
-    @apply w-full overflow-x-auto rounded-2xl border border-border/60 bg-card shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] focus-visible:outline-2 focus-visible:outline-accent;
+    @apply w-full overflow-x-auto rounded-2xl border border-border/60 bg-card shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] focus-ring-flush;
   }
 
   .data-table {
@@ -1091,12 +1091,12 @@
   }
 
   .period-switcher button {
-    @apply rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+    @apply rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-card hover:text-foreground focus-ring;
   }
 
   /* Selected: the same accent tint as the date pills and the navbar */
   .period-switcher button.is-active {
-    @apply bg-accent/15 text-foreground ring-1 ring-inset ring-accent/30;
+    @apply selected;
   }
 
   .analytics-grid {
@@ -1140,7 +1140,7 @@
   }
 
   .chart-table-toggle summary {
-    @apply w-fit cursor-pointer rounded-sm text-sm text-accent hover:text-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+    @apply w-fit cursor-pointer rounded-sm text-sm text-accent hover:text-accent-hover focus-ring;
   }
 
   .chart-table-toggle[open] summary {
@@ -1263,11 +1263,11 @@
   }
 
   .settings-chip.is-verified {
-    @apply border-green-400/40 bg-green-400/10 text-green-400;
+    @apply border-success/40 bg-success/10 text-success;
   }
 
   .settings-chip.is-unverified {
-    @apply border-yellow-400/40 bg-yellow-400/10 text-yellow-400;
+    @apply border-warning/40 bg-warning/10 text-warning;
   }
 
   .settings-two {
@@ -1279,7 +1279,7 @@
   }
 
   .settings-rule.is-met {
-    @apply text-green-400;
+    @apply text-success;
   }
 
   .settings-rule.is-unmet {
@@ -1291,7 +1291,7 @@
   }
 
   .settings-saved {
-    @apply mr-auto inline-flex items-center gap-1.5 text-[13px] text-green-400 [&_svg]:size-4 [&_svg]:shrink-0;
+    @apply mr-auto inline-flex items-center gap-1.5 text-[13px] text-success [&_svg]:size-4 [&_svg]:shrink-0;
   }
 
   .settings-saved:empty {
@@ -1311,7 +1311,7 @@
   }
 
   .settings-link {
-    @apply rounded-sm text-accent underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+    @apply rounded-sm text-accent underline-offset-4 hover:underline focus-ring;
   }
 
   .settings-delete-start {
@@ -1341,7 +1341,7 @@
   }
 
   .settings-banner.is-warning {
-    @apply border-yellow-400/40 bg-yellow-400/8 [&>svg]:text-yellow-400;
+    @apply border-warning/40 bg-warning/8 [&>svg]:text-warning;
   }
 
   .settings-banner.is-danger {
@@ -1353,7 +1353,7 @@
   }
 
   .settings-banner-done {
-    @apply text-green-400;
+    @apply text-success;
   }
 
   /* PasswordInput: the eye sits inside the field's right edge */
@@ -1362,12 +1362,12 @@
   }
 
   .password-input-toggle {
-    @apply absolute right-1.5 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-muted transition-colors hover:bg-foreground/8 hover:text-foreground focus-visible:outline-2 focus-visible:outline-accent motion-reduce:transition-none [&_svg]:size-[18px];
+    @apply absolute right-1.5 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-muted transition-colors hover:bg-foreground/8 hover:text-foreground focus-ring-flush motion-reduce:transition-none [&_svg]:size-[18px];
   }
 
   /* Switch: on is the accent tint, like other selected options */
   .switch {
-    @apply relative h-[26px] w-[46px] shrink-0 cursor-pointer rounded-full border border-border bg-background transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none;
+    @apply relative h-[26px] w-[46px] shrink-0 cursor-pointer rounded-full border border-border bg-background transition-colors focus-ring motion-reduce:transition-none;
   }
 
   .switch::after {
@@ -1449,7 +1449,7 @@
     }
 
     .preferences-coming-toggle {
-      @apply flex w-full items-center gap-1.5 text-sm text-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-accent [&_svg]:size-4 [&_svg]:transition-transform motion-reduce:[&_svg]:transition-none;
+      @apply flex w-full items-center gap-1.5 text-sm text-muted hover:text-foreground focus-ring-flush [&_svg]:size-4 [&_svg]:transition-transform motion-reduce:[&_svg]:transition-none;
     }
 
     .preferences-picks[data-coming-up="open"] .preferences-coming-toggle svg {
