@@ -314,7 +314,7 @@ export default function ContactMessages({ contactMessages, users, onSetRead, onR
               {notice && <StatusMessage>{notice}</StatusMessage>}
 
               {openMessage.repliedAt ? (
-                <div className="message-reply">
+                <div className="callout callout-compact tone-success message-reply">
                   <p className="message-reply-title">
                     <Check aria-hidden="true" />
                     {messagePanel.repliedOn(shortDateFormatter.format(new Date(openMessage.repliedAt)))}

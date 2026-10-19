@@ -155,7 +155,7 @@
   }
 
   .admin-changes {
-    @apply flex flex-col gap-2 rounded-xl border border-accent/35 bg-accent/7 px-3.5 py-3 text-[13px];
+    @apply flex-col items-stretch;
   }
 
   .admin-changes-title {
@@ -180,7 +180,7 @@
   }
 
   .admin-note {
-    @apply flex flex-col gap-0.5 rounded-xl border border-dashed border-border px-3.5 py-2.5 text-[13px] leading-relaxed text-muted;
+    @apply flex-col items-stretch gap-0.5 border-dashed border-border bg-transparent py-2.5 leading-relaxed text-muted;
   }
 
   .admin-note strong {
@@ -301,11 +301,11 @@
   }
 
   .message-reply {
-    @apply flex flex-col gap-1.5 rounded-xl border border-success/35 bg-success/7 px-3.5 py-3;
+    @apply flex-col items-stretch gap-1.5;
   }
 
   .message-reply-title {
-    @apply flex items-center gap-1.5 text-[13px] font-medium text-green-200 [&_svg]:size-4;
+    @apply flex items-center gap-1.5 text-[13px] font-medium text-(--tone-soft) [&_svg]:size-4;
   }
 
   .dashboard-summary-link {

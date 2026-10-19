@@ -179,7 +179,7 @@
   }
 
   .reading-note {
-    @apply flex items-start gap-3 rounded-xl border border-accent/40 bg-accent/10 p-4 text-sm leading-6 text-foreground [&>svg]:mt-0.5 [&>svg]:size-5 [&>svg]:shrink-0 [&>svg]:text-accent;
+    @apply p-4 text-sm leading-6 text-foreground;
   }
 
   .contact-form {

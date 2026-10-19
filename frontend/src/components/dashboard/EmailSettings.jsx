@@ -23,7 +23,7 @@ export default function EmailSettings({ role, enabled, onChange }) {
         </div>
         <Switch checked={enabled} onChange={toggle} label={title} describedBy="email-switch-text" />
       </div>
-      <p className="settings-note">
+      <p className="callout callout-compact settings-note">
         <ShieldCheck aria-hidden="true" />
         {emailSettings.always}
       </p>

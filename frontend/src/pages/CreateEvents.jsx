@@ -457,7 +457,7 @@ function EventFormPage({
         ) : (
           <div className="event-form">
             {banner && (
-              <div className={`event-details-banner is-${event.status}`} role="note">
+              <div className={`callout event-details-banner status-${event.status}`} role="note">
                 <banner.icon aria-hidden="true" />
                 <p>
                   <strong>{banner.title}</strong>

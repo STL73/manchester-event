@@ -66,7 +66,20 @@
   /* A label that states something (a status, Verified, Replied). Its colour
      comes from a tone-* utility (base.css) or a .status-* class */
   .badge {
-    @apply inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium [&_svg]:size-3.5;
+    @apply inline-flex shrink-0 items-center gap-1 rounded-full border border-(--tone)/40 bg-(--tone)/10 px-2.5 py-1 text-xs font-medium text-(--tone-text) [&_svg]:size-3.5;
+  }
+
+  /* A message box with its icon on the left: status banners, notes, saved
+     and error messages. Its tone (a tone-* utility or a .status-* class)
+     colours the border, fill and icon at 40% / 10%; the component sets the
+     text, since a banner's body reads lighter than a note's */
+  .callout {
+    @apply flex items-start gap-3 rounded-xl border border-(--tone)/40 bg-(--tone)/10 px-4 py-3.5 [&>svg]:mt-0.5 [&>svg]:size-5 [&>svg]:shrink-0 [&>svg]:text-(--tone);
+  }
+
+  /* The smaller one inside a panel or card */
+  .callout-compact {
+    @apply gap-2 px-3.5 py-3 text-[13px] [&>svg]:size-4;
   }
 
   .navbar-logo {
@@ -336,7 +349,7 @@
 
   /* Why the main action isn't offered (a draft whose date has passed) */
   .event-card-notice {
-    @apply mt-auto flex items-start gap-2 rounded-xl border border-warning/35 bg-warning/10 px-3 py-2 text-[13px] leading-snug text-yellow-200 [&_svg]:mt-px [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-warning;
+    @apply mt-auto px-3 py-2 leading-snug text-(--tone-soft) [&>svg]:mt-px;
   }
 
   /* Delete's question, in the button row's place; above the stretched
@@ -499,38 +512,13 @@
     @apply text-center text-xs text-muted [&_a]:font-medium [&_a]:text-accent [&_a]:hover:text-accent-hover;
   }
 
-  /* One banner at most, in the event's status colour */
+  /* One banner at most, a .callout in the event's status colour (.status-*) */
   .event-details-banner {
-    @apply flex items-start gap-3 rounded-xl border px-4 py-3.5 text-sm leading-relaxed [&>svg]:mt-0.5 [&>svg]:size-5 [&>svg]:shrink-0;
+    @apply text-sm leading-relaxed text-(--tone-soft);
   }
 
   .event-details-banner strong {
     @apply block text-foreground;
-  }
-
-  .event-details-banner.is-cancelled {
-    @apply border-cancelled/40 bg-cancelled/10 text-orange-200 [&>svg]:text-cancelled;
-  }
-
-  .event-details-banner.is-past {
-    @apply border-past/40 bg-past/10 text-past [&>svg]:text-past;
-  }
-
-  .event-details-banner.is-pending {
-    @apply border-warning/40 bg-warning/10 text-yellow-200 [&>svg]:text-warning;
-  }
-
-  .event-details-banner.is-rejected {
-    @apply border-danger/40 bg-danger/10 text-red-200 [&>svg]:text-danger;
-  }
-
-  .event-details-banner.is-draft {
-    @apply border-draft/40 bg-draft/10 text-cyan-100 [&>svg]:text-draft;
-  }
-
-  /* Edit Event on a live event */
-  .event-details-banner.is-approved {
-    @apply border-success/40 bg-success/10 text-green-100 [&>svg]:text-success;
   }
 
   /* The live card: the real EventCard, nothing to click */
@@ -925,15 +913,7 @@
 
   /* StatusMessage: one box for success and error, icon beside the text */
   .status-message {
-    @apply p-3 flex items-start gap-2 rounded-lg border text-sm [&>svg]:mt-0.5 [&>svg]:size-4 [&>svg]:shrink-0;
-  }
-
-  .status-message-success {
-    @apply border-success/40 bg-success/10 text-success;
-  }
-
-  .status-message-error {
-    @apply border-danger/40 bg-danger/10 text-danger;
+    @apply gap-2 rounded-lg p-3 text-sm text-(--tone-text) [&>svg]:size-4;
   }
 
   .status-message-text {

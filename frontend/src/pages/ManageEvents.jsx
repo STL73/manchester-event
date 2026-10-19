@@ -151,7 +151,7 @@ function EventReview({ event, state, events, decision, onDecision, reason, onRea
       </div>
 
       {pending && changes.length > 0 && (
-        <section className="admin-changes" aria-label={eventPanel.changes.title}>
+        <section className="callout callout-compact tone-accent admin-changes" aria-label={eventPanel.changes.title}>
           <p className="admin-changes-title">
             <eventPanel.changes.icon aria-hidden="true" />
             {eventPanel.changes.title}
@@ -210,7 +210,7 @@ function EventReview({ event, state, events, decision, onDecision, reason, onRea
       {event.description && <p className="admin-review-description">{event.description}</p>}
 
       {state === "rejected" && event.rejectionReason && (
-        <p className="admin-note">
+        <p className="callout callout-compact admin-note">
           <strong>{eventPanel.rejectedReason}</strong>
           {event.rejectionReason}
         </p>
@@ -246,12 +246,12 @@ function EventReview({ event, state, events, decision, onDecision, reason, onRea
               {reasonError && <FieldError id="reject-reason-error">{reasonError}</FieldError>}
             </div>
           ) : (
-            <p className="admin-note">{event.approvedSnapshot ? eventPanel.approveEditNote : eventPanel.approveNote}</p>
+            <p className="callout callout-compact admin-note">{event.approvedSnapshot ? eventPanel.approveEditNote : eventPanel.approveNote}</p>
           )}
         </div>
       )}
 
-      {state === "approved" && decision !== "reject" && <p className="admin-note">{eventPanel.liveNote}</p>}
+      {state === "approved" && decision !== "reject" && <p className="callout callout-compact admin-note">{eventPanel.liveNote}</p>}
     </div>
   );
 }

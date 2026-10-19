@@ -19,7 +19,7 @@ export const organiserInsights = {
   pending: {
     title: "Awaiting approval",
     icon: ClipboardClock,
-    tone: "dashboard-card-accent-yellow",
+    tone: "warning",
     oldest: (days) => `Oldest: ${days === 1 ? "1 day" : `${days} days`}`,
     to: "/dashboard/my-events?status=pending",
     none: "Nothing waiting",
@@ -27,7 +27,7 @@ export const organiserInsights = {
   rejected: {
     title: "Rejected",
     icon: CircleX,
-    tone: "dashboard-card-accent-red",
+    tone: "danger",
     action: { label: "Edit and resubmit", to: "/dashboard/my-events?status=rejected" },
     none: "Nothing to fix",
   },

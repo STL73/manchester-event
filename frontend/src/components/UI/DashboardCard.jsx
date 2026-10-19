@@ -31,7 +31,7 @@ export default function DashboardCard({ item }) {
   const hasCount = item.count !== undefined && item.value === undefined;
   // Colour and actions only when there is something there: "0 pending" is fine
   const needsAction = hasCount && item.count > 0;
-  const tone = needsAction ? (item.tone ?? "") : "";
+  const tone = needsAction && item.tone ? `tone-${item.tone}` : "";
 
   return (
     <article className={`card dashboard-card ${tone}`}>

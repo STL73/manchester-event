@@ -32,7 +32,7 @@ function AccountBanner({ role, details }) {
     const { suspended } = accountBanners;
     const until = details.suspendedUntil && dateFormatter.format(new Date(details.suspendedUntil));
     return (
-      <div className="settings-banner is-danger" role="status">
+      <div className="callout settings-banner tone-danger" role="status">
         <ShieldAlert aria-hidden="true" />
         <div>
           <p className="settings-banner-title">{suspended.title(until)}</p>
@@ -53,7 +53,7 @@ function AccountBanner({ role, details }) {
   if (!details.emailVerifiedAt) {
     const { unverified } = accountBanners;
     return (
-      <div className="settings-banner is-warning" role="status">
+      <div className="callout settings-banner tone-warning" role="status">
         <MailWarning aria-hidden="true" />
         <div>
           <p className="settings-banner-title">{unverified.title}</p>
