@@ -19,7 +19,7 @@ export default function EmailSettings({ role, enabled, onChange }) {
       <div className="settings-switch-row">
         <div>
           <p className="settings-switch-title" id="email-switch-title">{title}</p>
-          <p className="settings-hint" id="email-switch-text">{text}</p>
+          <p className="field-hint settings-hint" id="email-switch-text">{text}</p>
         </div>
         <Switch checked={enabled} onChange={toggle} label={title} describedBy="email-switch-text" />
       </div>

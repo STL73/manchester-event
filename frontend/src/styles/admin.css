@@ -195,14 +195,6 @@
     @apply flex flex-col gap-3;
   }
 
-  .admin-field {
-    @apply flex flex-col gap-2;
-  }
-
-  .admin-field-label {
-    @apply text-sm font-medium;
-  }
-
   .admin-danger-line {
     @apply flex flex-wrap items-center justify-between gap-2.5 border-t border-border/60 pt-3 text-[13px] text-muted;
   }

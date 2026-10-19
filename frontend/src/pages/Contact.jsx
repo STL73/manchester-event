@@ -88,7 +88,7 @@ export default function Contact({ onSendMessage }) {
             )}
 
             {form.fields.map((field) => (
-              <div className="contact-field" key={field.id}>
+              <div className="field" key={field.id}>
                 <label htmlFor={field.id}>{field.label}: *</label>
                 {field.type === "textarea" ? (
                   <textarea

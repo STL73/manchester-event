@@ -172,7 +172,7 @@
 
   /* 34px circles: things you click are pills */
   .events-view-switcher button {
-    @apply inline-flex size-[34px] items-center justify-center rounded-full text-muted transition-colors hover:bg-card hover:text-foreground focus-ring;
+    @apply inline-flex size-8.5 items-center justify-center rounded-full text-muted transition-colors hover:bg-card hover:text-foreground focus-ring;
   }
 
   .events-view-switcher button.is-active {
@@ -180,7 +180,7 @@
   }
 
   .events-view-switcher svg {
-    @apply size-[18px];
+    @apply size-4.5;
   }
 
   .events-grid {
@@ -207,7 +207,7 @@
   }
 
   .pagination-page {
-    @apply inline-flex size-[34px] items-center justify-center rounded-full text-sm font-medium text-muted tabular-nums transition-colors hover:bg-card hover:text-foreground focus-ring motion-reduce:transition-none;
+    @apply inline-flex size-8.5 items-center justify-center rounded-full text-sm font-medium text-muted tabular-nums transition-colors hover:bg-card hover:text-foreground focus-ring motion-reduce:transition-none;
   }
 
   .pagination-page.is-active {
@@ -219,7 +219,7 @@
   }
 
   .pagination-step {
-    @apply inline-flex h-[34px] items-center gap-1 rounded-full border border-border px-3.5 text-sm font-medium text-foreground transition-colors hover:border-accent focus-ring disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none [&_svg]:size-4;
+    @apply inline-flex h-8.5 items-center gap-1 rounded-full border border-border px-3.5 text-sm font-medium text-foreground transition-colors hover:border-accent focus-ring disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none [&_svg]:size-4;
   }
 
   .events-grid-three {
@@ -341,7 +341,7 @@
   /* Same 34px circle as the icon buttons, tinted with its own red like the
      buttons' hovers; the heart stays 20px because it is the card's main action */
   .event-favourite-button {
-    @apply inline-flex size-[34px] items-center justify-center rounded-full text-favourite transition-colors hover:bg-favourite/12 focus-ring motion-reduce:transition-none;
+    @apply inline-flex size-8.5 items-center justify-center rounded-full text-favourite transition-colors hover:bg-favourite/12 focus-ring motion-reduce:transition-none;
   }
 
   .event-favourite-button svg {
@@ -351,7 +351,7 @@
   /* Add to calendar (My Favourites): the heart's 34px circle, in the
      neutral colours of an icon action rather than the heart's red */
   .event-calendar-button {
-    @apply inline-flex size-[34px] items-center justify-center rounded-full text-muted transition-colors hover:bg-accent/15 hover:text-accent-hover focus-ring motion-reduce:transition-none [&_svg]:size-5;
+    @apply inline-flex size-8.5 items-center justify-center rounded-full text-muted transition-colors hover:bg-accent/15 hover:text-accent-hover focus-ring motion-reduce:transition-none [&_svg]:size-5;
   }
 
   /* A favourite that has finished or been cancelled: photo in greyscale and
@@ -404,7 +404,7 @@
 
   /* Over: greyed like My Favourites' ended cards */
   .event-details.is-over .event-details-image {
-    @apply grayscale-[85%] brightness-75;
+    @apply grayscale-85 brightness-75;
   }
 
   .event-details-layout {
@@ -541,21 +541,38 @@
     @apply text-2xl;
   }
 
-  .contact-field {
+  /* Every form field (FormField and the ones built by hand): label, control,
+     then hint or error, in one column. Controls are styled through it, so
+     they need no class of their own */
+  .field {
     @apply flex flex-col gap-2;
   }
 
-  .contact-field label {
+  /* .field-label names a control that has no <label> (a switch, a locked
+     email, a set of options) */
+  .field label,
+  .field-label {
     @apply text-sm font-medium text-foreground;
   }
 
-  .contact-field input,
-  .contact-field textarea {
+  .field input,
+  .field textarea,
+  .field select {
     @apply w-full rounded-lg border border-border bg-background px-4 py-2.5 text-foreground outline-none transition-colors placeholder:text-muted focus:border-accent;
   }
 
-  .contact-field textarea {
+  .field textarea {
     @apply resize-y;
+  }
+
+  .field select {
+    @apply cursor-pointer;
+  }
+
+  /* Short help beside a label or under the control: "Optional", a counter,
+     a format */
+  .field-hint {
+    @apply text-xs font-normal text-muted;
   }
 
   /* honeycomb: the brand pattern. One moment per screen, on a photo or on
@@ -646,7 +663,7 @@
      less the arrow's 5px, to keep the arrow on its middle */
   .tooltip::after {
     content: "";
-    @apply absolute top-full right-[var(--tooltip-arrow-offset,11px)] -mt-[5px] w-2.5 h-2.5 rotate-45 border-r-2 border-b-2 border-accent/70 bg-border;
+    @apply absolute top-full right-(--tooltip-arrow-offset,11px) -mt-[5px] w-2.5 h-2.5 rotate-45 border-r-2 border-b-2 border-accent/70 bg-border;
   }
 
   .tooltip-start {
@@ -654,7 +671,7 @@
   }
 
   .tooltip-start::after {
-    @apply left-[var(--tooltip-arrow-offset,11px)] right-auto;
+    @apply left-(--tooltip-arrow-offset,11px) right-auto;
   }
 
   .tooltip-center {
@@ -662,7 +679,7 @@
   }
 
   .tooltip-center::after {
-    @apply left-1/2 right-auto -ml-[5px];
+    @apply left-1/2 right-auto -ml-1.25;
   }
 
   .tooltip-wrap {
@@ -880,21 +897,17 @@
     @apply w-full flex flex-col items-center gap-6;
   }
 
-  .form-select {
-    @apply w-full rounded-lg border border-border bg-background px-4 py-2.5 text-foreground outline-none transition-colors focus:border-accent cursor-pointer;
-  }
-
   /* organiser event pages */
-  .contact-field input[type="datetime-local"] {
+  .field input[type="datetime-local"] {
     color-scheme: dark;
   }
 
-  .contact-field .password-input input {
+  .field .password-input input {
     @apply pr-12;
   }
 
   /* FieldError: the icon sits on the first line of the text */
-  .profile-error {
+  .field-error {
     @apply flex items-start gap-1.5 text-sm text-danger [&_svg]:mt-0.5 [&_svg]:size-4 [&_svg]:shrink-0;
   }
 
@@ -917,15 +930,15 @@
 
   /* fieldset has a browser border and min-width; the legend sits in the
      column like a label, so it needs its own gap */
-  fieldset.contact-field {
+  fieldset.field {
     @apply min-w-0 border-0;
   }
 
-  fieldset.contact-field legend {
+  fieldset.field legend {
     @apply mb-2;
   }
 
-  .contact-field [aria-invalid="true"] {
+  .field [aria-invalid="true"] {
     @apply border-danger focus:border-danger;
   }
 

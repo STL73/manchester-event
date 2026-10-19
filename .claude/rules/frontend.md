@@ -73,6 +73,11 @@ frontend/src/
   full border, `p-6`), `.card` (12px, faint border and top highlight), `.heading-page`,
   `.heading-section`, `.heading-panel`, `.group-label` (small uppercase label) and `.eyebrow`
   (the public accent label). Dashboard pages are `.dashboard-page`, sections `.dashboard-section`.
+  Every form field is a `.field` (`UI/FormField` or by hand), which styles its `<label>`,
+  input, select and textarea, so controls take no class; `.field-label` names a control with no
+  `<label>`, `.field-hint` is the 12px help ("Optional", counters, formats), `.field-error`
+  the error line (`UI/FieldError`). Before naming a class, check Tailwind has no utility by that
+  name: a class called `overline` also gets Tailwind's line over the text
   A component class only overrides (padding, gap, size); don't repeat the shared utilities in it
 - **Corner radius:** panels that hold a page's content (forms, tables, chart cards, detail and
   activity panels) are 16px (`rounded-2xl`), public and dashboard alike. Cards in a grid, list

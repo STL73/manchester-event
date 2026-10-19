@@ -230,9 +230,9 @@ function EventReview({ event, state, events, decision, onDecision, reason, onRea
             />
           )}
           {decision === "reject" ? (
-            <div className="contact-field">
+            <div className="field">
               <label htmlFor="reject-reason">
-                {eventPanel.reasonLabel} <span className="admin-hint">({eventPanel.reasonHint})</span>
+                {eventPanel.reasonLabel} <span className="field-hint">({eventPanel.reasonHint})</span>
               </label>
               <textarea
                 id="reject-reason"
