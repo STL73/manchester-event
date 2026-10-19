@@ -49,6 +49,26 @@
     @apply text-sm font-semibold uppercase tracking-[0.2em] text-accent;
   }
 
+  /* A round button holding only an icon (favourite, calendar, close, the
+     password eye) or a page number. 34px; a component sets another size to
+     match what sits beside it, and a tint where the hover means something */
+  .icon-button {
+    @apply inline-grid size-8.5 place-items-center rounded-full text-muted transition-colors hover:bg-foreground/8 hover:text-foreground focus-ring motion-reduce:transition-none [&_svg]:size-5;
+  }
+
+  /* A small option or control in a row of them (date and status filters,
+     the sort dropdown, Previous / Next): 32px, unfilled, lighter than a
+     form field so it reads as an option */
+  .pill {
+    @apply inline-flex h-8 items-center gap-1.5 rounded-full border border-border px-3.5 text-[13px] font-medium text-muted transition-colors hover:border-accent hover:text-foreground focus-ring motion-reduce:transition-none [&_svg]:size-3.5;
+  }
+
+  /* A label that states something (a status, Verified, Replied). Its colour
+     comes from a tone-* utility (base.css) or a .status-* class */
+  .badge {
+    @apply inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium [&_svg]:size-3.5;
+  }
+
   .navbar-logo {
     @apply flex items-center gap-2.5 rounded-lg text-foreground font-semibold text-lg focus-ring-wide;
   }
@@ -124,7 +144,7 @@
   }
 
   .events-when-option {
-    @apply inline-flex h-8 items-center gap-1.5 rounded-full border border-border px-3.5 text-[13px] font-medium text-muted transition-colors hover:border-accent hover:text-foreground focus-ring motion-reduce:transition-none [&_svg]:size-3.5 [&_svg]:text-accent;
+    @apply [&_svg]:text-accent;
   }
 
   /* "Pick a date": the browser's calendar opens from a date input kept
@@ -170,11 +190,6 @@
     @apply flex items-center gap-2;
   }
 
-  /* 34px circles: things you click are pills */
-  .events-view-switcher button {
-    @apply inline-flex size-8.5 items-center justify-center rounded-full text-muted transition-colors hover:bg-card hover:text-foreground focus-ring;
-  }
-
   .events-view-switcher button.is-active {
     @apply selected;
   }
@@ -207,7 +222,7 @@
   }
 
   .pagination-page {
-    @apply inline-flex size-8.5 items-center justify-center rounded-full text-sm font-medium text-muted tabular-nums transition-colors hover:bg-card hover:text-foreground focus-ring motion-reduce:transition-none;
+    @apply text-sm font-medium tabular-nums;
   }
 
   .pagination-page.is-active {
@@ -219,7 +234,7 @@
   }
 
   .pagination-step {
-    @apply inline-flex h-8.5 items-center gap-1 rounded-full border border-border px-3.5 text-sm font-medium text-foreground transition-colors hover:border-accent focus-ring disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none [&_svg]:size-4;
+    @apply h-8.5 gap-1 text-sm text-foreground disabled:pointer-events-none disabled:opacity-40 [&_svg]:size-4;
   }
 
   .events-grid-three {
@@ -341,7 +356,7 @@
   /* Same 34px circle as the icon buttons, tinted with its own red like the
      buttons' hovers; the heart stays 20px because it is the card's main action */
   .event-favourite-button {
-    @apply inline-flex size-8.5 items-center justify-center rounded-full text-favourite transition-colors hover:bg-favourite/12 focus-ring motion-reduce:transition-none;
+    @apply text-favourite hover:bg-favourite/12 hover:text-favourite;
   }
 
   .event-favourite-button svg {
@@ -351,7 +366,7 @@
   /* Add to calendar (My Favourites): the heart's 34px circle, in the
      neutral colours of an icon action rather than the heart's red */
   .event-calendar-button {
-    @apply inline-flex size-8.5 items-center justify-center rounded-full text-muted transition-colors hover:bg-accent/15 hover:text-accent-hover focus-ring motion-reduce:transition-none [&_svg]:size-5;
+    @apply hover:bg-accent/15 hover:text-accent-hover;
   }
 
   /* A favourite that has finished or been cancelled: photo in greyscale and
@@ -663,7 +678,7 @@
      less the arrow's 5px, to keep the arrow on its middle */
   .tooltip::after {
     content: "";
-    @apply absolute top-full right-(--tooltip-arrow-offset,11px) -mt-[5px] w-2.5 h-2.5 rotate-45 border-r-2 border-b-2 border-accent/70 bg-border;
+    @apply absolute top-full right-(--tooltip-arrow-offset,11px) -mt-1.25 w-2.5 h-2.5 rotate-45 border-r-2 border-b-2 border-accent/70 bg-border;
   }
 
   .tooltip-start {
@@ -746,7 +761,7 @@
      page's icon, interlocked like the logo (the front cell sits 3/4 of a
      cell lower, half a cell across) */
   .empty-honeycomb {
-    @apply relative h-[72px] w-[76px];
+    @apply relative h-18 w-19;
   }
 
   .empty-hex {
@@ -766,7 +781,7 @@
   }
 
   .empty-hex-front {
-    @apply left-5 top-8 bg-accent/40 [&_svg]:relative [&_svg]:size-[18px] [&_svg]:text-accent;
+    @apply left-5 top-8 bg-accent/40 [&_svg]:relative [&_svg]:size-4.5 [&_svg]:text-accent;
   }
 
   /* My Events' status pills (Explore's date pills) carry a count */
@@ -794,38 +809,35 @@
 
   /* Clears a picked date: a round 32px button, the height of the pills */
   .events-when-clear {
-    @apply grid size-8 place-items-center rounded-full border border-border text-muted transition-colors hover:border-accent hover:text-foreground focus-ring motion-reduce:transition-none [&_svg]:size-3.5;
+    @apply size-8 border border-border hover:border-accent hover:bg-transparent [&_svg]:size-3.5;
   }
 
-  .status-badge {
-    @apply px-2.5 py-1 inline-flex rounded-full border text-xs font-medium;
-  }
-
+  /* Each event and account status in its tone (on .badge). Event status
+     colours match the PHP input.css */
   .status-active,
   .status-approved {
-    @apply border-success/40 bg-success/10 text-success;
+    @apply tone-success;
   }
 
   .status-pending {
-    @apply border-warning/40 bg-warning/10 text-warning;
+    @apply tone-warning;
   }
 
   .status-suspended,
   .status-rejected {
-    @apply border-danger/40 bg-danger/10 text-danger;
+    @apply tone-danger;
   }
 
-  /* Event status colours match the PHP input.css */
   .status-cancelled {
-    @apply border-cancelled/40 bg-cancelled/10 text-cancelled;
+    @apply tone-cancelled;
   }
 
   .status-draft {
-    @apply border-draft/40 bg-draft/10 text-draft;
+    @apply tone-draft;
   }
 
   .status-past {
-    @apply border-past/40 bg-past/10 text-past;
+    @apply tone-past;
   }
 
   .status-unverified {
@@ -865,7 +877,7 @@
   }
 
   .dashboard-page-title-hex svg {
-    @apply relative size-[18px] text-accent;
+    @apply relative size-4.5 text-accent;
   }
 
   /* One line under the title with what matters on this page, like the

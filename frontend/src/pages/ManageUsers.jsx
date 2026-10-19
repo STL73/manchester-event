@@ -72,8 +72,8 @@ function Avatar({ user, large = false }) {
 function StatusBadges({ user }) {
   return (
     <>
-      <span className={`status-badge status-${user.accStatus}`}>{statusLabels[user.accStatus] ?? user.accStatus}</span>
-      {!user.emailVerifiedAt && <span className="status-badge status-unverified">Unverified</span>}
+      <span className={`badge status-${user.accStatus}`}>{statusLabels[user.accStatus] ?? user.accStatus}</span>
+      {!user.emailVerifiedAt && <span className="badge status-unverified">Unverified</span>}
     </>
   );
 }

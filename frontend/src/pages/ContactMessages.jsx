@@ -255,8 +255,8 @@ export default function ContactMessages({ contactMessages, users, onSetRead, onR
                     </div>
                     <span className="message-snippet">{message.message.split("\n")[0]}</span>
                     <span className="message-meta">
-                      {message.repliedAt && <span className="admin-chip is-good">{contactMessagesPage.replied}</span>}
-                      {!message.userId && <span className="admin-chip">{contactMessagesPage.guest}</span>}
+                      {message.repliedAt && <span className="badge tone-success">{contactMessagesPage.replied}</span>}
+                      {!message.userId && <span className="badge tone-accent">{contactMessagesPage.guest}</span>}
                       <time dateTime={message.sentAt}>{shortDateFormatter.format(new Date(message.sentAt))}</time>
                     </span>
                   </li>

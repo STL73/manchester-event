@@ -7,7 +7,7 @@ export default function FilterPills({ label, options, value, onChange }) {
     <div className="events-when" role="group" aria-label={label}>
       {options.map((option) => (
         <button
-          className={`events-when-option ${value === option.value ? "is-active" : ""} ${option.attention ? "is-attention" : ""} ${option.tone === "danger" ? "is-danger" : ""}`}
+          className={`pill events-when-option ${value === option.value ? "is-active" : ""} ${option.attention ? "is-attention" : ""} ${option.tone === "danger" ? "is-danger" : ""}`}
           type="button"
           aria-pressed={value === option.value}
           onClick={() => onChange(option.value)}

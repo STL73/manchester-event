@@ -144,8 +144,8 @@ function EventReview({ event, state, events, decision, onDecision, reason, onRea
       <img className="admin-review-photo" src={event.image} alt="" style={{ objectPosition: event.imagePosition }} />
       <div className="admin-review-head">
         <div className="admin-review-badges">
-          <span className={`status-badge status-${state}`}>{statusLabels[state] ?? state}</span>
-          {event.approvedSnapshot && pending && <span className="admin-chip">{manageEventsPage.editOfLive}</span>}
+          <span className={`badge status-${state}`}>{statusLabels[state] ?? state}</span>
+          {event.approvedSnapshot && pending && <span className="badge tone-accent">{manageEventsPage.editOfLive}</span>}
         </div>
         <h3 className="admin-review-name">{event.name}</h3>
       </div>
@@ -474,7 +474,7 @@ export default function ManageEvents({ events, onUpdateEventStatus }) {
                         </button>
                         <span className="admin-row-sub">
                           {state === "pending" && event.approvedSnapshot && (
-                            <span className="admin-chip">{manageEventsPage.editOfLive}</span>
+                            <span className="badge tone-accent">{manageEventsPage.editOfLive}</span>
                           )}
                           {contextLine(event, state, now)}
                         </span>
@@ -483,7 +483,7 @@ export default function ManageEvents({ events, onUpdateEventStatus }) {
                     <span className="admin-row-cell admin-row-hide">{event.organiser}</span>
                     <span className="admin-row-cell admin-row-meta">{whenFormatter.format(new Date(event.startDatetime))}</span>
                     <span className="admin-row-status">
-                      <span className={`status-badge status-${state}`}>{statusLabels[state] ?? state}</span>
+                      <span className={`badge status-${state}`}>{statusLabels[state] ?? state}</span>
                     </span>
                     <span className="admin-row-action" aria-hidden="true">
                       <span className={`admin-row-cue ${state === "pending" ? "is-primary" : ""}`}>

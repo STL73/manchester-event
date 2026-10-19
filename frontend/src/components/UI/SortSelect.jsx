@@ -4,7 +4,7 @@ import { ArrowDownUp } from "lucide-react";
 // filter pills beside it (My Events, Manage Events, Manage Users)
 export default function SortSelect({ label, options, value, onChange }) {
   return (
-    <label className="toolbar-select">
+    <label className="pill toolbar-select">
       <span className="sr-only">{label}</span>
       <ArrowDownUp aria-hidden="true" />
       <select value={value} onChange={(changeEvent) => onChange(changeEvent.target.value)}>

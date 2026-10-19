@@ -39,7 +39,7 @@ export default function WhatsOnSection({ events, now }) {
 
       <div className="events-when" role="group" aria-label="When">
         {whenOptions.map(({ id, label }) => (
-          <button className={`events-when-option ${when === id ? "is-active" : ""}`} type="button" aria-pressed={when === id} onClick={() => setWhen(id)} key={id || "any"}>
+          <button className={`pill events-when-option ${when === id ? "is-active" : ""}`} type="button" aria-pressed={when === id} onClick={() => setWhen(id)} key={id || "any"}>
             {label}
           </button>
         ))}

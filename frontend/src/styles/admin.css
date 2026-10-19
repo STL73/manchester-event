@@ -83,17 +83,13 @@
     @apply border-transparent bg-accent text-background;
   }
 
-  .admin-chip {
-    @apply shrink-0 rounded-full bg-accent/15 px-2 py-px text-[11px] font-medium text-accent-hover;
-  }
-
   /* Initials in the logo's cell, where the user has no picture */
   .admin-avatar {
-    @apply hex-cell grid h-[38px] w-[34px] shrink-0 place-items-center bg-accent/22 text-xs font-semibold text-accent;
+    @apply hex-cell grid h-9.5 w-8.5 shrink-0 place-items-center bg-accent/22 text-xs font-semibold text-accent;
   }
 
   .admin-avatar.is-large {
-    @apply h-[58px] w-[52px] text-base;
+    @apply h-14.5 w-13 text-base;
   }
 
   /* The side panel: a <dialog> pinned to the right, the page dimmed */
@@ -118,7 +114,7 @@
   }
 
   .side-panel-close {
-    @apply grid size-9 place-items-center rounded-full text-muted transition-colors hover:bg-foreground/8 hover:text-foreground focus-ring [&_svg]:size-5;
+    @apply size-9;
   }
 
   .side-panel-body {
@@ -135,7 +131,7 @@
   }
 
   .admin-review-photo {
-    @apply aspect-[2/1] w-full rounded-xl object-cover;
+    @apply aspect-2/1 w-full rounded-xl object-cover;
   }
 
   .admin-review-head {
@@ -203,10 +199,6 @@
     @apply flex flex-wrap gap-2;
   }
 
-  .admin-chip.is-good {
-    @apply bg-success/15 text-success;
-  }
-
   /* System Logs (decided 2026-10-12, layout A) and Admin Home's Recent Admin
      Actions: entries as sentences, grouped under day headings on System Logs */
   .log-feed {
@@ -227,7 +219,7 @@
 
   /* The action's icon in the logo's cell, coloured by how it went */
   .log-entry-icon {
-    @apply hex-cell grid h-[33px] w-[30px] place-items-center bg-accent/18 text-accent [&_svg]:size-[15px];
+    @apply hex-cell grid h-8.25 w-7.5 place-items-center bg-accent/18 text-accent [&_svg]:size-3.75;
   }
 
   .log-entry-icon.is-good {

@@ -139,12 +139,12 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
           <Lock aria-hidden="true" />
           <span className="settings-locked-value">{selectedUser.email}</span>
           {emailVerified ? (
-            <span className="settings-chip is-verified">
+            <span className="badge tone-success">
               <BadgeCheck aria-hidden="true" />
               {profileForm.verified}
             </span>
           ) : (
-            <span className="settings-chip is-unverified">
+            <span className="badge tone-warning">
               <CircleAlert aria-hidden="true" />
               {profileForm.notVerified}
             </span>

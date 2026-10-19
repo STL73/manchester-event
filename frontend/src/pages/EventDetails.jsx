@@ -160,7 +160,7 @@ function EventDetailsBody({ event, TitleTag, titleId, role, favouriteIds, onTogg
               {event.category}
             </p>
             {isStaff && (
-              <span className={`status-badge status-${state}`}>
+              <span className={`badge status-${state}`}>
                 {(role === "organiser" && organiserStatusLabels[state]) || state}
               </span>
             )}

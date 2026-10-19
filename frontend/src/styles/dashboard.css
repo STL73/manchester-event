@@ -36,7 +36,7 @@
 
   /* The group's number in the logo's cell */
   .event-form-step {
-    @apply hex-cell relative grid h-[26px] w-6 shrink-0 place-items-center bg-accent/35 text-xs font-semibold text-accent;
+    @apply hex-cell relative grid h-6.5 w-6 shrink-0 place-items-center bg-accent/35 text-xs font-semibold text-accent;
   }
 
   .event-form-step::before {
@@ -240,7 +240,7 @@
 
   /* Counts where something needs you; tones match the Home cards */
   .nav-badge {
-    @apply ml-auto min-w-5 h-5 px-1.5 shrink-0 inline-flex items-center justify-center rounded-full bg-accent/20 text-xs font-semibold text-accent-hover;
+    @apply ml-auto min-w-5 h-5 px-1.5 shrink-0 inline-flex items-center justify-center rounded-full bg-accent/15 text-xs font-semibold text-accent-hover;
   }
 
   .nav-badge-warning {
@@ -289,7 +289,7 @@
   /* Quiet until pointed at or current, so the current page is the
      brightest thing in the sidebar */
   .menu-icon {
-    @apply w-[18px] h-[18px] shrink-0 text-muted/70 transition-colors duration-200 motion-reduce:transition-none;
+    @apply w-4.5 h-4.5 shrink-0 text-muted/70 transition-colors duration-200 motion-reduce:transition-none;
   }
 
   .sidebar-link:hover .menu-icon,
@@ -413,7 +413,7 @@
     /* Arrow: a rotated square centred on the tooltip's left border */
     .sidebar-collapsed .menu-label::after {
       content: "";
-      @apply absolute -left-1.5 top-1/2 -mt-[5px] w-2.5 h-2.5 rotate-45 border-l-2 border-b-2 border-accent/70 bg-border;
+      @apply absolute -left-1.5 top-1/2 -mt-1.25 w-2.5 h-2.5 rotate-45 border-l-2 border-b-2 border-accent/70 bg-border;
     }
 
     .sidebar-collapsed .sidebar-link:hover .menu-label,
@@ -441,7 +441,7 @@
     }
 
     .sidebar-collapsed .sidebar-user .tooltip::after {
-      @apply left-1/2 right-auto -ml-[5px];
+      @apply left-1/2 right-auto -ml-1.25;
     }
   }
 
@@ -487,7 +487,7 @@
 
   .menu-item.is-active::before {
     content: "";
-    @apply absolute -left-2 top-2 bottom-2 w-[3px] rounded-r-full bg-accent;
+    @apply absolute -left-2 top-2 bottom-2 w-0.75 rounded-r-full bg-accent;
   }
 
   /* dashboard main section styles */
@@ -552,7 +552,7 @@
   /* The picture in the logo's cell, outlined like the title hexagons;
      the default icon when there is no picture */
   .dashboard-greeting-avatar {
-    @apply hex-cell relative grid h-16 w-[58px] shrink-0 place-items-center bg-accent/35;
+    @apply hex-cell relative grid h-16 w-14.5 shrink-0 place-items-center bg-accent/35;
   }
 
   .dashboard-greeting-avatar::before {
@@ -560,7 +560,7 @@
   }
 
   .dashboard-greeting-avatar svg {
-    @apply relative size-[30px] text-accent;
+    @apply relative size-7.5 text-accent;
   }
 
   .dashboard-greeting-avatar.has-photo {
@@ -607,7 +607,7 @@
   /* The icon in the logo's cell, outlined like the title hexagons. Pulled
      into the corner so the card's label row keeps its height */
   .dashboard-card-hex {
-    @apply hex-cell relative -mt-1 -mr-1 grid h-[33px] w-[30px] shrink-0 place-items-center bg-accent/35;
+    @apply hex-cell relative -mt-1 -mr-1 grid h-8.25 w-7.5 shrink-0 place-items-center bg-accent/35;
   }
 
   .dashboard-card-hex::before {
@@ -615,7 +615,7 @@
   }
 
   .dashboard-card-icon {
-    @apply relative size-[15px] text-accent;
+    @apply relative size-3.75 text-accent;
   }
 
   .dashboard-card-number {
@@ -781,7 +781,7 @@
   }
 
   .honeycomb-icon {
-    @apply size-[22px] text-muted transition-[color,transform] duration-200 motion-reduce:transition-none;
+    @apply size-5.5 text-muted transition-[color,transform] duration-200 motion-reduce:transition-none;
   }
 
   .honeycomb-name {
@@ -830,7 +830,7 @@
   }
 
   .honeycomb[data-size="small"] .honeycomb-icon {
-    @apply size-[18px];
+    @apply size-4.5;
   }
 
   .honeycomb[data-size="small"] .honeycomb-name {
@@ -866,7 +866,7 @@
   /* A small dropdown beside the pills (My Events' sort), framed like them
      so the row reads as one toolbar, where Explore has its view switcher */
   .toolbar-select {
-    @apply relative inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border border-border pl-3 pr-1 text-[13px] font-medium text-muted transition-colors hover:border-accent focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent [&>svg]:size-3.5 [&>svg]:text-accent;
+    @apply relative shrink-0 pl-3 pr-1 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent [&>svg]:text-accent;
   }
 
   .toolbar-select select {
@@ -912,7 +912,7 @@
   }
 
   .notification-type-icon {
-    @apply grid size-9 place-items-center rounded-xl border border-border bg-background text-muted [&_svg]:size-[18px];
+    @apply grid size-9 place-items-center rounded-xl border border-border bg-background text-muted [&_svg]:size-4.5;
   }
 
   .notification-row.is-unread .notification-type-icon {
@@ -949,7 +949,7 @@
   }
 
   .notification-row-chevron {
-    @apply size-[18px] text-muted transition-transform motion-reduce:transition-none;
+    @apply size-4.5 text-muted transition-transform motion-reduce:transition-none;
   }
 
   .notification-row.is-open .notification-row-chevron {
@@ -959,7 +959,7 @@
   /* Closed envelope while unread; it opens on hover or focus to show what
      a click does. Once read, a faint open envelope that isn't a button */
   .notification-mark-read {
-    @apply grid size-8 place-items-center rounded-full text-accent-hover transition-colors hover:bg-accent/15 focus-ring motion-reduce:transition-none [&_svg]:size-[18px];
+    @apply size-8 text-accent-hover hover:bg-accent/15 hover:text-accent-hover [&_svg]:size-4.5;
   }
 
   .notification-envelope-open {
@@ -975,13 +975,13 @@
   }
 
   .notification-read-icon {
-    @apply size-8 shrink-0 p-[7px] text-muted opacity-45;
+    @apply size-8 shrink-0 p-1.75 text-muted opacity-45;
   }
 
   /* Opened: the message lines up with the subject (16px padding, 36px icon,
      14px gap) */
   .notification-row-detail {
-    @apply pb-4 pl-[66px] pr-4;
+    @apply pb-4 pl-16.5 pr-4;
   }
 
   .notification-row-body {
@@ -1161,7 +1161,7 @@
      in a 240px column beside its panel, above it below 44rem. Every panel
      saves on its own */
   .settings-layout {
-    @apply w-full max-w-[980px] self-start flex flex-col gap-10;
+    @apply w-full max-w-245 self-start flex flex-col gap-10;
   }
 
   .settings-row {
@@ -1235,24 +1235,12 @@
     @apply min-w-0 wrap-anywhere;
   }
 
-  .settings-chip {
-    @apply inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium [&_svg]:size-3.5;
-  }
-
-  .settings-chip.is-verified {
-    @apply border-success/40 bg-success/10 text-success;
-  }
-
-  .settings-chip.is-unverified {
-    @apply border-warning/40 bg-warning/10 text-warning;
-  }
-
   .settings-two {
     @apply grid grid-cols-2 gap-4;
   }
 
   .settings-rule {
-    @apply flex items-center gap-1.5 text-[13px] text-muted [&_svg]:size-[15px] [&_svg]:shrink-0;
+    @apply flex items-center gap-1.5 text-[13px] text-muted [&_svg]:size-3.75 [&_svg]:shrink-0;
   }
 
   .settings-rule.is-met {
@@ -1339,17 +1327,17 @@
   }
 
   .password-input-toggle {
-    @apply absolute right-1.5 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-muted transition-colors hover:bg-foreground/8 hover:text-foreground focus-ring-flush motion-reduce:transition-none [&_svg]:size-[18px];
+    @apply absolute right-1.5 top-1/2 size-8 -translate-y-1/2 focus-visible:outline-offset-0 [&_svg]:size-4.5;
   }
 
   /* Switch: on is the accent tint, like other selected options */
   .switch {
-    @apply relative h-[26px] w-[46px] shrink-0 cursor-pointer rounded-full border border-border bg-background transition-colors focus-ring motion-reduce:transition-none;
+    @apply relative h-6.5 w-11.5 shrink-0 cursor-pointer rounded-full border border-border bg-background transition-colors focus-ring motion-reduce:transition-none;
   }
 
   .switch::after {
     content: "";
-    @apply absolute left-[3px] top-[3px] size-[18px] rounded-full bg-muted transition-transform motion-reduce:transition-none;
+    @apply absolute left-0.75 top-0.75 size-4.5 rounded-full bg-muted transition-transform motion-reduce:transition-none;
   }
 
   .switch[aria-checked="true"] {
@@ -1418,7 +1406,7 @@
     }
 
     .preferences-picks-actions {
-      @apply order-none border-0 pt-0;
+      @apply order-0 border-0 pt-0;
     }
 
     .preferences-picks-saved {
