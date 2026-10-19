@@ -19,6 +19,13 @@
   --color-danger-hover: #fca5a5;
   /* The favourite heart (Tailwind's red-500): a liked event, not an error */
   --color-favourite: #ef4444;
+  /* Status colours, one per state (Tailwind's palette, matching the PHP
+     input.css). Rejected and errors use danger above */
+  --color-success: oklch(79.2% 0.209 151.711); /* green-400: approved, active, done */
+  --color-warning: oklch(85.2% 0.199 91.936); /* yellow-400: pending, needs attention */
+  --color-cancelled: oklch(75% 0.183 55.934); /* orange-400 */
+  --color-draft: oklch(86.5% 0.127 207.078); /* cyan-300 */
+  --color-past: oklch(87.2% 0.01 258.338); /* gray-300 */
   --font-sans: "Poppins", system-ui, sans-serif;
 
   /* --color-green-accent: #c2fec9;
