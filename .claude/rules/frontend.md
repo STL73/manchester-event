@@ -80,9 +80,12 @@ frontend/src/
   component sets another size to match its neighbours, and a tint where the hover means
   something), `.pill` a 32px option in a row (filters, sort, Previous / Next), `.badge` a
   label that states something, `.callout` a message box with its icon on the left (status
-  banners, notes, saved / error messages; `.callout-compact` inside panels and cards).
+  banners, notes, saved / error messages; `.callout-compact` inside panels and cards),
+  `.hex-frame` an outlined hexagon round an icon, number or picture (35% accent ring, sized
+  per use at 10:11), `.hex-fill` a filled one at 15% of its tone (initials, log icons), and a
+  list of rows is `panel list-panel` with `.list-row` rows (a 60% divider; hovers per list).
   Colour comes from a `tone-*` utility (`styles/base.css`: success, warning, danger,
-  cancelled, draft, past, accent) or a `.status-*` class, which maps each event and account
+  cancelled, draft, past, accent, muted) or a `.status-*` class, which maps each event and account
   status to its tone. A tone only sets variables (`--tone` for borders, fills and icons,
   `--tone-text` for text in the colour, `--tone-soft` for body text on a tinted box), so one
   class colours a badge, a callout, a sidebar count or a stat card's figure, each in its own

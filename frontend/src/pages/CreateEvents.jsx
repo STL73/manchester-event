@@ -479,7 +479,7 @@ function EventFormPage({
                     <section className="event-form-group" aria-labelledby={`group-${group.id}`} key={group.id}>
                       <h2 className="event-form-group-title" id={`group-${group.id}`}>
                         {/* Numbered in the logo's cell, like the page title */}
-                        <span className="event-form-step" aria-hidden="true">
+                        <span className="hex-frame event-form-step" aria-hidden="true">
                           <span>{index + 1}</span>
                         </span>
                         {group.title}

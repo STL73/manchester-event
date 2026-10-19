@@ -30,7 +30,7 @@ export default function Footer() {
           <ul className="footer-socials" aria-label={footerText.socialsLabel}>
             {socialLinks.map(({ label, icon: Icon, href }) => (
               <li key={label}>
-                <a href={href} aria-label={label} className="hex-button">
+                <a href={href} aria-label={label} className="hex-frame hex-button">
                   <Icon aria-hidden="true" />
                 </a>
               </li>
@@ -71,7 +71,7 @@ export default function Footer() {
           © {new Date().getFullYear()} {footerText.rights}
         </p>
         <Tooltip text={footerText.backToTop}>
-          <button type="button" className="hex-button" aria-label={footerText.backToTop} onClick={scrollToTop}>
+          <button type="button" className="hex-frame hex-button" aria-label={footerText.backToTop} onClick={scrollToTop}>
             <ArrowUp aria-hidden="true" />
           </button>
         </Tooltip>

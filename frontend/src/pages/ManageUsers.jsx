@@ -63,7 +63,7 @@ function suspensionText(user) {
 
 function Avatar({ user, large = false }) {
   return (
-    <span className={`admin-avatar ${large ? "is-large" : ""}`} aria-hidden="true">
+    <span className={`hex-fill tone-accent admin-avatar ${large ? "is-large" : ""}`} aria-hidden="true">
       {initials(user.username)}
     </span>
   );
@@ -361,7 +361,7 @@ export default function ManageUsers({ users, events, currentUserId, onUpdateUser
                 </Button>
               </EmptyState>
             ) : (
-              <ul className="admin-list admin-list-users" ref={listRef}>
+              <ul className="panel list-panel admin-list admin-list-users" ref={listRef}>
                 <li className="group-label admin-list-head" aria-hidden="true">
                   <span>Account</span>
                   <span>Role</span>
@@ -372,7 +372,7 @@ export default function ManageUsers({ users, events, currentUserId, onUpdateUser
                 {pageUsers.map((user) => {
                   const own = events.filter((event) => event.organiserId === user.userId && event.status !== "draft").length;
                   return (
-                    <li className={`admin-row ${openId === user.userId ? "is-open" : ""}`} key={user.userId}>
+                    <li className={`list-row admin-row ${openId === user.userId ? "is-open" : ""}`} key={user.userId}>
                       <div className="admin-row-main">
                         <Avatar user={user} />
                         <div className="admin-row-text">

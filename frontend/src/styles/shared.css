@@ -82,6 +82,33 @@
     @apply gap-2 px-3.5 py-3 text-[13px] [&>svg]:size-4;
   }
 
+  /* An outlined hexagon in the logo's cell round an icon, a number or a
+     picture: the cell in 35% accent, a card-coloured cell 1.5px inside it, so
+     it reads as a thin ring. Sized per use at the logo's 10:11; what sits
+     inside needs position relative to show above the inner cell */
+  .hex-frame {
+    @apply hex-cell relative grid place-items-center bg-accent/35;
+  }
+
+  .hex-frame::before {
+    @apply hex-cell absolute inset-[1.5px] bg-card content-[''];
+  }
+
+  /* A filled hexagon (initials, a log action's icon): 15% of its tone */
+  .hex-fill {
+    @apply hex-cell grid shrink-0 place-items-center bg-(--tone)/15 text-(--tone-text);
+  }
+
+  /* A panel holding rows that run edge to edge (admin lists, logs,
+     notifications), and one row in it: a line above all but the first */
+  .list-panel {
+    @apply w-full p-0;
+  }
+
+  .list-row {
+    @apply border-t border-border/60 first:border-t-0;
+  }
+
   .navbar-logo {
     @apply flex items-center gap-2.5 rounded-lg text-foreground font-semibold text-lg focus-ring-wide;
   }
@@ -753,11 +780,7 @@
   }
 
   .empty-hex {
-    @apply hex-cell absolute grid h-10 w-9 place-items-center bg-accent/15;
-  }
-
-  .empty-hex::before {
-    @apply hex-cell absolute inset-[1.5px] bg-card content-[''];
+    @apply absolute h-10 w-9 bg-accent/15;
   }
 
   .empty-hex-left {
@@ -857,11 +880,7 @@
      hexagon with a card-coloured one 1.5px inside, like the Preferences cells
      and the footer's hex buttons. 36 x 40, the logo's 10:11 */
   .dashboard-page-title-hex {
-    @apply hex-cell relative grid h-10 w-9 shrink-0 place-items-center bg-accent/35;
-  }
-
-  .dashboard-page-title-hex::before {
-    @apply hex-cell absolute inset-[1.5px] bg-card content-[''];
+    @apply h-10 w-9 shrink-0;
   }
 
   .dashboard-page-title-hex svg {

@@ -86,7 +86,7 @@ export default function DashboardGreeting({ selectedUser, ...data }) {
 
   return (
     <header className="dashboard-greeting">
-      <div className={`dashboard-greeting-avatar ${selectedUser.avatarUrl ? "has-photo" : ""}`}>
+      <div className={`hex-frame dashboard-greeting-avatar ${selectedUser.avatarUrl ? "has-photo" : ""}`}>
         {selectedUser.avatarUrl ? (
           <img src={selectedUser.avatarUrl} alt="" />
         ) : (

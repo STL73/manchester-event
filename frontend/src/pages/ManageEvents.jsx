@@ -455,7 +455,7 @@ export default function ManageEvents({ events, onUpdateEventStatus }) {
             {filtered.length === 0 ? (
               <EmptyState icon={manageEventsPage.icon} text={view === "pending" ? manageEventsPage.summary.none : manageEventsMessages.noEvents} />
             ) : (
-              <ul className="admin-list admin-list-events" ref={listRef}>
+              <ul className="panel list-panel admin-list admin-list-events" ref={listRef}>
                 <li className="group-label admin-list-head" aria-hidden="true">
                   <span>Event</span>
                   <span>Organiser</span>
@@ -464,7 +464,7 @@ export default function ManageEvents({ events, onUpdateEventStatus }) {
                   <span />
                 </li>
                 {pageRows.map(({ event, state }) => (
-                  <li className={`admin-row ${openId === event.eventId ? "is-open" : ""}`} key={event.eventId}>
+                  <li className={`list-row admin-row ${openId === event.eventId ? "is-open" : ""}`} key={event.eventId}>
                     <div className="admin-row-main">
                       <img className="admin-row-thumb" src={event.image} alt="" loading="lazy" style={{ objectPosition: event.imagePosition }} />
                       <div className="admin-row-text">
