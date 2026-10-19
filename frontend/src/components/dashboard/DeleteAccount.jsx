@@ -15,7 +15,7 @@ export default function DeleteAccount({ role, hasPublicEvents, onDelete }) {
 
   if (role === "organiser" && hasPublicEvents) {
     return (
-      <p className="settings-hint settings-blocked">
+      <p className="field-hint settings-hint settings-blocked">
         {deleteAccountCopy.blocked}{" "}
         <Link className="settings-link" to="/contact">{deleteAccountCopy.contact}</Link>
       </p>
@@ -52,7 +52,7 @@ export default function DeleteAccount({ role, hasPublicEvents, onDelete }) {
         ))}
         <li>{deleteAccountCopy.permanent}</li>
       </ul>
-      <div className="contact-field">
+      <div className="field">
         <label htmlFor="delete-password">{deleteAccountCopy.passwordLabel}</label>
         <PasswordInput
           id="delete-password"

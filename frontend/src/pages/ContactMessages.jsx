@@ -322,7 +322,7 @@ export default function ContactMessages({ contactMessages, users, onSetRead, onR
                   <p className="message-body-plain">{openMessage.replyBody}</p>
                 </div>
               ) : (
-                <div className="contact-field">
+                <div className="field">
                   <label htmlFor="message-reply">{messagePanel.replyLabel(openMessage.name)}</label>
                   <textarea
                     id="message-reply"

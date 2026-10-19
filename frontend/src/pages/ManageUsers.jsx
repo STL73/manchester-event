@@ -90,8 +90,8 @@ function AccountForm({ user, isSelf, form, onChange, reasonError }) {
 
   return (
     <div className="admin-decision">
-      <div className="admin-field">
-        <span className="admin-field-label" id="account-status-label">
+      <div className="field">
+        <span className="field-label" id="account-status-label">
           {userPanel.statusLabel}
         </span>
         <PeriodSwitcher
@@ -103,11 +103,10 @@ function AccountForm({ user, isSelf, form, onChange, reasonError }) {
       </div>
       {suspended && (
         <>
-          <div className="contact-field">
+          <div className="field">
             <label htmlFor="suspend-length">{userPanel.lengthLabel}</label>
             <select
               id="suspend-length"
-              className="form-select"
               value={form.length}
               onChange={(changeEvent) => onChange({ length: changeEvent.target.value })}
             >
@@ -118,9 +117,9 @@ function AccountForm({ user, isSelf, form, onChange, reasonError }) {
               ))}
             </select>
           </div>
-          <div className="contact-field">
+          <div className="field">
             <label htmlFor="suspend-reason">
-              {userPanel.reasonLabel} <span className="admin-hint">({userPanel.reasonHint})</span>
+              {userPanel.reasonLabel} <span className="field-hint">({userPanel.reasonHint})</span>
             </label>
             <textarea
               id="suspend-reason"

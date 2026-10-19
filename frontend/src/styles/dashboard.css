@@ -59,16 +59,8 @@
     @apply flex items-baseline justify-between gap-2;
   }
 
-  .event-field-optional {
-    @apply text-xs font-normal text-muted;
-  }
-
-  .event-field select {
-    @apply px-4 py-2.5;
-  }
-
   .event-field-hint {
-    @apply -mt-1 flex justify-between gap-3 text-xs text-muted tabular-nums;
+    @apply -mt-1 flex justify-between gap-3 tabular-nums;
   }
 
   /* The photo box: dashed while empty, the photo itself once chosen */
@@ -112,7 +104,7 @@
     @apply absolute right-3 bottom-3 flex gap-2;
   }
 
-  .event-image-drop .profile-error {
+  .event-image-drop .field-error {
     @apply absolute inset-x-3 top-3 justify-center rounded-lg bg-background/90 px-3 py-2;
   }
 
@@ -1208,16 +1200,13 @@
     @apply flex flex-col gap-5;
   }
 
-  .settings-label {
-    @apply text-sm font-medium text-foreground;
-  }
-
+  /* On .field-hint: sentences, so looser lines */
   .settings-hint {
-    @apply text-[13px] leading-relaxed text-muted;
+    @apply leading-relaxed;
   }
 
   .settings-counter {
-    @apply self-end text-xs text-muted tabular-nums;
+    @apply self-end tabular-nums;
   }
 
   .settings-avatar-row {

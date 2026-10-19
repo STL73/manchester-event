@@ -56,13 +56,13 @@ export default function PasswordSettings({ email, onChange }) {
       {/* Lets a password manager tell which account the new password is for */}
       <input type="email" name="username" autoComplete="username" value={email} readOnly hidden />
 
-      <div className="contact-field">
+      <div className="field">
         <label htmlFor="current-password">{passwordForm.current}</label>
         <PasswordInput {...shared} id="current-password" name="current" autoComplete="current-password" value={current} />
       </div>
 
       <div className="settings-two">
-        <div className="contact-field">
+        <div className="field">
           <label htmlFor="new-password">{passwordForm.next}</label>
           <PasswordInput
             {...shared}
@@ -77,7 +77,7 @@ export default function PasswordSettings({ email, onChange }) {
             {passwordForm.lengthRule}
           </PasswordRule>
         </div>
-        <div className="contact-field">
+        <div className="field">
           <label htmlFor="confirm-password">{passwordForm.confirm}</label>
           <PasswordInput
             {...shared}

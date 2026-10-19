@@ -2,7 +2,7 @@ import { CircleCheck } from "lucide-react";
 import FieldError from "./FieldError";
 
 // One labelled form control with an optional hint and error, styled by
-// .contact-field. The hint and error are linked to the control with
+// .field. The hint and error are linked to the control with
 // aria-describedby so screen readers announce them with the field.
 // The hint sits on the label row so it costs no extra height.
 export default function FormField({
@@ -32,8 +32,8 @@ export default function FormField({
   // the group, so the legend is the label row itself
   if (type === "radio") {
     return (
-      <fieldset className="contact-field" aria-describedby={describedBy}>
-        <legend className="field-label-row">
+      <fieldset className="field" aria-describedby={describedBy}>
+        <legend className="field-label field-label-row">
           <span>{label}</span>
           {hintText}
         </legend>
@@ -70,14 +70,14 @@ export default function FormField({
   };
 
   return (
-    <div className="contact-field">
+    <div className="field">
       <div className="field-label-row">
         <label htmlFor={id}>{label}</label>
         {hintText}
       </div>
 
       {type === "select" ? (
-        <select className="form-select" defaultValue="" {...controlProps}>
+        <select defaultValue="" {...controlProps}>
           {placeholder && (
             <option value="" disabled>
               {placeholder}

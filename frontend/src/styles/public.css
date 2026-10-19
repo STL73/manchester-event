@@ -219,7 +219,7 @@
     @apply flex;
   }
 
-  .contact-layout .contact-field:has(textarea),
+  .contact-layout .field:has(textarea),
   .contact-layout textarea {
     @apply grow;
   }
@@ -494,11 +494,7 @@
   /* shared form field extras (FormField) */
   /* Label on the left, short hint on the right: the hint costs no height */
   .field-label-row {
-    @apply w-full flex items-baseline justify-between gap-3 text-sm font-medium text-foreground;
-  }
-
-  .field-hint {
-    @apply text-xs font-normal text-muted;
+    @apply w-full flex items-baseline justify-between gap-3;
   }
 
   .radio-cards {

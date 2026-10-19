@@ -333,7 +333,7 @@ function EventFormPage({
     if (field.type === "category" || field.type === "area") {
       const options = field.type === "category" ? eventCategories : eventLocations;
       return (
-        <select {...sharedProps} className="form-select" value={form[field.id]} onChange={handleChange}>
+        <select {...sharedProps} value={form[field.id]} onChange={handleChange}>
           <option value="">{field.placeholder}</option>
           {options.map(({ id, name }) => (
             <option key={id} value={id}>
@@ -380,14 +380,14 @@ function EventFormPage({
     };
 
     return (
-      <div className="contact-field event-field" key={field.id}>
+      <div className="field event-field" key={field.id}>
         <label htmlFor={field.id}>
           {field.label}
-          {field.optional && <span className="event-field-optional">Optional</span>}
+          {field.optional && <span className="field-hint">Optional</span>}
         </label>
         {renderControl(field, sharedProps)}
         {hasHint && (
-          <p className="event-field-hint" id={hintId}>
+          <p className="field-hint event-field-hint" id={hintId}>
             <span>{field.hint}</span>
             {field.maxLength && (
               <span>

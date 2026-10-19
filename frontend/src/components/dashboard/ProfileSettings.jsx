@@ -104,12 +104,12 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
           {avatarError ? (
             <FieldError id="avatar-error">{avatarError}</FieldError>
           ) : (
-            <p className="settings-hint" id="avatar-hint">{profileForm.pictureHint}</p>
+            <p className="field-hint settings-hint" id="avatar-hint">{profileForm.pictureHint}</p>
           )}
         </div>
       </div>
 
-      <div className="contact-field">
+      <div className="field">
         <label htmlFor="display-name">{profileForm.nameLabel}</label>
         <input
           id="display-name"
@@ -125,7 +125,7 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
           }}
         />
         {trimmedName ? (
-          <p className="settings-counter" id="display-name-count">
+          <p className="field-hint settings-counter" id="display-name-count">
             {name.length}/{displayNameMaxLength}
           </p>
         ) : (
@@ -133,8 +133,8 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
         )}
       </div>
 
-      <div className="contact-field">
-        <span className="settings-label">{profileForm.emailLabel}</span>
+      <div className="field">
+        <span className="field-label">{profileForm.emailLabel}</span>
         <p className="settings-locked">
           <Lock aria-hidden="true" />
           <span className="settings-locked-value">{selectedUser.email}</span>
@@ -150,7 +150,7 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
             </span>
           )}
         </p>
-        <p className="settings-hint">{profileForm.emailHint}</p>
+        <p className="field-hint settings-hint">{profileForm.emailHint}</p>
       </div>
 
       <div className="settings-foot">
