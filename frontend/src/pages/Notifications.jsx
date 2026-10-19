@@ -98,7 +98,7 @@ function NotificationRow({ notification, group, isOpen, onToggle, onMarkRead }) 
 
       <div className="notification-row-detail" id={detailId} hidden={!isOpen}>
         <p className="notification-row-body">{notification.body}</p>
-        <div className="notification-row-foot">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
           <span className="notification-row-type">{type.label}</span>
           {notification.eventId && (
             <Button
@@ -249,21 +249,24 @@ export default function Notifications({ selectedUser, notifications: allNotifica
             ]}
             value={showUnread ? "unread" : "all"}
             onChange={handleViewChange}
-            className="notification-view-switch"
+            // All / Unread: lined up with the list, not centred like the section
+            className="self-start"
           />
         )}
 
         {visible.length === 0 ? (
           <EmptyState icon={Bell} text={notifications.length === 0 ? notificationsEmpty : notificationsView.unreadEmpty} />
         ) : (
-          <div className="notification-groups" ref={listRef}>
+          <div className="w-full flex flex-col gap-7" ref={listRef}>
             {groups.map((group) => (
               <section
-                className="notification-group"
+                className="flex flex-col gap-2.5"
                 aria-labelledby={`notification-group-${group.key}`}
                 key={group.key}
               >
-                <h2 className="group-label notification-group-title" id={`notification-group-${group.key}`}>
+                {/* Date dividers inside one list, not page sections, so they are small labels
+                   rather than the 20px section heading */}
+                <h2 className="group-label px-1" id={`notification-group-${group.key}`}>
                   {group.title}
                 </h2>
                 <ul className="panel list-panel notification-rows">

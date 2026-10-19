@@ -29,7 +29,7 @@ export default function Pagination({ page, pageCount, onPageChange, summary }) {
   return (
     <nav className="pagination" aria-label="Pagination">
       {summary && <p className="pagination-summary">{summary}</p>}
-      <div className="pagination-controls">
+      <div className="flex items-center gap-2">
         <button
           className="pill pagination-step"
           type="button"
@@ -39,7 +39,7 @@ export default function Pagination({ page, pageCount, onPageChange, summary }) {
           <ChevronLeft aria-hidden="true" />
           <span className="pagination-step-label">Previous</span>
         </button>
-        <ul className="pagination-pages">
+        <ul className="flex items-center gap-1">
           {pageItems(page, pageCount).map((item) =>
             typeof item === "number" ? (
               <li key={item}>

@@ -157,7 +157,7 @@ export default function SystemLogs({ events, users }) {
                 </Button>
               </EmptyState>
             ) : (
-              <div className="log-feed" ref={listRef}>
+              <div className="flex w-full flex-col" ref={listRef}>
                 {days.map((day) => (
                   <Fragment key={day.key}>
                     <h2 className="group-label log-day">{day.label}</h2>

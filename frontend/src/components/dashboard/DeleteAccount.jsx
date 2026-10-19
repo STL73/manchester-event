@@ -24,7 +24,7 @@ export default function DeleteAccount({ role, hasPublicEvents, onDelete }) {
 
   if (!confirming) {
     return (
-      <div className="settings-delete-start">
+      <div className="flex justify-end">
         <Button variant="danger" size="sm" onClick={() => setConfirming(true)}>
           <ButtonIcon aria-hidden="true" />
           {deleteAccountCopy.button.label}
@@ -64,7 +64,7 @@ export default function DeleteAccount({ role, hasPublicEvents, onDelete }) {
           autoFocus
         />
       </div>
-      <div className="settings-confirm-actions">
+      <div className="flex flex-wrap justify-end gap-2">
         <Button variant="ghost" size="sm" onClick={cancel}>
           {deleteAccountCopy.cancel}
         </Button>

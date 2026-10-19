@@ -259,7 +259,7 @@ export default function ManageUsers({ users, events, currentUserId, onUpdateUser
             confirmingDelete ? (
               <>
                 <span>{remove.question}</span>
-                <span className="admin-danger-actions">
+                <span className="flex flex-wrap gap-2">
                   <Button type="button" variant="secondary" size="sm" onClick={() => setConfirmingDelete(false)}>
                     {remove.keep}
                   </Button>

@@ -101,24 +101,12 @@
     animation: side-panel-in 200ms ease-out;
   }
 
-  .side-panel-inner {
-    @apply flex h-full flex-col;
-  }
-
   .side-panel-head {
     @apply flex items-center justify-between gap-3 border-b border-border px-5 py-4;
   }
 
   .side-panel-title {
     @apply text-base font-semibold;
-  }
-
-  .side-panel-close {
-    @apply size-9;
-  }
-
-  .side-panel-body {
-    @apply flex-1 overflow-y-auto p-5;
   }
 
   .side-panel-foot {
@@ -132,10 +120,6 @@
 
   .admin-review-photo {
     @apply aspect-2/1 w-full rounded-xl object-cover;
-  }
-
-  .admin-review-head {
-    @apply flex flex-col gap-2;
   }
 
   .admin-review-badges {
@@ -195,16 +179,8 @@
     @apply flex flex-wrap items-center justify-between gap-2.5 border-t border-border/60 pt-3 text-[13px] text-muted;
   }
 
-  .admin-danger-actions {
-    @apply flex flex-wrap gap-2;
-  }
-
   /* System Logs (decided 2026-10-12, layout A) and Admin Home's Recent Admin
      Actions: entries as sentences, grouped under day headings on System Logs */
-  .log-feed {
-    @apply flex w-full flex-col;
-  }
-
   .log-day {
     @apply mt-5 mb-2 first:mt-0;
   }
@@ -288,22 +264,12 @@
     @apply whitespace-pre-line text-sm leading-relaxed text-foreground/90;
   }
 
-  .message-reply {
-    @apply flex-col items-stretch gap-1.5;
-  }
-
   .message-reply-title {
     @apply flex items-center gap-1.5 text-[13px] font-medium text-(--tone-soft) [&_svg]:size-4;
   }
 
   .dashboard-summary-link {
     @apply cursor-pointer;
-  }
-
-  /* Admin Home's Recent Admin Actions: the log list (its own card) and View
-     All Logs under it */
-  .activity-log {
-    @apply w-full flex flex-col items-start gap-4;
   }
 
   @container (max-width: 52rem) {

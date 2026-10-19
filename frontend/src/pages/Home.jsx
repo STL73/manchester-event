@@ -54,7 +54,7 @@ export default function Home({ events }) {
         <h2 className="heading-section" id="categories-title">
           {categories.title}
         </h2>
-        <ul className="category-chips">
+        <ul className="flex flex-wrap gap-2">
           {eventCategories.map(({ id, name }) => (
             <li key={id}>
               <Link className="category-chip" to={`/events?category=${id}`}>

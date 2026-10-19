@@ -4,7 +4,7 @@ import { ChevronDown } from "lucide-react";
 // keyboard accessible by default. Used on Contact and the FAQs page
 export default function FaqList({ items }) {
   return (
-    <div className="faq-list">
+    <div className="flex flex-col gap-3">
       {items.map(({ question, answer }) => (
         <details className="faq-item" key={question}>
           <summary>

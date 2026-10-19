@@ -27,7 +27,7 @@ export default function Footer() {
           </Link>
           <p className="footer-tagline">{footerText.tagline}</p>
           {/* Placeholder addresses (#) until the real accounts exist */}
-          <ul className="footer-socials" aria-label={footerText.socialsLabel}>
+          <ul className="mt-1 flex flex-wrap gap-2.5" aria-label={footerText.socialsLabel}>
             {socialLinks.map(({ label, icon: Icon, href }) => (
               <li key={label}>
                 <a href={href} aria-label={label} className="hex-frame hex-button">
@@ -41,7 +41,7 @@ export default function Footer() {
         {footerNav.map(({ title, links }) => (
           <nav key={title} aria-label={title}>
             <h2 className="eyebrow footer-title">{title}</h2>
-            <ul className="footer-links">
+            <ul className="flex flex-col items-start gap-2.5">
               {links.map(({ title: linkTitle, url }) => (
                 <li key={url}>
                   {/* Scrolls up too when only the filter changes, e.g.

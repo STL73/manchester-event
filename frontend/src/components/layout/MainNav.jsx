@@ -12,8 +12,11 @@ function groupBySection(items) {
 }
 
 export default function MainNav({ items, counts, activePath, pathname }) {
+  // Grows into spare height (the honeycomb takes it) but never below its links:
+  // on a short screen the whole sidebar scrolls instead, rather than the links
+  // scrolling in a box of their own
   return (
-    <div className="sidebar-group sidebar-group-main">
+    <div className="sidebar-group flex-1 gap-0">
       {groupBySection(items).map(({ section, items: sectionItems }) => (
         <div key={section ?? "top"}>
           {section && <p className="group-label sidebar-section-label">{section}</p>}

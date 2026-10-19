@@ -302,10 +302,10 @@ export default function EventDetails({
   // name is the public page's <h1>
   return (
     <section
-      className="section-content event-details-page"
+      className="section-content items-stretch"
       aria-labelledby="event-details-title"
     >
-      <div className="event-details-back">
+      <div className="w-full max-w-6xl mx-auto">
         <Button to={allEvents.to} variant="secondary" size="sm">
           <allEvents.icon aria-hidden="true" />
           {allEvents.label}

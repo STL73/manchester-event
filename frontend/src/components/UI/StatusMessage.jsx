@@ -14,7 +14,7 @@ export default function StatusMessage({ variant = "success", className = "", ref
       role="status"
     >
       <Icon aria-hidden="true" />
-      <div className="status-message-text">{children}</div>
+      <div className="flex flex-col gap-1">{children}</div>
     </div>
   );
 }

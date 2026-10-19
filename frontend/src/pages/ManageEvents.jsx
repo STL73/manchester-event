@@ -142,7 +142,7 @@ function EventReview({ event, state, events, decision, onDecision, reason, onRea
   return (
     <div className="admin-review">
       <img className="admin-review-photo" src={event.image} alt="" style={{ objectPosition: event.imagePosition }} />
-      <div className="admin-review-head">
+      <div className="flex flex-col gap-2">
         <div className="admin-review-badges">
           <span className={`badge status-${state}`}>{statusLabels[state] ?? state}</span>
           {event.approvedSnapshot && pending && <span className="badge tone-accent">{manageEventsPage.editOfLive}</span>}

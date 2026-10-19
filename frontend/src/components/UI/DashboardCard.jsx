@@ -35,10 +35,11 @@ export default function DashboardCard({ item }) {
 
   return (
     <article className={`card dashboard-card ${tone}`}>
-      <header className="dashboard-card-header">
+      <header className="flex items-start justify-between gap-3">
         <h3 className="dashboard-card-title">{item.title}</h3>
         {Icon && (
-          <span className="hex-frame dashboard-card-hex">
+          // Pulled into the corner so the card's label row keeps its height
+          <span className="hex-frame -mt-1 -mr-1 h-8.25 w-7.5 shrink-0">
             <Icon className="dashboard-card-icon" aria-hidden="true" />
           </span>
         )}

@@ -138,7 +138,8 @@ export default function AdminDashboardHome({ users, events, contactMessages }) {
         {recentAdminActions.length === 0 ? (
           <EmptyState icon={Logs} text="No recent admin actions." />
         ) : (
-          <div className="activity-log">
+          // Recent Admin Actions: the log list (its own card) and View All Logs under it
+          <div className="w-full flex flex-col items-start gap-4">
             {/* The same entries as System Logs, with the day in the time */}
             <ul className="panel list-panel log-list">
               {recentAdminActions.map((log) => (

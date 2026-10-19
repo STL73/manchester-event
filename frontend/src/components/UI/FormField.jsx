@@ -33,11 +33,11 @@ export default function FormField({
   if (type === "radio") {
     return (
       <fieldset className="field" aria-describedby={describedBy}>
-        <legend className="field-label field-label-row">
+        <legend className="field-label w-full flex items-baseline justify-between gap-3">
           <span>{label}</span>
           {hintText}
         </legend>
-        <div className="radio-cards">
+        <div className="grid grid-cols-2 gap-6">
           {options.map((option) => (
             <label className="radio-card" key={option.value}>
               <input
@@ -71,7 +71,8 @@ export default function FormField({
 
   return (
     <div className="field">
-      <div className="field-label-row">
+      {/* Label on the left, short hint on the right: the hint costs no height */}
+      <div className="w-full flex items-baseline justify-between gap-3">
         <label htmlFor={id}>{label}</label>
         {hintText}
       </div>

@@ -164,7 +164,7 @@ export default function Preferences({ events, interestIds, onSaveInterests }) {
                             <span className="preferences-coming-day">{dayFormatter.format(start)}</span>
                             <span className="preferences-coming-month">{monthFormatter.format(start)}</span>
                           </span>
-                          <span className="preferences-coming-text">
+                          <span className="flex min-w-0 flex-col">
                             <span className="preferences-coming-name">{event.name}</span>
                             <span className="preferences-coming-location">{event.location}</span>
                           </span>

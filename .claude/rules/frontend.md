@@ -89,7 +89,10 @@ frontend/src/
   status to its tone. A tone only sets variables (`--tone` for borders, fills and icons,
   `--tone-text` for text in the colour, `--tone-soft` for body text on a tinted box), so one
   class colours a badge, a callout, a sidebar count or a stat card's figure, each in its own
-  way; data says `tone: "warning"`, never a class name. A component class only overrides (padding, gap, size);
+  way; data says `tone: "warning"`, never a class name. A wrapper that only lays out its
+  children and is used in one component takes inline utilities, not a class (2026-10-19:
+  `className="flex flex-col gap-4"`); a class is for a look, or a layout shared between
+  components. A component class only overrides (padding, gap, size);
   don't repeat the shared utilities in it. Before naming a class, check Tailwind has no utility
   by that name: a class called `overline` also gets Tailwind's line over the text
 - **Canonical Tailwind classes** (2026-10-19): write what Tailwind suggests, scale values over

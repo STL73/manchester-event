@@ -147,10 +147,6 @@
 
   /* Date field: the browser's calendar button stays clickable but invisible,
      over a Lucide icon in the accent colour (same as the sidebar icons) */
-  .date-field {
-    @apply relative min-w-0;
-  }
-
   .events-search-input[type="date"]::-webkit-calendar-picker-indicator {
     opacity: 0;
     cursor: pointer;
@@ -204,12 +200,6 @@
     @apply border-accent/30 bg-accent/15 text-foreground;
   }
 
-  /* Result count, then one chip per filter in use. Pagination scrolls
-     back here */
-  .events-results {
-    @apply w-full max-w-7xl flex flex-wrap items-center gap-2 scroll-mt-4;
-  }
-
   .events-count {
     @apply mr-2 text-sm font-semibold text-foreground;
   }
@@ -251,14 +241,6 @@
 
   .pagination-summary {
     @apply text-sm text-muted tabular-nums;
-  }
-
-  .pagination-controls {
-    @apply flex items-center gap-2;
-  }
-
-  .pagination-pages {
-    @apply flex items-center gap-1;
   }
 
   .pagination-page {
@@ -316,10 +298,6 @@
   /* The title link covers the card; the card shows its focus ring instead */
   .event-card-link {
     @apply outline-none after:absolute after:inset-0 after:content-[''];
-  }
-
-  .event-card-media {
-    @apply overflow-hidden;
   }
 
   .event-card-image {
@@ -389,10 +367,6 @@
     @apply text-sm font-medium text-danger;
   }
 
-  .event-card-confirm-actions {
-    @apply flex flex-wrap items-center gap-3;
-  }
-
   /* Same 34px circle as the icon buttons, tinted with its own red like the
      buttons' hovers; the heart stays 20px because it is the card's main action */
   .event-favourite-button {
@@ -434,14 +408,6 @@
      and description beside a panel with when, where, who and the actions.
      The public page and the dashboard share it; below 52rem the panel moves
      up under the title (see the @container rules further down) */
-  .event-details-page {
-    @apply items-stretch;
-  }
-
-  .event-details-back {
-    @apply w-full max-w-6xl mx-auto;
-  }
-
   .event-details {
     @apply w-full max-w-6xl mx-auto flex flex-col gap-6;
   }
@@ -775,10 +741,6 @@
   /* EmptyState's honeycomb: two faint cells behind, the front one with the
      page's icon, interlocked like the logo (the front cell sits 3/4 of a
      cell lower, half a cell across) */
-  .empty-honeycomb {
-    @apply relative h-18 w-19;
-  }
-
   .empty-hex {
     @apply absolute h-10 w-9 bg-accent/15;
   }
@@ -859,23 +821,6 @@
     @apply w-full flex items-center justify-between gap-4;
   }
 
-  /* Inner dashboard pages: the page's title row, 32px above the content
-     (this margin plus the section's 16px gap). The shortcuts wrap under the
-     title when the row runs out of room */
-  .dashboard-page-heading {
-    @apply w-full mb-4 flex flex-col gap-2;
-  }
-
-  .dashboard-page-heading-row {
-    @apply flex-wrap gap-y-3;
-  }
-
-  /* The page title matches Home's greeting; section headings below it
-     stay smaller and muted (.dashboard-title) */
-  .dashboard-page-title {
-    @apply min-w-0 flex items-center gap-3;
-  }
-
   /* The title icon in the logo's cell (decided 2026-10-11): an accent-tinted
      hexagon with a card-coloured one 1.5px inside, like the Preferences cells
      and the footer's hex buttons. 36 x 40, the logo's 10:11 */
@@ -898,10 +843,6 @@
     @apply font-semibold text-foreground tabular-nums;
   }
 
-  .dashboard-page-actions {
-    @apply flex flex-wrap items-center gap-2;
-  }
-
   .section-heading-row .dashboard-title {
     @apply w-auto min-w-0;
   }
@@ -909,11 +850,6 @@
   .section-heading-row > a,
   .section-heading-row > button {
     @apply shrink-0 whitespace-nowrap;
-  }
-
-  /* Search, layout switcher and cards inside the dashboard Explore Events section */
-  .dashboard-events-browser {
-    @apply w-full flex flex-col items-center gap-6;
   }
 
   /* organiser event pages */
@@ -933,10 +869,6 @@
   /* StatusMessage: one box for success and error, icon beside the text */
   .status-message {
     @apply gap-2 rounded-lg p-3 text-sm text-(--tone-text) [&>svg]:size-4;
-  }
-
-  .status-message-text {
-    @apply flex flex-col gap-1;
   }
 
   /* fieldset has a browser border and min-width; the legend sits in the

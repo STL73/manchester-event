@@ -46,7 +46,7 @@ export default function SearchBar({
           </label>
           {/* The browser's calendar button is made invisible but stays
               clickable on top of a Lucide icon in the accent colour */}
-          <div className="date-field">
+          <div className="relative min-w-0">
             <input
               id="event-date"
               name="date"

@@ -24,8 +24,8 @@ export default function About({ events, isUser }) {
         image={{ ...hero.image, width: 1920, height: 1280 }}
       />
 
-      <section className="about-section about-story" aria-labelledby="story-title">
-        <div className="about-story-text">
+      <section className="about-story" aria-labelledby="story-title">
+        <div className="flex flex-col gap-5">
           <h2 className="heading-section" id="story-title">
             {story.title}
           </h2>
@@ -35,7 +35,7 @@ export default function About({ events, isUser }) {
             </p>
           ))}
         </div>
-        <div className="about-story-media">
+        <div className="relative">
           <img
             className="about-story-img"
             src={story.image.src}
@@ -57,13 +57,13 @@ export default function About({ events, isUser }) {
 
       <HoneycombDivider />
 
-      <section className="about-section" aria-labelledby="process-title">
+      <section className="flex flex-col gap-8" aria-labelledby="process-title">
         <h2 className="heading-section about-heading-center" id="process-title">
           {process.title}
         </h2>
         <ol className="about-steps">
           {process.steps.map(({ icon: Icon, title, text }, index) => (
-            <li className="panel about-step" key={title}>
+            <li className="panel relative flex flex-col gap-3 pt-9" key={title}>
               <span className="about-step-number" aria-hidden="true">
                 {index + 1}
               </span>
@@ -79,7 +79,7 @@ export default function About({ events, isUser }) {
         </p>
       </section>
 
-      <section className="about-section" aria-labelledby="stats-title">
+      <section className="flex flex-col gap-8" aria-labelledby="stats-title">
         <h2 className="sr-only" id="stats-title">
           {stats.title}
         </h2>
@@ -100,7 +100,7 @@ export default function About({ events, isUser }) {
           {closing.title}
         </h2>
         <p className="about-closing-text">{closing.text}</p>
-        <div className="about-closing-actions">
+        <div className="flex flex-wrap justify-center gap-4 pt-2">
           <Button to={closing.explore.to} variant="primary" size="lg">
             {closing.explore.label}
           </Button>
