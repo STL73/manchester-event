@@ -48,7 +48,7 @@ function NotificationRow({ notification, group, isOpen, onToggle, onMarkRead }) 
 
   return (
     <li
-      className={`notification-row ${isRead ? "" : "is-unread"} ${isOpen ? "is-open" : ""}`}
+      className={`list-row notification-row ${isRead ? "" : "is-unread"} ${isOpen ? "is-open" : ""}`}
     >
       <div className="notification-row-head">
         <h3 className="notification-row-heading">
@@ -266,7 +266,7 @@ export default function Notifications({ selectedUser, notifications: allNotifica
                 <h2 className="group-label notification-group-title" id={`notification-group-${group.key}`}>
                   {group.title}
                 </h2>
-                <ul className="notification-rows">
+                <ul className="panel list-panel notification-rows">
                   {group.items.map((notification) => (
                     <NotificationRow
                       key={notification.notificationId}

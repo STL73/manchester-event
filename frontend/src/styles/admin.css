@@ -5,7 +5,7 @@
      records as a list of rows, the whole row opening the side panel. Below
      52rem a row becomes a two-line card */
   .admin-list {
-    @apply w-full overflow-hidden rounded-2xl border border-border bg-card;
+    @apply overflow-hidden;
   }
 
   .admin-list-head,
@@ -26,7 +26,7 @@
   }
 
   .admin-row {
-    @apply relative border-t border-border/55 text-sm transition-colors hover:bg-accent/6 motion-reduce:transition-none;
+    @apply relative text-sm transition-colors hover:bg-accent/6 motion-reduce:transition-none;
   }
 
   .admin-list-head + .admin-row {
@@ -85,7 +85,7 @@
 
   /* Initials in the logo's cell, where the user has no picture */
   .admin-avatar {
-    @apply hex-cell grid h-9.5 w-8.5 shrink-0 place-items-center bg-accent/22 text-xs font-semibold text-accent;
+    @apply h-9.5 w-8.5 text-xs font-semibold;
   }
 
   .admin-avatar.is-large {
@@ -210,28 +210,16 @@
   }
 
   .log-list {
-    @apply w-full overflow-hidden rounded-2xl border border-border bg-card;
+    @apply overflow-hidden;
   }
 
   .log-entry {
-    @apply grid grid-cols-[30px_minmax(0,1fr)_auto] items-center gap-3 border-t border-border/55 px-4 py-2.5 text-sm first:border-t-0;
+    @apply grid grid-cols-[30px_minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5 text-sm;
   }
 
   /* The action's icon in the logo's cell, coloured by how it went */
   .log-entry-icon {
-    @apply hex-cell grid h-8.25 w-7.5 place-items-center bg-accent/18 text-accent [&_svg]:size-3.75;
-  }
-
-  .log-entry-icon.is-good {
-    @apply bg-success/15 text-success;
-  }
-
-  .log-entry-icon.is-bad {
-    @apply bg-danger/15 text-danger;
-  }
-
-  .log-entry-icon.is-quiet {
-    @apply bg-muted/15 text-muted;
+    @apply h-8.25 w-7.5 [&_svg]:size-3.75;
   }
 
   .log-entry-text {

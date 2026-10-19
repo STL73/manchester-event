@@ -140,7 +140,7 @@ export default function AdminDashboardHome({ users, events, contactMessages }) {
         ) : (
           <div className="activity-log">
             {/* The same entries as System Logs, with the day in the time */}
-            <ul className="log-list">
+            <ul className="panel list-panel log-list">
               {recentAdminActions.map((log) => (
                 <LogEntry
                   key={log.logId}

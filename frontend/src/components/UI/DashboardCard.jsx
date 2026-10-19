@@ -38,7 +38,7 @@ export default function DashboardCard({ item }) {
       <header className="dashboard-card-header">
         <h3 className="dashboard-card-title">{item.title}</h3>
         {Icon && (
-          <span className="dashboard-card-hex">
+          <span className="hex-frame dashboard-card-hex">
             <Icon className="dashboard-card-icon" aria-hidden="true" />
           </span>
         )}

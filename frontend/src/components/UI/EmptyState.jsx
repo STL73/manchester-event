@@ -7,9 +7,9 @@ export default function EmptyState({ icon: Icon, text, children }) {
   return (
     <div className="dashboard-empty-state">
       <div className="empty-honeycomb" aria-hidden="true">
-        <span className="empty-hex empty-hex-left" />
-        <span className="empty-hex empty-hex-right" />
-        <span className="empty-hex empty-hex-front">{Icon && <Icon />}</span>
+        <span className="hex-frame empty-hex empty-hex-left" />
+        <span className="hex-frame empty-hex empty-hex-right" />
+        <span className="hex-frame empty-hex empty-hex-front">{Icon && <Icon />}</span>
       </div>
       <p className="dashboard-empty-text">{text}</p>
       {children}

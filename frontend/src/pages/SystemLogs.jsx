@@ -161,7 +161,7 @@ export default function SystemLogs({ events, users }) {
                 {days.map((day) => (
                   <Fragment key={day.key}>
                     <h2 className="group-label log-day">{day.label}</h2>
-                    <ul className="log-list">
+                    <ul className="panel list-panel log-list">
                       {day.entries.map(({ log, description }) => (
                         <LogEntry key={log.logId} log={log} description={description} />
                       ))}

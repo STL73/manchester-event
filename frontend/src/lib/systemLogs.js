@@ -42,7 +42,7 @@ function userTarget(details, lookup) {
 const describers = {
   "Event Status Changed": (details, lookup) => ({
     kind: "events",
-    tone: details.status === "approved" ? "good" : details.status === "rejected" ? "bad" : "",
+    tone: details.status === "approved" ? "success" : details.status === "rejected" ? "danger" : "",
     icon: details.status === "approved" ? Check : details.status === "rejected" ? X : CalendarCheck,
     verb: details.status === "approved" ? "approved" : details.status === "rejected" ? "rejected" : `set to ${details.status}`,
     target: eventTarget(details, lookup),
@@ -56,7 +56,7 @@ const describers = {
     after: details.status === "draft" ? "as a draft" : "and sent it for approval",
   }),
   "Event Updated": (details, lookup) => ({ kind: "events", icon: Pencil, verb: "edited", target: eventTarget(details, lookup) }),
-  "Event Cancelled": (details, lookup) => ({ kind: "events", tone: "bad", icon: CalendarX, verb: "cancelled", target: eventTarget(details, lookup) }),
+  "Event Cancelled": (details, lookup) => ({ kind: "events", tone: "danger", icon: CalendarX, verb: "cancelled", target: eventTarget(details, lookup) }),
   "Event Deleted": (details, lookup) => ({ kind: "events", icon: Trash2, verb: "deleted", target: eventTarget(details, lookup) }),
   "Draft Submitted": (details, lookup) => ({
     kind: "events",
@@ -69,20 +69,20 @@ const describers = {
   "Favourite Removed": (details, lookup) => ({ kind: "events", icon: HeartOff, verb: "unsaved", target: eventTarget(details, lookup) }),
   "User Registered": (details) => ({
     kind: "accounts",
-    tone: "good",
+    tone: "success",
     icon: UserPlus,
     verb: `signed up as ${details.role === "organiser" ? "an organiser" : "a user"}`,
     sub: details.email,
   }),
   "User Status Changed": (details, lookup) => ({
     kind: "accounts",
-    tone: details.status === "suspended" ? "bad" : "",
+    tone: details.status === "suspended" ? "danger" : "",
     icon: UserCog,
     verb: details.status === "suspended" ? "suspended" : "reactivated",
     target: userTarget(details, lookup),
     sub: details.reason ? `“${details.reason}”` : "",
   }),
-  "User Deleted": (details, lookup) => ({ kind: "accounts", tone: "bad", icon: UserMinus, verb: "deleted the account", target: userTarget(details, lookup) }),
+  "User Deleted": (details, lookup) => ({ kind: "accounts", tone: "danger", icon: UserMinus, verb: "deleted the account", target: userTarget(details, lookup) }),
   "Password Changed": () => ({ kind: "accounts", icon: KeyRound, verb: "changed their password" }),
   "Avatar Updated": () => ({ kind: "accounts", icon: ImageUp, verb: "changed their picture" }),
   "Preferences Updated": (details) => ({
@@ -91,12 +91,12 @@ const describers = {
     verb: "updated their interests",
     sub: details.categories?.length ? `${details.categories.length} categories` : "",
   }),
-  "User Login": () => ({ kind: "signins", tone: "quiet", icon: LogIn, verb: "signed in" }),
-  "User Logout": () => ({ kind: "signins", tone: "quiet", icon: LogOut, verb: "signed out" }),
+  "User Login": () => ({ kind: "signins", tone: "muted", icon: LogIn, verb: "signed in" }),
+  "User Logout": () => ({ kind: "signins", tone: "muted", icon: LogOut, verb: "signed out" }),
   // The actor is the account someone tried; the sentence starts with what happened
   "User Login Failed": (details) => ({
     kind: "failed",
-    tone: "bad",
+    tone: "danger",
     icon: ShieldAlert,
     failed: true,
     sub: [details.reason, details.ip && `from ${details.ip}`].filter(Boolean).join(" · "),

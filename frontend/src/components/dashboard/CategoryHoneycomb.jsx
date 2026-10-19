@@ -87,7 +87,7 @@ export default function CategoryHoneycomb({ categories, counts, selectedIds, onT
                         onChange={() => onToggle(category.id)}
                         aria-describedby={describedBy}
                       />
-                      <span className="honeycomb-hex">
+                      <span className="hex-frame honeycomb-hex">
                         <Check className="honeycomb-tick" aria-hidden="true" />
                         <span className="honeycomb-body">
                           <Icon className="honeycomb-icon" aria-hidden="true" />

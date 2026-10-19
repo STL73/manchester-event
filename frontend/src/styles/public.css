@@ -108,11 +108,11 @@
      hover or keyboard focus the whole cell fills with the accent and the icon
      lifts. The mask would hide a focus outline, so focus gets the hover fill */
   .hex-button {
-    @apply hex-cell relative grid h-11.5 w-10.5 place-items-center bg-accent/35 text-muted transition-colors duration-200 outline-none motion-reduce:transition-none;
+    @apply h-11.5 w-10.5 text-muted transition-colors duration-200 outline-none motion-reduce:transition-none;
   }
 
   .hex-button::before {
-    @apply hex-cell absolute inset-[1.5px] bg-card transition-colors duration-200 content-[''] motion-reduce:transition-none;
+    @apply transition-colors duration-200 motion-reduce:transition-none;
   }
 
   .hex-button svg {

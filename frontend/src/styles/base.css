@@ -49,8 +49,8 @@
    in shared.css maps each event and account status to one. Every tone sets
    all three, so a tone inside another never mixes with it. Components build
    some names at runtime (tone-${badge.tone}), which Tailwind can't see in the
-   source, so all seven are always generated */
-@source inline("tone-{success,warning,danger,cancelled,draft,past,accent}");
+   source, so all of them are always generated */
+@source inline("tone-{success,warning,danger,cancelled,draft,past,accent,muted}");
 
 @utility tone-success {
   --tone: --theme(--color-success);
@@ -92,6 +92,13 @@
   --tone: --theme(--color-accent);
   --tone-text: --theme(--color-accent-hover);
   --tone-soft: --theme(--color-foreground);
+}
+
+/* No status at all (a sign-in in the logs) */
+@utility tone-muted {
+  --tone: --theme(--color-muted);
+  --tone-text: --theme(--color-muted);
+  --tone-soft: --theme(--color-muted);
 }
 
 @layer base {

@@ -21,8 +21,8 @@ export default function LogEntry({ log, description, time }) {
   const { icon: Icon, tone, actor, role, verb, target, after, sub, failed } = description;
 
   return (
-    <li className={`log-entry ${failed ? "is-failed" : ""}`}>
-      <span className={`log-entry-icon ${tone ? `is-${tone}` : ""}`} aria-hidden="true">
+    <li className={`list-row log-entry ${failed ? "is-failed" : ""}`}>
+      <span className={`hex-fill tone-${tone || "accent"} log-entry-icon`} aria-hidden="true">
         <Icon />
       </span>
       <p className="log-entry-text">

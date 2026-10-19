@@ -239,10 +239,10 @@ export default function ContactMessages({ contactMessages, users, onSetRead, onR
                 </Button>
               </EmptyState>
             ) : (
-              <ul className="admin-list admin-list-messages" ref={listRef}>
+              <ul className="panel list-panel admin-list admin-list-messages" ref={listRef}>
                 {pageMessages.map((message) => (
                   <li
-                    className={`admin-row message-row ${message.readAt ? "" : "is-unread"} ${openId === message.messageId ? "is-open" : ""}`}
+                    className={`list-row admin-row message-row ${message.readAt ? "" : "is-unread"} ${openId === message.messageId ? "is-open" : ""}`}
                     key={message.messageId}
                   >
                     <span className="message-dot" aria-hidden="true" />
@@ -286,7 +286,7 @@ export default function ContactMessages({ contactMessages, users, onSetRead, onR
           {openMessage && (
             <div className="admin-review">
               <div className="admin-account-head">
-                <span className="admin-avatar" aria-hidden="true">
+                <span className="hex-fill tone-accent admin-avatar" aria-hidden="true">
                   {initials(openMessage.name)}
                 </span>
                 <div>
