@@ -429,7 +429,7 @@ function EventFormPage({
     : createEventForm.summary;
 
   return (
-    <div className="dashboard-home">
+    <div className="dashboard-page">
       <section
         className="dashboard-section"
         aria-labelledby="create-event-title"
@@ -474,7 +474,7 @@ function EventFormPage({
 
             <div className="event-form-layout">
               <div className="event-form-main">
-                <form id="event-form" className="event-form-panel" onSubmit={handleSubmit} noValidate>
+                <form id="event-form" className="panel event-form-panel" onSubmit={handleSubmit} noValidate>
                   {eventFormGroups.map((group, index) => (
                     <section className="event-form-group" aria-labelledby={`group-${group.id}`} key={group.id}>
                       <h2 className="event-form-group-title" id={`group-${group.id}`}>
@@ -532,13 +532,13 @@ function EventFormPage({
               </div>
 
               <aside className="event-form-side" aria-label="Preview and save">
-                <p className="event-form-side-label">{createEventForm.previewLabel}</p>
+                <p className="group-label event-form-side-label">{createEventForm.previewLabel}</p>
                 {/* A picture of the result; the form is what screen readers use */}
                 <div className="event-form-preview" aria-hidden="true">
                   <EventCard event={previewEvent} preview />
                 </div>
 
-                <div className="event-form-actions">
+                <div className="panel event-form-actions">
                   {isDraft && (
                     <div className="event-form-checklist">
                       <p className="event-form-checklist-title">

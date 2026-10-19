@@ -20,7 +20,7 @@ export default function NotFound({ isUser = false, inDashboard = false }) {
   // Inside the dashboard the sidebar stays, so the page keeps its layout
   if (inDashboard) {
     return (
-      <div className="dashboard-home">
+      <div className="dashboard-page">
         <section className="dashboard-section" aria-labelledby="not-found-title">
           <DashboardPageHeading id="not-found-title" icon={TitleIcon} title={title} />
           <EmptyState icon={TitleIcon} text={message}>
@@ -33,7 +33,7 @@ export default function NotFound({ isUser = false, inDashboard = false }) {
 
   return (
     <section className="section-content" aria-labelledby="not-found-title">
-      <h1 className="section-title" id="not-found-title">
+      <h1 className="heading-section section-title" id="not-found-title">
         {title}
       </h1>
       <p className="content-p">{message}</p>

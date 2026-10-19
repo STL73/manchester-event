@@ -287,7 +287,7 @@ export default function ManageUsers({ users, events, currentUserId, onUpdateUser
     ) : null;
 
   return (
-    <div className="dashboard-home">
+    <div className="dashboard-page">
       <section className="dashboard-section" aria-labelledby="manage-users-title">
         <DashboardPageHeading
           id="manage-users-title"
@@ -363,7 +363,7 @@ export default function ManageUsers({ users, events, currentUserId, onUpdateUser
               </EmptyState>
             ) : (
               <ul className="admin-list admin-list-users" ref={listRef}>
-                <li className="admin-list-head" aria-hidden="true">
+                <li className="group-label admin-list-head" aria-hidden="true">
                   <span>Account</span>
                   <span>Role</span>
                   <span>Status</span>

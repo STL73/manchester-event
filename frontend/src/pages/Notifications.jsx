@@ -203,7 +203,7 @@ export default function Notifications({ selectedUser, notifications: allNotifica
   }
 
   return (
-    <div className="dashboard-home">
+    <div className="dashboard-page">
       <section
         className="dashboard-section"
         aria-labelledby="notifications-title"
@@ -263,7 +263,7 @@ export default function Notifications({ selectedUser, notifications: allNotifica
                 aria-labelledby={`notification-group-${group.key}`}
                 key={group.key}
               >
-                <h2 className="notification-group-title" id={`notification-group-${group.key}`}>
+                <h2 className="group-label notification-group-title" id={`notification-group-${group.key}`}>
                   {group.title}
                 </h2>
                 <ul className="notification-rows">

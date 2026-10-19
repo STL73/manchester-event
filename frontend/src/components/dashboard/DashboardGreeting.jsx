@@ -94,7 +94,7 @@ export default function DashboardGreeting({ selectedUser, ...data }) {
         )}
       </div>
       <div className="dashboard-greeting-text">
-        <h1 className="dashboard-greeting-title">
+        <h1 className="heading-page">
           {dashboardGreeting.title}{" "}
           <span className="dashboard-greeting-name">{selectedUser.user}</span>
         </h1>

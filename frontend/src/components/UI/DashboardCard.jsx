@@ -34,7 +34,7 @@ export default function DashboardCard({ item }) {
   const tone = needsAction ? (item.tone ?? "") : "";
 
   return (
-    <article className={`dashboard-card ${tone}`}>
+    <article className={`card dashboard-card ${tone}`}>
       <header className="dashboard-card-header">
         <h3 className="dashboard-card-title">{item.title}</h3>
         {Icon && (

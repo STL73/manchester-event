@@ -2,6 +2,53 @@
    details, forms, tables, status badges, tooltips */
 @layer components {
 
+  /* Building blocks every area shares. A component adds its own class only
+     for what differs (padding, gap, size); those come later in the files,
+     so they win over these */
+
+  /* A public page: one centred column, the same width as the navbar */
+  .page {
+    @apply mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-10 md:px-6 md:py-14;
+  }
+
+  /* Holds a page's content: forms, lists, tables, charts, detail panels.
+     16px corners; a full border on the card colour */
+  .panel {
+    @apply rounded-2xl border border-border bg-card p-6;
+  }
+
+  /* One of many in a grid (event and stat cards): 12px corners, a fainter
+     border and a faint top highlight. Drop shadows barely show on this dark
+     background, so depth comes from the edge instead */
+  .card {
+    @apply rounded-xl border border-border/60 bg-card shadow-[inset_0_1px_0_rgb(255_255_255/0.04)];
+  }
+
+  /* The page's own title: the dashboard title row and Home's greeting */
+  .heading-page {
+    @apply text-2xl font-semibold text-foreground;
+  }
+
+  /* A section of a public page (Home, About, FAQs) */
+  .heading-section {
+    @apply text-2xl font-semibold text-accent-hover md:text-3xl;
+  }
+
+  /* The title inside a panel or card */
+  .heading-panel {
+    @apply text-xl font-semibold text-foreground;
+  }
+
+  /* A small label over a group: sidebar sections, day groups, list headers */
+  .group-label {
+    @apply text-xs font-medium uppercase tracking-wider text-muted;
+  }
+
+  /* The public site's accent label: page heroes, footer columns */
+  .eyebrow {
+    @apply text-sm font-semibold uppercase tracking-[0.2em] text-accent;
+  }
+
   .navbar-logo {
     @apply flex items-center gap-2.5 rounded-lg text-foreground font-semibold text-lg focus-ring-wide;
   }
@@ -17,19 +64,11 @@
   }
 
   .section-title {
-    @apply w-full text-3xl text-accent-hover font-semibold text-center;
+    @apply w-full text-3xl text-center;
   }
 
   .content-p {
     @apply text-base leading-7 text-muted;
-  }
-
-  /* Pages that open with a compact PageHero: same width and spacing as
-     Home and About */
-  .explore-page,
-  .contact-page,
-  .reading-page {
-    @apply mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-10 md:px-6 md:py-14;
   }
 
   /* Keywords gets double width; the Search button is only as wide as it needs.
@@ -199,11 +238,9 @@
     @apply col-span-full p-8 flex flex-col items-center gap-4 rounded-xl bg-card text-center;
   }
 
-  /* Surfaces (event, dashboard and chart cards, tables) share one edge: a
-     1px border and a faint top highlight. Drop shadows barely show on this
-     dark background, so depth comes from the edge instead. */
+  /* On .card */
   .event-card {
-    @apply relative flex min-w-0 flex-col overflow-hidden rounded-xl border border-border/60 bg-card shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] transition-[translate,border-color,box-shadow] duration-200 motion-reduce:transition-none;
+    @apply relative flex min-w-0 flex-col overflow-hidden transition-[translate,border-color,box-shadow] duration-200 motion-reduce:transition-none;
   }
 
   /* The whole card is clickable, so it answers hover and keyboard focus */
@@ -411,7 +448,7 @@
   }
 
   .event-details-panel {
-    @apply self-start flex flex-col gap-5 rounded-2xl border border-border bg-card p-5;
+    @apply self-start flex flex-col gap-5 p-5;
     grid-area: panel;
   }
 
@@ -497,11 +534,11 @@
 
   /* contact styles */
   .contact-form-container {
-    @apply w-full rounded-2xl border border-border bg-card p-6;
+    @apply w-full;
   }
 
   .contact-form-title {
-    @apply text-2xl font-semibold text-foreground;
+    @apply text-2xl;
   }
 
   .contact-field {
@@ -561,10 +598,6 @@
 
   .page-hero-compact .page-hero-content {
     @apply gap-3 md:p-10;
-  }
-
-  .page-hero-eyebrow {
-    @apply text-sm font-semibold uppercase tracking-[0.2em] text-accent;
   }
 
   .page-hero-title {
@@ -648,7 +681,7 @@
     @apply w-full p-4 flex flex-col justify-center items-center gap-4;
   }
 
-  .dashboard-home {
+  .dashboard-page {
     @apply w-full flex flex-col gap-4;
   }
 
@@ -800,7 +833,7 @@
   /* The page title matches Home's greeting; section headings below it
      stay smaller and muted (.dashboard-title) */
   .dashboard-page-title {
-    @apply min-w-0 flex items-center gap-3 text-2xl text-foreground font-semibold;
+    @apply min-w-0 flex items-center gap-3;
   }
 
   /* The title icon in the logo's cell (decided 2026-10-11): an accent-tinted

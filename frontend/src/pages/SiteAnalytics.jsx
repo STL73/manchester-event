@@ -85,7 +85,7 @@ export default function SiteAnalytics({ users, events }) {
   const categoryRows = countBy(events, (event) => event.category);
 
   return (
-    <div className="dashboard-home">
+    <div className="dashboard-page">
       <section
         className="dashboard-section"
         aria-labelledby="site-analytics-title"

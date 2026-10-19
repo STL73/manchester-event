@@ -392,7 +392,7 @@ export default function ManageEvents({ events, onUpdateEventStatus }) {
   ) : null;
 
   return (
-    <div className="dashboard-home">
+    <div className="dashboard-page">
       <section className="dashboard-section" aria-labelledby="manage-events-title">
         <DashboardPageHeading
           id="manage-events-title"
@@ -456,7 +456,7 @@ export default function ManageEvents({ events, onUpdateEventStatus }) {
               <EmptyState icon={manageEventsPage.icon} text={view === "pending" ? manageEventsPage.summary.none : manageEventsMessages.noEvents} />
             ) : (
               <ul className="admin-list admin-list-events" ref={listRef}>
-                <li className="admin-list-head" aria-hidden="true">
+                <li className="group-label admin-list-head" aria-hidden="true">
                   <span>Event</span>
                   <span>Organiser</span>
                   <span>Date</span>

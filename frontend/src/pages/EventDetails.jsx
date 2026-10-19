@@ -170,7 +170,7 @@ function EventDetailsBody({ event, TitleTag, titleId, role, favouriteIds, onTogg
           </TitleTag>
         </div>
 
-        <aside className="event-details-panel" aria-label="When and where">
+        <aside className="panel event-details-panel" aria-label="When and where">
           <ul className="event-details-facts">
             <li className="event-details-fact">
               <CalendarDays aria-hidden="true" />
@@ -261,7 +261,7 @@ export default function EventDetails({
   // Inside the dashboard: same layout as the edit pages, with Go Back
   if (inDashboard) {
     return (
-      <div className="dashboard-home">
+      <div className="dashboard-page">
         <section
           className="dashboard-section"
           aria-labelledby="event-details-heading"
@@ -290,7 +290,7 @@ export default function EventDetails({
   if (!event) {
     return (
       <section className="section-content">
-        <h1 className="section-title">Event not found</h1>
+        <h1 className="heading-section section-title">Event not found</h1>
         <Button to="/events" variant="primary" size="md">
           Back to Events
         </Button>

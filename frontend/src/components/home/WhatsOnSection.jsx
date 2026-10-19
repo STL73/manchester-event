@@ -26,7 +26,7 @@ export default function WhatsOnSection({ events, now }) {
   return (
     <section className="home-section" aria-labelledby="whats-on-title">
       <div className="home-section-header">
-        <h2 className="home-heading" id="whats-on-title">
+        <h2 className="heading-section" id="whats-on-title">
           {whatsOn.title}
         </h2>
         {matching.length > whatsOn.limit && (

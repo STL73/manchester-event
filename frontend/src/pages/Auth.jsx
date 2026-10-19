@@ -73,12 +73,12 @@ function AuthForm({ page }) {
   }
 
   return (
-    <div className="auth-card">
+    <div className="panel auth-card">
       {/* noValidate: the checks below show their messages in the page style,
           instead of the browser's own pop-ups */}
       <form className="contact-form auth-form" onSubmit={handleSubmit} noValidate>
         <div className="auth-form-header">
-          <h1 className="contact-form-title">{title}</h1>
+          <h1 className="heading-panel contact-form-title">{title}</h1>
           <p className="auth-subtitle">{subtitle}</p>
         </div>
 
@@ -116,7 +116,7 @@ function AuthForm({ page }) {
       <div className="auth-media">
         <img className="auth-image" src={image.src} alt={image.alt} />
         <div className="auth-caption">
-          <p className="page-hero-eyebrow">{caption.place}</p>
+          <p className="eyebrow">{caption.place}</p>
           <p className="auth-caption-text">{caption.text}</p>
         </div>
       </div>

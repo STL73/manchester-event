@@ -13,7 +13,7 @@ export default function SettingsSection({ id, section, danger = false, children 
         </h2>
         <p className="settings-row-text">{section.description}</p>
       </div>
-      <div className="settings-panel">{children}</div>
+      <div className="panel settings-panel">{children}</div>
     </section>
   );
 }

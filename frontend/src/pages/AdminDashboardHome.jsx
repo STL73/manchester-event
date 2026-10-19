@@ -108,7 +108,7 @@ export default function AdminDashboardHome({ users, events, contactMessages }) {
   const lookup = logLookup(events, users);
 
   return (
-    <div className="dashboard-home">
+    <div className="dashboard-page">
       <section
         className="dashboard-section"
         aria-labelledby="quick-insights-title"

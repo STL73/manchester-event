@@ -67,6 +67,13 @@ frontend/src/
   for the lighter text on banners (`text-yellow-200`…) and colours with no status meaning.
   Repeated multi-utility patterns get a semantic class in `styles/` built with `@apply` (e.g.
   `.event-card`, `.status-badge`), which is how most components are styled
+- **Shared classes first** (2026-10-19): an element takes the shared class for what it is and
+  a component class only for what differs, e.g. `className="panel contact-aside"`. The shared
+  ones sit at the top of `styles/shared.css`: `.page` (a public page's column), `.panel` (16px,
+  full border, `p-6`), `.card` (12px, faint border and top highlight), `.heading-page`,
+  `.heading-section`, `.heading-panel`, `.group-label` (small uppercase label) and `.eyebrow`
+  (the public accent label). Dashboard pages are `.dashboard-page`, sections `.dashboard-section`.
+  A component class only overrides (padding, gap, size); don't repeat the shared utilities in it
 - **Corner radius:** panels that hold a page's content (forms, tables, chart cards, detail and
   activity panels) are 16px (`rounded-2xl`), public and dashboard alike. Cards in a grid, list
   items and small boxes are 12px (`rounded-xl`). The filter bar is 40px round its pill fields.
@@ -212,7 +219,7 @@ frontend/src/
   dashboard (`.contact-form-title`) are 20px; the public Contact form keeps 24px. Page-specific
   buttons (Go Back, Mark All as Read) go in the title row as `DashboardPageHeading`'s children
 - **Dashboard spacing:** 32px under the title row, 48px between sections, 16px from a heading to
-  its content (`.dashboard-home` / `.dashboard-section` gaps, see the comment in `styles/shared.css`)
+  its content (`.dashboard-page` / `.dashboard-section` gaps, see the comment in `styles/shared.css`)
 - **Stat cards only on the three Home pages.** Each card answers "what needs me, what's coming, or
   how am I doing", and always has one context line (`trend`, `action` or `detail` in
   `DashboardCard`); no bare figures. Inner pages get a one-line summary under the title instead

@@ -40,7 +40,7 @@ export default function Contact({ onSendMessage }) {
   }
 
   return (
-    <div className="contact-page">
+    <div className="page contact-page">
       <PageHero
         compact
         eyebrow={hero.eyebrow}
@@ -51,13 +51,13 @@ export default function Contact({ onSendMessage }) {
       />
 
       <div className="contact-layout">
-        <section className="contact-aside" aria-labelledby="quick-answers-title">
+        <section className="panel contact-aside" aria-labelledby="quick-answers-title">
           <p className="contact-response-note">
             <Clock aria-hidden="true" />
             {responseNote}
           </p>
 
-          <h2 className="contact-aside-title" id="quick-answers-title">
+          <h2 className="heading-panel" id="quick-answers-title">
             {quickAnswers.title}
           </h2>
           <FaqList items={featuredQuestions} />
@@ -77,9 +77,9 @@ export default function Contact({ onSendMessage }) {
           </ul>
         </section>
 
-        <div className="contact-form-container">
+        <div className="panel contact-form-container">
           <form className="contact-form" onSubmit={handleSubmit}>
-            <h2 className="contact-form-title">{form.title}</h2>
+            <h2 className="heading-panel contact-form-title">{form.title}</h2>
 
             {status && (
               <StatusMessage variant={status === "sent" ? "success" : "error"}>

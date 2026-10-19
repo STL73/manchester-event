@@ -6,7 +6,7 @@ export default function LegalPage({ page, titleId }) {
   const { hero, updated, draftNote, sections } = page;
 
   return (
-    <div className="reading-page">
+    <div className="page reading-page">
       <PageHero compact eyebrow={hero.eyebrow} title={hero.title} titleId={titleId} intro={hero.intro} />
 
       <article className="reading-column">
@@ -18,7 +18,7 @@ export default function LegalPage({ page, titleId }) {
 
         {sections.map(({ title, paragraphs }) => (
           <section className="reading-section" key={title}>
-            <h2 className="reading-heading">{title}</h2>
+            <h2 className="heading-section reading-heading">{title}</h2>
             {paragraphs.map((paragraph) => (
               <p className="content-p" key={paragraph}>
                 {paragraph}

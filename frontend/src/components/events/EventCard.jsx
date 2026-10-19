@@ -62,7 +62,7 @@ export default function EventCard({
   // card (see .event-card-link), and the action buttons sit above it.
   // muted greys out an event that has finished or been cancelled
   return (
-    <article className={`event-card ${muted ? "event-card-muted" : ""} ${preview ? "event-card-preview" : ""}`.trim()}>
+    <article className={`card event-card ${muted ? "event-card-muted" : ""} ${preview ? "event-card-preview" : ""}`.trim()}>
       {/* alt="": the title link right below already names the event, so a
           screen reader would read it twice. Lazy, because Explore lists every
           upcoming event and most cards start below the screen */}

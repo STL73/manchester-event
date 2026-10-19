@@ -180,7 +180,7 @@ export default function ContactMessages({ contactMessages, users, onSetRead, onR
   ) : null;
 
   return (
-    <div className="dashboard-home">
+    <div className="dashboard-page">
       <section className="dashboard-section" aria-labelledby="contact-messages-title">
         <DashboardPageHeading
           id="contact-messages-title"

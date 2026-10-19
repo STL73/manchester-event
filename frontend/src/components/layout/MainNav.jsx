@@ -16,7 +16,7 @@ export default function MainNav({ items, counts, activePath, pathname }) {
     <div className="sidebar-group sidebar-group-main">
       {groupBySection(items).map(({ section, items: sectionItems }) => (
         <div key={section ?? "top"}>
-          {section && <p className="sidebar-section-label">{section}</p>}
+          {section && <p className="group-label sidebar-section-label">{section}</p>}
           <div className="sidebar-menu">
             {sectionItems.map((item) => (
               <NavItem

@@ -58,7 +58,7 @@ export default function MyDrafts({
   const { submitted } = myDraftsMessages;
 
   return (
-    <div className="dashboard-home">
+    <div className="dashboard-page">
       <section
         className="dashboard-section"
         aria-labelledby="my-drafts-title"

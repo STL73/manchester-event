@@ -94,7 +94,7 @@ export default function SystemLogs({ events, users }) {
   const { summary } = systemLogsPage;
 
   return (
-    <div className="dashboard-home">
+    <div className="dashboard-page">
       <section className="dashboard-section" aria-labelledby="system-logs-title">
         <DashboardPageHeading
           id="system-logs-title"
@@ -160,7 +160,7 @@ export default function SystemLogs({ events, users }) {
               <div className="log-feed" ref={listRef}>
                 {days.map((day) => (
                   <Fragment key={day.key}>
-                    <h2 className="log-day">{day.label}</h2>
+                    <h2 className="group-label log-day">{day.label}</h2>
                     <ul className="log-list">
                       {day.entries.map(({ log, description }) => (
                         <LogEntry key={log.logId} log={log} description={description} />
