@@ -29,8 +29,10 @@ frontend/src/
 ├── App.jsx            routes + all shared app state (events, users, favourites, messages)
 ├── App.css            font and Tailwind imports, @theme tokens, then imports styles/
 ├── styles/            component classes via @apply, by where they are used:
-│                      base (hex-cell utility, element defaults, keyframes), shared
-│                      (public site and dashboard), public, dashboard, admin
+│                      base (utilities: hex-cell, focus-ring, selected, tone-*;
+│                      element defaults, keyframes), shared (the shared classes
+│                      at the top, then what public site and dashboard share),
+│                      public, dashboard, admin
 ├── pages/             one file per route
 ├── components/
 │   ├── UI/            shared primitives: Button, DashboardCard, Tooltip
@@ -43,6 +45,92 @@ frontend/src/
 ├── lib/               pure helpers (analytics.js: chart aggregation)
 └── images/            event images
 ```
+
+## Styling
+
+Tailwind v4 with no config file: tokens in the `@theme` block of `src/App.css`, component
+classes in `styles/` built with `@apply`. The structure below was set on 2026-10-19.
+
+### Colours and tones
+
+- Theme tokens only, never raw hex: `bg-background`, `bg-card`, `border-border`,
+  `text-foreground`, `text-muted`, `text-accent` / `accent-hover`, `text-danger` for errors and
+  destructive actions, `text-favourite` for the favourite heart
+- **Status colours are tokens:** `success` (approved, active, done), `warning` (pending, needs
+  attention), `danger` (rejected, errors), `cancelled`, `draft`, `past`. Tailwind's palette is
+  only for colours with no status meaning
+- **Tones** (`styles/base.css`): `tone-success`, `tone-warning`, `tone-danger`,
+  `tone-cancelled`, `tone-draft`, `tone-past`, plus `tone-accent` (a plain label) and
+  `tone-muted` (no status, e.g. a sign-in). A tone only sets three variables: `--tone` (borders,
+  fills, icons), `--tone-text` (text in the colour) and `--tone-soft` (body text on a tinted box,
+  the palette's lighter shade). Each component reads them its own way, so one class colours a
+  badge, a callout, a sidebar count, a stat card's figure or a log icon
+- `.status-*` (in `styles/shared.css`) maps each event and account status to its tone, so a
+  banner or badge is `status-${state}`. Data says `tone: "warning"`, never a class name. All
+  tones are always generated (`@source inline` in `base.css`), since components build some
+  names at runtime
+- **Strengths:** badges and callouts 40% border / 10% fill; small fills (log icons, avatars,
+  sidebar counts) 15%; a danger border on a panel 40%
+
+### Shared classes
+
+An element takes the shared class for what it is, plus a component class only for what differs:
+`className="panel contact-aside"`. The component class overrides (padding, gap, size) and never
+repeats the shared utilities. The shared classes sit at the top of `styles/shared.css`:
+
+| Class | For |
+| --- | --- |
+| `.page` | a public page's centred column, as wide as the navbar |
+| `.dashboard-page`, `.dashboard-section` | a dashboard page and each section in it |
+| `.panel` | what holds a page's content: forms, tables, charts, detail panels (16px corners, full border, `p-6`) |
+| `.card` | one of many in a grid: event and stat cards (12px, faint border, top highlight) |
+| `.list-panel`, `.list-row` | `panel list-panel` holds rows edge to edge, a 60% line between them; each list sets its own hover |
+| `.heading-page`, `.heading-section`, `.heading-panel` | the page title (24px white); a public section heading; a title inside a panel |
+| `.group-label`, `.eyebrow` | a small uppercase label over a group; the public accent label (heroes, footer) |
+| `.field`, `.field-label`, `.field-hint`, `.field-error` | every form field (`UI/FormField` or by hand). `.field` styles its label, input, select and textarea, so controls take no class |
+| `.icon-button` | a round icon-only button, 34px; a component sets another size to match its neighbours |
+| `.pill` | a 32px option in a row: filters, sort, Previous / Next |
+| `.badge` | a label that states something, coloured by a tone or `.status-*` |
+| `.callout`, `.callout-compact` | a message box with its icon on the left: banners, notes, saved / error messages; compact inside panels and cards |
+| `.hex-frame`, `.hex-fill` | an outlined hexagon (35% accent ring) round an icon or picture; a filled one at 15% of its tone |
+
+The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), the focus rings,
+`selected` and the tones.
+
+### Writing classes
+
+- A wrapper that only lays out its children and is used in one component takes inline
+  utilities (`className="flex flex-col gap-4"`). A class is for a look, or a layout shared
+  between components
+- Inline utilities beat every component class (Tailwind's utilities layer), so an inline
+  utility next to a component class that sets the same property always wins
+- **Canonical Tailwind:** write what Tailwind suggests, scale values over arbitrary ones
+  (`size-4.5` not `size-[18px]`, `-ml-1.25`, `grayscale-85`, `right-(--x,11px)`). Arbitrary
+  values only where the scale has nothing (`text-[13px]`, grid templates, `transition-[…]`,
+  `content-['']`). The editor's yellow hints flag any that slip in
+- Before naming a class, check Tailwind has no utility by that name: a class called `overline`
+  also gets Tailwind's line over the text
+
+### Look
+
+- **Corner radius** (2026-10-10): panels that hold a page's content (forms, tables, chart
+  cards, detail and activity panels) are 16px (`rounded-2xl`), public and dashboard alike.
+  Cards in a grid, list items and small boxes are 12px (`rounded-xl`). The filter bar is 40px
+  round its pill fields
+- **Selected vs action:** a selected option (navbar links, date pills, range toggle, view
+  switcher, page number) gets the `selected` utility: `bg-accent/15`, an `accent/30` ring,
+  bright text. Sidebar links keep the tint but swap the ring for a 3px accent bar
+  (2026-10-18); the bordered date and status pills tint their border. Solid accent is only for
+  buttons that do something (Search, Save, Submit)
+- **Focus and motion:** respect `motion-reduce:`, and give everything clickable a visible
+  keyboard focus ring: `focus-ring` (2px accent, 2px out), `focus-ring-wide` (4px out: logos,
+  footer links), `focus-ring-inset` (4px in: photo tiles) or `focus-ring-flush` (no offset:
+  rows and boxes). `Button` keeps its own, the same ring
+- **Responsive layout inside the dashboard** uses container queries (`@container (max-width:
+  …)` in the `styles/` files), not window breakpoints: `.dashboard-content` is the container,
+  so a page responds to the space beside the sidebar. `<main>` is a container too, so the parts
+  shared with public pages (filter bar, event grid) follow the same rules on both. Window
+  `@media` rules stay for the page frame: navbar, sidebar rail, outer margins
 
 ## Required patterns
 
@@ -57,57 +145,6 @@ frontend/src/
   `DashboardCard` or `Button`? Add an optional prop. `Button` already does links (`to`), six
   variants and four sizes. `destructive` (solid red, `danger` / `danger-hover` tokens) is only for
   the final step that can't be undone; the step before it uses the outlined `danger`
-- **Styling:** use the theme colour tokens (`bg-card`, `text-muted`, `border-border`, `text-accent`,
-  `bg-background`, `text-foreground`, `text-danger` for errors and destructive actions,
-  `text-favourite` for the favourite heart), never raw hex. **Status colours are tokens too**
-  (2026-10-19): `success` (approved, active, done), `warning` (pending, needs attention),
-  `danger` (rejected, errors), `cancelled`, `draft`, `past`, e.g. `tone-warning` on a badge
-  (`border-warning/40 bg-warning/10 text-warning`). Badges, chips and messages use 40% border / 10% fill, banners
-  40% border, small fills (log icons, chips, sidebar badges) 15%. Tailwind's palette only
-  for the lighter text on banners (`text-yellow-200`…) and colours with no status meaning.
-  Repeated multi-utility patterns get a semantic class in `styles/` built with `@apply` (e.g.
-  `.event-card`, `.event-details-panel`), which is how most components are styled
-- **Shared classes first** (2026-10-19): an element takes the shared class for what it is and
-  a component class only for what differs, e.g. `className="panel contact-aside"`. The shared
-  ones sit at the top of `styles/shared.css`: `.page` (a public page's column), `.panel` (16px,
-  full border, `p-6`), `.card` (12px, faint border and top highlight), `.heading-page`,
-  `.heading-section`, `.heading-panel`, `.group-label` (small uppercase label) and `.eyebrow`
-  (the public accent label). Dashboard pages are `.dashboard-page`, sections `.dashboard-section`.
-  Every form field is a `.field` (`UI/FormField` or by hand), which styles its `<label>`,
-  input, select and textarea, so controls take no class; `.field-label` names a control with no
-  `<label>`, `.field-hint` is the 12px help ("Optional", counters, formats), `.field-error`
-  the error line (`UI/FieldError`). `.icon-button` is a round icon-only button (34px; a
-  component sets another size to match its neighbours, and a tint where the hover means
-  something), `.pill` a 32px option in a row (filters, sort, Previous / Next), `.badge` a
-  label that states something, `.callout` a message box with its icon on the left (status
-  banners, notes, saved / error messages; `.callout-compact` inside panels and cards),
-  `.hex-frame` an outlined hexagon round an icon, number or picture (35% accent ring, sized
-  per use at 10:11), `.hex-fill` a filled one at 15% of its tone (initials, log icons), and a
-  list of rows is `panel list-panel` with `.list-row` rows (a 60% divider; hovers per list).
-  Colour comes from a `tone-*` utility (`styles/base.css`: success, warning, danger,
-  cancelled, draft, past, accent, muted) or a `.status-*` class, which maps each event and account
-  status to its tone. A tone only sets variables (`--tone` for borders, fills and icons,
-  `--tone-text` for text in the colour, `--tone-soft` for body text on a tinted box), so one
-  class colours a badge, a callout, a sidebar count or a stat card's figure, each in its own
-  way; data says `tone: "warning"`, never a class name. A wrapper that only lays out its
-  children and is used in one component takes inline utilities, not a class (2026-10-19:
-  `className="flex flex-col gap-4"`); a class is for a look, or a layout shared between
-  components. A component class only overrides (padding, gap, size);
-  don't repeat the shared utilities in it. Before naming a class, check Tailwind has no utility
-  by that name: a class called `overline` also gets Tailwind's line over the text
-- **Canonical Tailwind classes** (2026-10-19): write what Tailwind suggests, scale values over
-  arbitrary ones (`size-4.5` not `size-[18px]`, `-ml-1.25`, `grayscale-85`, `right-(--x,11px)`).
-  Arbitrary values only where the scale has nothing (`text-[13px]`, grid templates,
-  `transition-[…]`, `content-['']`). The editor's yellow hints flag any that slip in
-- **Corner radius:** panels that hold a page's content (forms, tables, chart cards, detail and
-  activity panels) are 16px (`rounded-2xl`), public and dashboard alike. Cards in a grid, list
-  items and small boxes are 12px (`rounded-xl`). The filter bar is 40px round its pill fields.
-  Decided 2026-10-10
-- **Selected vs action:** a selected option (navbar links, date pills, range toggle, view
-  switcher) gets the accent tint: the `selected` utility (`styles/base.css`: `bg-accent/15`,
-  an `accent/30` ring, bright text). Sidebar links keep the tint but swap the ring for a 3px
-  accent bar (2026-10-18); the bordered date and status pills tint their border. Solid
-  accent is only for buttons that do something (Search, Save, Submit)
 - **Dashboard pages** open with a title row: the page's title (`DashboardPageHeading`; on Home the
   greeting), and beside it only the page's own actions, e.g. "Create event" on My Events and My
   Drafts, Go Back, Mark All as Read. **No navigation shortcuts:** the sidebar already links every
@@ -201,7 +238,7 @@ frontend/src/
 - **Settings** (decided 2026-10-11): four sections (`SettingsSection`), each with its title and
   explanation in a 240px column beside its panel, above it below 44rem, and each saving on its
   own: Profile (picture up to 5 MB with Remove, editable display name, locked email with a
-  Verified chip), Password (`UI/PasswordInput` eye, 8-character and match rules, adds a Password
+  Verified badge), Password (`UI/PasswordInput` eye, 8-character and match rules, adds a Password
   changed notification), Email notifications (one `UI/Switch`, wording per role, saves at once),
   Delete account (confirmed in the page with the password; organisers whose events have been
   public get a contact link; no section for admins). Banners only for an unverified email or a
@@ -250,22 +287,14 @@ frontend/src/
   `DashboardCard`); no bare figures. Inner pages get a one-line summary under the title instead
   (`DashboardPageHeading`'s `summary`, figures in `<strong>`), with its own wording when empty.
   Cards have a 5% white top gradient, never a hue. Decided 2026-10-10
-- **Responsive layout inside the dashboard** uses container queries (`@container (max-width: …)`
-  in the `styles/` files), not window breakpoints: `.dashboard-content` is the container, so a page responds
-  to the space beside the sidebar. `<main>` is a container too, so the parts shared with public pages
-  (filter bar, event grid) follow the same rules on both. Window `@media` rules stay for the page
-  frame: navbar, sidebar rail, outer margins
 - Dates use `Intl.DateTimeFormat("en-GB", …)`
-- Respect `motion-reduce:` and give everything clickable a visible keyboard focus ring: the
-  `focus-ring` utility (`styles/base.css`; 2px accent, 2px out), `focus-ring-wide` (4px out:
-  logos, footer links), `focus-ring-inset` (4px in: photo tiles) or `focus-ring-flush` (no
-  offset: rows and boxes). `Button` keeps its own, the same ring
 
 ## Naming
 
 - Components and pages: PascalCase `.jsx`, default export
 - Data files: camelCase ending in `Data.js` (`userDashboardData.js`)
-- CSS classes: kebab-case, prefixed by component (`event-card-media`)
+- CSS classes: kebab-case, prefixed by component (`event-card-image`); the shared classes
+  (see Styling) have no prefix
 
 ## Protected files
 
