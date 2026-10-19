@@ -22,7 +22,7 @@
   }
 
   .admin-list-head {
-    @apply border-b border-border text-xs font-medium uppercase tracking-[0.06em] text-muted;
+    @apply border-b border-border;
   }
 
   .admin-row {
@@ -222,7 +222,7 @@
   }
 
   .log-day {
-    @apply mt-5 mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-muted first:mt-0;
+    @apply mt-5 mb-2 first:mt-0;
   }
 
   .log-list {

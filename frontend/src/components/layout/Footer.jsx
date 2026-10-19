@@ -40,7 +40,7 @@ export default function Footer() {
 
         {footerNav.map(({ title, links }) => (
           <nav key={title} aria-label={title}>
-            <h2 className="footer-title">{title}</h2>
+            <h2 className="eyebrow footer-title">{title}</h2>
             <ul className="footer-links">
               {links.map(({ title: linkTitle, url }) => (
                 <li key={url}>

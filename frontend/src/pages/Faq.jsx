@@ -8,13 +8,13 @@ export default function Faq() {
   const { hero, contactLink } = faqPage;
 
   return (
-    <div className="reading-page">
+    <div className="page reading-page">
       <PageHero compact eyebrow={hero.eyebrow} title={hero.title} titleId="faq-title" intro={hero.intro} />
 
       <div className="reading-column">
         {faqGroups.map(({ id, title, items }) => (
           <section className="faq-group" aria-labelledby={`faq-${id}`} key={id}>
-            <h2 className="reading-heading" id={`faq-${id}`}>
+            <h2 className="heading-section reading-heading" id={`faq-${id}`}>
               {title}
             </h2>
             <FaqList items={items} />

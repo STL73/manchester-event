@@ -51,7 +51,7 @@ export default function MyFavourites({ events, favouriteIds, onToggleFavourite }
   const EndedIcon = endedFavourites.icon;
 
   return (
-    <div className="dashboard-home">
+    <div className="dashboard-page">
       <section
         className="dashboard-section"
         aria-labelledby="my-favourites-title"

@@ -88,7 +88,7 @@
   }
 
   .footer-title {
-    @apply mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-accent;
+    @apply mb-4 text-xs;
   }
 
   .footer-links {
@@ -171,7 +171,7 @@
   }
 
   .reading-heading {
-    @apply text-xl font-semibold text-accent-hover md:text-2xl;
+    @apply text-xl md:text-2xl;
   }
 
   .reading-meta {
@@ -225,16 +225,12 @@
   }
 
   .contact-aside {
-    @apply flex flex-col gap-5 rounded-2xl border border-border bg-card p-6;
+    @apply flex flex-col gap-5;
   }
 
   /* Questions sit on the darker page colour inside the card */
   .contact-aside .faq-item {
     @apply bg-background;
-  }
-
-  .contact-aside-title {
-    @apply text-xl font-semibold text-foreground;
   }
 
   .faq-list {
@@ -267,15 +263,11 @@
 
   /* about page: hero, story, how an event goes live, numbers, closing */
   .about-page {
-    @apply mx-auto flex w-full max-w-7xl flex-col gap-16 px-4 py-10 md:gap-24 md:px-6 md:py-14;
+    @apply gap-16 md:gap-24;
   }
 
   .about-section {
     @apply flex flex-col gap-8;
-  }
-
-  .about-heading {
-    @apply text-2xl font-semibold text-accent-hover md:text-3xl;
   }
 
   .about-heading-center {
@@ -308,7 +300,7 @@
   }
 
   .about-step {
-    @apply relative flex flex-col gap-3 rounded-2xl border border-border bg-card p-6 pt-9;
+    @apply relative flex flex-col gap-3 pt-9;
   }
 
   .about-step-number {
@@ -320,7 +312,7 @@
   }
 
   .about-step-title {
-    @apply text-lg font-semibold text-foreground;
+    @apply text-lg;
   }
 
   .about-step-text {
@@ -337,7 +329,7 @@
 
   /* <dt> comes first for screen readers; the number shows above it */
   .about-stat {
-    @apply flex flex-col-reverse items-center justify-end gap-1 rounded-2xl border border-border bg-card px-2 py-5 text-center md:p-6;
+    @apply flex flex-col-reverse items-center justify-end gap-1 px-2 py-5 text-center md:p-6;
   }
 
   .about-stat-value {
@@ -345,11 +337,11 @@
   }
 
   .about-stat-label {
-    @apply text-xs tracking-wider text-muted uppercase md:text-sm;
+    @apply md:text-sm;
   }
 
   .about-closing {
-    @apply relative isolate flex flex-col items-center gap-5 overflow-hidden rounded-2xl border border-border bg-card px-6 py-14 text-center md:py-20;
+    @apply relative isolate flex flex-col items-center gap-5 overflow-hidden py-14 text-center md:py-20;
   }
 
   .about-closing-mark {
@@ -367,7 +359,7 @@
   /* home page: the shop window. Hero with search, what's on, areas,
      categories, then one band for going out and organising */
   .home-page {
-    @apply mx-auto flex w-full max-w-7xl flex-col gap-16 px-4 py-10 md:gap-20 md:px-6 md:py-14;
+    @apply gap-16 md:gap-20;
   }
 
   /* Hero: the city's name, full width, with event photos showing through
@@ -430,10 +422,6 @@
     @apply flex items-baseline justify-between gap-4;
   }
 
-  .home-heading {
-    @apply text-2xl font-semibold text-accent-hover md:text-3xl;
-  }
-
   /* Five areas as a bento: the city centre tile is the tall one */
   .area-tiles {
     @apply grid grid-cols-2 gap-4 md:grid-cols-4 md:grid-rows-2;
@@ -487,7 +475,7 @@
   }
 
   .home-audience {
-    @apply flex flex-col items-start gap-4 rounded-2xl border border-border bg-card p-6 md:p-8;
+    @apply flex flex-col items-start gap-4 md:p-8;
   }
 
   .home-audience-icon {
@@ -495,7 +483,7 @@
   }
 
   .home-audience-title {
-    @apply text-xl font-semibold text-foreground md:text-2xl;
+    @apply md:text-2xl;
   }
 
   /* profile settings styles */
@@ -563,7 +551,7 @@
      switching between them doesn't resize the card. Log in's shorter form
      centres inside it */
   .auth-card {
-    @apply w-full max-w-5xl flex overflow-hidden rounded-2xl border border-border bg-card md:min-h-132;
+    @apply w-full max-w-5xl flex overflow-hidden p-0 md:min-h-132;
   }
 
   .auth-form {

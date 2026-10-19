@@ -75,7 +75,7 @@ export default function Preferences({ events, interestIds, onSaveInterests }) {
   }
 
   return (
-    <div className="dashboard-home">
+    <div className="dashboard-page">
       <section
         className="dashboard-section"
         aria-labelledby="my-preferences-title"
@@ -87,9 +87,9 @@ export default function Preferences({ events, interestIds, onSaveInterests }) {
           summary={<PreferencesSummary upcomingEvents={upcomingEvents} interestIds={interestIds} />}
         />
         <form className="preferences-layout" onSubmit={handleSubmit}>
-          <div className="contact-form-container preferences-picker">
+          <div className="panel contact-form-container preferences-picker">
             <fieldset className="contents">
-              <legend className="contact-form-title">{preferencesForm.title}</legend>
+              <legend className="heading-panel contact-form-title">{preferencesForm.title}</legend>
               <p className="content-p">{preferencesForm.description}</p>
               <CategoryHoneycomb
                 categories={preferenceCategories}
@@ -103,12 +103,12 @@ export default function Preferences({ events, interestIds, onSaveInterests }) {
           {/* Beside the honeycomb on wide screens; a bar pinned above it on
               narrow ones, with the event list folded away (see App.css) */}
           <aside
-            className="preferences-picks"
+            className="panel preferences-picks"
             aria-labelledby="your-picks-title"
             data-coming-up={comingUpOpen ? "open" : "closed"}
           >
             <div className="preferences-picks-head">
-              <h2 className="contact-form-title preferences-picks-title" id="your-picks-title">
+              <h2 className="heading-panel contact-form-title preferences-picks-title" id="your-picks-title">
                 {yourPicks.title}
               </h2>
               <p className="preferences-picks-figures">
@@ -148,7 +148,7 @@ export default function Preferences({ events, interestIds, onSaveInterests }) {
             </button>
 
             <div className="preferences-coming" id="preferences-coming-up">
-              <h3 className="preferences-coming-title">{yourPicks.comingUp}</h3>
+              <h3 className="group-label preferences-coming-title">{yourPicks.comingUp}</h3>
               {matchingEvents.length === 0 ? (
                 <p className="preferences-coming-empty">
                   {pickedCount === 0 ? yourPicks.pickFirst : yourPicks.noneComing}

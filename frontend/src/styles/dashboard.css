@@ -19,7 +19,7 @@
   }
 
   .event-form-panel {
-    @apply rounded-2xl border border-border bg-card px-6 py-1;
+    @apply py-1;
   }
 
   .event-form-group {
@@ -120,12 +120,8 @@
     @apply sticky top-4 flex flex-col gap-3.5;
   }
 
-  .event-form-side-label {
-    @apply text-xs font-medium uppercase tracking-[0.08em] text-muted;
-  }
-
   .event-form-actions {
-    @apply flex flex-col gap-2.5 rounded-2xl border border-border bg-card p-4 [&>button]:w-full;
+    @apply flex flex-col gap-2.5 p-4 [&>button]:w-full;
   }
 
   .event-form-actions-note {
@@ -243,7 +239,7 @@
 
   /* Events, Insights, Moderation: px-5 lines it up with the link icons */
   .sidebar-section-label {
-    @apply px-5 pt-4 pb-1.5 text-xs font-semibold uppercase tracking-wider text-muted/70;
+    @apply px-5 pt-4 pb-1.5 text-muted/70;
   }
 
   .sidebar-menu {
@@ -583,10 +579,6 @@
     @apply hex-cell absolute inset-0.5 size-[calc(100%-4px)] object-cover;
   }
 
-  .dashboard-greeting-title {
-    @apply text-2xl text-foreground font-semibold;
-  }
-
   .dashboard-greeting-name {
     @apply text-accent-hover;
   }
@@ -609,7 +601,7 @@
   /* Stat card: label + hexagon icon, one big figure, one line of context.
      Left-aligned so a row of cards scans like a table. */
   .dashboard-card {
-    @apply min-w-0 min-h-32 p-4 flex flex-col gap-2 rounded-xl border border-border/60 bg-card bg-linear-to-b from-white/5 to-transparent shadow-[inset_0_1px_0_rgb(255_255_255/0.04)];
+    @apply min-w-0 min-h-32 p-4 flex flex-col gap-2 bg-linear-to-b from-white/5 to-transparent;
   }
 
   .dashboard-card-header {
@@ -684,7 +676,7 @@
   }
 
   .preferences-picks {
-    @apply sticky top-4 z-10 flex flex-col gap-5 rounded-2xl border border-border bg-card p-6;
+    @apply sticky top-4 z-10 flex flex-col gap-5;
   }
 
   .preferences-picks-head {
@@ -711,10 +703,6 @@
 
   .preferences-coming {
     @apply flex flex-col gap-3;
-  }
-
-  .preferences-coming-title {
-    @apply text-xs font-medium uppercase tracking-wider text-muted;
   }
 
   .preferences-coming-empty {
@@ -900,7 +888,7 @@
   /* Date dividers inside one list, not page sections, so they are small
      labels rather than the 20px section heading */
   .notification-group-title {
-    @apply px-1 text-xs font-medium uppercase tracking-wider text-muted;
+    @apply px-1;
   }
 
   .notification-rows {
@@ -1059,7 +1047,7 @@
 
   /* table styles */
   .table-wrapper {
-    @apply w-full overflow-x-auto rounded-2xl border border-border/60 bg-card shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] focus-ring-flush;
+    @apply w-full overflow-x-auto p-0 focus-ring-flush;
   }
 
   .data-table {
@@ -1104,7 +1092,7 @@
   }
 
   .chart-card {
-    @apply min-w-0 p-4 flex flex-col gap-4 rounded-2xl border border-border/60 bg-card shadow-[inset_0_1px_0_rgb(255_255_255/0.04)];
+    @apply min-w-0 p-4 flex flex-col gap-4;
   }
 
   .chart-card-wide {
@@ -1209,7 +1197,7 @@
   }
 
   .settings-panel {
-    @apply min-w-0 rounded-2xl border border-border bg-card p-6;
+    @apply min-w-0;
   }
 
   .settings-row.is-danger .settings-panel {

@@ -84,7 +84,7 @@ export default function EventAnalytics({ organiserEvents }) {
   const locationRows = countBy(organiserEvents, (event) => event.location);
 
   return (
-    <div className="dashboard-home">
+    <div className="dashboard-page">
       <section
         className="dashboard-section"
         aria-labelledby="event-analytics-title"

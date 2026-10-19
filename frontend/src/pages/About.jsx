@@ -15,7 +15,7 @@ export default function About({ events, isUser }) {
   ];
 
   return (
-    <div className="about-page">
+    <div className="page about-page">
       <PageHero
         eyebrow={hero.eyebrow}
         title={hero.title}
@@ -26,7 +26,7 @@ export default function About({ events, isUser }) {
 
       <section className="about-section about-story" aria-labelledby="story-title">
         <div className="about-story-text">
-          <h2 className="about-heading" id="story-title">
+          <h2 className="heading-section" id="story-title">
             {story.title}
           </h2>
           {story.paragraphs.map((paragraph) => (
@@ -58,17 +58,17 @@ export default function About({ events, isUser }) {
       <HoneycombDivider />
 
       <section className="about-section" aria-labelledby="process-title">
-        <h2 className="about-heading about-heading-center" id="process-title">
+        <h2 className="heading-section about-heading-center" id="process-title">
           {process.title}
         </h2>
         <ol className="about-steps">
           {process.steps.map(({ icon: Icon, title, text }, index) => (
-            <li className="about-step" key={title}>
+            <li className="panel about-step" key={title}>
               <span className="about-step-number" aria-hidden="true">
                 {index + 1}
               </span>
               <Icon className="about-step-icon" aria-hidden="true" />
-              <h3 className="about-step-title">{title}</h3>
+              <h3 className="heading-panel about-step-title">{title}</h3>
               <p className="about-step-text">{text}</p>
             </li>
           ))}
@@ -85,18 +85,18 @@ export default function About({ events, isUser }) {
         </h2>
         <dl className="about-stats">
           {numbers.map(({ value, label }) => (
-            <div className="about-stat" key={label}>
-              <dt className="about-stat-label">{label}</dt>
+            <div className="panel about-stat" key={label}>
+              <dt className="group-label about-stat-label">{label}</dt>
               <dd className="about-stat-value">{value}</dd>
             </div>
           ))}
         </dl>
       </section>
 
-      <section className="about-closing" aria-labelledby="closing-title">
+      <section className="panel about-closing" aria-labelledby="closing-title">
         <div className="honeycomb-texture" aria-hidden="true" />
         <LogoMark className="about-closing-mark" />
-        <h2 className="about-heading" id="closing-title">
+        <h2 className="heading-section" id="closing-title">
           {closing.title}
         </h2>
         <p className="about-closing-text">{closing.text}</p>

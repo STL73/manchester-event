@@ -22,7 +22,7 @@ export default function PageHero({ eyebrow, title, titleId, intro, image, compac
       )}
       <div className="honeycomb-texture" aria-hidden="true" />
       <div className="page-hero-content">
-        <p className="page-hero-eyebrow">{eyebrow}</p>
+        <p className="eyebrow">{eyebrow}</p>
         <h1 className="page-hero-title" id={titleId}>
           {title}
         </h1>

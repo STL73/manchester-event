@@ -19,7 +19,7 @@ export default function ChartCard({
 
   return (
     <article
-      className={`chart-card ${wide ? "chart-card-wide" : ""}`}
+      className={`panel chart-card ${wide ? "chart-card-wide" : ""}`}
       aria-labelledby={titleId}
     >
       <header className="chart-card-header">
@@ -42,7 +42,7 @@ export default function ChartCard({
           </div>
           <details className="chart-table-toggle">
             <summary>{chartText.viewTable}</summary>
-            <div className="table-wrapper">
+            <div className="panel table-wrapper">
               <table className="data-table">
                 <caption className="sr-only">{title}</caption>
                 <thead>

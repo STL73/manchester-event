@@ -96,7 +96,7 @@ export default function UserDashboardHome({
   const insights = getUserInsights({ events, favouriteIds, interestIds, notifications });
 
   return (
-    <div className="dashboard-home">
+    <div className="dashboard-page">
       <section
         className="dashboard-section"
         aria-labelledby="quick-insights-title"

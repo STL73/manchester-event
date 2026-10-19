@@ -16,13 +16,13 @@ export default function Home({ events }) {
   const upcoming = events.filter((event) => isUpcoming(event, now));
 
   return (
-    <div className="home-page">
+    <div className="page home-page">
       <Hero />
 
       <WhatsOnSection events={upcoming} now={now} />
 
       <section className="home-section" aria-labelledby="areas-title">
-        <h2 className="home-heading" id="areas-title">
+        <h2 className="heading-section" id="areas-title">
           {areas.title}
         </h2>
         <ul className="area-tiles">
@@ -51,7 +51,7 @@ export default function Home({ events }) {
       </section>
 
       <section className="home-section" aria-labelledby="categories-title">
-        <h2 className="home-heading" id="categories-title">
+        <h2 className="heading-section" id="categories-title">
           {categories.title}
         </h2>
         <ul className="category-chips">
@@ -67,9 +67,9 @@ export default function Home({ events }) {
 
       <section className="home-audiences" aria-label="Get involved">
         {audiences.map(({ icon: Icon, title, text, button }) => (
-          <div className="home-audience" key={title}>
+          <div className="panel home-audience" key={title}>
             <Icon className="home-audience-icon" aria-hidden="true" />
-            <h2 className="home-audience-title">{title}</h2>
+            <h2 className="heading-panel home-audience-title">{title}</h2>
             <p className="content-p">{text}</p>
             <Button to={button.to} variant="secondary" size="md">
               {button.label}

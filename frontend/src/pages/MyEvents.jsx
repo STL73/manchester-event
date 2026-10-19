@@ -230,7 +230,7 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
   }
 
   return (
-    <div className="dashboard-home">
+    <div className="dashboard-page">
       <section
         className="dashboard-section"
         aria-labelledby="my-events-title"

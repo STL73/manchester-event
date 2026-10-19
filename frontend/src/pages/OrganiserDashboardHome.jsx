@@ -121,7 +121,7 @@ export default function OrganiserDashboardHome({ organiserEvents: events, onDele
   }
 
   return (
-    <div className="dashboard-home">
+    <div className="dashboard-page">
       <section
         className="dashboard-section"
         aria-labelledby="quick-insights-title"

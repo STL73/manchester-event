@@ -26,7 +26,7 @@ export default function ExploreEvents({
 
   if (!inDashboard) {
     return (
-      <div className="explore-page">
+      <div className="page">
         <PageHero
           compact
           eyebrow={publicIntro.eyebrow}
@@ -43,7 +43,7 @@ export default function ExploreEvents({
   const SectionIcon = exploreEventsSection.icon;
 
   return (
-    <div className="dashboard-home">
+    <div className="dashboard-page">
       <section
         className="dashboard-section"
         aria-labelledby="explore-events-title"

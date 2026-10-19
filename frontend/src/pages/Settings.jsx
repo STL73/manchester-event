@@ -88,7 +88,7 @@ export default function Settings({
   const role = selectedUser.type;
 
   return (
-    <div className="dashboard-home">
+    <div className="dashboard-page">
       <section className="dashboard-section" aria-labelledby="settings-title">
         <DashboardPageHeading
           id="settings-title"
