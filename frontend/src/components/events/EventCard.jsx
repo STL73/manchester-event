@@ -66,7 +66,7 @@ export default function EventCard({
       {/* alt="": the title link right below already names the event, so a
           screen reader would read it twice. Lazy, because Explore lists every
           upcoming event and most cards start below the screen */}
-      <div className="event-card-media">
+      <div className="overflow-hidden">
         <img
           className="event-card-image"
           src={event.image}
@@ -223,7 +223,7 @@ export default function EventCard({
             onKeyDown={(keyEvent) => keyEvent.key === "Escape" && closeConfirm()}
           >
             <p className="event-card-confirm-text">{confirmDelete.question}</p>
-            <div className="event-card-confirm-actions">
+            <div className="flex flex-wrap items-center gap-3">
               <Button ref={keepRef} type="button" variant="secondary" size="sm" onClick={closeConfirm}>
                 {confirmDelete.cancel}
               </Button>

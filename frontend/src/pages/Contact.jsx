@@ -111,7 +111,7 @@ export default function Contact({ onSendMessage }) {
               </div>
             ))}
 
-            <div className="content-btn-box contact-actions">
+            <div className="w-full flex flex-wrap items-center justify-start gap-4">
               <Button type="submit" variant="primary" size="md">
                 <actions.submit.icon aria-hidden="true" />
                 {actions.submit.label}

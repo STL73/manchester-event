@@ -17,7 +17,7 @@ export default function LegalPage({ page, titleId }) {
         </p>
 
         {sections.map(({ title, paragraphs }) => (
-          <section className="reading-section" key={title}>
+          <section className="flex flex-col gap-4" key={title}>
             <h2 className="heading-section reading-heading">{title}</h2>
             {paragraphs.map((paragraph) => (
               <p className="content-p" key={paragraph}>

@@ -91,16 +91,8 @@
     @apply mb-4 text-xs;
   }
 
-  .footer-links {
-    @apply flex flex-col items-start gap-2.5;
-  }
-
   .footer-link {
     @apply rounded-sm text-[15px] text-muted transition-colors duration-200 hover:text-foreground focus-ring-wide motion-reduce:transition-none;
-  }
-
-  .footer-socials {
-    @apply mt-1 flex flex-wrap gap-2.5;
   }
 
   /* Hexagon buttons in the logo's cell (socials, back to top). The outline
@@ -142,10 +134,6 @@
     @apply mx-auto flex max-w-7xl flex-col items-center gap-3 border-t border-border px-4 py-5 text-center text-sm text-muted md:flex-row md:justify-between md:px-6 md:text-left;
   }
 
-  .content-btn-box {
-    @apply w-full flex justify-center items-center gap-8;
-  }
-
   .content-icon {
     @apply w-6 h-6 shrink-0 text-accent;
   }
@@ -165,8 +153,7 @@
     @apply flex flex-col gap-10;
   }
 
-  .faq-group,
-  .reading-section {
+  .faq-group {
     @apply flex flex-col gap-4;
   }
 
@@ -184,10 +171,6 @@
 
   .contact-form {
     @apply w-full flex flex-col gap-5;
-  }
-
-  .contact-actions {
-    @apply flex-wrap justify-start gap-4;
   }
 
   .contact-details {
@@ -233,10 +216,6 @@
     @apply bg-background;
   }
 
-  .faq-list {
-    @apply flex flex-col gap-3;
-  }
-
   .faq-item {
     @apply rounded-xl border border-border bg-card transition-colors hover:border-accent/50;
   }
@@ -266,24 +245,12 @@
     @apply gap-16 md:gap-24;
   }
 
-  .about-section {
-    @apply flex flex-col gap-8;
-  }
-
   .about-heading-center {
     @apply text-center;
   }
 
   .about-story {
     @apply grid items-center gap-12 md:grid-cols-2;
-  }
-
-  .about-story-text {
-    @apply flex flex-col gap-5;
-  }
-
-  .about-story-media {
-    @apply relative;
   }
 
   .about-story-img {
@@ -297,10 +264,6 @@
 
   .about-steps {
     @apply grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4;
-  }
-
-  .about-step {
-    @apply relative flex flex-col gap-3 pt-9;
   }
 
   .about-step-number {
@@ -350,10 +313,6 @@
 
   .about-closing-text {
     @apply max-w-2xl text-base leading-7 text-balance text-muted;
-  }
-
-  .about-closing-actions {
-    @apply flex flex-wrap justify-center gap-4 pt-2;
   }
 
   /* home page: the shop window. Hero with search, what's on, areas,
@@ -418,10 +377,6 @@
     @apply flex flex-col gap-6;
   }
 
-  .home-section-header {
-    @apply flex items-baseline justify-between gap-4;
-  }
-
   /* Five areas as a bento: the city centre tile is the tall one */
   .area-tiles {
     @apply grid grid-cols-2 gap-4 md:grid-cols-4 md:grid-rows-2;
@@ -462,10 +417,6 @@
     @apply text-sm text-foreground/80;
   }
 
-  .category-chips {
-    @apply flex flex-wrap gap-2;
-  }
-
   .category-chip {
     @apply inline-flex rounded-full border border-border bg-card px-4 py-2 text-sm text-foreground transition-colors hover:border-accent hover:text-accent-hover focus-ring motion-reduce:transition-none;
   }
@@ -492,15 +443,6 @@
   }
 
   /* shared form field extras (FormField) */
-  /* Label on the left, short hint on the right: the hint costs no height */
-  .field-label-row {
-    @apply w-full flex items-baseline justify-between gap-3;
-  }
-
-  .radio-cards {
-    @apply grid grid-cols-2 gap-6;
-  }
-
   /* Compact choice cards: the radio dot is visually hidden (still focusable
      and announced), the border and corner tick show which one is chosen */
   .radio-card {

@@ -16,7 +16,7 @@ export default function EmailSettings({ role, enabled, onChange }) {
 
   return (
     <div className="settings-form">
-      <div className="settings-switch-row">
+      <div className="flex items-start justify-between gap-4">
         <div>
           <p className="settings-switch-title" id="email-switch-title">{title}</p>
           <p className="field-hint settings-hint" id="email-switch-text">{text}</p>

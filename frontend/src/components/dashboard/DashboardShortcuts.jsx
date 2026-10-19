@@ -8,7 +8,7 @@ export default function DashboardShortcuts({ actions = [] }) {
   if (actions.length === 0) return null;
 
   return (
-    <div className="dashboard-page-actions" role="group" aria-label="Page actions">
+    <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Page actions">
       {actions.map(({ label, to, icon: Icon }) => (
         <Button key={label} to={to} variant="primary" size="sm">
           <Icon aria-hidden="true" />

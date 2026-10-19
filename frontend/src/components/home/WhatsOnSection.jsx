@@ -25,7 +25,7 @@ export default function WhatsOnSection({ events, now }) {
 
   return (
     <section className="home-section" aria-labelledby="whats-on-title">
-      <div className="home-section-header">
+      <div className="flex items-baseline justify-between gap-4">
         <h2 className="heading-section" id="whats-on-title">
           {whatsOn.title}
         </h2>

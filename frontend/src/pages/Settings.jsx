@@ -104,7 +104,7 @@ export default function Settings({
           }
         />
 
-        <div className="settings-layout">
+        <div className="w-full max-w-245 self-start flex flex-col gap-10">
           <AccountBanner role={role} details={accountDetails} />
 
           <SettingsSection id="settings-profile" section={settingsSections.profile}>

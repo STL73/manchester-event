@@ -225,7 +225,8 @@ export default function EventsBrowser({
         </div>
       </div>
 
-      <div className="events-results" ref={resultsRef}>
+      {/* Result count, then one chip per filter in use. Pagination scrolls back here */}
+      <div className="w-full max-w-7xl flex flex-wrap items-center gap-2 scroll-mt-4" ref={resultsRef}>
         <p className="events-count" aria-live="polite">
           {resultsText.count(filteredEvents.length)}
         </p>

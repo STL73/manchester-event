@@ -455,7 +455,7 @@ function EventFormPage({
             {lockedMessage}
           </StatusMessage>
         ) : (
-          <div className="event-form">
+          <div className="w-full flex flex-col gap-5">
             {banner && (
               <div className={`callout event-details-banner status-${event.status}`} role="note">
                 <banner.icon aria-hidden="true" />
@@ -473,7 +473,7 @@ function EventFormPage({
             {message && <StatusMessage ref={messageRef}>{message}</StatusMessage>}
 
             <div className="event-form-layout">
-              <div className="event-form-main">
+              <div className="min-w-0 flex flex-col gap-7">
                 <form id="event-form" className="panel event-form-panel" onSubmit={handleSubmit} noValidate>
                   {eventFormGroups.map((group, index) => (
                     <section className="event-form-group" aria-labelledby={`group-${group.id}`} key={group.id}>
@@ -484,7 +484,7 @@ function EventFormPage({
                         </span>
                         {group.title}
                       </h2>
-                      <div className={group.row ? "event-form-row" : "event-form-fields"}>
+                      <div className={group.row ? "event-form-row" : "flex flex-col gap-4"}>
                         {group.fields.map(renderField)}
                       </div>
                     </section>
@@ -504,7 +504,7 @@ function EventFormPage({
                         {confirming ? danger.question : danger.text}
                       </p>
                     </div>
-                    <div className="event-danger-zone-actions">
+                    <div className="flex flex-wrap gap-2.5">
                       {confirming ? (
                         <>
                           <Button type="button" variant="secondary" size="md" onClick={() => setConfirming(false)}>

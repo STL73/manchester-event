@@ -93,7 +93,7 @@ export default function DashboardGreeting({ selectedUser, ...data }) {
           Avatar && <Avatar aria-hidden="true" />
         )}
       </div>
-      <div className="dashboard-greeting-text">
+      <div className="min-w-0 flex flex-col gap-2">
         <h1 className="heading-page">
           {dashboardGreeting.title}{" "}
           <span className="dashboard-greeting-name">{selectedUser.user}</span>

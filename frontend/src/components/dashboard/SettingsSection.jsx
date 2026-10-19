@@ -6,7 +6,7 @@ export default function SettingsSection({ id, section, danger = false, children 
 
   return (
     <section className={`settings-row ${danger ? "is-danger" : ""}`} aria-labelledby={id}>
-      <div className="settings-row-head">
+      <div className="flex flex-col gap-1.5">
         <h2 className="dashboard-title settings-row-title" id={id}>
           <Icon aria-hidden="true" />
           {section.title}

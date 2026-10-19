@@ -53,7 +53,8 @@ export default function ExploreEvents({
           icon={SectionIcon}
           title={exploreEventsSection.title}
         />
-        <div className="dashboard-events-browser">{browser}</div>
+        {/* Search, layout switcher and cards inside the dashboard Explore Events section */}
+        <div className="w-full flex flex-col items-center gap-6">{browser}</div>
       </section>
     </div>
   );

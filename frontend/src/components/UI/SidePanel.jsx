@@ -45,16 +45,16 @@ export default function SidePanel({ open, title, titleId, onClose, footer, child
       }}
     >
       {open && (
-        <div className="side-panel-inner">
+        <div className="flex h-full flex-col">
           <header className="side-panel-head">
             <h2 className="side-panel-title" id={titleId}>
               {title}
             </h2>
-            <button className="icon-button side-panel-close" type="button" aria-label="Close" onClick={onClose}>
+            <button className="icon-button size-9" type="button" aria-label="Close" onClick={onClose}>
               <X aria-hidden="true" />
             </button>
           </header>
-          <div className="side-panel-body">{children}</div>
+          <div className="flex-1 overflow-y-auto p-5">{children}</div>
           {footer && <footer className="side-panel-foot">{footer}</footer>}
         </div>
       )}

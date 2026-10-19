@@ -68,7 +68,7 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
 
   return (
     <form className="settings-form" onSubmit={handleSubmit} noValidate>
-      <div className="settings-avatar-row">
+      <div className="flex flex-wrap items-center gap-5">
         <div className="settings-avatar">
           {avatarUrl ? (
             <img src={avatarUrl} alt="Your profile picture" />
@@ -76,8 +76,8 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
             DefaultAvatar && <DefaultAvatar aria-hidden="true" />
           )}
         </div>
-        <div className="settings-avatar-actions">
-          <div className="settings-avatar-buttons">
+        <div className="min-w-0 flex flex-col gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               variant="secondary"
               size="sm"
