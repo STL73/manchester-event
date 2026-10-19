@@ -77,7 +77,7 @@ export default function EventCard({
       </div>
       <div className="event-card-content">
         {status && (
-          <span className={`status-badge status-${status} event-card-status`}>
+          <span className={`badge status-${status} event-card-status`}>
             {statusLabel ?? status}
           </span>
         )}
@@ -148,7 +148,7 @@ export default function EventCard({
             </Button>
             {canFavourite && (
               <button
-                className={`event-favourite-button ${isFavourite ? "is-favourite" : ""} ${isPopping ? "is-popping" : ""}`}
+                className={`icon-button event-favourite-button ${isFavourite ? "is-favourite" : ""} ${isPopping ? "is-popping" : ""}`}
                 type="button"
                 aria-label={
                   isFavourite ? "Remove from favourites" : "Add to favourites"
@@ -169,7 +169,7 @@ export default function EventCard({
             {onAddToCalendar && (
               <Tooltip text={addToCalendar.label}>
                 <button
-                  className="event-calendar-button"
+                  className="icon-button event-calendar-button"
                   type="button"
                   aria-label={`${addToCalendar.label}: ${event.name}`}
                   onClick={() => onAddToCalendar(event)}

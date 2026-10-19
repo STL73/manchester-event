@@ -50,7 +50,7 @@ export default function SidePanel({ open, title, titleId, onClose, footer, child
             <h2 className="side-panel-title" id={titleId}>
               {title}
             </h2>
-            <button className="side-panel-close" type="button" aria-label="Close" onClick={onClose}>
+            <button className="icon-button side-panel-close" type="button" aria-label="Close" onClick={onClose}>
               <X aria-hidden="true" />
             </button>
           </header>

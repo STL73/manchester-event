@@ -199,13 +199,13 @@ export default function EventsBrowser({
             // "Any date" is only selected when no date has been picked either
             const isActive = filters.when === id && !(id === "" && filters.date);
             return (
-              <button className={`events-when-option ${isActive ? "is-active" : ""}`} type="button" aria-pressed={isActive} onClick={() => handleWhenChange(id)} key={id || "any"}>
+              <button className={`pill events-when-option ${isActive ? "is-active" : ""}`} type="button" aria-pressed={isActive} onClick={() => handleWhenChange(id)} key={id || "any"}>
                 {label}
               </button>
             );
           })}
           <span className="events-when-date">
-            <button className={`events-when-option ${filters.date ? "is-active" : ""}`} type="button" aria-pressed={Boolean(filters.date)} onClick={openDatePicker}>
+            <button className={`pill events-when-option ${filters.date ? "is-active" : ""}`} type="button" aria-pressed={Boolean(filters.date)} onClick={openDatePicker}>
               <CalendarDays aria-hidden="true" />
               {filters.date ? chipDate.format(new Date(`${filters.date}T00:00:00`)) : resultsText.pickDate}
             </button>
@@ -218,7 +218,7 @@ export default function EventsBrowser({
             ["two", Grid2X2, "2-column grid"],
             ["one", Square, "1-column list"],
           ].map(([value, Icon, label]) => (
-            <button className={view === value ? "is-active" : ""} type="button" aria-label={label} aria-pressed={view === value} onClick={() => handleViewChange(value)} key={value}>
+            <button className={`icon-button ${view === value ? "is-active" : ""}`} type="button" aria-label={label} aria-pressed={view === value} onClick={() => handleViewChange(value)} key={value}>
               <Icon aria-hidden="true" />
             </button>
           ))}

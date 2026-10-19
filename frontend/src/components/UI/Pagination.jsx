@@ -31,7 +31,7 @@ export default function Pagination({ page, pageCount, onPageChange, summary }) {
       {summary && <p className="pagination-summary">{summary}</p>}
       <div className="pagination-controls">
         <button
-          className="pagination-step"
+          className="pill pagination-step"
           type="button"
           onClick={() => onPageChange(page - 1)}
           disabled={page === 1}
@@ -44,7 +44,7 @@ export default function Pagination({ page, pageCount, onPageChange, summary }) {
             typeof item === "number" ? (
               <li key={item}>
                 <button
-                  className={`pagination-page ${item === page ? "is-active" : ""}`}
+                  className={`icon-button pagination-page ${item === page ? "is-active" : ""}`}
                   type="button"
                   aria-label={`Page ${item}`}
                   aria-current={item === page ? "page" : undefined}
@@ -61,7 +61,7 @@ export default function Pagination({ page, pageCount, onPageChange, summary }) {
           )}
         </ul>
         <button
-          className="pagination-step"
+          className="pill pagination-step"
           type="button"
           onClick={() => onPageChange(page + 1)}
           disabled={page === pageCount}

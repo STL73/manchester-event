@@ -61,12 +61,12 @@ frontend/src/
   `bg-background`, `text-foreground`, `text-danger` for errors and destructive actions,
   `text-favourite` for the favourite heart), never raw hex. **Status colours are tokens too**
   (2026-10-19): `success` (approved, active, done), `warning` (pending, needs attention),
-  `danger` (rejected, errors), `cancelled`, `draft`, `past`, e.g. `border-warning/40
-  bg-warning/10 text-warning`. Badges, chips and messages use 40% border / 10% fill, banners
+  `danger` (rejected, errors), `cancelled`, `draft`, `past`, e.g. `tone-warning` on a badge
+  (`border-warning/40 bg-warning/10 text-warning`). Badges, chips and messages use 40% border / 10% fill, banners
   40% border, small fills (log icons, chips, sidebar badges) 15%. Tailwind's palette only
   for the lighter text on banners (`text-yellow-200`…) and colours with no status meaning.
   Repeated multi-utility patterns get a semantic class in `styles/` built with `@apply` (e.g.
-  `.event-card`, `.status-badge`), which is how most components are styled
+  `.event-card`, `.event-details-panel`), which is how most components are styled
 - **Shared classes first** (2026-10-19): an element takes the shared class for what it is and
   a component class only for what differs, e.g. `className="panel contact-aside"`. The shared
   ones sit at the top of `styles/shared.css`: `.page` (a public page's column), `.panel` (16px,
@@ -76,9 +76,18 @@ frontend/src/
   Every form field is a `.field` (`UI/FormField` or by hand), which styles its `<label>`,
   input, select and textarea, so controls take no class; `.field-label` names a control with no
   `<label>`, `.field-hint` is the 12px help ("Optional", counters, formats), `.field-error`
-  the error line (`UI/FieldError`). Before naming a class, check Tailwind has no utility by that
-  name: a class called `overline` also gets Tailwind's line over the text
-  A component class only overrides (padding, gap, size); don't repeat the shared utilities in it
+  the error line (`UI/FieldError`). `.icon-button` is a round icon-only button (34px; a
+  component sets another size to match its neighbours, and a tint where the hover means
+  something), `.pill` a 32px option in a row (filters, sort, Previous / Next), `.badge` a
+  label that states something, coloured by a `tone-*` utility (`styles/base.css`: success,
+  warning, danger, cancelled, draft, past, accent) or a `.status-*` class, which maps each
+  event and account status to its tone. A component class only overrides (padding, gap, size);
+  don't repeat the shared utilities in it. Before naming a class, check Tailwind has no utility
+  by that name: a class called `overline` also gets Tailwind's line over the text
+- **Canonical Tailwind classes** (2026-10-19): write what Tailwind suggests, scale values over
+  arbitrary ones (`size-4.5` not `size-[18px]`, `-ml-1.25`, `grayscale-85`, `right-(--x,11px)`).
+  Arbitrary values only where the scale has nothing (`text-[13px]`, grid templates,
+  `transition-[…]`, `content-['']`). The editor's yellow hints flag any that slip in
 - **Corner radius:** panels that hold a page's content (forms, tables, chart cards, detail and
   activity panels) are 16px (`rounded-2xl`), public and dashboard alike. Cards in a grid, list
   items and small boxes are 12px (`rounded-xl`). The filter bar is 40px round its pill fields.

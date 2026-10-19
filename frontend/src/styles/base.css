@@ -42,6 +42,37 @@
   @apply bg-accent/15 text-foreground ring-1 ring-inset ring-accent/30;
 }
 
+/* A status colour on a badge or chip: 40% border, 10% fill, the colour as
+   text. One per state (the tokens in App.css), plus accent for a plain
+   label. .status-* in shared.css maps each event and account status to one */
+@utility tone-success {
+  @apply border-success/40 bg-success/10 text-success;
+}
+
+@utility tone-warning {
+  @apply border-warning/40 bg-warning/10 text-warning;
+}
+
+@utility tone-danger {
+  @apply border-danger/40 bg-danger/10 text-danger;
+}
+
+@utility tone-cancelled {
+  @apply border-cancelled/40 bg-cancelled/10 text-cancelled;
+}
+
+@utility tone-draft {
+  @apply border-draft/40 bg-draft/10 text-draft;
+}
+
+@utility tone-past {
+  @apply border-past/40 bg-past/10 text-past;
+}
+
+@utility tone-accent {
+  @apply border-accent/40 bg-accent/10 text-accent-hover;
+}
+
 @layer base {
   * {
     @apply m-0 p-0 box-border;

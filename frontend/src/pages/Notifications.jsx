@@ -84,7 +84,7 @@ function NotificationRow({ notification, group, isOpen, onToggle, onMarkRead }) 
         ) : (
           <Tooltip text={markRead.label}>
             <button
-              className="notification-mark-read"
+              className="icon-button notification-mark-read"
               type="button"
               aria-label={`${markRead.label}: ${notification.subject}`}
               onClick={() => onMarkRead([notification.notificationId])}

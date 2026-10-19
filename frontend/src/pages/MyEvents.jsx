@@ -268,7 +268,7 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
               <div className="events-when-tools">
                 <span className="events-when-date">
                   <button
-                    className={`events-when-option ${date ? "is-active" : ""}`}
+                    className={`pill events-when-option ${date ? "is-active" : ""}`}
                     type="button"
                     aria-pressed={Boolean(date)}
                     onClick={openDatePicker}
@@ -288,7 +288,7 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
                 </span>
                 {date && (
                   <button
-                    className="events-when-clear"
+                    className="icon-button events-when-clear"
                     type="button"
                     aria-label={myEventsDate.clear}
                     onClick={() => handleDateChange("")}

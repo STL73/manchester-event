@@ -13,7 +13,7 @@ export default function PasswordInput({ showLabel, hideLabel, ...inputProps }) {
     <div className="password-input">
       <input {...inputProps} type={visible ? "text" : "password"} />
       <button
-        className="password-input-toggle"
+        className="icon-button password-input-toggle"
         type="button"
         aria-label={visible ? hideLabel : showLabel}
         aria-pressed={visible}
