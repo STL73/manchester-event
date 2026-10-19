@@ -1,0 +1,998 @@
+/* Classes used on both the public site and the dashboard: filter bar, event cards and
+   details, forms, tables, status badges, tooltips */
+@layer components {
+
+  .navbar-logo {
+    @apply flex items-center gap-2.5 rounded-lg text-foreground font-semibold text-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent;
+  }
+
+  /* 32px: big enough for the bee to read inside its cell */
+  .navbar-icon {
+    @apply size-8 text-accent;
+  }
+
+  /* section styles */
+  .section-content {
+    @apply w-full max-w-7xl mx-auto py-20 px-6 flex flex-col justify-center items-center gap-8;
+  }
+
+  .section-title {
+    @apply w-full text-3xl text-accent-hover font-semibold text-center;
+  }
+
+  .content-p {
+    @apply text-base leading-7 text-muted;
+  }
+
+  /* Pages that open with a compact PageHero: same width and spacing as
+     Home and About */
+  .explore-page,
+  .contact-page,
+  .reading-page {
+    @apply mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-10 md:px-6 md:py-14;
+  }
+
+  /* Keywords gets double width; the Search button is only as wide as it needs.
+     Pill fields, like Home's search. 40px corners = the fields' 24px radius
+     plus the 16px padding, so the bar curves evenly round them in one row,
+     two rows (My Events) or stacked on phones */
+  .events-search {
+    @apply w-full max-w-7xl p-4 grid grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto] gap-3 rounded-[40px] bg-card;
+  }
+
+  .events-search-input {
+    @apply w-full min-w-0 rounded-full border border-border bg-background px-5 py-2.5 text-foreground outline-none focus:border-accent;
+    accent-color: #8e98f3;
+    color-scheme: dark;
+  }
+
+  /* Date field: the browser's calendar button stays clickable but invisible,
+     over a Lucide icon in the accent colour (same as the sidebar icons) */
+  .date-field {
+    @apply relative min-w-0;
+  }
+
+  .events-search-input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .date-field-icon {
+    @apply pointer-events-none absolute right-5 top-1/2 size-5 -translate-y-1/2 text-accent;
+  }
+
+  /* Explore Events: no date field (the date pills pick it), so Keywords (2)
+     | Category | Location | Search */
+  .events-search-keywords-only {
+    @apply grid-cols-[minmax(0,1fr)_auto];
+  }
+
+  .events-search-no-date {
+    @apply grid-cols-[minmax(0,2fr)_repeat(2,minmax(0,1fr))_auto];
+  }
+
+  /* Date pills on the left, the layout switch on the right */
+  /* Wraps when the pills and the control on the right don't fit (My
+     Events' sort on a phone); the control then sits on its own line */
+  .events-when-row {
+    @apply w-full max-w-7xl flex flex-wrap items-center justify-between gap-x-4 gap-y-3;
+  }
+
+  /* Quick date ranges. 32px and unfilled, lighter than the 46px fields
+     above, so they read as options rather than more fields */
+  .events-when {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .events-when-option {
+    @apply inline-flex h-8 items-center gap-1.5 rounded-full border border-border px-3.5 text-[13px] font-medium text-muted transition-colors hover:border-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none [&_svg]:size-3.5 [&_svg]:text-accent;
+  }
+
+  /* "Pick a date": the browser's calendar opens from a date input kept
+     invisible under the pill, so it appears where the pill is */
+  .events-when-date {
+    @apply relative inline-flex;
+  }
+
+  .events-when-date-input {
+    @apply pointer-events-none absolute bottom-0 left-0 h-px w-full opacity-0;
+    color-scheme: dark;
+  }
+
+  /* Selected, not an action: the navbar and sidebar's accent tint. Solid
+     accent is kept for buttons that do something (Search, Save) */
+  .events-when-option.is-active {
+    @apply border-accent/30 bg-accent/15 text-foreground;
+  }
+
+  /* Result count, then one chip per filter in use. Pagination scrolls
+     back here */
+  .events-results {
+    @apply w-full max-w-7xl flex flex-wrap items-center gap-2 scroll-mt-4;
+  }
+
+  .events-count {
+    @apply mr-2 text-sm font-semibold text-foreground;
+  }
+
+  .filter-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-accent/60 bg-accent/10 py-1 pl-3 pr-2 text-sm text-accent-hover transition-colors hover:bg-accent/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none;
+  }
+
+  .filter-chip svg {
+    @apply size-3.5;
+  }
+
+  .filter-chip-clear {
+    @apply rounded px-1 text-sm text-muted underline underline-offset-4 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  }
+
+  .events-view-switcher {
+    @apply flex items-center gap-2;
+  }
+
+  /* 34px circles: things you click are pills */
+  .events-view-switcher button {
+    @apply inline-flex size-[34px] items-center justify-center rounded-full text-muted transition-colors hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  }
+
+  .events-view-switcher button.is-active {
+    @apply bg-accent/15 text-foreground ring-1 ring-inset ring-accent/30;
+  }
+
+  .events-view-switcher svg {
+    @apply size-[18px];
+  }
+
+  .events-grid {
+    @apply w-full max-w-7xl grid gap-6;
+  }
+
+  /* Pagination: "Showing 1–12 of 26" on the left, the pages on the right.
+     Circles and pills like the view switch; the current page gets the
+     selected tint, not solid accent */
+  .pagination {
+    @apply w-full max-w-7xl flex flex-wrap items-center justify-between gap-4;
+  }
+
+  .pagination-summary {
+    @apply text-sm text-muted tabular-nums;
+  }
+
+  .pagination-controls {
+    @apply flex items-center gap-2;
+  }
+
+  .pagination-pages {
+    @apply flex items-center gap-1;
+  }
+
+  .pagination-page {
+    @apply inline-flex size-[34px] items-center justify-center rounded-full text-sm font-medium text-muted tabular-nums transition-colors hover:bg-card hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none;
+  }
+
+  .pagination-page.is-active {
+    @apply bg-accent/15 text-foreground ring-1 ring-inset ring-accent/30;
+  }
+
+  .pagination-gap {
+    @apply px-1 text-muted;
+  }
+
+  .pagination-step {
+    @apply inline-flex h-[34px] items-center gap-1 rounded-full border border-border px-3.5 text-sm font-medium text-foreground transition-colors hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none [&_svg]:size-4;
+  }
+
+  .events-grid-three {
+    @apply grid-cols-3;
+  }
+
+  .events-grid-two {
+    @apply grid-cols-2;
+  }
+
+  .events-grid-one {
+    @apply grid-cols-1;
+  }
+
+  .events-empty-state {
+    @apply col-span-full p-8 flex flex-col items-center gap-4 rounded-xl bg-card text-center;
+  }
+
+  /* Surfaces (event, dashboard and chart cards, tables) share one edge: a
+     1px border and a faint top highlight. Drop shadows barely show on this
+     dark background, so depth comes from the edge instead. */
+  .event-card {
+    @apply relative flex min-w-0 flex-col overflow-hidden rounded-xl border border-border/60 bg-card shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] transition-[translate,border-color,box-shadow] duration-200 motion-reduce:transition-none;
+  }
+
+  /* The whole card is clickable, so it answers hover and keyboard focus */
+  /* The glow matches the primary button's, and the title (the link) takes
+     the accent so it's clear what the click opens */
+  .event-card:hover {
+    @apply -translate-y-0.5 border-accent/40 shadow-[inset_0_1px_0_rgb(255_255_255/0.04),0_18px_40px_-22px_var(--color-accent)] motion-reduce:translate-y-0;
+  }
+
+  .event-card:hover .event-card-title {
+    @apply text-accent-hover;
+  }
+
+  .event-card:has(.event-card-link:focus-visible) {
+    @apply border-accent/40 outline-2 outline-offset-2 outline-accent;
+  }
+
+  /* The title link covers the card; the card shows its focus ring instead */
+  .event-card-link {
+    @apply outline-none after:absolute after:inset-0 after:content-[''];
+  }
+
+  .event-card-media {
+    @apply overflow-hidden;
+  }
+
+  .event-card-image {
+    @apply block w-full aspect-video object-cover transition-transform duration-200 motion-reduce:transition-none;
+  }
+
+  .event-card:hover .event-card-image {
+    @apply scale-[1.03] motion-reduce:scale-100;
+  }
+
+  /* Grows to the card's height (cards in a row share the tallest one's) */
+  .event-card-content {
+    @apply p-5 flex grow flex-col gap-3;
+  }
+
+  .event-card-category,
+  .event-card-detail {
+    @apply flex items-center gap-2 text-sm text-muted;
+  }
+
+  .event-card-category {
+    @apply text-accent;
+  }
+
+  .event-card-icon {
+    @apply w-4 h-4 shrink-0;
+  }
+
+  /* Two lines at most, so one long title can't make its whole row taller;
+     the full title is on the event page */
+  .event-card-title {
+    @apply line-clamp-2 text-xl text-foreground font-semibold transition-colors duration-200 motion-reduce:transition-none;
+  }
+
+  /* Above the stretched title link, so the buttons keep their own clicks.
+     mt-auto pins them to the bottom, so a longer title on one card doesn't
+     push its buttons below its neighbours'. They wrap in narrow columns (an
+     organiser card's three buttons on a tablet dashboard) instead of being
+     cut off by the card's overflow-hidden */
+  .event-card-actions {
+    @apply relative z-10 mt-auto flex flex-wrap items-center gap-3 pt-2;
+  }
+
+  /* The card's main job (My Drafts' Submit), above its other buttons and
+     the stretched title link */
+  .event-card-primary {
+    @apply relative z-10 mt-auto w-full;
+  }
+
+  .event-card-primary + .event-card-actions,
+  .event-card-notice + .event-card-actions {
+    @apply mt-0;
+  }
+
+  /* Why the main action isn't offered (a draft whose date has passed) */
+  .event-card-notice {
+    @apply mt-auto flex items-start gap-2 rounded-xl border border-yellow-400/35 bg-yellow-400/10 px-3 py-2 text-[13px] leading-snug text-yellow-200 [&_svg]:mt-px [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-yellow-400;
+  }
+
+  /* Delete's question, in the button row's place; above the stretched
+     title link like the row it replaces */
+  .event-card-confirm {
+    @apply relative z-10 mt-auto flex flex-col gap-2.5 pt-2;
+  }
+
+  .event-card-confirm-text {
+    @apply text-sm font-medium text-danger;
+  }
+
+  .event-card-confirm-actions {
+    @apply flex flex-wrap items-center gap-3;
+  }
+
+  /* Same 34px circle as the icon buttons, tinted with its own red like the
+     buttons' hovers; the heart stays 20px because it is the card's main action */
+  .event-favourite-button {
+    @apply inline-flex size-[34px] items-center justify-center rounded-full text-favourite transition-colors hover:bg-favourite/12 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none;
+  }
+
+  .event-favourite-button svg {
+    @apply w-5 h-5;
+  }
+
+  /* Add to calendar (My Favourites): the heart's 34px circle, in the
+     neutral colours of an icon action rather than the heart's red */
+  .event-calendar-button {
+    @apply inline-flex size-[34px] items-center justify-center rounded-full text-muted transition-colors hover:bg-accent/15 hover:text-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none [&_svg]:size-5;
+  }
+
+  /* A favourite that has finished or been cancelled: photo in greyscale and
+     the text faded, while the status badge and the heart stay at full
+     strength so the label reads and the event can still be removed */
+  .event-card-muted .event-card-image {
+    @apply opacity-50 grayscale;
+  }
+
+  .event-card-muted :is(.event-card-category, .event-card-title, .event-card-detail) {
+    @apply opacity-60;
+  }
+
+  .event-favourite-button.is-favourite {
+    @apply bg-favourite/16;
+  }
+
+  /* Liking an event pops the heart once. A class of its own, set on the
+     click, so hearts that are already liked don't pop when a page loads */
+  .event-favourite-button.is-popping svg {
+    animation: heart-pop 350ms ease-out;
+  }
+
+  /* Event details (layout A, decided 2026-10-12): photo, then the title
+     and description beside a panel with when, where, who and the actions.
+     The public page and the dashboard share it; below 52rem the panel moves
+     up under the title (see the @container rules further down) */
+  .event-details-page {
+    @apply items-stretch;
+  }
+
+  .event-details-back {
+    @apply w-full max-w-6xl mx-auto;
+  }
+
+  .event-details {
+    @apply w-full max-w-6xl mx-auto flex flex-col gap-6;
+  }
+
+  /* 21:8 and at most 320px tall, so the facts and Tickets reach a laptop's
+     first screen */
+  .event-details-image-container {
+    @apply max-h-80 overflow-hidden rounded-2xl border border-border/60;
+    aspect-ratio: 21 / 8;
+  }
+
+  .event-details-image {
+    @apply block w-full h-full object-cover;
+  }
+
+  /* Over: greyed like My Favourites' ended cards */
+  .event-details.is-over .event-details-image {
+    @apply grayscale-[85%] brightness-75;
+  }
+
+  .event-details-layout {
+    @apply grid grid-cols-[minmax(0,1fr)_340px] gap-x-8;
+    grid-template-areas: "head panel" "about panel";
+    grid-template-rows: auto 1fr;
+  }
+
+  .event-details-head {
+    @apply flex flex-col gap-2.5;
+    grid-area: head;
+  }
+
+  .event-details-chips {
+    @apply flex flex-wrap items-center gap-2.5 [&_.event-card-category]:flex [&_.event-card-category]:items-center [&_.event-card-category]:gap-1.5;
+  }
+
+  .event-details-title {
+    @apply text-3xl/tight font-semibold text-foreground;
+  }
+
+  .event-details.is-over .event-details-title {
+    @apply text-muted;
+  }
+
+  .event-details.is-cancelled .event-details-title {
+    @apply line-through decoration-orange-400/60;
+  }
+
+  .event-details-about {
+    @apply mt-7 flex flex-col gap-3;
+    grid-area: about;
+  }
+
+  .event-details-about-title {
+    @apply text-lg;
+  }
+
+  .event-details-description {
+    @apply max-w-[64ch] whitespace-pre-line leading-relaxed text-foreground/85;
+  }
+
+  .event-details-panel {
+    @apply self-start flex flex-col gap-5 rounded-2xl border border-border bg-card p-5;
+    grid-area: panel;
+  }
+
+  .event-details-facts {
+    @apply flex flex-col gap-4;
+  }
+
+  .event-details-fact {
+    @apply grid grid-cols-[20px_minmax(0,1fr)] gap-3 text-sm leading-relaxed text-muted [&>svg]:mt-0.5 [&>svg]:size-5 [&>svg]:text-accent;
+  }
+
+  .event-details-fact strong {
+    @apply block font-medium text-foreground;
+  }
+
+  .event-details-fact-link {
+    @apply mt-1 flex w-fit items-center gap-1 break-all rounded-sm text-[13px] font-medium text-accent hover:text-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent [&_svg]:size-3.5 [&_svg]:shrink-0;
+  }
+
+  .event-details-actions {
+    @apply flex flex-col gap-2.5 border-t border-border/60 pt-5 [&>a]:w-full [&>button]:w-full;
+  }
+
+  .event-details-actions-row {
+    @apply flex flex-wrap gap-2.5 [&>button]:flex-[1_1_140px];
+  }
+
+  .event-details-heart.is-saved {
+    @apply fill-favourite text-favourite;
+  }
+
+  .event-details-login {
+    @apply text-center text-xs text-muted [&_a]:font-medium [&_a]:text-accent [&_a]:hover:text-accent-hover;
+  }
+
+  /* One banner at most, in the event's status colour */
+  .event-details-banner {
+    @apply flex items-start gap-3 rounded-xl border px-4 py-3.5 text-sm leading-relaxed [&>svg]:mt-0.5 [&>svg]:size-5 [&>svg]:shrink-0;
+  }
+
+  .event-details-banner strong {
+    @apply block text-foreground;
+  }
+
+  .event-details-banner.is-cancelled {
+    @apply border-orange-400/40 bg-orange-400/10 text-orange-200 [&>svg]:text-orange-400;
+  }
+
+  .event-details-banner.is-past {
+    @apply border-gray-300/30 bg-gray-300/10 text-gray-300 [&>svg]:text-gray-300;
+  }
+
+  .event-details-banner.is-pending {
+    @apply border-yellow-400/35 bg-yellow-400/10 text-yellow-200 [&>svg]:text-yellow-400;
+  }
+
+  .event-details-banner.is-rejected {
+    @apply border-danger/40 bg-danger/10 text-red-200 [&>svg]:text-danger;
+  }
+
+  .event-details-banner.is-draft {
+    @apply border-cyan-300/35 bg-cyan-300/10 text-cyan-100 [&>svg]:text-cyan-300;
+  }
+
+  /* Edit Event on a live event */
+  .event-details-banner.is-approved {
+    @apply border-green-400/35 bg-green-400/10 text-green-100 [&>svg]:text-green-400;
+  }
+
+  /* The live card: the real EventCard, nothing to click */
+  .event-card-preview {
+    @apply pointer-events-none;
+  }
+
+  /* The admin's reason on a rejected event, under the banner's text */
+  .event-details-banner-reason {
+    @apply mt-1 block italic;
+  }
+
+  .dashboard-page-summary .log-summary-failed {
+    @apply text-red-300;
+  }
+
+  /* contact styles */
+  .contact-form-container {
+    @apply w-full rounded-2xl border border-border bg-card p-6;
+  }
+
+  .contact-form-title {
+    @apply text-2xl font-semibold text-foreground;
+  }
+
+  .contact-field {
+    @apply flex flex-col gap-2;
+  }
+
+  .contact-field label {
+    @apply text-sm font-medium text-foreground;
+  }
+
+  .contact-field input,
+  .contact-field textarea {
+    @apply w-full rounded-lg border border-border bg-background px-4 py-2.5 text-foreground outline-none transition-colors placeholder:text-muted focus:border-accent;
+  }
+
+  .contact-field textarea {
+    @apply resize-y;
+  }
+
+  /* honeycomb: the brand pattern. One moment per screen, on a photo or on
+     empty space, never on a plain background behind body text. Every public
+     page has at least the footer's divider. The cell is drawn inline, so
+     there is no image file */
+  .honeycomb-texture {
+    @apply pointer-events-none absolute inset-0 -z-10 opacity-15;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='45' viewBox='0 0 26 45'%3E%3Cpath d='M13 0v7.5L26 15v15l-13 7.5L0 30V15l13-7.5M13 37.5V45' fill='none' stroke='%238e98f3' stroke-width='1'/%3E%3C/svg%3E");
+    background-size: 26px 45px;
+    mask-image: radial-gradient(ellipse at center, black 10%, transparent 70%);
+  }
+
+  /* Page hero (PageHero.jsx): photo card with the heading over it. Tall
+     on About, compact on Explore Events */
+  .page-hero {
+    @apply relative isolate flex min-h-96 items-end overflow-hidden rounded-2xl border border-border md:min-h-120;
+  }
+
+  .page-hero-compact {
+    @apply min-h-60 md:min-h-72;
+  }
+
+  .page-hero-plain {
+    @apply min-h-52 bg-card md:min-h-60;
+  }
+
+  /* Darkens the photo towards the text so the heading keeps its contrast */
+  .page-hero::before {
+    @apply absolute inset-0 -z-10 bg-linear-to-t from-background via-background/75 to-background/10 content-[''];
+  }
+
+  .page-hero-img {
+    @apply absolute inset-0 -z-20 h-full w-full object-cover;
+  }
+
+  .page-hero-content {
+    @apply flex max-w-3xl flex-col gap-4 p-6 md:p-12;
+  }
+
+  .page-hero-compact .page-hero-content {
+    @apply gap-3 md:p-10;
+  }
+
+  .page-hero-eyebrow {
+    @apply text-sm font-semibold uppercase tracking-[0.2em] text-accent;
+  }
+
+  .page-hero-title {
+    @apply text-4xl leading-tight font-semibold text-balance text-foreground md:text-6xl;
+  }
+
+  .page-hero-compact .page-hero-title {
+    @apply text-3xl md:text-5xl;
+  }
+
+  .page-hero-intro {
+    @apply max-w-2xl text-base leading-7 text-balance text-foreground/85 md:text-lg;
+  }
+
+  @media (max-width: 768px) {
+
+    .section-content {
+      @apply py-14 px-4;
+    }
+
+    .section-title {
+      @apply text-2xl;
+    }
+  }
+
+  /* A few pixels of pattern read as a stray dotted line (the admin sidebar
+     on a 680px-tall window), so a sliver shows nothing */
+  @container sidebar-honeycomb (max-height: 48px) {
+
+    .honeycomb-texture {
+      @apply hidden;
+    }
+  }
+
+  /* tooltip styles */
+  .tooltip-wrapper {
+    @apply relative inline-flex;
+  }
+
+  .tooltip {
+    @apply pointer-events-none absolute bottom-full right-0 z-20 mb-2.5 px-2.5 py-1.5 whitespace-nowrap rounded-lg border-2 border-accent/70 bg-border text-xs font-medium text-foreground shadow-lg shadow-black/40 opacity-0 translate-y-1 transition duration-150 motion-reduce:transition-none;
+  }
+
+  /* Arrow: a rotated square sharing the tooltip border, centred on the
+     button. A wider trigger sets --tooltip-arrow-offset to half its width,
+     less the arrow's 5px, to keep the arrow on its middle */
+  .tooltip::after {
+    content: "";
+    @apply absolute top-full right-[var(--tooltip-arrow-offset,11px)] -mt-[5px] w-2.5 h-2.5 rotate-45 border-r-2 border-b-2 border-accent/70 bg-border;
+  }
+
+  .tooltip-start {
+    @apply left-0 right-auto;
+  }
+
+  .tooltip-start::after {
+    @apply left-[var(--tooltip-arrow-offset,11px)] right-auto;
+  }
+
+  .tooltip-center {
+    @apply left-1/2 right-auto -translate-x-1/2;
+  }
+
+  .tooltip-center::after {
+    @apply left-1/2 right-auto -ml-[5px];
+  }
+
+  .tooltip-wrap {
+    @apply w-max max-w-56 whitespace-normal text-center leading-snug;
+  }
+
+  .tooltip-wrapper:hover .tooltip,
+  .tooltip-wrapper:has(:focus-visible) .tooltip {
+    @apply opacity-100 translate-y-0;
+  }
+
+  /* Spacing scale: 16px from a heading to its content (this gap), 48px
+     between sections (16px padding + 16px gap + 16px padding) and 32px
+     under the page's title row (see .dashboard-page-heading) */
+  .dashboard-section {
+    @apply w-full p-4 flex flex-col justify-center items-center gap-4;
+  }
+
+  .dashboard-home {
+    @apply w-full flex flex-col gap-4;
+  }
+
+  .dashboard-title {
+    @apply w-full flex items-center gap-2 text-xl text-muted text-start font-semibold;
+  }
+
+  .dashboard-title-icon {
+    @apply w-5 h-5 text-accent;
+  }
+
+  .event-card-status {
+    @apply w-fit capitalize;
+  }
+
+  .dashboard-empty-state {
+    @apply w-full col-span-full p-6 flex flex-col items-center gap-4 rounded-xl bg-card text-center;
+  }
+
+  .dashboard-empty-text {
+    @apply text-sm text-muted;
+  }
+
+  /* An empty state's button may wrap on a phone rather than stick out of
+     the box. Button's whitespace-nowrap is a utility, which beats this
+     layer, hence the ! */
+  .dashboard-empty-state > :is(a, button) {
+    @apply max-w-full text-center whitespace-normal!;
+  }
+
+  /* Phones: less padding and smaller button text, so a long label takes
+     two lines at most, with softer corners than a pill while it wraps */
+  @container (max-width: 24rem) {
+
+    .dashboard-empty-state {
+      @apply px-4;
+    }
+
+    .dashboard-empty-state > :is(a, button) {
+      @apply rounded-2xl! px-4! text-sm! leading-snug!;
+    }
+  }
+
+  /* EmptyState's honeycomb: two faint cells behind, the front one with the
+     page's icon, interlocked like the logo (the front cell sits 3/4 of a
+     cell lower, half a cell across) */
+  .empty-honeycomb {
+    @apply relative h-[72px] w-[76px];
+  }
+
+  .empty-hex {
+    @apply hex-cell absolute grid h-10 w-9 place-items-center bg-accent/15;
+  }
+
+  .empty-hex::before {
+    @apply hex-cell absolute inset-[1.5px] bg-card content-[''];
+  }
+
+  .empty-hex-left {
+    @apply left-0 top-0;
+  }
+
+  .empty-hex-right {
+    @apply left-10 top-0;
+  }
+
+  .empty-hex-front {
+    @apply left-5 top-8 bg-accent/40 [&_svg]:relative [&_svg]:size-[18px] [&_svg]:text-accent;
+  }
+
+  /* My Events' status pills (Explore's date pills) carry a count */
+  .events-when-count {
+    @apply tabular-nums text-muted;
+  }
+
+  .events-when-option.is-active .events-when-count {
+    @apply text-accent-hover;
+  }
+
+  .events-when-option.is-attention .events-when-count {
+    @apply text-yellow-400;
+  }
+
+  .events-when-option.is-danger .events-when-count {
+    @apply text-red-300;
+  }
+
+  /* The controls on the right of the pills row (My Events' date and
+     sort); after a wrap they keep to the right */
+  .events-when-tools {
+    @apply ml-auto flex flex-wrap items-center justify-end gap-2;
+  }
+
+  /* Clears a picked date: a round 32px button, the height of the pills */
+  .events-when-clear {
+    @apply grid size-8 place-items-center rounded-full border border-border text-muted transition-colors hover:border-accent hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent motion-reduce:transition-none [&_svg]:size-3.5;
+  }
+
+  .status-badge {
+    @apply px-2.5 py-1 inline-flex rounded-full border text-xs font-medium;
+  }
+
+  .status-active,
+  .status-approved {
+    @apply border-green-400/40 bg-green-400/10 text-green-400;
+  }
+
+  .status-pending {
+    @apply border-yellow-400/40 bg-yellow-400/10 text-yellow-400;
+  }
+
+  .status-suspended,
+  .status-rejected {
+    @apply border-danger/40 bg-danger/10 text-danger;
+  }
+
+  /* Event status colours match the PHP input.css */
+  .status-cancelled {
+    @apply border-orange-400/40 bg-orange-400/10 text-orange-400;
+  }
+
+  .status-draft {
+    @apply border-cyan-300/40 bg-cyan-300/10 text-cyan-300;
+  }
+
+  .status-past {
+    @apply border-gray-300/40 bg-gray-300/10 text-gray-300;
+  }
+
+  .status-unverified {
+    @apply border-dashed border-border bg-transparent text-muted;
+  }
+
+  .section-heading-row {
+    @apply w-full flex items-center justify-between gap-4;
+  }
+
+  /* Inner dashboard pages: the page's title row, 32px above the content
+     (this margin plus the section's 16px gap). The shortcuts wrap under the
+     title when the row runs out of room */
+  .dashboard-page-heading {
+    @apply w-full mb-4 flex flex-col gap-2;
+  }
+
+  .dashboard-page-heading-row {
+    @apply flex-wrap gap-y-3;
+  }
+
+  /* The page title matches Home's greeting; section headings below it
+     stay smaller and muted (.dashboard-title) */
+  .dashboard-page-title {
+    @apply min-w-0 flex items-center gap-3 text-2xl text-foreground font-semibold;
+  }
+
+  /* The title icon in the logo's cell (decided 2026-10-11): an accent-tinted
+     hexagon with a card-coloured one 1.5px inside, like the Preferences cells
+     and the footer's hex buttons. 36 x 40, the logo's 10:11 */
+  .dashboard-page-title-hex {
+    @apply hex-cell relative grid h-10 w-9 shrink-0 place-items-center bg-accent/35;
+  }
+
+  .dashboard-page-title-hex::before {
+    @apply hex-cell absolute inset-[1.5px] bg-card content-[''];
+  }
+
+  .dashboard-page-title-hex svg {
+    @apply relative size-[18px] text-accent;
+  }
+
+  /* One line under the title with what matters on this page, like the
+     status line under Home's greeting; indented to the title text (the
+     36px hexagon plus the 12px gap) */
+  .dashboard-page-summary {
+    @apply pl-12 text-muted;
+  }
+
+  .dashboard-page-summary strong {
+    @apply font-semibold text-foreground tabular-nums;
+  }
+
+  .dashboard-page-actions {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .section-heading-row .dashboard-title {
+    @apply w-auto min-w-0;
+  }
+
+  .section-heading-row > a,
+  .section-heading-row > button {
+    @apply shrink-0 whitespace-nowrap;
+  }
+
+  /* Search, layout switcher and cards inside the dashboard Explore Events section */
+  .dashboard-events-browser {
+    @apply w-full flex flex-col items-center gap-6;
+  }
+
+  .form-select {
+    @apply w-full rounded-lg border border-border bg-background px-4 py-2.5 text-foreground outline-none transition-colors focus:border-accent cursor-pointer;
+  }
+
+  /* organiser event pages */
+  .contact-field input[type="datetime-local"] {
+    color-scheme: dark;
+  }
+
+  .contact-field .password-input input {
+    @apply pr-12;
+  }
+
+  /* FieldError: the icon sits on the first line of the text */
+  .profile-error {
+    @apply flex items-start gap-1.5 text-sm text-danger [&_svg]:mt-0.5 [&_svg]:size-4 [&_svg]:shrink-0;
+  }
+
+  /* StatusMessage: one box for success and error, icon beside the text */
+  .status-message {
+    @apply p-3 flex items-start gap-2 rounded-lg border text-sm [&>svg]:mt-0.5 [&>svg]:size-4 [&>svg]:shrink-0;
+  }
+
+  .status-message-success {
+    @apply border-green-400/40 bg-green-400/10 text-green-400;
+  }
+
+  .status-message-error {
+    @apply border-danger/40 bg-danger/10 text-danger;
+  }
+
+  .status-message-text {
+    @apply flex flex-col gap-1;
+  }
+
+  /* fieldset has a browser border and min-width; the legend sits in the
+     column like a label, so it needs its own gap */
+  fieldset.contact-field {
+    @apply min-w-0 border-0;
+  }
+
+  fieldset.contact-field legend {
+    @apply mb-2;
+  }
+
+  .contact-field [aria-invalid="true"] {
+    @apply border-danger focus:border-danger;
+  }
+
+  /* The dashboard on a phone, beside the icon rail (about 15rem): cards
+     trim their padding and button gaps so View, the heart and Add to
+     calendar stay on one line */
+  @container (max-width: 20rem) {
+
+    .event-card-content {
+      @apply p-4;
+    }
+
+    .event-card-actions {
+      @apply gap-2;
+    }
+  }
+
+  /* Phones: one item per line; the text beside each icon may wrap between
+     its parts ("Manchester, UK" / "14°C" / "Partly cloudy") */
+  @container (max-width: 52rem) {
+
+    .event-details-layout {
+      @apply grid-cols-1 gap-y-5;
+      grid-template-areas: "head" "panel" "about";
+    }
+
+    .event-details-about {
+      @apply mt-2;
+    }
+  }
+
+  @container (max-width: 28rem) {
+
+    .event-details-image-container {
+      aspect-ratio: 4 / 3;
+    }
+
+    .event-details-title {
+      @apply text-2xl/tight;
+    }
+  }
+
+  /* Filter bar and event grid, shared by the public Explore page (<main> is
+     its container, about the window's width) and the dashboard. 56rem: the
+     narrowest three cards still read well in; 36rem: one card per row */
+  @container (max-width: 56rem) {
+
+    .events-search {
+      @apply grid-cols-2;
+    }
+
+    .events-search-keywords {
+      @apply col-span-2;
+    }
+
+    /* Without the date field: Keywords | Category, then Location | Search */
+    .events-search-no-date .events-search-keywords {
+      @apply col-span-1;
+    }
+
+    .events-search-keywords-only {
+      @apply grid-cols-[minmax(0,1fr)_auto];
+    }
+
+    .events-search-keywords-only .events-search-keywords {
+      @apply col-span-1;
+    }
+
+    .events-grid-three {
+      @apply grid-cols-2;
+    }
+
+    /* Three and two columns look the same here, so the switcher is hidden */
+    .events-view-switcher {
+      @apply hidden;
+    }
+  }
+
+  @container (max-width: 36rem) {
+
+    .events-search {
+      @apply grid-cols-1;
+    }
+
+    .events-search-keywords {
+      @apply col-span-1;
+    }
+
+    .events-grid-three,
+    .events-grid-two {
+      @apply grid-cols-1;
+    }
+
+    /* Phones: the summary over the pages, arrows without their words */
+    .pagination {
+      @apply justify-center;
+    }
+
+    .pagination-step-label {
+      @apply sr-only;
+    }
+  }
+}

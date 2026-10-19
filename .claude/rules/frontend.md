@@ -27,7 +27,10 @@ functions record behaviour being matched on purpose: keep that parity unless tol
 ```text
 frontend/src/
 ├── App.jsx            routes + all shared app state (events, users, favourites, messages)
-├── App.css            Tailwind import, @theme tokens, component classes via @apply
+├── App.css            font and Tailwind imports, @theme tokens, then imports styles/
+├── styles/            component classes via @apply, by where they are used:
+│                      base (hex-cell utility, element defaults, keyframes), shared
+│                      (public site and dashboard), public, dashboard, admin
 ├── pages/             one file per route
 ├── components/
 │   ├── UI/            shared primitives: Button, DashboardCard, Tooltip
@@ -58,8 +61,8 @@ frontend/src/
   `bg-background`, `text-foreground`, `text-danger` for errors and destructive actions,
   `text-favourite` for the favourite heart), never raw hex. Tailwind's own palette appears only
   for status colours: one per status badge (green, yellow, orange, cyan, grey), green for the
-  success message and a faint slate for past rows in tables.
-  Repeated multi-utility patterns get a semantic class in `App.css` built with `@apply` (e.g.
+  success message.
+  Repeated multi-utility patterns get a semantic class in `styles/` built with `@apply` (e.g.
   `.event-card`, `.status-badge`), which is how most components are styled
 - **Corner radius:** panels that hold a page's content (forms, tables, chart cards, detail and
   activity panels) are 16px (`rounded-2xl`), public and dashboard alike. Cards in a grid, list
@@ -205,14 +208,14 @@ frontend/src/
   dashboard (`.contact-form-title`) are 20px; the public Contact form keeps 24px. Page-specific
   buttons (Go Back, Mark All as Read) go in the title row as `DashboardPageHeading`'s children
 - **Dashboard spacing:** 32px under the title row, 48px between sections, 16px from a heading to
-  its content (`.dashboard-home` / `.dashboard-section` gaps, see the comment in `App.css`)
+  its content (`.dashboard-home` / `.dashboard-section` gaps, see the comment in `styles/shared.css`)
 - **Stat cards only on the three Home pages.** Each card answers "what needs me, what's coming, or
   how am I doing", and always has one context line (`trend`, `action` or `detail` in
   `DashboardCard`); no bare figures. Inner pages get a one-line summary under the title instead
   (`DashboardPageHeading`'s `summary`, figures in `<strong>`), with its own wording when empty.
   Cards have a 5% white top gradient, never a hue. Decided 2026-10-10
 - **Responsive layout inside the dashboard** uses container queries (`@container (max-width: …)`
-  in `App.css`), not window breakpoints: `.dashboard-content` is the container, so a page responds
+  in the `styles/` files), not window breakpoints: `.dashboard-content` is the container, so a page responds
   to the space beside the sidebar. `<main>` is a container too, so the parts shared with public pages
   (filter bar, event grid) follow the same rules on both. Window `@media` rules stay for the page
   frame: navbar, sidebar rail, outer margins
