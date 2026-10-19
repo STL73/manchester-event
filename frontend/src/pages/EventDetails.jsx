@@ -50,7 +50,7 @@ function StateBanner({ event, state, role }) {
       : (banner[role] ?? banner.text);
 
   return (
-    <div className={`event-details-banner is-${state}`} role="status">
+    <div className={`callout event-details-banner status-${state}`} role="status">
       <banner.icon aria-hidden="true" />
       <p>
         <strong>{banner.title}</strong>

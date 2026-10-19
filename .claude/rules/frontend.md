@@ -79,9 +79,14 @@ frontend/src/
   the error line (`UI/FieldError`). `.icon-button` is a round icon-only button (34px; a
   component sets another size to match its neighbours, and a tint where the hover means
   something), `.pill` a 32px option in a row (filters, sort, Previous / Next), `.badge` a
-  label that states something, coloured by a `tone-*` utility (`styles/base.css`: success,
-  warning, danger, cancelled, draft, past, accent) or a `.status-*` class, which maps each
-  event and account status to its tone. A component class only overrides (padding, gap, size);
+  label that states something, `.callout` a message box with its icon on the left (status
+  banners, notes, saved / error messages; `.callout-compact` inside panels and cards).
+  Colour comes from a `tone-*` utility (`styles/base.css`: success, warning, danger,
+  cancelled, draft, past, accent) or a `.status-*` class, which maps each event and account
+  status to its tone. A tone only sets variables (`--tone` for borders, fills and icons,
+  `--tone-text` for text in the colour, `--tone-soft` for body text on a tinted box), so one
+  class colours a badge, a callout, a sidebar count or a stat card's figure, each in its own
+  way; data says `tone: "warning"`, never a class name. A component class only overrides (padding, gap, size);
   don't repeat the shared utilities in it. Before naming a class, check Tailwind has no utility
   by that name: a class called `overline` also gets Tailwind's line over the text
 - **Canonical Tailwind classes** (2026-10-19): write what Tailwind suggests, scale values over

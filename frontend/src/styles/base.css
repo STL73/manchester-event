@@ -42,35 +42,56 @@
   @apply bg-accent/15 text-foreground ring-1 ring-inset ring-accent/30;
 }
 
-/* A status colour on a badge or chip: 40% border, 10% fill, the colour as
-   text. One per state (the tokens in App.css), plus accent for a plain
-   label. .status-* in shared.css maps each event and account status to one */
+/* A status colour, as variables each component uses its own way: --tone
+   for borders, fills and icons, --tone-text for text in the colour (badges,
+   counts), --tone-soft for body text on a tinted box (banners). One per
+   state (the tokens in App.css), plus accent for a plain label. .status-*
+   in shared.css maps each event and account status to one. Every tone sets
+   all three, so a tone inside another never mixes with it. Components build
+   some names at runtime (tone-${badge.tone}), which Tailwind can't see in the
+   source, so all seven are always generated */
+@source inline("tone-{success,warning,danger,cancelled,draft,past,accent}");
+
 @utility tone-success {
-  @apply border-success/40 bg-success/10 text-success;
+  --tone: --theme(--color-success);
+  --tone-text: --theme(--color-success);
+  --tone-soft: --theme(--color-green-100);
 }
 
 @utility tone-warning {
-  @apply border-warning/40 bg-warning/10 text-warning;
+  --tone: --theme(--color-warning);
+  --tone-text: --theme(--color-warning);
+  --tone-soft: --theme(--color-yellow-200);
 }
 
 @utility tone-danger {
-  @apply border-danger/40 bg-danger/10 text-danger;
+  --tone: --theme(--color-danger);
+  --tone-text: --theme(--color-danger);
+  --tone-soft: --theme(--color-red-200);
 }
 
 @utility tone-cancelled {
-  @apply border-cancelled/40 bg-cancelled/10 text-cancelled;
+  --tone: --theme(--color-cancelled);
+  --tone-text: --theme(--color-cancelled);
+  --tone-soft: --theme(--color-orange-200);
 }
 
 @utility tone-draft {
-  @apply border-draft/40 bg-draft/10 text-draft;
+  --tone: --theme(--color-draft);
+  --tone-text: --theme(--color-draft);
+  --tone-soft: --theme(--color-cyan-100);
 }
 
 @utility tone-past {
-  @apply border-past/40 bg-past/10 text-past;
+  --tone: --theme(--color-past);
+  --tone-text: --theme(--color-past);
+  --tone-soft: --theme(--color-past);
 }
 
 @utility tone-accent {
-  @apply border-accent/40 bg-accent/10 text-accent-hover;
+  --tone: --theme(--color-accent);
+  --tone-text: --theme(--color-accent-hover);
+  --tone-soft: --theme(--color-foreground);
 }
 
 @layer base {

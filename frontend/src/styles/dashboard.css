@@ -142,7 +142,7 @@
 
   /* Edit only: Cancel or Delete, asked here like Settings' delete */
   .event-danger-zone {
-    @apply flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-danger/35 px-6 py-5;
+    @apply flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-danger/40 px-6 py-5;
   }
 
   .event-danger-zone-title {
@@ -240,15 +240,7 @@
 
   /* Counts where something needs you; tones match the Home cards */
   .nav-badge {
-    @apply ml-auto min-w-5 h-5 px-1.5 shrink-0 inline-flex items-center justify-center rounded-full bg-accent/15 text-xs font-semibold text-accent-hover;
-  }
-
-  .nav-badge-warning {
-    @apply bg-warning/15 text-warning;
-  }
-
-  .nav-badge-danger {
-    @apply bg-danger/15 text-danger;
+    @apply ml-auto min-w-5 h-5 px-1.5 shrink-0 inline-flex items-center justify-center rounded-full bg-(--tone)/15 text-xs font-semibold text-(--tone-text);
   }
 
   /* Help: a row like the links, opening a small panel of public pages over
@@ -642,12 +634,8 @@
 
   /* Colour only for states that need action, matching statusColours:
      yellow = waiting for approval, red = rejected; only the figure changes */
-  .dashboard-card-accent-yellow .dashboard-card-number {
-    @apply text-warning;
-  }
-
-  .dashboard-card-accent-red .dashboard-card-number {
-    @apply text-danger;
+  .dashboard-card[class*="tone-"] .dashboard-card-number {
+    @apply text-(--tone-text);
   }
 
   /* Organiser Home's five cards, one row where each still gets ~190px */
@@ -1193,7 +1181,7 @@
   }
 
   .settings-row.is-danger .settings-panel {
-    @apply border-danger/35;
+    @apply border-danger/40;
   }
 
   .settings-form {
@@ -1272,7 +1260,7 @@
   }
 
   .settings-note {
-    @apply flex items-start gap-2 rounded-xl border border-border/70 bg-background px-3.5 py-3 text-[13px] text-muted [&_svg]:mt-0.5 [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-accent;
+    @apply border-border/70 bg-background text-muted [&>svg]:text-accent;
   }
 
   .settings-link {
@@ -1284,7 +1272,7 @@
   }
 
   .settings-confirm {
-    @apply flex flex-col gap-3 rounded-xl border border-danger/35 bg-danger/6 p-4;
+    @apply flex flex-col gap-3 rounded-xl border border-danger/40 bg-danger/10 p-4;
   }
 
   .settings-confirm-title {
@@ -1302,15 +1290,7 @@
   /* Only when something limits the account: yellow for an unverified
      email, red for a suspension */
   .settings-banner {
-    @apply flex items-start gap-3 rounded-xl border px-4 py-3.5 text-sm leading-relaxed text-muted [&>svg]:mt-0.5 [&>svg]:size-5 [&>svg]:shrink-0 [&>div]:flex [&>div]:flex-col [&>div]:items-start [&>div]:gap-1.5;
-  }
-
-  .settings-banner.is-warning {
-    @apply border-warning/40 bg-warning/8 [&>svg]:text-warning;
-  }
-
-  .settings-banner.is-danger {
-    @apply border-danger/40 bg-danger/8 [&>svg]:text-danger;
+    @apply text-sm leading-relaxed text-muted [&>div]:flex [&>div]:flex-col [&>div]:items-start [&>div]:gap-1.5;
   }
 
   .settings-banner-title {

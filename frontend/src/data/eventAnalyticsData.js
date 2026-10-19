@@ -23,7 +23,7 @@ export const eventAnalyticsCards = [
     id: "pending",
     title: "Pending Approval",
     icon: ClipboardClock,
-    tone: "dashboard-card-accent-yellow",
+    tone: "warning",
     action: { label: "View", to: "/dashboard/my-events" },
   },
   {

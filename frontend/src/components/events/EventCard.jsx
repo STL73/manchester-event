@@ -126,7 +126,7 @@ export default function EventCard({
           </Button>
         )}
         {!isConfirming && notice && (
-          <p className="event-card-notice">
+          <p className="callout callout-compact tone-warning event-card-notice">
             <notice.icon aria-hidden="true" />
             {notice.text}
           </p>

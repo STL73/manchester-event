@@ -6,11 +6,6 @@ function matches(path, url) {
   return path === url || path.startsWith(`${url}/`);
 }
 
-const badgeTones = {
-  warning: "nav-badge-warning",
-  danger: "nav-badge-danger",
-};
-
 export default function NavItem({ item, counts, activePath, pathname }) {
   const isActive = matches(activePath, item.url);
   // aria-current only when this really is the page shown, not the "came from" page
@@ -38,7 +33,7 @@ export default function NavItem({ item, counts, activePath, pathname }) {
         </span>
         {count > 0 && (
           <span
-            className={`nav-badge ${badgeTones[item.badge.tone] ?? ""}`}
+            className={`nav-badge tone-${item.badge.tone ?? "accent"}`}
             aria-hidden="true"
           >
             {count}

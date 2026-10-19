@@ -10,7 +10,7 @@ export default function StatusMessage({ variant = "success", className = "", ref
   return (
     <div
       ref={ref}
-      className={`status-message status-message-${variant} ${className}`.trim()}
+      className={`callout status-message ${variant === "error" ? "tone-danger" : "tone-success"} ${className}`.trim()}
       role="status"
     >
       <Icon aria-hidden="true" />

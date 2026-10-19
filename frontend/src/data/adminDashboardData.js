@@ -19,7 +19,7 @@ export const adminInsights = {
   review: {
     title: "Events to review",
     icon: ClipboardClock,
-    tone: "dashboard-card-accent-yellow",
+    tone: "warning",
     oldest: (days) => `Oldest: ${daysLabel(days)}`,
     resubmitted: "resubmitted",
     to: "/dashboard/manage-events",
@@ -58,7 +58,7 @@ export const siteTotalsCards = [
     id: "pendingEvents",
     title: "Events Waiting Approval",
     icon: ClipboardClock,
-    tone: "dashboard-card-accent-yellow",
+    tone: "warning",
     action: { label: "Review", to: "/dashboard/manage-events" },
   },
   {

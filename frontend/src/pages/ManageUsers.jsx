@@ -80,7 +80,7 @@ function StatusBadges({ user }) {
 
 // The panel's form: status, and for a suspension how long and why
 function AccountForm({ user, isSelf, form, onChange, reasonError }) {
-  if (isSelf) return <p className="admin-note">{userPanel.self}</p>;
+  if (isSelf) return <p className="callout callout-compact admin-note">{userPanel.self}</p>;
   const suspended = form.accStatus === "suspended";
   const lengthOptions = [
     // An existing suspension can be kept as it is
@@ -132,7 +132,7 @@ function AccountForm({ user, isSelf, form, onChange, reasonError }) {
             />
             {reasonError && <FieldError id="suspend-reason-error">{reasonError}</FieldError>}
           </div>
-          <p className="admin-note">{userPanel.suspendedNote[user.role === "organiser" ? "organiser" : "user"]}</p>
+          <p className="callout callout-compact admin-note">{userPanel.suspendedNote[user.role === "organiser" ? "organiser" : "user"]}</p>
         </>
       )}
     </div>
@@ -464,7 +464,7 @@ export default function ManageUsers({ users, events, currentUserId, onUpdateUser
               </ul>
 
               {openUser.accStatus === "suspended" && openUser.suspensionReason && (
-                <p className="admin-note">
+                <p className="callout callout-compact admin-note">
                   <strong>{suspensionText(openUser)}</strong>
                   {openUser.suspensionReason}
                 </p>

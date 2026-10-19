@@ -11,7 +11,7 @@ export default function LegalPage({ page, titleId }) {
 
       <article className="reading-column">
         <p className="reading-meta">{updated}</p>
-        <p className="reading-note">
+        <p className="callout reading-note tone-accent">
           <Info aria-hidden="true" />
           {draftNote}
         </p>
