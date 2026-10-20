@@ -68,7 +68,9 @@ export default function TrendChart({
 
   return (
     <ResponsiveContainer width="100%" height={240}>
-      <AreaChart data={rows} margin={{ top: 16, right: 16, bottom: 0, left: -16 }}>
+      {/* A callout needs room above the top of the plot: the point it labels
+          is often the highest */}
+      <AreaChart data={rows} margin={{ top: marked ? 32 : 16, right: 16, bottom: 0, left: -16 }}>
         <CartesianGrid vertical={false} stroke={chartColours.grid} />
         <XAxis
           dataKey="label"
