@@ -6,6 +6,15 @@ export const siteAnalyticsSection = {
   icon: ChartNoAxesCombined,
 };
 
+// Sections, one shown at a time under the stat cards (`?tab=` in the URL);
+// the same layout as Event Analytics (decided 2026-10-20)
+export const siteAnalyticsTabs = [
+  { value: "growth", label: "Growth" },
+  { value: "moderation", label: "Moderation" },
+  { value: "engagement", label: "Engagement" },
+  { value: "safety", label: "Safety and support" },
+];
+
 // Sign-ups and event creations only happen in the past, so every range looks
 // back from today. The grouping follows the range. The control sits in the
 // growth chart's header and changes only that chart.

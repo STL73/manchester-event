@@ -1,3 +1,5 @@
+import { ChartNoAxesColumn } from "lucide-react";
+import EmptyState from "../UI/EmptyState";
 import { chartText } from "../../data/analyticsData";
 
 // A chart with its title and a "View data table" twin, so every value can be
@@ -25,16 +27,16 @@ export default function ChartCard({
       {/* Title and description left, controls right; controls wrap below when narrow */}
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex flex-col gap-1">
-          <h3 className="chart-card-title" id={titleId}>
+          <h2 className="heading-panel" id={titleId}>
             {title}
-          </h3>
+          </h2>
           {description && <p className="chart-card-description">{description}</p>}
         </div>
         {actions && <div className="chart-card-actions">{actions}</div>}
       </header>
 
       {rows.length === 0 ? (
-        <p className="dashboard-empty-text">{chartText.noData}</p>
+        <EmptyState icon={ChartNoAxesColumn} text={chartText.noData} />
       ) : (
         <>
           {/* The table below carries the same values for screen readers */}

@@ -1,29 +1,45 @@
+import { themeColour } from "../lib/themeColour";
+
 // Shared chart settings for Event Analytics and Site Analytics.
-// SVG chart fills need plain hex, so these are the exact hex versions of the
-// theme tokens and Tailwind status colours used by the badges.
+// Colours come from the theme tokens when a chart draws (see themeColour), so
+// the charts always match the badges. Faint fills are these colours at a lower
+// opacity (`chartOpacity`), not mixed hex values.
 export const chartColours = {
-  accent: "#8e98f3", // --color-accent
-  surface: "#121a31", // --color-card (chart background)
-  grid: "#243460", // --color-border
-  axisText: "#a1aabf", // --color-muted
-  areaFill: "rgba(142, 152, 243, 0.1)", // accent at 10%
-  barHover: "rgba(142, 152, 243, 0.08)",
-  // Timeline: held events in the accent, scheduled ones in a quieter step of
-  // the same hue (accent mixed 50/50 with the card surface)
-  held: "#8e98f3",
-  scheduled: "#50598f",
+  get accent() {
+    return themeColour("accent");
+  },
+  // The chart background, for rings round dots
+  get surface() {
+    return themeColour("card");
+  },
+  get grid() {
+    return themeColour("border");
+  },
+  get axisText() {
+    return themeColour("muted");
+  },
 };
 
-// Same colours as the status badges (PHP input.css)
-export const statusColours = {
-  approved: "#05df72", // green-400
-  past: "#d1d5dc", // gray-300
-  rejected: "#ff6467", // red-400
-  pending: "#fdc700", // yellow-400
-  draft: "#53eafd", // cyan-300
-  cancelled: "#ff8904", // orange-400
-  active: "#05df72",
-  suspended: "#ff6467",
+export const chartOpacity = {
+  areaFill: 0.1,
+  barHover: 0.08,
+  // Timeline: scheduled events are the accent at half strength over the card,
+  // a quieter step of the held events' colour
+  scheduled: 0.5,
+};
+
+// The status tones the badges use (styles/base.css), by status. Unverified is
+// a label, not a status, so it takes the muted tone like its badge
+export const statusTones = {
+  approved: "success",
+  past: "past",
+  rejected: "danger",
+  pending: "warning",
+  draft: "draft",
+  cancelled: "cancelled",
+  active: "success",
+  unverified: "muted",
+  suspended: "danger",
 };
 
 // Bar order chosen with the dataviz palette validator (dark mode, card surface)
@@ -38,9 +54,9 @@ export const eventStatusOrder = [
   "cancelled",
 ];
 
-// Active and Suspended are 7.7 apart for colour-blind readers (target 8), which
-// is allowed because every bar is also named on the axis and in the table.
-export const accountStatusOrder = ["active", "suspended"];
+// Unverified (grey) sits between Active and Suspended, so the green and red
+// that are hardest to tell apart are never side by side
+export const accountStatusOrder = ["active", "unverified", "suspended"];
 
 export const chartText = {
   range: "Time range",
@@ -48,6 +64,7 @@ export const chartText = {
   countHeading: "Count",
   noData: "No data yet.",
   metric: "Metric",
+  sections: "Sections",
 };
 
 // Stat cards always compare the same fixed window, so they stay put while the

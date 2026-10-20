@@ -1,7 +1,8 @@
 // Pills that filter a list, each with its count, in Explore's date-pill
 // style (My Events, the admin lists). One is selected at a time; `attention`
 // marks the one that needs doing (Needs review, Unread) and `tone: "danger"`
-// one that is bad news (System Logs' Failed sign-ins)
+// one that is bad news (System Logs' Failed sign-ins). Without a `count` an
+// option is a plain pill, which is how the analytics pages switch sections
 export default function FilterPills({ label, options, value, onChange }) {
   return (
     <div className="events-when" role="group" aria-label={label}>
@@ -13,7 +14,13 @@ export default function FilterPills({ label, options, value, onChange }) {
           onClick={() => onChange(option.value)}
           key={option.value}
         >
-          {option.label} <span className="events-when-count">{option.count}</span>
+          {option.label}
+          {option.count != null && (
+            <>
+              {" "}
+              <span className="events-when-count">{option.count}</span>
+            </>
+          )}
         </button>
       ))}
     </div>

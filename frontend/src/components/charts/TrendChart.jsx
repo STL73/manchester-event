@@ -9,9 +9,8 @@ import {
   usePlotArea,
 } from "recharts";
 import ChartTooltip from "./ChartTooltip";
-import { chartColours } from "../../data/analyticsData";
+import { chartColours, chartOpacity } from "../../data/analyticsData";
 
-const axisTick = { fill: chartColours.axisText, fontSize: 12 };
 const GLOW_RADIUS = 12;
 
 // The hovered point: a faint accent glow around a 6px dot, and a thin line
@@ -52,6 +51,8 @@ function HoverPoint({ cx, cy }) {
 // Single-series count over time: 2px line with a 10% wash and dots with a
 // surface ring. Hovering a point shows HoverPoint and the tooltip.
 export default function TrendChart({ rows, valueLabel = "events" }) {
+  const axisTick = { fill: chartColours.axisText, fontSize: 12 };
+
   return (
     <ResponsiveContainer width="100%" height={240}>
       <AreaChart data={rows} margin={{ top: 16, right: 16, bottom: 0, left: -16 }}>
@@ -86,7 +87,8 @@ export default function TrendChart({ rows, valueLabel = "events" }) {
           strokeWidth={2}
           strokeLinejoin="round"
           strokeLinecap="round"
-          fill={chartColours.areaFill}
+          fill={chartColours.accent}
+          fillOpacity={chartOpacity.areaFill}
           dot={{
             r: 4,
             fill: chartColours.accent,
