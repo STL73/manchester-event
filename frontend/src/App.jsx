@@ -439,7 +439,7 @@ function App() {
               <Route path="my-events" element={<MyEvents organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} />} />
               <Route path="my-events/:eventId/edit" element={<ResetOnParam param="eventId"><CreateEvents mode="edit" events={organiserEvents} onUpdateEvent={updateOrganiserEvent} onCancelEvent={cancelOrganiserEvent} onDeleteEvent={deleteOrganiserEvent} /></ResetOnParam>} />
               <Route path="my-drafts" element={<MyDrafts organiserEvents={organiserEvents} onSubmitDraft={submitDraft} onDeleteEvent={deleteOrganiserEvent} />} />
-              <Route path="event-analytics" element={<EventAnalytics organiserEvents={organiserEvents} />} />
+              <Route path="event-analytics" element={<EventAnalytics organiserEvents={organiserEvents} favouriteIds={favouriteIds} interestIds={interestIds} />} />
             </Route>
             <Route element={<RoleOnly allow="admin" userType={userType} />}>
               <Route path="manage-users" element={<ManageUsers users={users} events={events} currentUserId={currentAdmin.id} onUpdateUser={updateUserStatus} onDeleteUser={deleteUser} />} />

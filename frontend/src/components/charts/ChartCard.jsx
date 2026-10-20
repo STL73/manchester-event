@@ -8,6 +8,7 @@ import { chartText } from "../../data/analyticsData";
 // (e.g. the range control) sit in the header, next to the chart they change.
 // `table={false}` is for panels whose content is already text (lists, facts):
 // it is shown as it is, readable by screen readers, with no table twin.
+// `empty` replaces the generic "No data yet." where the panel can say more.
 export default function ChartCard({
   id,
   title,
@@ -18,6 +19,7 @@ export default function ChartCard({
   wide = false,
   actions,
   table = true,
+  empty = chartText.noData,
   children,
 }) {
   const titleId = `${id}-title`;
@@ -38,7 +40,7 @@ export default function ChartCard({
         {actions && <div className="chart-card-actions">{actions}</div>}
       </header>
 
-      {rows.length === 0 && <EmptyState icon={ChartNoAxesColumn} text={chartText.noData} />}
+      {rows.length === 0 && <EmptyState icon={ChartNoAxesColumn} text={empty} />}
       {rows.length > 0 && !table && children}
       {rows.length > 0 && table && (
         <>

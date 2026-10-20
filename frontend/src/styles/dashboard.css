@@ -1205,6 +1205,23 @@
     @apply text-right text-xs text-muted tabular-nums;
   }
 
+  /* Approval record: the admins' latest reasons under the facts */
+  .approval-reasons {
+    @apply flex flex-col gap-1.5 text-[13px] text-muted;
+  }
+
+  .approval-reasons-title {
+    @apply font-medium text-foreground;
+  }
+
+  .approval-reasons ul {
+    @apply flex list-disc flex-col gap-1 pl-4.5;
+  }
+
+  .approval-reasons q {
+    @apply text-foreground;
+  }
+
   /* When events happen (WeekTimeGrid): brighter = more */
   .week-grid {
     @apply grid grid-cols-[2.25rem_repeat(4,minmax(0,1fr))] gap-1;
