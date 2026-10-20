@@ -583,7 +583,7 @@
     @apply mt-auto inline-flex w-fit items-center gap-1 rounded-sm text-sm font-medium text-accent hover:text-accent-hover focus-ring [&_svg]:size-3.5;
   }
 
-  /* Colour only for states that need action, matching statusColours:
+  /* Colour only for states that need action, matching the status tones:
      yellow = waiting for approval, red = rejected; only the figure changes */
   .dashboard-card[class*="tone-"] .dashboard-card-number {
     @apply text-(--tone-text);
@@ -993,10 +993,6 @@
 
   .chart-card-actions {
     @apply flex flex-wrap items-center gap-2;
-  }
-
-  .chart-card-title {
-    @apply text-base font-semibold text-foreground;
   }
 
   .chart-card-description {

@@ -9,25 +9,25 @@ import {
   YAxis,
 } from "recharts";
 import ChartTooltip from "./ChartTooltip";
-import { chartColours } from "../../data/analyticsData";
-
-const axisTick = { fill: chartColours.axisText, fontSize: 12 };
+import { chartColours, chartOpacity } from "../../data/analyticsData";
+import { themeColour } from "../../lib/themeColour";
 
 // Column chart for counts per category/status/location.
-// One colour by default; pass `colours` ({ key: hex }) when colour means
+// One colour by default; pass `tones` ({ key: theme token }) when colour means
 // something (e.g. status), otherwise every bar uses the accent.
 // `horizontal` lays the bars sideways, one row per name, for long lists with
 // long names (Events by Category); the height grows with the number of rows.
 export default function CountBarChart({
   rows,
-  colours,
+  tones,
   valueLabel = "events",
   horizontal = false,
 }) {
-  const fill = (row) => colours?.[row.key] ?? chartColours.accent;
+  const axisTick = { fill: chartColours.axisText, fontSize: 12 };
+  const fill = (row) => themeColour(tones?.[row.key] ?? "accent");
   const tooltip = (
     <Tooltip
-      cursor={{ fill: chartColours.barHover }}
+      cursor={{ fill: chartColours.accent, fillOpacity: chartOpacity.barHover }}
       content={<ChartTooltip valueLabel={valueLabel} getColour={fill} />}
     />
   );

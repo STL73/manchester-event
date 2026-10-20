@@ -9,10 +9,10 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { chartColours } from "../../data/analyticsData";
+import { chartColours, chartOpacity } from "../../data/analyticsData";
 
-const axisTick = { fill: chartColours.axisText, fontSize: 12 };
-const seriesColours = { held: chartColours.held, scheduled: chartColours.scheduled };
+// Both series are the accent; scheduled is at half strength
+const seriesOpacity = { held: 1, scheduled: chartOpacity.scheduled };
 
 function TimelineTooltip({ active, payload, series, valueLabel }) {
   if (!active || !payload?.length) return null;
@@ -24,7 +24,7 @@ function TimelineTooltip({ active, payload, series, valueLabel }) {
         <p className="chart-tooltip-value" key={key}>
           <span
             className="chart-tooltip-key"
-            style={{ backgroundColor: seriesColours[key] }}
+            style={{ backgroundColor: chartColours.accent, opacity: seriesOpacity[key] }}
             aria-hidden="true"
           />
           {row[key]} {label.toLowerCase()} {valueLabel}
@@ -40,6 +40,8 @@ function TimelineTooltip({ active, payload, series, valueLabel }) {
 // with a "Today" line between them. `series` = [{ key, label }] in stack order.
 export default function TimelineChart({ rows, series, todayLabel, valueLabel = "events" }) {
   const [lower, upper] = series;
+  const axisTick = { fill: chartColours.axisText, fontSize: 12 };
+  const accent = chartColours.accent;
 
   return (
     <div className="timeline-chart">
@@ -49,7 +51,7 @@ export default function TimelineChart({ rows, series, todayLabel, valueLabel = "
           <li key={key}>
             <span
               className="chart-legend-key"
-              style={{ backgroundColor: seriesColours[key] }}
+              style={{ backgroundColor: accent, opacity: seriesOpacity[key] }}
               aria-hidden="true"
             />
             {label}
@@ -69,7 +71,7 @@ export default function TimelineChart({ rows, series, todayLabel, valueLabel = "
           />
           <YAxis allowDecimals={false} tick={axisTick} tickLine={false} axisLine={false} />
           <Tooltip
-            cursor={{ fill: chartColours.barHover }}
+            cursor={{ fill: accent, fillOpacity: chartOpacity.barHover }}
             content={<TimelineTooltip series={series} valueLabel={valueLabel} />}
           />
           {todayLabel && (
@@ -81,7 +83,13 @@ export default function TimelineChart({ rows, series, todayLabel, valueLabel = "
             />
           )}
           {/* Only the top segment of each stack gets the 4px rounded end */}
-          <Bar dataKey={lower.key} stackId="timeline" maxBarSize={24} fill={seriesColours[lower.key]}>
+          <Bar
+            dataKey={lower.key}
+            stackId="timeline"
+            maxBarSize={24}
+            fill={accent}
+            fillOpacity={seriesOpacity[lower.key]}
+          >
             {rows.map((row) => (
               <Cell key={row.key} radius={row[upper.key] > 0 ? 0 : [4, 4, 0, 0]} />
             ))}
@@ -90,7 +98,8 @@ export default function TimelineChart({ rows, series, todayLabel, valueLabel = "
             dataKey={upper.key}
             stackId="timeline"
             maxBarSize={24}
-            fill={seriesColours[upper.key]}
+            fill={accent}
+            fillOpacity={seriesOpacity[upper.key]}
             radius={[4, 4, 0, 0]}
           />
         </BarChart>

@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import DashboardCard from "../components/UI/DashboardCard";
+import FilterPills from "../components/UI/FilterPills";
 import ChartCard from "../components/charts/ChartCard";
 import CountBarChart from "../components/charts/CountBarChart";
 import PeriodSwitcher from "../components/charts/PeriodSwitcher";
@@ -9,27 +11,42 @@ import {
   cardTrend,
   chartText,
   eventStatusOrder,
-  statusColours,
+  statusTones,
 } from "../data/analyticsData";
 import {
   defaultEventRange,
   eventAnalyticsCards,
   eventAnalyticsCharts,
   eventAnalyticsSection,
+  eventAnalyticsTabs,
   eventRangeOptions,
   timelineSeries,
   timelineStatuses,
 } from "../data/eventAnalyticsData";
 import { eventStatuses } from "../data/manageEventsData";
+import { organiserStatusLabels } from "../data/organiserEventsData";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 
+// Organisers see "approved" as "Live", as on My Events and Event details
 const statusLabels = Object.fromEntries(
-  eventStatuses.map(({ value, label }) => [value, label]),
+  eventStatuses.map(({ value, label }) => {
+    const organiserLabel = organiserStatusLabels[value];
+    return [value, organiserLabel ? capitalise(organiserLabel) : label];
+  }),
 );
+
+function capitalise(text) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
 
 // Organiser analytics (event_stats.php), counted live from the shared
 // organiser events list, so it updates when events are created or deleted
 export default function EventAnalytics({ organiserEvents }) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const tab = eventAnalyticsTabs.some((option) => option.value === tabParam)
+    ? tabParam
+    : eventAnalyticsTabs[0].value;
   const [rangeValue, setRangeValue] = useState(defaultEventRange);
   const range = eventRangeOptions.find((option) => option.value === rangeValue);
   const bounds = getRangeBounds(range);
@@ -83,6 +100,14 @@ export default function EventAnalytics({ organiserEvents }) {
   const categoryRows = countBy(organiserEvents, (event) => event.category);
   const locationRows = countBy(organiserEvents, (event) => event.location);
 
+  // The first section is the default, so it keeps the address clean
+  function handleTabChange(nextTab) {
+    const nextParams = new URLSearchParams(searchParams);
+    if (nextTab === eventAnalyticsTabs[0].value) nextParams.delete("tab");
+    else nextParams.set("tab", nextTab);
+    setSearchParams(nextParams);
+  }
+
   return (
     <div className="dashboard-page">
       <section
@@ -101,38 +126,55 @@ export default function EventAnalytics({ organiserEvents }) {
           ))}
         </div>
 
+        <div className="w-full">
+          <FilterPills
+            label={chartText.sections}
+            options={eventAnalyticsTabs}
+            value={tab}
+            onChange={handleTabChange}
+          />
+        </div>
+
         <div className="analytics-grid">
-          <ChartCard
-            id="events-timeline"
-            rows={timelineRows}
-            wide
-            {...overTime}
-            description={`${overTime.description} ${range.description}`}
-            columns={timelineSeries.map(({ key, label }) => ({ key, heading: label }))}
-            actions={
-              <PeriodSwitcher
-                label={chartText.range}
-                options={eventRangeOptions}
-                value={rangeValue}
-                onChange={setRangeValue}
-              />
-            }
-          >
-            <TimelineChart
+          {tab === "overview" && (
+            <ChartCard
+              id="events-timeline"
               rows={timelineRows}
-              series={timelineSeries}
-              todayLabel={todayRow?.label}
-            />
-          </ChartCard>
-          <ChartCard id="events-by-status" rows={statusRows} {...byStatus}>
-            <CountBarChart rows={statusRows} colours={statusColours} />
-          </ChartCard>
-          <ChartCard id="events-by-category" rows={categoryRows} {...byCategory}>
-            <CountBarChart rows={categoryRows} horizontal />
-          </ChartCard>
-          <ChartCard id="events-by-location" rows={locationRows} wide {...byLocation}>
-            <CountBarChart rows={locationRows} />
-          </ChartCard>
+              wide
+              {...overTime}
+              description={`${overTime.description} ${range.description}`}
+              columns={timelineSeries.map(({ key, label }) => ({ key, heading: label }))}
+              actions={
+                <PeriodSwitcher
+                  label={chartText.range}
+                  options={eventRangeOptions}
+                  value={rangeValue}
+                  onChange={setRangeValue}
+                />
+              }
+            >
+              <TimelineChart
+                rows={timelineRows}
+                series={timelineSeries}
+                todayLabel={todayRow?.label}
+              />
+            </ChartCard>
+          )}
+          {tab === "approval" && (
+            <ChartCard id="events-by-status" rows={statusRows} wide {...byStatus}>
+              <CountBarChart rows={statusRows} tones={statusTones} />
+            </ChartCard>
+          )}
+          {tab === "what-where" && (
+            <>
+              <ChartCard id="events-by-category" rows={categoryRows} {...byCategory}>
+                <CountBarChart rows={categoryRows} horizontal />
+              </ChartCard>
+              <ChartCard id="events-by-location" rows={locationRows} {...byLocation}>
+                <CountBarChart rows={locationRows} />
+              </ChartCard>
+            </>
+          )}
         </div>
       </section>
     </div>

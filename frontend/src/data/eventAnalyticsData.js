@@ -12,6 +12,14 @@ export const eventAnalyticsSection = {
   icon: ChartNoAxesCombined,
 };
 
+// Sections, one shown at a time under the stat cards (`?tab=` in the URL);
+// the same layout as Site Analytics (decided 2026-10-20)
+export const eventAnalyticsTabs = [
+  { value: "overview", label: "Overview" },
+  { value: "approval", label: "Approval" },
+  { value: "what-where", label: "What and where" },
+];
+
 // Stat cards; counts are worked out from the organiser's events
 export const eventAnalyticsCards = [
   {
