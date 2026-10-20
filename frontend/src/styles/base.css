@@ -50,7 +50,7 @@
    all three, so a tone inside another never mixes with it. Components build
    some names at runtime (tone-${badge.tone}), which Tailwind can't see in the
    source, so all of them are always generated */
-@source inline("tone-{success,warning,danger,cancelled,draft,past,accent,muted}");
+@source inline("tone-{success,warning,danger,cancelled,draft,past,accent,muted,teal,foreground}");
 
 @utility tone-success {
   --tone: --theme(--color-success);
@@ -99,6 +99,21 @@
   --tone: --theme(--color-muted);
   --tone-text: --theme(--color-muted);
   --tone-soft: --theme(--color-muted);
+}
+
+/* No status either: the other two roles on Site Analytics' Accounts bar
+   (users are the accent), chosen 2026-10-20 to stay apart from it and from
+   the status colours */
+@utility tone-teal {
+  --tone: --theme(--color-teal-400);
+  --tone-text: --theme(--color-teal-400);
+  --tone-soft: --theme(--color-teal-100);
+}
+
+@utility tone-foreground {
+  --tone: --theme(--color-foreground);
+  --tone-text: --theme(--color-foreground);
+  --tone-soft: --theme(--color-foreground);
 }
 
 @layer base {

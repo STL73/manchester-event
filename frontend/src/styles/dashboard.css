@@ -1044,6 +1044,225 @@
     @apply text-xs text-muted;
   }
 
+  /* One line under a chart saying what to read from it */
+  .chart-hint {
+    @apply text-xs text-muted;
+  }
+
+  /* Short figures over a chart or list (ChartFacts): as many across as fit */
+  .chart-facts {
+    @apply grid grid-cols-[repeat(auto-fit,minmax(8rem,1fr))] gap-3;
+  }
+
+  .chart-fact {
+    @apply flex flex-col gap-0.5 rounded-xl border border-border/60 p-3;
+  }
+
+  .chart-fact-label,
+  .chart-fact-detail {
+    @apply text-xs text-muted;
+  }
+
+  .chart-fact-value {
+    @apply text-xl font-semibold tabular-nums text-(--tone-text,var(--color-foreground));
+  }
+
+  /* A list panel's rows (ChartList), edge to edge through the panel's p-4 */
+  .chart-list {
+    @apply -mx-4 flex flex-col;
+  }
+
+  .chart-list-row {
+    @apply grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-2.5;
+  }
+
+  .chart-list-lead {
+    @apply min-w-6 text-center text-muted tabular-nums;
+  }
+
+  .chart-list-lead svg {
+    @apply mx-auto size-4;
+  }
+
+  .chart-list-title {
+    @apply truncate text-sm text-foreground;
+  }
+
+  .chart-list-detail {
+    @apply truncate text-xs text-muted;
+  }
+
+  .chart-list-end {
+    @apply flex items-center gap-1 text-sm text-muted tabular-nums;
+  }
+
+  .chart-list-end svg {
+    @apply size-3.5 text-favourite;
+  }
+
+  .chart-list-date {
+    @apply flex w-11 flex-col items-center rounded-[10px] border border-border py-1 leading-tight;
+  }
+
+  .chart-list-date strong {
+    @apply text-base text-foreground;
+  }
+
+  .chart-list-date small {
+    @apply text-[10px] uppercase;
+  }
+
+  /* Shares of a whole (ShareBar): parts read their tone's colour */
+  .share {
+    @apply flex flex-col gap-2;
+  }
+
+  .share-title {
+    @apply text-sm text-foreground;
+  }
+
+  .share-bar {
+    @apply flex h-3.5 gap-0.5 overflow-hidden rounded-full;
+  }
+
+  .share-part {
+    @apply min-w-1 bg-(--tone);
+  }
+
+  .share-legend {
+    @apply flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-muted;
+  }
+
+  .share-legend li {
+    @apply flex items-center gap-1.5;
+  }
+
+  .share-legend strong {
+    @apply font-medium text-foreground tabular-nums;
+  }
+
+  .share-legend li > span:last-child {
+    @apply text-xs;
+  }
+
+  .share-key {
+    @apply size-2.5 rounded-[3px] bg-(--tone);
+  }
+
+  /* Switched off (emails): grey stripes rather than another flat grey */
+  .share-part.is-striped,
+  .is-striped .share-key {
+    background: repeating-linear-gradient(
+      135deg,
+      var(--color-muted) 0 3px,
+      color-mix(in oklab, var(--color-muted) 25%, transparent) 3px 6px
+    );
+  }
+
+  /* Events by status (StatusDonut): the ring beside its legend, the legend
+     under it when the panel is narrow */
+  .donut {
+    @apply flex flex-wrap items-center justify-center gap-6;
+  }
+
+  .donut-ring {
+    @apply relative aspect-square w-42.5 shrink-0;
+  }
+
+  .donut-ring svg {
+    @apply size-full;
+  }
+
+  .donut-total {
+    @apply absolute inset-0 grid place-content-center text-center;
+  }
+
+  .donut-total strong {
+    @apply text-[26px] leading-none font-semibold text-foreground tabular-nums;
+  }
+
+  .donut-total span {
+    @apply text-xs text-muted;
+  }
+
+  .donut-legend {
+    @apply flex min-w-42.5 flex-1 flex-col;
+  }
+
+  .donut-legend li {
+    @apply grid grid-cols-[10px_1fr_auto_38px] items-center gap-2.5 border-b border-border/50 py-1.5 text-[13px] last:border-b-0;
+  }
+
+  .donut-legend strong {
+    @apply font-medium text-foreground tabular-nums;
+  }
+
+  .donut-key {
+    @apply size-2.5 rounded-[3px] bg-(--tone);
+  }
+
+  .donut-share {
+    @apply text-right text-xs text-muted tabular-nums;
+  }
+
+  /* When events happen (WeekTimeGrid): brighter = more */
+  .week-grid {
+    @apply grid grid-cols-[2.25rem_repeat(4,minmax(0,1fr))] gap-1;
+  }
+
+  .week-grid-slot {
+    @apply truncate text-center text-[11px] text-muted;
+  }
+
+  .week-grid-day {
+    @apply self-center text-xs text-muted;
+  }
+
+  .week-grid-cell {
+    @apply grid h-7.5 place-items-center rounded-md text-xs text-foreground tabular-nums;
+    background: color-mix(
+      in oklab,
+      var(--color-accent) var(--level),
+      color-mix(in oklab, var(--color-border) 40%, transparent)
+    );
+  }
+
+  /* Audience reach (ReachHoneycomb, option A): small cells, brighter = more
+     followers; rows nest like the Preferences honeycomb's */
+  .reach {
+    @apply flex flex-wrap items-center justify-center gap-6;
+  }
+
+  .reach-honeycomb {
+    @apply flex flex-col items-center;
+  }
+
+  .reach-row {
+    @apply flex gap-1;
+  }
+
+  .reach-row + .reach-row {
+    margin-top: calc(48px * -0.275 + 4px * 0.87);
+  }
+
+  .reach-cell {
+    @apply hex-cell grid h-13.25 w-12 place-items-center;
+    background: color-mix(in oklab, var(--color-accent) var(--level), var(--color-card));
+  }
+
+  .reach-cell svg {
+    @apply size-4.5 text-foreground/90;
+  }
+
+  .reach-key {
+    @apply flex items-center gap-1 text-[11px] text-muted;
+  }
+
+  .reach-key-cell {
+    @apply hex-cell h-3.5 w-3;
+    background: color-mix(in oklab, var(--color-accent) var(--level), var(--color-card));
+  }
+
   /* Settings (decided 2026-10-11): each section's title and explanation sit
      in a 240px column beside its panel, above it below 44rem. Every panel
      saves on its own */

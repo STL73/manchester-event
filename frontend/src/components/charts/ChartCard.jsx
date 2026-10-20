@@ -6,6 +6,8 @@ import { chartText } from "../../data/analyticsData";
 // read without hovering (and by screen readers). `columns` lists the value
 // columns ({ key, heading }); by default a single Count column. `actions`
 // (e.g. the range control) sit in the header, next to the chart they change.
+// `table={false}` is for panels whose content is already text (lists, facts):
+// it is shown as it is, readable by screen readers, with no table twin.
 export default function ChartCard({
   id,
   title,
@@ -15,6 +17,7 @@ export default function ChartCard({
   columns = [{ key: "count", heading: chartText.countHeading }],
   wide = false,
   actions,
+  table = true,
   children,
 }) {
   const titleId = `${id}-title`;
@@ -35,9 +38,9 @@ export default function ChartCard({
         {actions && <div className="chart-card-actions">{actions}</div>}
       </header>
 
-      {rows.length === 0 ? (
-        <EmptyState icon={ChartNoAxesColumn} text={chartText.noData} />
-      ) : (
+      {rows.length === 0 && <EmptyState icon={ChartNoAxesColumn} text={chartText.noData} />}
+      {rows.length > 0 && !table && children}
+      {rows.length > 0 && table && (
         <>
           {/* The table below carries the same values for screen readers */}
           <div className="chart-plot" aria-hidden="true">

@@ -2,6 +2,7 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
+  ReferenceDot,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -10,6 +11,7 @@ import {
 } from "recharts";
 import ChartTooltip from "./ChartTooltip";
 import { chartColours, chartOpacity } from "../../data/analyticsData";
+import { themeColour } from "../../lib/themeColour";
 
 const GLOW_RADIUS = 12;
 
@@ -17,7 +19,7 @@ const GLOW_RADIUS = 12;
 // from the bottom of the glow down to the x-axis, so the point's date is easy
 // to find without a crosshair cutting through the whole chart.
 // Recharts passes cx/cy; usePlotArea() gives the bottom of the plot.
-function HoverPoint({ cx, cy }) {
+function HoverPoint({ cx, cy, colour }) {
   const plot = usePlotArea();
   if (cx == null || cy == null || !plot) return null;
   const axisY = plot.y + plot.height;
@@ -30,17 +32,17 @@ function HoverPoint({ cx, cy }) {
           y1={cy + GLOW_RADIUS}
           x2={cx}
           y2={axisY}
-          stroke={chartColours.accent}
+          stroke={colour}
           strokeOpacity={0.5}
           strokeWidth={1}
         />
       )}
-      <circle cx={cx} cy={cy} r={GLOW_RADIUS} fill={chartColours.accent} fillOpacity={0.2} />
+      <circle cx={cx} cy={cy} r={GLOW_RADIUS} fill={colour} fillOpacity={0.2} />
       <circle
         cx={cx}
         cy={cy}
         r={6}
-        fill={chartColours.accent}
+        fill={colour}
         stroke={chartColours.surface}
         strokeWidth={2}
       />
@@ -50,8 +52,19 @@ function HoverPoint({ cx, cy }) {
 
 // Single-series count over time: 2px line with a 10% wash and dots with a
 // surface ring. Hovering a point shows HoverPoint and the tooltip.
-export default function TrendChart({ rows, valueLabel = "events" }) {
+// `tone` colours it from a theme token (failed sign-ins are danger). `smooth`
+// curves the line and drops the dots, for a shape read at a glance (Saves).
+// `callout` ({ key, text }) labels one point: the latest month, or a spike
+export default function TrendChart({
+  rows,
+  valueLabel = "events",
+  tone = "accent",
+  smooth = false,
+  callout,
+}) {
   const axisTick = { fill: chartColours.axisText, fontSize: 12 };
+  const colour = themeColour(tone);
+  const marked = callout && rows.find((row) => row.key === callout.key);
 
   return (
     <ResponsiveContainer width="100%" height={240}>
@@ -76,27 +89,49 @@ export default function TrendChart({ rows, valueLabel = "events" }) {
           content={
             <ChartTooltip
               valueLabel={valueLabel}
-              getColour={() => chartColours.accent}
+              getColour={() => colour}
             />
           }
         />
         <Area
-          type="linear"
+          type={smooth ? "monotone" : "linear"}
           dataKey="count"
-          stroke={chartColours.accent}
+          stroke={colour}
           strokeWidth={2}
           strokeLinejoin="round"
           strokeLinecap="round"
-          fill={chartColours.accent}
+          fill={colour}
           fillOpacity={chartOpacity.areaFill}
-          dot={{
-            r: 4,
-            fill: chartColours.accent,
-            stroke: chartColours.surface,
-            strokeWidth: 2,
-          }}
-          activeDot={<HoverPoint />}
+          dot={
+            !smooth && {
+              r: 4,
+              fill: colour,
+              stroke: chartColours.surface,
+              strokeWidth: 2,
+            }
+          }
+          activeDot={<HoverPoint colour={colour} />}
         />
+        {marked && (
+          <ReferenceDot
+            x={marked.label}
+            y={marked.count}
+            r={4}
+            fill={colour}
+            stroke={chartColours.surface}
+            strokeWidth={2}
+            label={{
+              value: callout.text,
+              position: "top",
+              offset: 10,
+              // Ends at the point, so a callout on the last one stays inside
+              textAnchor: "end",
+              dx: 6,
+              fill: themeColour("foreground"),
+              fontSize: 12,
+            }}
+          />
+        )}
       </AreaChart>
     </ResponsiveContainer>
   );
