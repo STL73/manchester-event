@@ -1,5 +1,6 @@
 // Helpers that turn the app's lists into chart data, replacing the PHP
 // GROUP BY queries and the groupData() function in app.js.
+import { isUpcoming } from "./eventDates";
 
 // Count items per value of `getKey`. With `order`, every listed value appears
 // (zero counts included) in that order; otherwise values are sorted by count.
@@ -176,5 +177,285 @@ export function getSiteTotals(users, events) {
     // Not get_pending_users(): the schema has no pending account status;
     // an unverified email is something only the user can fix
     unverifiedUsers: users.filter((user) => !user.emailVerifiedAt).length,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Analytics round (2026-10-20): the figures behind the new panels. Each takes
+// the lists and `now`, so the pages stay plain and the API can return the
+// same shapes later.
+
+const HOUR = 3600000;
+const DAY = 24 * HOUR;
+
+// Events that have been public at some point: approved, ended or called off
+// (only a public event can be cancelled; one that never was is deleted)
+const WENT_PUBLIC = ["approved", "past", "cancelled"];
+
+// When an event was last sent for review: the organiser's last change. The
+// backend will take it from the "Draft Submitted" log instead
+function submittedAt(event) {
+  return new Date(event.orgUpdatedAt ?? event.createdAt);
+}
+
+function average(values) {
+  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+}
+
+// A wait in the unit a person would say: "19 h", "1.6 days"
+export function formatWait(ms) {
+  if (ms == null) return "–";
+  const hours = ms / HOUR;
+  if (hours < 48) return `${Math.max(1, Math.round(hours))} h`;
+  const days = hours / 24;
+  return `${days.toFixed(days < 10 ? 1 : 0)} days`;
+}
+
+// Sunday-first index (Date.getDay) to "Saturday"
+const weekdayName = new Intl.DateTimeFormat("en-GB", { weekday: "long" });
+export function formatWeekday(index) {
+  return weekdayName.format(new Date(2026, 0, 4 + index)); // 4 Jan 2026 was a Sunday
+}
+
+// Saves: the last 30 days against the 30 before, all time, and the day of
+// the week people save on most
+export function getSavesSummary(saves, now = new Date()) {
+  const trend = countTrend(saves, (save) => save.createdAt, getRangeBounds({ days: 30 }, now), now);
+  const byWeekday = Array(7).fill(0);
+  saves.forEach((save) => {
+    byWeekday[new Date(save.createdAt).getDay()] += 1;
+  });
+  const busiest = byWeekday.indexOf(Math.max(...byWeekday));
+  return {
+    last30: trend.current,
+    previous30: trend.previous,
+    change: trend.previous
+      ? Math.round(((trend.current - trend.previous) / trend.previous) * 100)
+      : null,
+    allTime: saves.length,
+    busiestDay: saves.length ? busiest : null,
+    busiestShare: saves.length ? byWeekday[busiest] / saves.length : 0,
+  };
+}
+
+// Saves per event, most saved first, joined to the events they belong to
+export function rankBySaves(saves, events, limit = 5) {
+  const byId = new Map(events.map((event) => [event.eventId, event]));
+  return countBy(saves, (save) => save.eventId)
+    .filter((row) => byId.has(row.key))
+    .slice(0, limit)
+    .map((row) => ({ event: byId.get(row.key), saves: row.count }));
+}
+
+// How submitted events got through review: approval rate, the average wait
+// from submit to decision, what is waiting now and the latest reasons given
+export function getApprovalRecord(events, now = new Date()) {
+  const approved = events.filter((event) => WENT_PUBLIC.includes(event.status));
+  const rejected = events.filter((event) => event.status === "rejected");
+  const pending = events.filter((event) => event.status === "pending");
+  const decided = approved.length + rejected.length;
+  const waits = [...approved, ...rejected]
+    .map((event) => new Date(event.adminUpdatedAt) - submittedAt(event))
+    .filter((ms) => ms > 0);
+  const pendingWaits = pending.map((event) => now - submittedAt(event));
+  return {
+    approved: approved.length,
+    rejected: rejected.length,
+    decided,
+    rate: decided ? approved.length / decided : null,
+    averageWait: average(waits),
+    pending: pending.length,
+    oldestWait: pendingWaits.length ? Math.max(...pendingWaits) : null,
+    latestRejections: rejected
+      .filter((event) => event.rejectionReason)
+      .sort((a, b) => new Date(b.adminUpdatedAt) - new Date(a.adminUpdatedAt))
+      .slice(0, 3),
+  };
+}
+
+// Pending events, the longest waiting first, with how long each has waited
+export function getWaitingLongest(events, now = new Date(), limit = 5) {
+  return events
+    .filter((event) => event.status === "pending")
+    .map((event) => ({ event, wait: now - submittedAt(event) }))
+    .sort((a, b) => b.wait - a.wait)
+    .slice(0, limit);
+}
+
+// Review decisions per period: approved and rejected (by decision date),
+// the share rejected and the average hours from submit to decision
+export function getDecisionRows(events, period, bounds) {
+  const decided = events.filter(
+    (event) =>
+      event.adminUpdatedAt &&
+      (WENT_PUBLIC.includes(event.status) || event.status === "rejected"),
+  );
+  const rows = countOverTime(decided, (event) => event.adminUpdatedAt, period, {
+    bounds,
+    series: ["approved", "rejected"],
+    getSeries: (event) => (event.status === "rejected" ? "rejected" : "approved"),
+  });
+  return rows.map((row, index) => {
+    const end = rows[index + 1]?.key ?? bounds?.to.getTime() ?? Infinity;
+    const waits = decided
+      .filter((event) => {
+        const time = new Date(event.adminUpdatedAt).getTime();
+        return time >= row.key && time < end;
+      })
+      .map((event) => new Date(event.adminUpdatedAt) - submittedAt(event))
+      .filter((ms) => ms > 0);
+    const wait = average(waits);
+    return {
+      ...row,
+      rejectedShare: row.count ? Math.round((row.rejected / row.count) * 100) : 0,
+      averageHours: wait == null ? null : Math.round(wait / HOUR),
+    };
+  });
+}
+
+// Everyone who registered, how many verified their email, and how many of
+// those are active (not suspended)
+export function getSignUpFunnel(users) {
+  const verified = users.filter((user) => user.emailVerifiedAt);
+  return {
+    registered: users.length,
+    verified: verified.length,
+    active: verified.filter((user) => user.accStatus === "active").length,
+  };
+}
+
+// The three ways of splitting accounts on the Accounts panel. Unverified is
+// a label, not a status; a suspended account counts as suspended either way
+export function getAccountShares(users) {
+  const count = (test) => users.filter(test).length;
+  return {
+    roles: [
+      { key: "user", count: count((user) => user.role === "user") },
+      { key: "organiser", count: count((user) => user.role === "organiser") },
+      { key: "admin", count: count((user) => user.role === "admin") },
+    ],
+    statuses: [
+      { key: "active", count: count((user) => user.accStatus === "active" && user.emailVerifiedAt) },
+      { key: "unverified", count: count((user) => user.accStatus === "active" && !user.emailVerifiedAt) },
+      { key: "suspended", count: count((user) => user.accStatus === "suspended") },
+    ],
+    // Not set = the schema's default, on
+    emails: [
+      { key: "on", count: count((user) => user.emailNotifications !== false) },
+      { key: "off", count: count((user) => user.emailNotifications === false) },
+    ],
+  };
+}
+
+// Organisers who submitted or changed an event in the last 30 days, and the
+// organisers with the most live events
+export function getOrganiserActivity(users, events, now = new Date(), limit = 4) {
+  const since = now.getTime() - 30 * DAY;
+  const organisers = users.filter((user) => user.role === "organiser");
+  const rows = organisers.map((user) => {
+    const own = events.filter((event) => event.organiserId === user.userId);
+    return {
+      user,
+      live: own.filter((event) => event.status === "approved" && isUpcoming(event, now)).length,
+      lastSubmitted: own.length
+        ? Math.max(...own.map((event) => submittedAt(event).getTime()))
+        : null,
+    };
+  });
+  return {
+    organisers: organisers.length,
+    active: rows.filter((row) => row.lastSubmitted >= since).length,
+    top: rows
+      .filter((row) => row.live > 0)
+      .sort((a, b) => b.live - a.live || b.lastSubmitted - a.lastSubmitted)
+      .slice(0, limit),
+  };
+}
+
+// Per category: people following it next to the public events coming up in
+// it. Underserved = fewer than one upcoming event for every three followers
+export function getSupplyAndDemand(follows, events, categories, now = new Date()) {
+  return categories
+    .map((category) => {
+      const followers = follows.filter((follow) => follow.categoryId === category.id).length;
+      const upcoming = events.filter(
+        (event) =>
+          event.categoryId === category.id &&
+          event.status === "approved" &&
+          isUpcoming(event, now),
+      ).length;
+      return {
+        key: category.id,
+        label: category.name,
+        followers,
+        upcoming,
+        underserved: followers >= 3 && upcoming < followers / 3,
+      };
+    })
+    .filter((row) => row.followers > 0 || row.upcoming > 0)
+    .sort((a, b) => b.followers - a.followers || b.upcoming - a.upcoming);
+}
+
+// Followers of each of `categoryIds`, most followed first
+export function getCategoryReach(follows, categoryIds) {
+  return categoryIds
+    .map((categoryId) => ({
+      key: categoryId,
+      count: follows.filter((follow) => follow.categoryId === categoryId).length,
+    }))
+    .sort((a, b) => b.count - a.count);
+}
+
+// Start times by day of the week (Monday first) and time of day: morning
+// 05:00-12:00, afternoon to 17:00, evening to 22:00, night after that
+export const timeSlots = ["morning", "afternoon", "evening", "night"];
+
+export function getWeekTimeGrid(events) {
+  const grid = Array.from({ length: 7 }, () => [0, 0, 0, 0]);
+  events.forEach((event) => {
+    const start = new Date(event.startDatetime);
+    const hour = start.getHours();
+    let slot = 3;
+    if (hour >= 5 && hour < 12) slot = 0;
+    else if (hour >= 12 && hour < 17) slot = 1;
+    else if (hour >= 17 && hour < 22) slot = 2;
+    grid[(start.getDay() + 6) % 7][slot] += 1;
+  });
+  return grid;
+}
+
+// Contact messages: average time to a reply, how quickly each was answered,
+// what is unread and what has waited over three days with no reply
+export function getSupportSummary(messages, now = new Date()) {
+  const replyTimes = messages
+    .filter((message) => message.repliedAt)
+    .map((message) => new Date(message.repliedAt) - new Date(message.sentAt));
+  return {
+    averageReply: average(replyTimes),
+    unread: messages.filter((message) => !message.readAt).length,
+    overdue: messages.filter(
+      (message) => !message.repliedAt && now - new Date(message.sentAt) > 3 * DAY,
+    ).length,
+    replySpeed: [
+      { key: "day", count: replyTimes.filter((ms) => ms < DAY).length },
+      { key: "days", count: replyTimes.filter((ms) => ms >= DAY && ms <= 3 * DAY).length },
+      { key: "late", count: replyTimes.filter((ms) => ms > 3 * DAY).length },
+    ],
+  };
+}
+
+// Suspended accounts, and the ones whose suspension ends in the next week
+export function getSuspensions(users, now = new Date()) {
+  const suspended = users.filter((user) => user.accStatus === "suspended");
+  const weekAhead = now.getTime() + 7 * DAY;
+  return {
+    total: suspended.length,
+    indefinite: suspended.filter((user) => !user.suspendedUntil).length,
+    endingSoon: suspended
+      .filter(
+        (user) =>
+          user.suspendedUntil && new Date(user.suspendedUntil).getTime() <= weekAhead,
+      )
+      .sort((a, b) => new Date(a.suspendedUntil) - new Date(b.suspendedUntil)),
   };
 }
