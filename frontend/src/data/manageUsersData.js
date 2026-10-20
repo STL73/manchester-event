@@ -105,6 +105,8 @@ export const manageUsersMessages = {
 
 // Mock of the users table. IDs rise with the sign-up date, as auto-increment
 // IDs would; organisers 2 and 16 own some of the events in eventsData.js.
+// emailNotifications is only written where it's off (the schema's default
+// is on), for Site Analytics' email opt-outs.
 const users = [
   {
     userId: 1,
@@ -175,6 +177,7 @@ const users = [
     role: "user",
     accStatus: "active",
     emailVerifiedAt: "2026-03-27T09:10:00",
+    emailNotifications: false,
     createdAt: "2026-03-27T09:10:00",
     updatedAt: "2026-06-21T20:15:00",
   },
@@ -207,6 +210,7 @@ const users = [
     role: "user",
     accStatus: "active",
     emailVerifiedAt: "2026-05-30T13:25:00",
+    emailNotifications: false,
     createdAt: "2026-05-30T13:25:00",
     updatedAt: "2026-09-02T10:40:00",
   },
@@ -267,6 +271,7 @@ const users = [
     role: "user",
     accStatus: "active",
     emailVerifiedAt: null,
+    emailNotifications: false,
     createdAt: "2026-09-25T11:20:00",
     updatedAt: "2026-09-25T11:20:00",
   },
