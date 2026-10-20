@@ -75,3 +75,25 @@ export const cardTrend = {
   label: (count) => `+${count} in the last 30 days`,
   note: (previous) => `vs ${previous} in the 30 days before`,
 };
+
+// Review decisions: approved below rejected, in their status colours
+export const decisionSeries = [
+  { key: "approved", label: "Approved", tone: "success" },
+  { key: "rejected", label: "Rejected", tone: "danger" },
+];
+
+// When events happen: Monday first, and the four times of day
+// getWeekTimeGrid counts in (timeSlots in lib/analytics.js)
+export const weekGridText = {
+  days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+  slots: ["Morning", "Afternoon", "Evening", "Night"],
+};
+
+// Audience reach honeycomb: brighter = more followers
+export const reachText = {
+  cell: (name, count) => `${name}: ${count} ${count === 1 ? "follower" : "followers"}`,
+  others: (count) => `Top 5 shown; ${count} more in the data table or on hover.`,
+  hover: "Hover a cell for its name.",
+  keyFewer: "Fewer followers",
+  keyMore: "More",
+};
