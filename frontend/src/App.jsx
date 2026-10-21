@@ -446,7 +446,7 @@ function App() {
               <Route path="manage-users/:userId/edit" element={<OpenInPanel param="userId" to="/dashboard/manage-users" />} />
               <Route path="manage-events" element={<ManageEvents events={managedEvents} onUpdateEventStatus={updateEventStatus} />} />
               <Route path="manage-events/:eventId/edit" element={<OpenInPanel param="eventId" to="/dashboard/manage-events" />} />
-              <Route path="site-analytics" element={<SiteAnalytics users={users} events={events} />} />
+              <Route path="site-analytics" element={<SiteAnalytics users={users} events={events} contactMessages={contactMessages} favouriteIds={favouriteIds} interestIds={interestIds} />} />
               <Route path="system-logs" element={<SystemLogs events={events} users={users} />} />
               <Route path="contact-messages" element={<ContactMessages contactMessages={contactMessages} users={users} onSetRead={setContactMessageRead} onReply={replyToContactMessage} />} />
             </Route>

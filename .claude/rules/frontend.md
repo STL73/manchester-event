@@ -235,6 +235,25 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   account it names; `components/dashboard/LogEntry` draws it, and Admin Home's Recent Admin
   Actions uses the same entries. Pills: Events, Accounts, Sign-ins, Failed sign-ins (red, the
   `danger` tone on `FilterPills`), Admins only
+- **Event Analytics / Site Analytics** (decided 2026-10-20, layout B, from a preview Slav chose
+  panel by panel): four stat cards (the one exception to "stat cards only on Home"), then
+  `UI/FilterPills` as section tabs (`?tab=`, the first one keeps a clean address), one section
+  shown at a time. Organiser: Live Events, Saves, Approval Rate, Audience Reach; tabs Overview,
+  Audience, Approval, What and where. Admin: Users, Events, Saves, Review Time (not Admin Home's
+  `siteTotalsCards`); tabs Growth, Moderation, Engagement, Safety and support. Every figure is one
+  function in `lib/analytics.js`, copy in `eventAnalyticsData.js` / `siteAnalyticsData.js`, shared
+  tones and copy in `analyticsData.js`; saves, follows and sign-in rows come from
+  `analyticsActivityData.js` until the API exists. Every panel is a `ChartCard` with its data
+  table (`table={false}` only for lists and facts). Charts: Recharts for lines and columns
+  (`TrendChart`, `TimelineChart`, `DecisionChart`, `CountBarChart`), CSS for the rest
+  (`StatusDonut`, `ShareBar`, `ReachHoneycomb`, `WeekTimeGrid`, `FunnelSteps`,
+  `FollowersHoneycomb`). Followers and events per category is a honeycomb with a card that
+  lists every category and shows one when its cell is selected (`ChartCard`'s `interactive`
+  keeps its buttons reachable); bars for it were turned down as too tall.
+  Saves show a % change only when the 30 days before had at least 10 (`savesTrend`). A sentence
+  read from data ("Most start on …") is left out on a tie. Organisers see "Live". Rejected in
+  the preview, don't offer again: a year calendar of saves, weekly save columns, hexagons in the
+  top-5 list, pink
 - **Settings** (decided 2026-10-11): four sections (`SettingsSection`), each with its title and
   explanation in a 240px column beside its panel, above it below 44rem, and each saving on its
   own: Profile (picture up to 5 MB with Remove, editable display name, locked email with a

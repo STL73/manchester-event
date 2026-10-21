@@ -42,17 +42,6 @@ export const eventAnalyticsCards = {
   },
 };
 
-// Saves compare the last 30 days with the 30 before. A percentage of a small
-// number says little ("+300%" from 2 to 8), so it shows only when the 30
-// days before had at least 10; below that, the plain figure
-export const savesTrend = {
-  minimumForChange: 10,
-  change: (change) => `${change > 0 ? "+" : ""}${change}% on the 30 days before`,
-  previous: (count) => `vs ${count} in the 30 days before`,
-  note: (current, previous) =>
-    `${current} saves in the last 30 days, ${previous} in the 30 days before`,
-};
-
 // Organiser events happen on both sides of today, so each range reaches the
 // same distance back and forward: past events to compare, the schedule ahead.
 export const eventRangeOptions = [

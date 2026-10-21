@@ -1,9 +1,13 @@
 import { themeColour } from "../lib/themeColour";
 
-// Shared chart settings for Event Analytics and Site Analytics.
-// Colours come from the theme tokens when a chart draws (see themeColour), so
-// the charts always match the badges. Faint fills are these colours at a lower
-// opacity (`chartOpacity`), not mixed hex values.
+// Shared chart settings and copy for Event Analytics and Site Analytics. Each
+// page's own copy is in eventAnalyticsData.js / siteAnalyticsData.js and its
+// figures come from lib/analytics.js.
+// Recharts colours come from the theme tokens when a chart draws (see
+// themeColour), so the charts always match the badges. Faint fills are these
+// colours at a lower opacity (`chartOpacity`), not mixed hex values. The CSS
+// charts (donut, share bars, honeycomb, grid) read a tone class instead, so
+// the tables below map a key to a tone name, never to a colour.
 export const chartColours = {
   get accent() {
     return themeColour("accent");
@@ -42,9 +46,10 @@ export const statusTones = {
   suspended: "danger",
 };
 
-// Bar order chosen with the dataviz palette validator (dark mode, card surface)
-// so that neighbouring bars never have colours that are hard to tell apart:
-// all neighbours pass the colour-blind and normal-vision checks.
+// Status order on the Events by Status donut, chosen with the dataviz palette
+// validator (dark mode, card surface) so that neighbouring parts never have
+// colours that are hard to tell apart: all neighbours pass the colour-blind
+// and normal-vision checks.
 export const eventStatusOrder = [
   "approved",
   "past",
@@ -53,10 +58,6 @@ export const eventStatusOrder = [
   "draft",
   "cancelled",
 ];
-
-// Unverified (grey) sits between Active and Suspended, so the green and red
-// that are hardest to tell apart are never side by side
-export const accountStatusOrder = ["active", "unverified", "suspended"];
 
 export const chartText = {
   range: "Time range",
@@ -75,6 +76,31 @@ export const cardTrend = {
   label: (count) => `+${count} in the last 30 days`,
   note: (previous) => `vs ${previous} in the 30 days before`,
 };
+
+// Saves compare the last 30 days with the 30 before, on both pages. A
+// percentage of a small number says little ("+300%" from 2 to 8), so it
+// shows only when the 30 days before had at least 10; below that, the figure
+export const savesTrend = {
+  minimumForChange: 10,
+  change: (change) => `${change > 0 ? "+" : ""}${change}% on the 30 days before`,
+  previous: (count) => `vs ${count} in the 30 days before`,
+  note: (current, previous) =>
+    `${current} saves in the last 30 days, ${previous} in the 30 days before`,
+};
+
+// Roles on the Accounts panel (decided 2026-10-20): users the accent,
+// organisers teal, admins white, kept apart from the status colours
+export const roleTones = {
+  user: "accent",
+  organiser: "teal",
+  admin: "foreground",
+};
+
+// Notification emails: on is the accent, off is grey stripes (ShareBar)
+export const emailTones = { on: "accent", off: "muted" };
+
+// Support reply time: same day is good, over three days is late
+export const replySpeedTones = { day: "success", days: "warning", late: "danger" };
 
 // Review decisions: approved below rejected, in their status colours
 export const decisionSeries = [

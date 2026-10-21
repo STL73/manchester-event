@@ -9,6 +9,8 @@ import { chartText } from "../../data/analyticsData";
 // `table={false}` is for panels whose content is already text (lists, facts):
 // it is shown as it is, readable by screen readers, with no table twin.
 // `empty` replaces the generic "No data yet." where the panel can say more.
+// `interactive` is for content with controls in it (the followers
+// honeycomb): it stays reachable rather than hidden behind its table twin.
 export default function ChartCard({
   id,
   title,
@@ -20,6 +22,7 @@ export default function ChartCard({
   actions,
   table = true,
   empty = chartText.noData,
+  interactive = false,
   children,
 }) {
   const titleId = `${id}-title`;
@@ -29,9 +32,12 @@ export default function ChartCard({
       className={`panel min-w-0 p-4 flex flex-col gap-4 ${wide ? "col-span-full" : ""}`}
       aria-labelledby={titleId}
     >
-      {/* Title and description left, controls right; controls wrap below when narrow */}
+      {/* Title and description left, controls right. The text wraps in its
+          own column (at least 20rem) rather than pushing the controls down,
+          so they move below only when the panel is narrow, never because
+          one description is longer than another (the growth metric switch) */}
       <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0 flex flex-col gap-1">
+        <div className="min-w-0 flex-1 basis-80 flex flex-col gap-1">
           <h2 className="heading-panel" id={titleId}>
             {title}
           </h2>
@@ -45,7 +51,7 @@ export default function ChartCard({
       {rows.length > 0 && table && (
         <>
           {/* The table below carries the same values for screen readers */}
-          <div className="chart-plot" aria-hidden="true">
+          <div className="chart-plot" aria-hidden={interactive ? undefined : "true"}>
             {children}
           </div>
           <details className="chart-table-toggle">
