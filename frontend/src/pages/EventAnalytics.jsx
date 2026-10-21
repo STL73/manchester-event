@@ -19,6 +19,7 @@ import {
   formatWait,
   formatWeekday,
   getApprovalRecord,
+  getBusiestSlot,
   getCategoryReach,
   getRangeBounds,
   getSavesSummary,
@@ -26,7 +27,13 @@ import {
   rankBySaves,
 } from "../lib/analytics";
 import { bySoonest, isUpcoming } from "../lib/eventDates";
-import { chartText, eventStatusOrder, statusTones, weekGridText } from "../data/analyticsData";
+import {
+  chartText,
+  eventStatusOrder,
+  savesTrend,
+  statusTones,
+  weekGridText,
+} from "../data/analyticsData";
 import { allFollows, allSaves } from "../data/analyticsActivityData";
 import {
   defaultEventRange,
@@ -35,7 +42,6 @@ import {
   eventAnalyticsSection,
   eventAnalyticsTabs,
   eventRangeOptions,
-  savesTrend,
   timelineSeries,
   timelineStatuses,
 } from "../data/eventAnalyticsData";
@@ -240,7 +246,7 @@ export default function EventAnalytics({ organiserEvents, favouriteIds, interest
     label: weekGridText.days[day],
     ...Object.fromEntries(counts.map((count, slot) => [weekGridText.slots[slot], count])),
   }));
-  const busiest = busiestCell(weekGrid);
+  const busiest = getBusiestSlot(weekGrid);
   const categoryRows = countBy(organiserEvents, (event) => event.category);
   const locationRows = countBy(organiserEvents, (event) => event.location);
 
@@ -424,12 +430,4 @@ function SaveCount({ count }) {
       <span className="sr-only">saves</span>
     </>
   );
-}
-
-// The grid's fullest cell (Monday-first day, time slot). Null when it is
-// empty or two cells share the top count: "most start on…" would be untrue
-function busiestCell(grid) {
-  const cells = grid.flatMap((counts, day) => counts.map((count, slot) => ({ day, slot, count })));
-  const [best, next] = cells.sort((a, b) => b.count - a.count);
-  return best.count > 0 && best.count > next.count ? best : null;
 }

@@ -325,7 +325,9 @@ export function getSignUpFunnel(users) {
 }
 
 // The three ways of splitting accounts on the Accounts panel. Unverified is
-// a label, not a status; a suspended account counts as suspended either way
+// a label, not a status; a suspended account counts as suspended either way.
+// Unverified (grey) sits between Active and Suspended, so the green and red
+// that are hardest to tell apart are never side by side
 export function getAccountShares(users) {
   const count = (test) => users.filter(test).length;
   return {
@@ -372,8 +374,10 @@ export function getOrganiserActivity(users, events, now = new Date(), limit = 4)
   };
 }
 
-// Per category: people following it next to the public events coming up in
-// it. Underserved = fewer than one upcoming event for every three followers
+// Per category: people following it, the public events coming up in it and
+// followers per event (how big an audience each of those events can reach;
+// null when nothing is coming up). A fact, not a judgement: nobody on the
+// page creates events (decided 2026-10-20)
 export function getSupplyAndDemand(follows, events, categories, now = new Date()) {
   return categories
     .map((category) => {
@@ -389,7 +393,7 @@ export function getSupplyAndDemand(follows, events, categories, now = new Date()
         label: category.name,
         followers,
         upcoming,
-        underserved: followers >= 3 && upcoming < followers / 3,
+        perEvent: upcoming ? followers / upcoming : null,
       };
     })
     .filter((row) => row.followers > 0 || row.upcoming > 0)
@@ -422,6 +426,14 @@ export function getWeekTimeGrid(events) {
     grid[(start.getDay() + 6) % 7][slot] += 1;
   });
   return grid;
+}
+
+// The grid's fullest cell (Monday-first day, time slot). Null when it is
+// empty or two cells share the top count: "most start on…" would be untrue
+export function getBusiestSlot(grid) {
+  const cells = grid.flatMap((counts, day) => counts.map((count, slot) => ({ day, slot, count })));
+  const [best, next] = cells.sort((a, b) => b.count - a.count);
+  return best.count > 0 && best.count > next.count ? best : null;
 }
 
 // Contact messages: average time to a reply, how quickly each was answered,

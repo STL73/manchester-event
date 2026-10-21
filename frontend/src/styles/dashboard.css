@@ -1205,6 +1205,123 @@
     @apply text-right text-xs text-muted tabular-nums;
   }
 
+  /* A thin bar filled to a share, in its tone (funnel steps, organiser
+     activity) */
+  .meter {
+    @apply block h-2 overflow-hidden rounded-full bg-border/60;
+  }
+
+  .meter > span {
+    @apply block h-full rounded-full bg-(--tone,var(--color-accent));
+  }
+
+  /* Sign-up funnel (FunnelSteps) */
+  .funnel {
+    @apply flex flex-col gap-4;
+  }
+
+  .funnel-step {
+    @apply grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 gap-y-1.5;
+  }
+
+  .funnel-step .meter {
+    @apply col-span-full;
+  }
+
+  .funnel-label {
+    @apply text-sm text-foreground;
+  }
+
+  .funnel-share {
+    @apply text-xs text-muted;
+  }
+
+  .funnel-count {
+    @apply text-lg font-semibold text-foreground tabular-nums;
+  }
+
+  /* Followers and events (FollowersHoneycomb): the Audience Reach cells as
+     buttons, beside a card that lists every category or shows one */
+  /* --cell is the hexagon's width: 72px fills a desktop panel, the
+     @container rules further down step it down to 48px and 36px */
+  .followers {
+    @apply flex flex-wrap items-center justify-center gap-10;
+    --cell: 72px;
+  }
+
+  .followers .reach-cell {
+    width: var(--cell);
+    height: calc(var(--cell) * 53 / 48);
+  }
+
+  .followers .reach-cell svg {
+    @apply size-6;
+  }
+
+  .followers .reach-row + .reach-row {
+    margin-top: calc(var(--cell) * -0.275 + 4px * 0.87);
+  }
+
+  .followers-cell {
+    @apply cursor-pointer;
+  }
+
+  .followers-cell:hover {
+    background: color-mix(in oklab, var(--color-accent) calc(var(--level) + 18%), var(--color-card));
+  }
+
+  .followers-cell.is-selected {
+    @apply bg-accent [&_svg]:text-background;
+  }
+
+  /* The hexagon mask cuts off an outline, so a focused cell fills instead */
+  .followers-cell:focus-visible {
+    @apply outline-none;
+    background: color-mix(in oklab, var(--color-accent) 80%, var(--color-foreground));
+  }
+
+  /* As tall as the honeycomb beside it (and the full list), so choosing a
+     category never moves the page */
+  .followers-card {
+    @apply flex min-h-83 max-w-140 min-w-62.5 flex-1 flex-col gap-2.5 rounded-xl border border-border/60 p-3.5;
+  }
+
+  .followers-card-title {
+    @apply text-[15px] font-semibold text-foreground;
+  }
+
+  .followers-list {
+    @apply grid grid-cols-2 gap-x-4;
+  }
+
+  .followers-list button {
+    @apply -mx-1 flex w-full justify-between gap-2 rounded-md px-1 py-0.75 text-left text-xs text-muted hover:bg-accent/12 hover:text-foreground focus-ring-flush;
+  }
+
+  .followers-list-count {
+    @apply text-foreground tabular-nums;
+  }
+
+  .followers-figures {
+    @apply grid grid-cols-[1fr_auto] gap-x-3 gap-y-1.5 text-[13px];
+  }
+
+  .followers-figures dt {
+    @apply text-muted;
+  }
+
+  .followers-figures dd {
+    @apply text-right text-foreground tabular-nums;
+  }
+
+  .followers-figures dd.is-big {
+    @apply text-lg font-semibold;
+  }
+
+  .followers-back {
+    @apply mt-auto flex w-fit items-center gap-1 rounded-sm text-[13px] text-accent hover:text-accent-hover focus-ring [&_svg]:size-3.5;
+  }
+
   /* Approval record: the admins' latest reasons under the facts */
   .approval-reasons {
     @apply flex flex-col gap-1.5 text-[13px] text-muted;
@@ -1570,6 +1687,24 @@
     }
   }
 
+  /* Five 72px cells (376px) no longer fit, and the card wraps under the
+     honeycomb, so it only needs the full list's height */
+  @container (max-width: 36rem) {
+
+    .followers {
+      @apply gap-6;
+      --cell: 48px;
+    }
+
+    .followers .reach-cell svg {
+      @apply size-4.5;
+    }
+
+    .followers-card {
+      @apply min-h-76;
+    }
+  }
+
   /* Stat cards one per row on phones, where two left ~110px each */
   @container (max-width: 28rem) {
 
@@ -1579,6 +1714,33 @@
 
     .dashboard-grid-five > :last-child:nth-child(odd) {
       @apply col-span-1;
+    }
+
+    /* Five 48px cells (256px) are wider than a phone's panel, so the
+       admin's 19-category honeycomb drops to 36px cells (196px) */
+    .followers {
+      --cell: 36px;
+    }
+
+    /* Its 250px minimum is wider than a phone's panel, so it takes the line */
+    .followers-card {
+      @apply min-w-full;
+    }
+
+    .followers .reach-cell svg {
+      @apply size-4;
+    }
+  }
+
+  /* 320px phones: 36px cells (196px) still overflow, 32px ones are 176px */
+  @container (max-width: 20rem) {
+
+    .followers {
+      --cell: 32px;
+    }
+
+    .followers .reach-cell svg {
+      @apply size-3.5;
     }
   }
 
