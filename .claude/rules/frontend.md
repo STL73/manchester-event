@@ -151,7 +151,9 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   page. The PHP pages had a Quick Actions block of links; removed 2026-10-10
 - **Preferences is a honeycomb** (decided 2026-10-11): one hexagon per category
   (`components/dashboard/CategoryHoneycomb.jsx`, rows from `lib/honeycomb.js`: 3-4-5-4-3 for 19,
-  interlocking rows for any other count or width, 1-2-1 on phones). Icons per slug in
+  interlocking rows for any other count or width, 1-2-1 on phones; where the last row would be two
+  or more cells short, a hill that fills every row without adding one, 12 at four across being
+  2-3-4-3, decided 2-3-4-3 over 3-4-3-2 on 2026-10-25). Icons per slug in
   `preferencesData.js`, `Tag` for a category without one. "Your picks" sits beside it on wide
   screens at a fixed height (counts, next 3 events, Save; no interest chips, the hexagons show
   them) and becomes a bar pinned above it below 64rem
