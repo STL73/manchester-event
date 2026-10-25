@@ -34,5 +34,39 @@ export function honeycombRows(count, maxPerRow) {
 
   const narrowFirst = alternating(maxPerRow - 1);
   if (isFull(narrowFirst)) return narrowFirst;
-  return alternating(maxPerRow);
+  const wideFirst = alternating(maxPerRow);
+
+  // A last row two or more cells short of the one above looks broken
+  // (12 was 4-3-4-1). A hill fills every row instead, 12 becoming 2-3-4-3,
+  // but only when it needs no more rows, so the panel doesn't grow
+  // (decided 2026-10-25)
+  const [above, last] = wideFirst.slice(-2);
+  const shape = hill(count, maxPerRow);
+  if (above.slots - last.filled >= 2 && shape && shape.length <= wideFirst.length) {
+    return shape.map((size) => ({ slots: size, filled: size }));
+  }
+  return wideFirst;
+}
+
+// Rows that grow by one cell to a peak, then shrink by one: every row full.
+// Fewest rows first, then the most even ends, then the narrower end on top.
+// Null when no hill adds up to the count
+function hill(count, maxPerRow) {
+  let best = null;
+  for (let peak = 2; peak <= maxPerRow; peak++) {
+    for (let top = 1; top <= peak; top++) {
+      for (let bottom = 1; bottom <= peak; bottom++) {
+        const sizes = [];
+        for (let size = top; size <= peak; size++) sizes.push(size);
+        for (let size = peak - 1; size >= bottom; size--) sizes.push(size);
+        if (sizes.reduce((sum, size) => sum + size, 0) !== count) continue;
+        const score = [sizes.length, Math.abs(top - bottom), top];
+        const differs = best && score.findIndex((value, i) => value !== best.score[i]);
+        if (!best || (differs !== -1 && score[differs] < best.score[differs])) {
+          best = { sizes, score };
+        }
+      }
+    }
+  }
+  return best && best.sizes;
 }

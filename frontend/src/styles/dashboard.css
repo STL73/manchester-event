@@ -1339,13 +1339,36 @@
     @apply text-foreground;
   }
 
-  /* When events happen (WeekTimeGrid): brighter = more */
+  /* When events happen (WeekTimeGrid): brighter = more. The frame is the
+     grid's own container, so the headings follow the grid's width */
+  .week-grid-frame {
+    @apply @container;
+  }
+
   .week-grid {
     @apply grid grid-cols-[2.25rem_repeat(4,minmax(0,1fr))] gap-1;
   }
 
   .week-grid-slot {
     @apply truncate text-center text-[11px] text-muted;
+  }
+
+  .week-grid-slot svg {
+    @apply hidden;
+  }
+
+  /* "Afternoon" needs 54px a column, which the grid has from 268px. Below
+     that each heading is its icon, the word kept for screen readers and as
+     the tooltip (decided 2026-10-25) */
+  @container (max-width: 17.5rem) {
+
+    .week-grid-slot-name {
+      @apply sr-only;
+    }
+
+    .week-grid-slot svg {
+      @apply mx-auto block size-3.5;
+    }
   }
 
   .week-grid-day {
@@ -1722,9 +1745,16 @@
       --cell: 36px;
     }
 
-    /* Its 250px minimum is wider than a phone's panel, so it takes the line */
+    /* Its 250px minimum is wider than a phone's panel, so it takes the line.
+       Two columns left ~62px a name and cut 13 of 18, so the list is one
+       column and the card follows its content: under the honeycomb, a
+       change of height only moves what is below it (decided 2026-10-25) */
     .followers-card {
-      @apply min-w-full;
+      @apply min-h-0 min-w-full;
+    }
+
+    .followers-list {
+      @apply grid-cols-1;
     }
 
     .followers .reach-cell svg {

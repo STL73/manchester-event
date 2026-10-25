@@ -1,3 +1,4 @@
+import { Moon, Sun, Sunrise, Sunset } from "lucide-react";
 import { themeColour } from "../lib/themeColour";
 
 // Shared chart settings and copy for Event Analytics and Site Analytics. Each
@@ -113,6 +114,8 @@ export const decisionSeries = [
 export const weekGridText = {
   days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
   slots: ["Morning", "Afternoon", "Evening", "Night"],
+  // Stand in for the words where the grid is too narrow for them
+  slotIcons: [Sunrise, Sun, Sunset, Moon],
 };
 
 // Audience reach honeycomb: brighter = more followers
