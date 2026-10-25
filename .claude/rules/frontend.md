@@ -92,7 +92,7 @@ repeats the shared utilities. The shared classes sit at the top of `styles/share
 | `.pill` | a 32px option in a row: filters, sort, Previous / Next |
 | `.badge` | a label that states something, coloured by a tone or `.status-*` |
 | `.callout`, `.callout-compact` | a message box with its icon on the left: banners, notes, saved / error messages; compact inside panels and cards |
-| `.hex-frame`, `.hex-fill` | an outlined hexagon (35% accent ring) round an icon or picture; a filled one at 15% of its tone |
+| `.hex-frame`, `.hex-fill` | an outlined hexagon (35% accent ring) round an icon or picture; a filled one at 15% of its tone. The icon or picture inside a `.hex-frame` needs `relative`, or the frame's `::before` fill paints over it and the hexagon shows empty |
 
 The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), the focus rings,
 `selected` and the tones.
