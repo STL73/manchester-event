@@ -15,8 +15,9 @@ The migration is half done, and **the two halves are not connected yet**:
 - `backend/` is an Express + Drizzle skeleton: routers return placeholder strings. The full schema
   in `src/db/schema/app.js` is applied to Neon and seeded
 
-There are no `fetch` calls, no API client and no Vite proxy. Wiring the frontend to the API is
-future work, so don't assume an endpoint exists because a page shows the data.
+The plumbing is there (`frontend/src/lib/api.js`, a Vite proxy for `/api`), but no page calls the
+API yet. Pages are wired phase by phase, so don't assume an endpoint exists because a page shows the
+data.
 
 ## Tech Stack
 
@@ -101,9 +102,10 @@ npx eslint .               # no lint script defined
 npx drizzle-kit generate   # schema -> SQL in drizzle/
 npx drizzle-kit migrate    # apply to DB_URL
 npm run db:seed            # 19 categories + demo admin (SEED_ADMIN_* in .env)
+npm test                   # Vitest, against the Neon test branch (TEST_DB_URL)
 ```
 
-There is no test runner in either package yet.
+The frontend has no test runner yet.
 
 ## Environment Variables
 
@@ -111,6 +113,8 @@ There is no test runner in either package yet.
 | --- | --- | --- |
 | `backend/.env` | `DB_URL` | Neon connection string. `db/index.js` and `drizzle.config.js` throw without it |
 | `backend/.env` | `PORT`, `NODE_ENV` | Read through `src/config/env.js` |
+| `backend/.env` | `ARCJET_KEY`, `ARCJET_ENV` | Arcjet; the server won't start without the key. `ARCJET_ENV=development` locally only |
+| `backend/.env` | `TEST_DB_URL` | The Neon `test` branch. `npm test` refuses to run without it |
 | `backend/.env` | `SEED_ADMIN_USERNAME`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` | Demo admin for `npm run db:seed` |
 | `frontend/.env` | `VITE_NEON_AUTH_URL`, `VITE_NEON_DATA_API_URL` | Defined but not yet read by any code |
 

@@ -2,12 +2,13 @@
 
 ## Current state
 
-Every endpoint is a stub that returns a placeholder string (`res.send('Get all events')`). There
-is no auth, validation or database access in the routes yet.
+Every endpoint is a stub that returns a placeholder string (`res.send('Get all events')`). The
+shared middleware below is in place (Phase 0, 2026-10-26); auth and database access come with each
+feature.
 
 ## Routing
 
-All routes are versioned under `/api/v1`, one router per resource, mounted in `src/server.js`:
+All routes are versioned under `/api/v1`, one router per resource, mounted in `src/app.js` (`server.js` only calls `listen`):
 
 | Mount | File and endpoints |
 | --- | --- |
@@ -21,9 +22,32 @@ All routes are versioned under `/api/v1`, one router per resource, mounted in `s
 
 ## Middleware order
 
-`app.use(express.json())` must stay **above** the `app.use('/api/v1/...')` lines in `server.js`.
-Middleware registered after a router never runs for that router's routes, so `req.body` would be
-`undefined`.
+In `src/app.js`: `helmet()`, then `securityMiddleware` (Arcjet, before the body is parsed), then
+`express.json()`, then the routers, then `notFound` and `errorHandler`, last. Middleware registered
+after a router never runs for that router's routes, so `express.json()` must stay above them or
+`req.body` is `undefined`.
+
+## Responses and errors (decided 2026-10-26)
+
+```js
+{ data: {...} }                                                  // one item
+{ data: [...], pagination: { page, limit, total, totalPages } }  // a list
+{ error: { message: 'Email already in use', details: [...] } }   // an error
+```
+
+- **No try/catch in routes.** Express 5 passes errors from async routes to `errorHandler`
+  (`middleware/errorHandler.js`). Throw `new AppError(status, message, details?)`
+  (`lib/errors.js`) for anything the client should see; anything else becomes a 500 with a generic
+  message, and the real error goes only to the server log
+- **Validation:** Zod through `validate({ body, query, params })` (`middleware/validate.js`). It
+  answers 400 `Invalid input` with one `{ path, message }` per problem, from every part at once.
+  Routes read **`req.valid` only**, never `req.body`: fields a schema doesn't list (an organiser's
+  `status`) never reach the database. (`req.valid` because Express 5 doesn't let `req.query` be
+  replaced)
+- **Security:** `config/arcjet.js` makes one Arcjet client (shield, bot detection allowing search
+  engines and link previews). Stricter rules for a route use `aj.withRule()` at module level, never
+  per request. Rate limit = 429, bot or shield = 403; if Arcjet can't be reached the request goes
+  through. The server won't start without `ARCJET_KEY`; tests skip Arcjet
 
 ## Auth (decided 2026-10-26)
 
@@ -48,7 +72,4 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
 
 Record each decision here once it's made:
 
-- Response shape (success and error envelope)
 - Status codes per action
-- Input validation approach
-- Central error-handling middleware

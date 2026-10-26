@@ -10,15 +10,20 @@ still stubs that don't touch the database.
 - Express 5
 - PostgreSQL on **Neon**, accessed through **Drizzle ORM** (`drizzle-orm/neon-http` driver,
   `@neondatabase/serverless` client). No raw SQL strings in route code; query through `db`
-- `dotenv` for config. No TypeScript, no validation library yet
+- `dotenv` for config, Zod for validation, Arcjet and `helmet` for security. No TypeScript
 
 ## Layout
 
 ```text
 backend/
 ├── src/
-│   ├── server.js           app setup, router mounting, listen
-│   ├── config/env.js       re-exports env vars (PORT, NODE_ENV, DB_URL)
+│   ├── app.js              the Express app: middleware, routers, error handling
+│   ├── server.js           imports app and calls listen
+│   ├── config/
+│   │   ├── env.js          re-exports env vars (PORT, NODE_ENV, DB_URL, ARCJET_KEY)
+│   │   └── arcjet.js       the one Arcjet client
+│   ├── lib/errors.js       AppError
+│   ├── middleware/         errorHandler (+ notFound), validate, security
 │   ├── db/
 │   │   ├── index.js        exports `db` (Drizzle client)
 │   │   └── schema/
@@ -26,6 +31,7 @@ backend/
 │   │       ├── app.js      app tables (users, enums...)
 │   │       └── auth.js     auth tables (sessions, auth_tokens)
 │   └── routes/<name>.routes.js
+├── tests/                  Vitest + Supertest; setup.js points DB_URL at TEST_DB_URL
 ├── drizzle/                generated migrations + meta (commit these)
 └── drizzle.config.js       points drizzle-kit at src/db/schema/index.js
 ```
@@ -69,4 +75,4 @@ Never edit a generated migration that has already been applied. Generate a new o
 
 ## Commands
 
-Run from `backend/`: `npm run dev` (nodemon), `npm start`, `npx eslint .`.
+Run from `backend/`: `npm run dev` (nodemon), `npm start`, `npm test`, `npx eslint .`.
