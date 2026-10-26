@@ -184,11 +184,12 @@
     @apply py-2 flex flex-col justify-between gap-2;
   }
 
-  /* Fills whatever space the links leave, so the pattern never sits behind
-     one. isolate keeps the texture's -z-10 inside this box */
+  /* Behind the whole link area, faint, rather than only in the space the
+     links leave: with five or six links and two section labels, a laptop
+     window left organisers and admins no space at all (decided 2026-10-26).
+     isolate keeps the texture's -z-10 inside this box */
   .sidebar-honeycomb {
-    @apply relative isolate flex-1 min-h-0 overflow-hidden;
-    container: sidebar-honeycomb / size;
+    @apply absolute inset-0 -z-10 isolate overflow-hidden;
   }
 
   /* One faint line, inset from the edges, between the page links and the
