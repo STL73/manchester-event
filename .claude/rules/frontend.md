@@ -20,7 +20,8 @@ functions record behaviour being matched on purpose: keep that parity unless tol
   every page only the dashboard uses, and `Dashboard` wraps its `<Outlet>` in `Suspense` with
   `UI/PageLoading`. A new dashboard page is lazy too. Explore Events and Event details stay eager:
   the public site uses them
-- Data fetching: none yet. Every page runs on mock data (see below)
+- Data fetching: through `lib/api.js` (`api(path, { method, body })`, throws `ApiError`), with the
+  Vite proxy sending `/api` to the backend. No page uses it yet: every page runs on mock data
 
 ## Layout
 
