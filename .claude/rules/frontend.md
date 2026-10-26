@@ -286,14 +286,16 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   one row, not a group, so every role fits a 650px-tall laptop window. Short screens scroll the
   whole sidebar, never the links in a box of their own. Look (layout B, 2026-10-18): the role
   sits under the brand ("Organiser dashboard"), no title line; small uppercase section labels
-  (`section` in `navigationData.js`: Events / Insights, Moderation / Insights; none for users)
+  (`section` in `navigationData.js`: Events for users, Events / Insights, Moderation /
+  Insights; Home unlabelled above them, the user label added 2026-10-26)
   and one faint 1px line instead of thick dividers; 14px pill rows, icons `text-muted/70` until
   hovered or current; the current page is the accent tint plus a 3px accent bar on the inner
   edge, no ring; the user is a soft card. Badges (`badge` per link, counts from `navCounts` in
   `App.jsx`, the Home cards' own filters so the two agree) only where something needs you:
   unread notifications, organisers' drafts and rejected events (red), admins' events to review
-  (yellow) and unread messages; on the rail they sit on the icon's corner. The honeycomb hides
-  when it gets under 48px (a size container query), so a sliver never shows
+  (yellow) and unread messages; on the rail they sit on the icon's corner. The honeycomb sits faint
+  behind the page links (2026-10-26), not only in the space under them: on a 1366x650 laptop
+  window organisers and admins had no space left, so they never saw it
 - **Public pages inside the dashboard** (decided 2026-10-26): FAQs, Contact, About, Privacy and
   Terms also open beside the sidebar at `/dashboard/<page>` (About, Privacy, Terms for every role;
   FAQs and Contact for user and organiser, as the Help menu). Each page takes `inDashboard`, and

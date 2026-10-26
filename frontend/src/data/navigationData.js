@@ -25,10 +25,10 @@ import {
 const faqLink = { title: "FAQs", url: "/dashboard/faq", icon: CircleHelp };
 const contactLink = { title: "Contact us", url: "/dashboard/contact", icon: Mail };
 
-// Sidebar links. `section` puts a small label over a run of links (none for
-// users, who have four). `badge` shows a count from App's navCounts when it
-// is above 0: `label` finishes the screen-reader text ("3 drafts") and
-// `tone` matches the Home card with the same figure
+// Sidebar links. `section` puts a small label over a run of links; Home
+// stays above them, unlabelled, for every role. `badge` shows a count from
+// App's navCounts when it is above 0: `label` finishes the screen-reader
+// text ("3 drafts") and `tone` matches the Home card with the same figure
 const navigationData = [
   {
     role: [
@@ -43,16 +43,19 @@ const navigationData = [
             title: "Explore Events",
             url: "/dashboard/explore-events",
             icon: CalendarSearch,
+            section: "Events",
           },
           {
             title: "My Favourites",
             url: "/dashboard/my-favourites",
             icon: Heart,
+            section: "Events",
           },
           {
             title: "Preferences",
             url: "/dashboard/preferences",
             icon: Settings2,
+            section: "Events",
           },
         ],
         helpNav: [faqLink, contactLink],

@@ -12,11 +12,11 @@ function groupBySection(items) {
 }
 
 export default function MainNav({ items, counts, activePath, pathname }) {
-  // Grows into spare height (the honeycomb takes it) but never below its links:
-  // on a short screen the whole sidebar scrolls instead, rather than the links
-  // scrolling in a box of their own
+  // Grows into spare height but never below its links: on a short screen the
+  // whole sidebar scrolls instead, rather than the links scrolling in a box of
+  // their own. The links stay at the top; the honeycomb fills the box behind them
   return (
-    <div className="sidebar-group flex-1 gap-0">
+    <div className="sidebar-group relative isolate flex-1 justify-start gap-0">
       {groupBySection(items).map(({ section, items: sectionItems }) => (
         <div key={section ?? "top"}>
           {section && <p className="group-label sidebar-section-label">{section}</p>}
@@ -33,8 +33,8 @@ export default function MainNav({ items, counts, activePath, pathname }) {
           </div>
         </div>
       ))}
-      {/* The dashboards' honeycomb: the empty space under the links, which
-          is the one spot on every dashboard page with nothing to read */}
+      {/* The dashboards' honeycomb, faint behind the page links, so every
+          role sees it whatever the number of links or the window's height */}
       <div className="sidebar-honeycomb" aria-hidden="true">
         <div className="honeycomb-texture" />
       </div>

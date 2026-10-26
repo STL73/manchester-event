@@ -636,14 +636,6 @@
     }
   }
 
-  /* A few pixels of pattern read as a stray dotted line (the admin sidebar
-     on a 680px-tall window), so a sliver shows nothing */
-  @container sidebar-honeycomb (max-height: 48px) {
-
-    .honeycomb-texture {
-      @apply hidden;
-    }
-  }
 
   /* tooltip styles */
   .tooltip-wrapper {
