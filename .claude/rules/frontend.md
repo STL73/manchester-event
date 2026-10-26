@@ -294,6 +294,14 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   unread notifications, organisers' drafts and rejected events (red), admins' events to review
   (yellow) and unread messages; on the rail they sit on the icon's corner. The honeycomb hides
   when it gets under 48px (a size container query), so a sliver never shows
+- **Public pages inside the dashboard** (decided 2026-10-26): FAQs, Contact, About, Privacy and
+  Terms also open beside the sidebar at `/dashboard/<page>` (About, Privacy, Terms for every role;
+  FAQs and Contact for user and organiser, as the Help menu). Each page takes `inDashboard`, and
+  `UI/PageFrame` swaps the public hero for `DashboardPageHeading` (hero intro as the summary);
+  section headings become `.dashboard-title`. About drops its photo hero and closing pitch. Contact
+  shows the account's name and email locked. Links between them, and from the sidebar and
+  Settings, use the `/dashboard/` addresses (`dashboardTo` in the data); the public navbar and
+  footer keep the public ones. Their layouts use container variants (`@2xl:`, `@3xl:`, `@5xl:`)
 - **Pagination:** `components/UI/Pagination.jsx`, page number in the URL (`?page=`), back to page 1
   when a filter changes. Explore Events shows 12 per page (whole rows in every view)
 - **Dashboard headings** (decided 2026-10-10): the page title is the page's only `<h1>`, 24px white

@@ -144,7 +144,11 @@
   }
 
   /* FAQs, Privacy and Terms: header and text share one centred column, at a
-     comfortable reading width */
+     comfortable reading width.
+     These pages, Contact and About also open inside the dashboard, so their
+     layouts respond to the nearest container (<main>, or the dashboard's
+     content box beside the sidebar), not the window: @2xl, @3xl and @5xl are
+     the widths of sm, md and lg */
   .reading-page {
     @apply max-w-4xl;
   }
@@ -158,7 +162,7 @@
   }
 
   .reading-heading {
-    @apply text-xl md:text-2xl;
+    @apply text-xl @3xl:text-2xl;
   }
 
   .reading-meta {
@@ -195,7 +199,7 @@
      form rather than empty space. Only here: the dashboard forms share
      .contact-form-container */
   .contact-layout {
-    @apply grid w-full grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)];
+    @apply grid w-full grid-cols-[minmax(0,1fr)] gap-6 @5xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)];
   }
 
   .contact-layout .contact-form-container {
@@ -250,7 +254,7 @@
   }
 
   .about-story {
-    @apply grid items-center gap-12 md:grid-cols-2;
+    @apply grid items-center gap-12 @3xl:grid-cols-2;
   }
 
   .about-story-img {
@@ -259,11 +263,11 @@
 
   /* The city bee in a honeycomb cell, overlapping the photo's corner */
   .about-story-bee {
-    @apply hex-cell absolute -bottom-6 -left-2 aspect-10/11 w-24 object-cover md:-bottom-8 md:-left-10 md:w-36;
+    @apply hex-cell absolute -bottom-6 -left-2 aspect-10/11 w-24 object-cover @3xl:-bottom-8 @3xl:-left-10 @3xl:w-36;
   }
 
   .about-steps {
-    @apply grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4;
+    @apply grid gap-x-6 gap-y-10 @2xl:grid-cols-2 @5xl:grid-cols-4;
   }
 
   .about-step-number {
@@ -287,20 +291,20 @@
   }
 
   .about-stats {
-    @apply grid grid-cols-3 gap-3 md:gap-6;
+    @apply grid grid-cols-3 gap-3 @3xl:gap-6;
   }
 
   /* <dt> comes first for screen readers; the number shows above it */
   .about-stat {
-    @apply flex flex-col-reverse items-center justify-end gap-1 px-2 py-5 text-center md:p-6;
+    @apply flex flex-col-reverse items-center justify-end gap-1 px-2 py-5 text-center @3xl:p-6;
   }
 
   .about-stat-value {
-    @apply text-3xl font-semibold tabular-nums text-accent-hover md:text-5xl;
+    @apply text-3xl font-semibold tabular-nums text-accent-hover @3xl:text-5xl;
   }
 
   .about-stat-label {
-    @apply md:text-sm;
+    @apply @3xl:text-sm;
   }
 
   .about-closing {

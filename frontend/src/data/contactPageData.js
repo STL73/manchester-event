@@ -15,10 +15,11 @@ export const contactPageData = {
     // Decorative: the heading says what the page is
     image: { src: manchesterOutdoorDiningLights, alt: "", width: 1200, height: 1799, position: "center 30%" },
   },
+  dashboardHeading: { title: "Contact us", icon: Mail },
   responseNote: "We reply within 1–2 working days.",
   quickAnswers: {
     title: "Quick answers",
-    seeAll: { label: "See all FAQs", to: "/faq" },
+    seeAll: { label: "See all FAQs", to: "/faq", dashboardTo: "/dashboard/faq" },
   },
   // Placeholders until the real details are decided
   contactDetails: [
@@ -37,6 +38,10 @@ export const contactPageData = {
       { id: "email", label: "Email", type: "email", placeholder: "you@example.com", autoComplete: "email" },
       { id: "message", label: "Message", type: "textarea", placeholder: "How can we help?" },
     ],
+    // Signed in, the name and email come from the account (the schema's
+    // contact_messages takes them from it server-side), so they're locked
+    accountFields: ["name", "email"],
+    accountHint: "From your account, so our reply reaches you.",
   },
   actions: {
     submit: { label: "Send Message", icon: Send },

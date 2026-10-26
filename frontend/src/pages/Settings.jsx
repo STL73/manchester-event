@@ -43,7 +43,7 @@ function AccountBanner({ role, details }) {
           )}
           <p>
             {suspended.text}{" "}
-            <Link className="settings-link" to="/contact">{suspended.contact}</Link>
+            <Link className="settings-link" to="/dashboard/contact">{suspended.contact}</Link>
           </p>
         </div>
       </div>

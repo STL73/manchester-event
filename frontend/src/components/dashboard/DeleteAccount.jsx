@@ -17,7 +17,7 @@ export default function DeleteAccount({ role, hasPublicEvents, onDelete }) {
     return (
       <p className="field-hint settings-hint settings-blocked">
         {deleteAccountCopy.blocked}{" "}
-        <Link className="settings-link" to="/contact">{deleteAccountCopy.contact}</Link>
+        <Link className="settings-link" to="/dashboard/contact">{deleteAccountCopy.contact}</Link>
       </p>
     );
   }

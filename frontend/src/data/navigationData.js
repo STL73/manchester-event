@@ -20,9 +20,10 @@ import {
 } from "lucide-react";
 
 // The public pages a signed-in person still needs; the dashboard hides the
-// public navbar and footer, so these are its only way to them
-const faqLink = { title: "FAQs", url: "/faq", icon: CircleHelp };
-const contactLink = { title: "Contact us", url: "/contact", icon: Mail };
+// public navbar and footer, so these are its only way to them. They open
+// inside the dashboard, beside the sidebar
+const faqLink = { title: "FAQs", url: "/dashboard/faq", icon: CircleHelp };
+const contactLink = { title: "Contact us", url: "/dashboard/contact", icon: Mail };
 
 // Sidebar links. `section` puts a small label over a run of links (none for
 // users, who have four). `badge` shows a count from App's navCounts when it
@@ -94,7 +95,7 @@ const navigationData = [
         ],
         helpNav: [
           // About is built around the approval steps
-          { title: "How approval works", url: "/about", icon: BadgeCheck },
+          { title: "How approval works", url: "/dashboard/about", icon: BadgeCheck },
           faqLink,
           contactLink,
         ],
@@ -162,9 +163,9 @@ export const helpNavTitle = "Help";
 
 // Small print under the signed-in user, for every role
 export const legalNav = [
-  { title: "About", url: "/about" },
-  { title: "Privacy", url: "/privacy" },
-  { title: "Terms", url: "/terms" },
+  { title: "About", url: "/dashboard/about" },
+  { title: "Privacy", url: "/dashboard/privacy" },
+  { title: "Terms", url: "/dashboard/terms" },
 ];
 
 // Public header links. "end" keeps Home active only on "/". Home is
