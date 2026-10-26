@@ -24,7 +24,7 @@ backend/
 │   │   └── schema/
 │   │       ├── index.js    barrel: re-exports every schema file
 │   │       ├── app.js      app tables (users, enums...)
-│   │       └── auth.js     auth tables (empty so far)
+│   │       └── auth.js     auth tables (sessions, auth_tokens)
 │   └── routes/<name>.routes.js
 ├── drizzle/                generated migrations + meta (commit these)
 └── drizzle.config.js       points drizzle-kit at src/db/schema/index.js

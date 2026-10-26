@@ -8,6 +8,13 @@
       "when": 1791205336955,
       "tag": "0000_last_smiling_tiger",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793046330769,
+      "tag": "0001_curious_the_initiative",
+      "breakpoints": true
     }
   ]
 }
