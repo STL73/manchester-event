@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { Suspense, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Sidebar from "../components/layout/Sidebar";
 import WeatherDateBar from "../components/dashboard/WeatherDateBar";
@@ -51,6 +51,15 @@ export default function Dashboard({
   const isDrawerOpen = isNarrow && isDrawerShown;
   const toggleRef = useRef(null);
   const closeButtonRef = useRef(null);
+  const containerRef = useRef(null);
+  const { pathname } = useLocation();
+
+  // ScrollToTop resets the window, but here the window never scrolls: this
+  // container does, and it stays mounted from page to page, so each new page
+  // would open at the last one's position. Only the path counts, as there
+  useEffect(() => {
+    containerRef.current?.scrollTo(0, 0);
+  }, [pathname]);
 
   function toggleSidebar() {
     if (isNarrow) {
@@ -86,7 +95,7 @@ export default function Dashboard({
   }, [isDrawerOpen]);
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container" ref={containerRef}>
       <Sidebar
         id="dashboard-sidebar"
         selectedUser={selectedUser}
