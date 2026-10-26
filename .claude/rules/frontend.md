@@ -302,6 +302,10 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   shows the account's name and email locked. Links between them, and from the sidebar and
   Settings, use the `/dashboard/` addresses (`dashboardTo` in the data); the public navbar and
   footer keep the public ones. Their layouts use container variants (`@2xl:`, `@3xl:`, `@5xl:`)
+- **Scroll position:** `ScrollToTop` resets the window on a new path, and `Dashboard` resets
+  `.dashboard-container`, the dashboard's only scroller (the page itself never scrolls there, so
+  `html:has(.dashboard-container)` drops the reserved scrollbar strip). Only the path counts:
+  `?page=`, `?tab=` and filters keep their place
 - **Pagination:** `components/UI/Pagination.jsx`, page number in the URL (`?page=`), back to page 1
   when a filter changes. Explore Events shows 12 per page (whole rows in every view)
 - **Dashboard headings** (decided 2026-10-10): the page title is the page's only `<h1>`, 24px white
