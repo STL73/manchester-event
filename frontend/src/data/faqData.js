@@ -1,3 +1,5 @@
+import { CircleHelp } from "lucide-react";
+
 // Every question in one place. The FAQs page shows them all, grouped; Contact
 // shows the ones marked `featured` beside the form, with a link here. The
 // answers follow the agreed rules (schema-decisions): approval before going
@@ -8,7 +10,10 @@ export const faqPage = {
     title: "Questions, answered",
     intro: "How browsing, listing and approval work on Manchester Event Portal. Can't find your answer? Send us a message.",
   },
-  contactLink: { label: "Contact us", to: "/contact" },
+  // Inside the dashboard: the title row (named like the sidebar link) and
+  // the dashboard's own Contact page
+  dashboardHeading: { title: "FAQs", icon: CircleHelp },
+  contactLink: { label: "Contact us", to: "/contact", dashboardTo: "/dashboard/contact" },
 };
 
 export const faqGroups = [

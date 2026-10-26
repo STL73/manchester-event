@@ -2,6 +2,7 @@ import {
   CalendarPlus,
   CalendarSearch,
   ClipboardCheck,
+  Info,
   Megaphone,
   ShieldCheck,
 } from "lucide-react";
@@ -21,6 +22,8 @@ export const aboutPageData = {
     // Decorative: the heading says what the page is
     image: { src: skylineSunset, alt: "" },
   },
+  // Inside the dashboard the title row replaces the photo hero
+  dashboardHeading: { title: "About", icon: Info },
   story: {
     title: "Our story",
     paragraphs: [

@@ -54,7 +54,7 @@ const SiteAnalytics = lazy(() => import("./pages/SiteAnalytics"));
 // as the API will refuse them. Home, Event details, Notifications and
 // Settings are everyone's
 function RoleOnly({ allow, userType }) {
-  return userType === allow ? <Outlet /> : <Navigate to="/dashboard/home" replace />;
+  return [allow].flat().includes(userType) ? <Outlet /> : <Navigate to="/dashboard/home" replace />;
 }
 
 // The old Edit Status / Edit User addresses open the item's side panel
@@ -419,6 +419,16 @@ function App() {
             </Route>
             <Route path="events/:eventId" element={<EventDetails inDashboard events={userType === "user" ? audienceEvents : events} role={userType} organiserId={currentOrganiser.id} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
             <Route path="notifications" element={<Notifications selectedUser={selectedUser} notifications={notifications} onMarkRead={markNotificationsRead} />} />
+            {/* The public pages the sidebar links to, opened beside it: About,
+                Privacy and Terms for everyone (under the user card), FAQs and
+                Contact for the roles with a Help menu */}
+            <Route path="about" element={<About inDashboard events={publicEvents} isUser={isUser} />} />
+            <Route path="privacy" element={<LegalPage inDashboard page={privacyPage} titleId="privacy-title" />} />
+            <Route path="terms" element={<LegalPage inDashboard page={termsPage} titleId="terms-title" />} />
+            <Route element={<RoleOnly allow={["user", "organiser"]} userType={userType} />}>
+              <Route path="faq" element={<Faq inDashboard />} />
+              <Route path="contact" element={<Contact inDashboard account={{ name: selectedUser.user, email: selectedUser.email }} onSendMessage={sendContactMessage} />} />
+            </Route>
             {/* key: a new test role starts the forms from that role's details */}
             <Route
               path="settings"

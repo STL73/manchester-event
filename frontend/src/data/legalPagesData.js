@@ -1,3 +1,5 @@
+import { FileText, ShieldCheck } from "lucide-react";
+
 // Privacy and Terms, shown by LegalPage.jsx. Written for this portfolio
 // project and kept to what the app actually stores (see the database schema):
 // a draft, not legal advice. Review before the site takes real users.
@@ -10,6 +12,7 @@ export const privacyPage = {
     title: "Your data, in plain English",
     intro: "What we collect, why we need it, who can see it and how to ask us to change or remove it.",
   },
+  dashboardHeading: { title: "Privacy", icon: ShieldCheck },
   updated: "Last updated 7 October 2026",
   draftNote,
   sections: [
@@ -56,6 +59,7 @@ export const termsPage = {
     title: "Using Manchester Event Portal",
     intro: "The ground rules for browsing, keeping an account and listing events.",
   },
+  dashboardHeading: { title: "Terms", icon: FileText },
   updated: "Last updated 7 October 2026",
   draftNote,
   sections: [

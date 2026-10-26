@@ -127,6 +127,12 @@
     scrollbar-gutter: stable;
   }
 
+  /* The dashboard page never scrolls (its container does, with its own
+     scrollbar), so the reserved strip would only show as an empty band */
+  html:has(.dashboard-container) {
+    scrollbar-gutter: auto;
+  }
+
   /* The logo's honeycomb cell (lucide's hexagon, rounded corners and all),
      as a mask. Every hexagon on the site uses it through .hex-cell, which
      stretches it to the element: keep elements at the cell's 10:11 ratio */
