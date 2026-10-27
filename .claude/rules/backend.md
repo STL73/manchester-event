@@ -1,8 +1,8 @@
 # Backend Rules
 
 The full schema is applied to Neon and seeded. Auth and the account's own `/users/me` are real
-(Phases 1 and 2); the rest of the users router and the events router are still stubs that don't
-touch the database.
+(Phases 1 and 2), and so are the public event reads and categories (Phase 3); the rest of the
+users and events routers are still stubs that don't touch the database.
 
 ## Stack constraints
 
@@ -23,13 +23,16 @@ backend/
 │   ├── config/
 │   │   ├── env.js          re-exports env vars (PORT, NODE_ENV, DB_URL, ARCJET_KEY, EMAIL_*, APP_URL)
 │   │   └── arcjet.js       the one Arcjet client
-│   ├── constants/          fixed names (logActions.js: system_logs actions)
+│   ├── constants/          fixed names (logActions.js: system_logs actions; areas.js: area ids)
 │   ├── lib/                AppError, tokens, sessions, authTokens, email + authEmails,
-│   │                       systemLogs (logAction), users (publicUser)
+│   │                       systemLogs (logAction), users (publicUser),
+│   │                       publicEvents (every public read), londonTime (date windows)
 │   ├── middleware/         errorHandler (+ notFound), validate, security, auth
-│   ├── validation/         Zod schemas per resource (auth.js, users.js)
+│   ├── validation/         Zod schemas per resource (auth.js, users.js, events.js)
 │   ├── db/
 │   │   ├── index.js        exports `db` (Drizzle client)
+│   │   ├── seed.js         npm run db:seed
+│   │   ├── demoData.js     the seed's demo locations and events
 │   │   └── schema/
 │   │       ├── index.js    barrel: re-exports every schema file
 │   │       ├── app.js      app tables (users, enums...)
@@ -61,6 +64,15 @@ admin from `SEED_ADMIN_USERNAME`, `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` i
 verified Demo User and Demo Organiser when `SEED_USER_EMAIL`, `SEED_ORGANISER_EMAIL` and
 `SEED_DEMO_PASSWORD` are set (skipped otherwise). Passwords
 are hashed with `bcryptjs` (cost 12). It skips rows that already exist, so it's safe to re-run.
+
+With the demo accounts it also adds (decided 2026-10-27) five more organisers (`mcrgigs`,
+`northernfood`, `quaysevents`, `salfordarts`, `leoevents` at `@example.test`, a random password
+nobody knows; `mcrgigs` suspended), 29 locations with made-up `seed-` place ids and approximate
+coordinates, and the 52 mock events from `demoData.js`, the Demo Organiser owning the mock's
+`organiserName` ones. Event dates are offsets from the day the seed runs, in Europe/London, so
+they go stale: `npm run db:seed -- --reset-events` deletes the demo organisers' events (their
+favourites cascade) and adds fresh ones. Events are added only when the demo organisers have
+none. None of this may reach production (Phase 12).
 
 ## Migrations
 

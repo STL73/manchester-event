@@ -15,6 +15,13 @@
       "when": 1793046330769,
       "tag": "0001_curious_the_initiative",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793126587604,
+      "tag": "0002_mighty_jack_flag",
+      "breakpoints": true
     }
   ]
 }
