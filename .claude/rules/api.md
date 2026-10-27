@@ -3,7 +3,8 @@
 ## Current state
 
 The shared middleware below is in place (Phase 0, 2026-10-26) and the auth routes are real
-(Phase 1). The users and events routers are still stubs that return a placeholder string
+(Phase 1, passwords Phase 2). Apart from `/users/me` (Phase 2), the users and events routers are
+still stubs that return a placeholder string
 (`res.send('Get all events')`); database access comes with each feature.
 
 ## Routing
@@ -12,8 +13,8 @@ All routes are versioned under `/api/v1`, one router per resource, mounted in `s
 
 | Mount | File and endpoints |
 | --- | --- |
-| `/api/v1/auth` | `routes/auth.routes.js`: `POST /sign-up`, `/login`, `/logout`, `/verify-email`, `/resend-verification`; `GET /me` |
-| `/api/v1/users` | `routes/user.routes.js`: REST CRUD on `/` and `/:id` |
+| `/api/v1/auth` | `routes/auth.routes.js`: `POST /sign-up`, `/login`, `/logout`, `/verify-email`, `/resend-verification`, `/forgot-password`, `/reset-password`; `GET /me`; `PUT /password` |
+| `/api/v1/users` | `routes/user.routes.js`: `PUT /me` (name, email switch), `DELETE /me` (password-confirmed); REST CRUD on `/` and `/:id`, `/me` registered first |
 | `/api/v1/events` | `routes/event.routes.js`: REST CRUD, plus `GET /user/:id`, `PUT /user/:id/cancel` |
 
 - Router files: `const xRouter = Router();` then `export default xRouter;`
@@ -85,6 +86,19 @@ effect on the next request, and a JWT can't be cancelled before it expires.
   `requireTLS`, not the `service: 'gmail'` shortcut: on Slav's machine port 465 is cut off
   ("Connection closed unexpectedly", likely Norton's mail scanning) while 587 works (2026-10-27)
 - New session ID at every login; a password change deletes all of that user's sessions
+- **Passwords and account (decided 2026-10-27):** forgot-password answers 204 whether or not the
+  email has an account, and sends the email without waiting so the timing matches too (3 an hour
+  per address, 10 per IP). Reset links are one hour; using one sets the new password, marks the
+  email verified (the link reached the inbox), ends every session and sends the person to Log in.
+  Changing the password in Settings needs the current one (400 under `body.currentPassword`,
+  never 401, which would read as logged out), ends every session and starts a fresh one for this
+  device (10 tries per 15 minutes per user). Both send a "password changed" email, which ignores
+  the email switch. A suspended account may change or reset its password; `PUT /users/me` and
+  `DELETE /users/me` are `requireActive`. Delete account: password-checked (400), admins 403, an
+  organiser with an event that has been public (approved, cancelled, or with an
+  `approved_snapshot`) 409; otherwise their other events and the account go in one `db.batch()`,
+  which `events.organiser_id`'s RESTRICT undoes whole if an event went public meanwhile
+  (checked on the test branch)
 - Sign-up rejects the `admin` role. Unverified users can log in; the event-submit route checks
   `email_verified_at`
 

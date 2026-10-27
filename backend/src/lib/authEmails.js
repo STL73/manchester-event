@@ -25,18 +25,62 @@ function verificationEmail(username, link) {
     };
 }
 
-// The link opens the frontend, which sends the token with a POST. A GET to the
-// API would let email scanners, which open every link, use it up first.
-// Returns false if the email couldn't be sent; the failure goes to System Logs
-export async function sendVerificationEmail(user) {
-    const token = await createAuthToken(user.userId, 'email_verification');
-    const link = `${APP_URL}/auth/verify-email?token=${token}`;
+function passwordResetEmail(username, link) {
+    return {
+        subject: 'Reset your Manchester Event Portal password',
+        text: [
+            `Hi ${username},`,
+            'Someone asked to reset the password for your account. To choose a new one, open this link:',
+            link,
+            "The link works for 1 hour. If it wasn't you, ignore this email: your password stays as it is.",
+        ].join('\n\n'),
+        html: `<p>Hi ${escapeHtml(username)},</p>
+<p>Someone asked to reset the password for your account.</p>
+<p><a href="${link}">Choose a new password</a></p>
+<p>The link works for 1 hour. If it wasn't you, ignore this email: your password stays as it is.</p>`,
+    };
+}
+
+// A security email: sent even when the account has email notifications off
+function passwordChangedEmail(username, resetLink) {
+    return {
+        subject: 'Your Manchester Event Portal password was changed',
+        text: [
+            `Hi ${username},`,
+            'The password for your account was just changed, and every other device was logged out.',
+            `If this wasn't you, reset your password straight away: ${resetLink}`,
+        ].join('\n\n'),
+        html: `<p>Hi ${escapeHtml(username)},</p>
+<p>The password for your account was just changed, and every other device was logged out.</p>
+<p>If this wasn't you, <a href="${resetLink}">reset your password</a> straight away.</p>`,
+    };
+}
+
+// Returns false if the email couldn't be sent; the failure goes to System
+// Logs, with `kind` saying which email it was
+async function send(user, kind, email) {
     try {
-        await sendEmail({ to: user.email, ...verificationEmail(user.username, link) });
+        await sendEmail({ to: user.email, ...email });
         return true;
     } catch (err) {
-        console.error('Verification email failed:', err.message);
-        await logAction(LOG.EMAIL_FAILED, user, { email: 'verification', error: err.message });
+        console.error(`Email (${kind}) failed:`, err.message);
+        await logAction(LOG.EMAIL_FAILED, user, { email: kind, error: err.message });
         return false;
     }
+}
+
+// The links open the frontend, which sends the token with a POST. A GET to the
+// API would let email scanners, which open every link, use it up first
+export async function sendVerificationEmail(user) {
+    const token = await createAuthToken(user.userId, 'email_verification');
+    return send(user, 'verification', verificationEmail(user.username, `${APP_URL}/auth/verify-email?token=${token}`));
+}
+
+export async function sendPasswordResetEmail(user) {
+    const token = await createAuthToken(user.userId, 'password_reset');
+    return send(user, 'password_reset', passwordResetEmail(user.username, `${APP_URL}/auth/reset-password?token=${token}`));
+}
+
+export async function sendPasswordChangedEmail(user) {
+    return send(user, 'password_changed', passwordChangedEmail(user.username, `${APP_URL}/auth/forgot-password`));
 }

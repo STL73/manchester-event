@@ -58,6 +58,12 @@ export async function renewSessionIfDue(res, token, session) {
     setSessionCookie(res, token);
 }
 
+// Every device logged out at once: after a password change or reset, so
+// whoever knew the old password loses the session they had
+export async function endAllSessions(userId) {
+    await db.delete(sessions).where(eq(sessions.userId, userId));
+}
+
 export async function endSession(res, token) {
     if (token) await db.delete(sessions).where(eq(sessions.sessionId, hashToken(token)));
     clearSessionCookie(res);
