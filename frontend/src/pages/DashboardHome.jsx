@@ -1,3 +1,4 @@
+import AccountBanner from "../components/dashboard/AccountBanner";
 import DashboardGreeting from "../components/dashboard/DashboardGreeting";
 import AdminDashboardHome from "./AdminDashboardHome";
 import OrganiserDashboardHome from "./OrganiserDashboardHome";
@@ -9,7 +10,7 @@ const dashboardByRole = {
   admin: AdminDashboardHome,
 };
 
-export default function DashboardHome({ selectedUser, ...props }) {
+export default function DashboardHome({ selectedUser, account, ...props }) {
   const DashboardComponent = dashboardByRole[selectedUser?.type];
 
   if (!DashboardComponent) {
@@ -34,6 +35,8 @@ export default function DashboardHome({ selectedUser, ...props }) {
         organiserEvents={props.organiserEvents}
         favouriteIds={props.favouriteIds}
       />
+      {/* mx-4: lines up with the sections below, which pad their content 16px */}
+      <AccountBanner account={account} className="mx-4" />
       <DashboardComponent selectedUser={selectedUser} {...props} />
     </>
   );

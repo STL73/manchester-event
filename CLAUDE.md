@@ -9,16 +9,16 @@ approve them and manage users. It is a rewrite of an older PHP/MySQL university 
 in a separate folder (`D:\MY PROJECTS\manchester-event-portal`). That code is the reference for
 behaviour. Comments here that cite `*.php` files or PHP functions mark parity that is deliberate.
 
-The migration is half done, and **the two halves are not connected yet**:
+The migration is half done, and **the two halves are only connected for auth so far**:
 
-- `frontend/` is a near-complete React port that runs entirely on in-memory mock data
+- `frontend/` is a near-complete React port. Login, sign-up, logout, email verification and the
+  signed-in account are real (Phase 1); every other page still runs on in-memory mock data
 - `backend/` is Express + Drizzle. Auth is real (sign-up, login, sessions, email verification;
   Phase 1, 2026-10-26); the users and events routers still return placeholder strings. The full
   schema in `src/db/schema/` is applied to Neon and seeded
 
-The plumbing is there (`frontend/src/lib/api.js`, a Vite proxy for `/api`), but no page calls the
-API yet. Pages are wired phase by phase, so don't assume an endpoint exists because a page shows the
-data.
+Calls go through `frontend/src/lib/api.js` and a Vite proxy for `/api`. Pages are wired phase by
+phase, so don't assume an endpoint exists because a page shows the data.
 
 ## Tech Stack
 
@@ -48,10 +48,12 @@ will need to do.
   (`isPublicEvent` = approved), `organiserEvents` (filtered by `currentOrganiser.id`) and
   `managedEvents`. Never add a parallel event array
 - **`src/data/*Data.js`** files hold both mock records and page config (copy, form fields, nav)
-- **Roles are simulated.** `TEST_USER_TYPE` in `src/data/navigationData.js` sets the starting role
-  (`user` / `organiser` / `admin`). `App.jsx` keeps `userType` and `isUser` state, and the
-  `Navbar`/`Sidebar` let you cycle roles and toggle signed-in, which is how you test each role's
-  dashboard. There's no real auth
+- **Roles are real** (Phase 1, 2026-10-27). `App.jsx` asks `/auth/me` once at startup and keeps
+  the answer as `account` (shows `PageLoading` until it arrives); `isUser` and `userType` are
+  derived from it. Test each role's dashboard by logging in as it: the seed's admin and its Demo
+  User and Demo Organiser. The role's sidebar links still come from `navigationData.js`, and pages
+  other than auth still read mock records (the Demo Organiser sees the mock organiser's events
+  until Phase 5)
 - **Routing:** public routes (`/`, `/events`, `/events/:eventId`, `/about`, `/contact`,
   `/auth/:pathname`) and a nested `/dashboard/*` tree, guarded only by `isUser`. Which sidebar links
   appear depends on the role. The public navbar and footer hide based on the pathname

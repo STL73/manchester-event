@@ -223,13 +223,12 @@ export const footerText = {
   backToTop: "Back to top",
 };
 
-export const TEST_USER_TYPE = "user";
-
 export function getData() {
   return navigationData;
 }
 
-export function getUserData(userType = TEST_USER_TYPE) {
+// The role's sidebar and default icon; the first role when nobody is logged in
+export function getUserData(userType) {
   return (
     navigationData[0].role.find(({ type }) => type === userType) ??
     navigationData[0].role[0]

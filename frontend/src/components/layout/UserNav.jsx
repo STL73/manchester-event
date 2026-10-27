@@ -7,7 +7,7 @@ import Tooltip from "../UI/Tooltip";
 
 // Who is signed in, at the bottom of the sidebar. Notifications and Settings
 // sit just above in the secondary nav, so this only needs Log Out.
-export default function UserNav({ items, onLogout, onSwitchUserType }) {
+export default function UserNav({ items, onLogout }) {
   const Avatar = items.avatar;
 
   return (
@@ -28,13 +28,6 @@ export default function UserNav({ items, onLogout, onSwitchUserType }) {
             <LogOut aria-hidden="true" />
           </Button>
         </Tooltip>
-      </div>
-      {/* Test control until real login exists: cycles user / organiser / admin */}
-      {/* Wrapper carries the class: Button's own display utility would beat it */}
-      <div className="sidebar-test-role">
-        <Button variant="secondary" size="sm" className="w-full" onClick={onSwitchUserType}>
-          Test role: {items.type}
-        </Button>
       </div>
       <nav className="sidebar-legal" aria-label="About and legal">
         {legalNav.map((link, index) => (

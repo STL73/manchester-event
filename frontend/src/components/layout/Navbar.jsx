@@ -13,7 +13,7 @@ function navLinkClass({ isActive }) {
 // Dashboard and Log Out take the place of Log In and Sign Up, so a signed-in
 // user who lands here has a way back. Guest-only links (Home) are hidden
 // rather than left to redirect
-export default function Navbar({ isUser, onToggleUserMode, ...props }) {
+export default function Navbar({ isUser, onLogout, ...props }) {
   const navLinks = isUser ? publicNav.filter((link) => !link.guestOnly) : publicNav;
   const { pathname } = useLocation();
   // Below lg the links and buttons fold into a drop-down panel
@@ -66,85 +66,72 @@ export default function Navbar({ isUser, onToggleUserMode, ...props }) {
   }
 
   return (
-    <>
-      <nav className="navbar" {...props}>
-        <div className="navbar-container">
-          <Link to={isUser ? "/dashboard/home" : "/"} className="navbar-logo" onClick={() => setMenuOpen(false)}>
-            <LogoMark className="navbar-icon" />
-            <span>Manchester Event Portal</span>
-          </Link>
+    <nav className="navbar" {...props}>
+      <div className="navbar-container">
+        <Link to={isUser ? "/dashboard/home" : "/"} className="navbar-logo" onClick={() => setMenuOpen(false)}>
+          <LogoMark className="navbar-icon" />
+          <span>Manchester Event Portal</span>
+        </Link>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-foreground lg:hidden"
-            aria-expanded={menuOpen}
-            aria-controls="navbar-menu"
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            onClick={() => setMenuOpen((open) => !open)}
-          >
-            {menuOpen ? <X className="size-6!" aria-hidden="true" /> : <Menu className="size-6!" aria-hidden="true" />}
-          </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-foreground lg:hidden"
+          aria-expanded={menuOpen}
+          aria-controls="navbar-menu"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          {menuOpen ? <X className="size-6!" aria-hidden="true" /> : <Menu className="size-6!" aria-hidden="true" />}
+        </Button>
 
-          {/* One set of links: inline from lg up, a drop-down panel below it */}
-          <div id="navbar-menu" className={`navbar-menu ${menuOpen ? "is-open" : ""}`} onClick={closeAfterChoice}>
-            <div className="navbar-links" ref={linksRef} onMouseLeave={restPill} onBlur={handleLinksBlur}>
-              <span
-                className={`navbar-pill ${pill ? "is-visible" : ""} ${pill?.glide ? "is-gliding" : ""}`}
-                style={pill ? { width: pill.width, transform: `translateX(${pill.left}px)` } : undefined}
-                aria-hidden="true"
-              />
-              {/* NavLink marks the current page (and /events/:id) as active */}
-              {navLinks.map(({ title, url, end }) => (
-                <NavLink
-                  key={url}
-                  to={url}
-                  end={end}
-                  className={navLinkClass}
-                  onMouseEnter={(event) => placePill(event.currentTarget)}
-                  onFocus={(event) => placePill(event.currentTarget)}
-                >
-                  {title}
-                </NavLink>
-              ))}
-            </div>
+        {/* One set of links: inline from lg up, a drop-down panel below it */}
+        <div id="navbar-menu" className={`navbar-menu ${menuOpen ? "is-open" : ""}`} onClick={closeAfterChoice}>
+          <div className="navbar-links" ref={linksRef} onMouseLeave={restPill} onBlur={handleLinksBlur}>
+            <span
+              className={`navbar-pill ${pill ? "is-visible" : ""} ${pill?.glide ? "is-gliding" : ""}`}
+              style={pill ? { width: pill.width, transform: `translateX(${pill.left}px)` } : undefined}
+              aria-hidden="true"
+            />
+            {/* NavLink marks the current page (and /events/:id) as active */}
+            {navLinks.map(({ title, url, end }) => (
+              <NavLink
+                key={url}
+                to={url}
+                end={end}
+                className={navLinkClass}
+                onMouseEnter={(event) => placePill(event.currentTarget)}
+                onFocus={(event) => placePill(event.currentTarget)}
+              >
+                {title}
+              </NavLink>
+            ))}
+          </div>
 
-            <div className="navbar-auth">
-              {isUser ? (
-                <>
-                  <Button to="/dashboard/home" size="sm">
-                    Dashboard
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={onToggleUserMode}>
-                    Log Out
-                  </Button>
-                </>
-              ) : (
-                <>
-                  {/* Button renders the link itself: one element, one Tab stop */}
-                  <Button to="/auth/login" variant="ghost" size="sm">
-                    Log In
-                  </Button>
-                  <Button to="/auth/sign-up" size="sm">
-                    Sign Up
-                  </Button>
-                </>
-              )}
-            </div>
+          <div className="navbar-auth">
+            {isUser ? (
+              <>
+                <Button to="/dashboard/home" size="sm">
+                  Dashboard
+                </Button>
+                <Button variant="ghost" size="sm" onClick={onLogout}>
+                  Log Out
+                </Button>
+              </>
+            ) : (
+              <>
+                {/* Button renders the link itself: one element, one Tab stop */}
+                <Button to="/auth/login" variant="ghost" size="sm">
+                  Log In
+                </Button>
+                <Button to="/auth/sign-up" size="sm">
+                  Sign Up
+                </Button>
+              </>
+            )}
           </div>
         </div>
-      </nav>
-
-      {/* Test control until real login exists. Development builds only, so
-          it can never reach production by accident. Outside <nav>: the
-          navbar's backdrop blur would pin a fixed child to the navbar */}
-      {import.meta.env.DEV && (
-        <div className="dev-role-badge">
-          <Button variant="secondary" size="sm" onClick={onToggleUserMode}>
-            User mode: {isUser ? "true" : "false"}
-          </Button>
-        </div>
-      )}
-    </>
+      </div>
+    </nav>
   );
 }

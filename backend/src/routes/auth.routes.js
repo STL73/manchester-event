@@ -102,7 +102,8 @@ authRouter.get('/me', requireAuth, (req, res) => {
 // No login needed: the link may be opened on another device
 authRouter.post('/verify-email', validate({ body: verifyEmailSchema }), async (req, res) => {
     const used = await consumeAuthToken(req.valid.body.token, 'email_verification');
-    if (!used) throw new AppError(400, 'This link has expired or has already been used. Log in to send a new one.');
+    // The page adds what to do next, which depends on whether someone is logged in
+    if (!used) throw new AppError(400, 'This link has expired or has already been used.');
 
     const [user] = await db
         .update(users)

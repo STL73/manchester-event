@@ -9,6 +9,8 @@ import {
   KeyRound,
   LogIn,
   LogOut,
+  MailCheck,
+  MailX,
   Pencil,
   Send,
   ShieldAlert,
@@ -83,6 +85,15 @@ const describers = {
     sub: details.reason ? `“${details.reason}”` : "",
   }),
   "User Deleted": (details, lookup) => ({ kind: "accounts", tone: "danger", icon: UserMinus, verb: "deleted the account", target: userTarget(details, lookup) }),
+  "Email Verified": () => ({ kind: "accounts", tone: "success", icon: MailCheck, verb: "verified their email" }),
+  // The account's own verification email; the error says why (a Gmail limit, say)
+  "Email Failed": (details) => ({
+    kind: "accounts",
+    tone: "danger",
+    icon: MailX,
+    verb: "wasn't sent a verification email",
+    sub: details.error,
+  }),
   "Password Changed": () => ({ kind: "accounts", icon: KeyRound, verb: "changed their password" }),
   "Avatar Updated": () => ({ kind: "accounts", icon: ImageUp, verb: "changed their picture" }),
   "Preferences Updated": (details) => ({

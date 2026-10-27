@@ -15,7 +15,6 @@ export default function Sidebar({
   onCloseDrawer,
   closeButtonRef,
   onLogout,
-  onSwitchUserType,
   ...props
 }) {
   const { pathname, state } = useLocation();
@@ -78,11 +77,7 @@ export default function Sidebar({
         activePath={activePath}
         pathname={pathname}
       />
-      <UserNav
-        items={selectedUser}
-        onLogout={onLogout}
-        onSwitchUserType={onSwitchUserType}
-      />
+      <UserNav items={selectedUser} onLogout={onLogout} />
     </aside>
   );
 }

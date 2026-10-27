@@ -10,8 +10,18 @@ if (!configured && NODE_ENV === 'production') {
     throw new Error('EMAIL_USER and EMAIL_APP_PASSWORD must be set in production');
 }
 
+// Port 587, not the `service: 'gmail'` shortcut's 465: on this machine 465 is
+// cut off ("Connection closed unexpectedly", likely antivirus mail scanning)
+// while 587 works. requireTLS: the connection must switch to encryption
+// before the password is sent, or nothing is sent at all
 const transporter = configured
-    ? nodemailer.createTransport({ service: 'gmail', auth: { user: EMAIL_USER, pass: EMAIL_APP_PASSWORD } })
+    ? nodemailer.createTransport({
+        host: 'smtp.gmail.com',
+        port: 587,
+        secure: false,
+        requireTLS: true,
+        auth: { user: EMAIL_USER, pass: EMAIL_APP_PASSWORD },
+    })
     : null;
 
 export async function sendEmail({ to, subject, text, html }) {

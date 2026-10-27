@@ -1,19 +1,12 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { MailWarning, Send, ShieldAlert, UserRoundCog } from "lucide-react";
-import Button from "../components/UI/Button";
+import { UserRoundCog } from "lucide-react";
+import AccountBanner from "../components/dashboard/AccountBanner";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import SettingsSection from "../components/dashboard/SettingsSection";
 import ProfileSettings from "../components/dashboard/ProfileSettings";
 import PasswordSettings from "../components/dashboard/PasswordSettings";
 import EmailSettings from "../components/dashboard/EmailSettings";
 import DeleteAccount from "../components/dashboard/DeleteAccount";
-import {
-  accountBanners,
-  accountDetails,
-  accountSummary,
-  settingsSections,
-} from "../data/profileSettingsData";
+import { accountSummary, settingsSections } from "../data/profileSettingsData";
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -21,64 +14,12 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   year: "numeric",
 });
 
-// Only when something limits the account: an unverified email or a
-// suspension. Admins never get either
-function AccountBanner({ role, details }) {
-  const [resent, setResent] = useState(false);
-
-  if (role === "admin") return null;
-
-  if (details.suspendedUntil !== null || details.suspensionReason) {
-    const { suspended } = accountBanners;
-    const until = details.suspendedUntil && dateFormatter.format(new Date(details.suspendedUntil));
-    return (
-      <div className="callout settings-banner tone-danger" role="status">
-        <ShieldAlert aria-hidden="true" />
-        <div>
-          <p className="settings-banner-title">{suspended.title(until)}</p>
-          {details.suspensionReason && (
-            <p>
-              {suspended.reason} {details.suspensionReason}
-            </p>
-          )}
-          <p>
-            {suspended.text}{" "}
-            <Link className="settings-link" to="/dashboard/contact">{suspended.contact}</Link>
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!details.emailVerifiedAt) {
-    const { unverified } = accountBanners;
-    return (
-      <div className="callout settings-banner tone-warning" role="status">
-        <MailWarning aria-hidden="true" />
-        <div>
-          <p className="settings-banner-title">{unverified.title}</p>
-          <p>{unverified.text[role] ?? unverified.text.user}</p>
-          {resent ? (
-            <p className="settings-banner-done">{unverified.sent}</p>
-          ) : (
-            <Button variant="secondary" size="sm" onClick={() => setResent(true)}>
-              <Send aria-hidden="true" />
-              {unverified.resend}
-            </Button>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  return null;
-}
-
 // Four sections, each saving on its own. What a role sees differs in the
 // email wording and in Delete: none for admins, a contact link for an
 // organiser whose events have been public
 export default function Settings({
   selectedUser,
+  account,
   hasPublicEvents,
   onSaveProfile,
   onPasswordChanged,
@@ -97,20 +38,20 @@ export default function Settings({
           summary={
             <>
               {accountSummary.memberSince}{" "}
-              <time dateTime={accountDetails.createdAt}>
-                {dateFormatter.format(new Date(accountDetails.createdAt))}
+              <time dateTime={account.createdAt}>
+                {dateFormatter.format(new Date(account.createdAt))}
               </time>
             </>
           }
         />
 
         <div className="w-full max-w-245 self-start flex flex-col gap-10">
-          <AccountBanner role={role} details={accountDetails} />
+          <AccountBanner account={account} />
 
           <SettingsSection id="settings-profile" section={settingsSections.profile}>
             <ProfileSettings
               selectedUser={selectedUser}
-              emailVerified={Boolean(accountDetails.emailVerifiedAt)}
+              emailVerified={Boolean(account.emailVerifiedAt)}
               onSave={onSaveProfile}
             />
           </SettingsSection>
