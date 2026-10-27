@@ -21,7 +21,9 @@ functions record behaviour being matched on purpose: keep that parity unless tol
   `UI/PageLoading`. A new dashboard page is lazy too. Explore Events and Event details stay eager:
   the public site uses them
 - Data fetching: through `lib/api.js` (`api(path, { method, body })`, throws `ApiError`), with the
-  Vite proxy sending `/api` to the backend. No page uses it yet: every page runs on mock data
+  Vite proxy sending `/api` to the backend. Used so far by auth (Phase 1): `App.jsx` (`/auth/me`,
+  logout), `Auth.jsx`, `VerifyEmail.jsx` and `AccountBanner`'s Resend. Every other page runs on
+  mock data until its phase
 
 ## Layout
 
@@ -264,8 +266,10 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   changed notification), Email notifications (one `UI/Switch`, wording per role, saves at once),
   Delete account (confirmed in the page with the password; organisers whose events have been
   public get a contact link; no section for admins). Banners only for an unverified email or a
-  suspension, never for admins. Name, picture and the switch live in App (`profileChanges`) so
-  the sidebar and greeting follow
+  suspension, never for admins: `dashboard/AccountBanner`, read from the real account, also shown
+  on Home under the greeting (2026-10-27) so a new account sees the email reminder where sign-up
+  lands. Name, picture and the switch live in App (`profileChanges`) so the sidebar and greeting
+  follow
 - **Hexagons in the dashboard** (decided 2026-10-11, extended 2026-10-12): each frames something
   that is already there, so the logo shows without overusing it. Every page title's icon sits in
   the logo's cell (`DashboardPageHeading`, 36 x 40); on Home the greeting's picture does

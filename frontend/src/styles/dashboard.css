@@ -319,10 +319,6 @@
     @apply text-xs text-muted truncate;
   }
 
-  .sidebar-test-role {
-    @apply mx-2;
-  }
-
   /* About · Privacy · Terms: the footer's small print, for signed-in people */
   .sidebar-legal {
     @apply flex flex-wrap justify-center gap-x-2 px-2 text-xs text-muted;
@@ -357,7 +353,6 @@
 
     .sidebar-collapsed .sidebar-help-chevron,
     .sidebar-collapsed .sidebar-user-details,
-    .sidebar-collapsed .sidebar-test-role,
     .sidebar-collapsed .sidebar-legal {
       @apply hidden;
     }

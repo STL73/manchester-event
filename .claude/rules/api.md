@@ -81,7 +81,9 @@ effect on the next request, and a JWT can't be cancelled before it expires.
   which POSTs the token: email scanners open GET links and would use it up. Tokens are 24 hours,
   one per user and purpose, deleted when used
 - All email goes through `sendEmail()` in `lib/email.js` (Nodemailer with Gmail). Without
-  `EMAIL_USER` locally it prints the email to the server terminal instead
+  `EMAIL_USER` locally it prints the email to the server terminal instead. It uses port 587 with
+  `requireTLS`, not the `service: 'gmail'` shortcut: on Slav's machine port 465 is cut off
+  ("Connection closed unexpectedly", likely Norton's mail scanning) while 587 works (2026-10-27)
 - New session ID at every login; a password change deletes all of that user's sessions
 - Sign-up rejects the `admin` role. Unverified users can log in; the event-submit route checks
   `email_verified_at`

@@ -1,7 +1,8 @@
-import { Fragment, lazy, Suspense, useState } from "react";
+import { Fragment, lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
+import VerifyEmail from "./pages/VerifyEmail";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Faq from "./pages/Faq";
@@ -12,7 +13,8 @@ import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import ScrollToTop from "./components/layout/ScrollToTop";
 import NotFound from "./pages/NotFound";
-import { TEST_USER_TYPE, getData, getUserData } from "./data/navigationData";
+import { getData, getUserData } from "./data/navigationData";
+import { api } from "./lib/api";
 import { mockUsers } from "./data/manageUsersData";
 import { currentAdmin, getManagedEvents } from "./data/manageEventsData";
 import { currentOrganiser } from "./data/organiserEventsData";
@@ -78,8 +80,14 @@ function App() {
     pathname.startsWith(path)
   );
   const navigate = useNavigate();
-  const [isUser, setIsUser] = useState(true);
-  const [userType, setUserType] = useState(TEST_USER_TYPE);
+  // The logged-in account from /auth/me (publicUser on the backend), or null.
+  // Roles are real: each dashboard is tried by logging in as its demo account
+  const [account, setAccount] = useState(null);
+  // Nothing is shown until /auth/me answers, so a refresh on a dashboard page
+  // doesn't send a logged-in person to the home page first
+  const [accountLoaded, setAccountLoaded] = useState(false);
+  const isUser = Boolean(account);
+  const userType = account?.role;
   // The one events list; every page reads a view of it (see eventsData.js)
   const [events, setEvents] = useState(initialEvents);
   // Users and guests see an edit waiting for approval as its last approved
@@ -108,10 +116,26 @@ function App() {
   // Read on the Notifications page and counted on the user dashboard, so
   // marking one read shows everywhere
   const [notifications, setNotifications] = useState(initialNotifications);
-  // Changes made on Settings (display name, picture, email switch), kept per
-  // test role and laid over navigationData's mock user, so the sidebar and
-  // greeting show the new name straight away
+  // Changes made on Settings (display name, picture, email switch), laid
+  // over the account until Phase 2 saves them, so the sidebar and greeting
+  // show the new name straight away. Cleared on logout
   const [profileChanges, setProfileChanges] = useState({});
+
+  // A 401 means nobody is logged in. Any other failure (the API is down)
+  // also shows the public site, rather than a page that can't load
+  useEffect(() => {
+    api("/auth/me")
+      .then(({ data }) => setAccount(data))
+      .catch(() => setAccount(null))
+      .finally(() => setAccountLoaded(true));
+  }, []);
+
+  // After the email is verified, so the banners go without a reload
+  const refreshAccount = useCallback(() => {
+    api("/auth/me")
+      .then(({ data }) => setAccount(data))
+      .catch(() => setAccount(null));
+  }, []);
 
   // Sets read_at on the ones not read yet; a read notification keeps its time
   function markNotificationsRead(notificationIds) {
@@ -180,8 +204,18 @@ function App() {
     );
   }
   const data = getData();
-  const userTypes = data[0].role.map(({ type }) => type);
-  const selectedUser = { ...getUserData(userType), ...profileChanges[userType] };
+  // The role's sidebar links and default icon from navigationData, with the
+  // account's own name, email and picture
+  const selectedUser = {
+    ...getUserData(userType),
+    ...(account && {
+      user: account.username,
+      email: account.email,
+      emailNotifications: account.emailNotifications,
+      ...(account.avatar && { avatarUrl: account.avatar }),
+    }),
+    ...profileChanges,
+  };
   // The sidebar's badges: the same filters as the Home cards, so the two agree
   const navCounts = {
     unreadNotifications: notifications.filter(
@@ -197,10 +231,7 @@ function App() {
   const hasPublicEvents = organiserEvents.some(hasBeenPublic);
 
   function updateProfile(changes) {
-    setProfileChanges((current) => ({
-      ...current,
-      [userType]: { ...current[userType], ...changes },
-    }));
+    setProfileChanges((current) => ({ ...current, ...changes }));
   }
 
   // A password change is a password_changed notification, as the backend
@@ -221,11 +252,19 @@ function App() {
     ]);
   }
 
-  // Until the API exists: the account leaves Manage Users and you are
-  // signed out to the public home page
+  // Until Phase 2: the account leaves the mock Manage Users and you are
+  // logged out to the public home page, but the real account stays
   function deleteAccount() {
     setUsers((currentUsers) => currentUsers.filter((user) => user.email !== selectedUser.email));
-    setIsUser(false);
+    logout();
+  }
+
+  // If the request fails the server session may live on until it expires,
+  // but this tab is logged out either way
+  async function logout() {
+    await api("/auth/logout", { method: "POST" }).catch(() => {});
+    setAccount(null);
+    setProfileChanges({});
     navigate("/");
   }
 
@@ -353,25 +392,13 @@ function App() {
     );
   }
 
-  function switchUserType() {
-    const currentIndex = userTypes.indexOf(userType);
-    const nextIndex = (currentIndex + 1) % userTypes.length;
-
-    setUserType(userTypes[nextIndex]);
-  }
-
-  function toggleUserMode() {
-    const nextIsUser = !isUser;
-
-    setIsUser(nextIsUser);
-    navigate(nextIsUser ? "/dashboard/home" : "/");
-  }
+  if (!accountLoaded) return <PageLoading />;
 
   return (
     <div className="app">
       <ScrollToTop />
       {showNavbar && (
-        <Navbar isUser={isUser} onToggleUserMode={toggleUserMode} />
+        <Navbar isUser={isUser} onLogout={logout} />
       )}
       {/* @container: shared parts (filter bar, event grid) size themselves by
           the space they have, here or in the dashboard's content box */}
@@ -384,7 +411,8 @@ function App() {
             path="/"
             element={isUser ? <Navigate to="/dashboard/home" replace /> : <Home events={publicEvents} />}
           />
-          <Route path="/auth/:pathname" element={<Auth />} />
+          <Route path="/auth/verify-email" element={<VerifyEmail isUser={isUser} onVerified={refreshAccount} />} />
+          <Route path="/auth/:pathname" element={<Auth isUser={isUser} onSignedIn={setAccount} />} />
           <Route path="/about" element={<About events={publicEvents} isUser={isUser} />} />
           <Route path="/contact" element={<Contact onSendMessage={sendContactMessage} />} />
           <Route path="/faq" element={<Faq />} />
@@ -401,8 +429,7 @@ function App() {
                     selectedUser={selectedUser}
                     secondaryNav={data[1].secondaryNav}
                     navCounts={navCounts}
-                    onLogout={toggleUserMode}
-                    onSwitchUserType={switchUserType}
+                    onLogout={logout}
                   />
                 </Suspense>
               ) : (
@@ -411,7 +438,7 @@ function App() {
             }
           >
             <Route index element={<Navigate to="home" replace />} />
-            <Route path="home" element={<DashboardHome selectedUser={selectedUser} users={users} events={userType === "user" ? audienceEvents : events} organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} interestIds={interestIds} contactMessages={contactMessages} notifications={notifications} />} />
+            <Route path="home" element={<DashboardHome selectedUser={selectedUser} account={account} users={users} events={userType === "user" ? audienceEvents : events} organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} interestIds={interestIds} contactMessages={contactMessages} notifications={notifications} />} />
             <Route element={<RoleOnly allow="user" userType={userType} />}>
               <Route path="explore-events" element={<ExploreEvents inDashboard events={publicEvents} selectedUser={selectedUser} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
               <Route path="my-favourites" element={<MyFavourites events={audienceEvents} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
@@ -429,13 +456,14 @@ function App() {
               <Route path="faq" element={<Faq inDashboard />} />
               <Route path="contact" element={<Contact inDashboard account={{ name: selectedUser.user, email: selectedUser.email }} onSendMessage={sendContactMessage} />} />
             </Route>
-            {/* key: a new test role starts the forms from that role's details */}
+            {/* key: another account starts the forms from its own details */}
             <Route
               path="settings"
               element={
                 <Settings
-                  key={userType}
+                  key={account?.userId}
                   selectedUser={selectedUser}
+                  account={account}
                   hasPublicEvents={hasPublicEvents}
                   onSaveProfile={updateProfile}
                   onPasswordChanged={addPasswordChangedNotification}

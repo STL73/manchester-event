@@ -40,7 +40,6 @@ export default function Dashboard({
   secondaryNav,
   navCounts,
   onLogout,
-  onSwitchUserType,
 }) {
   const isNarrow = useSyncExternalStore(subscribeToNarrow, getIsNarrow);
   // Wide screens: the full sidebar or the icon rail, remembered
@@ -106,7 +105,6 @@ export default function Dashboard({
         onCloseDrawer={closeDrawer}
         closeButtonRef={closeButtonRef}
         onLogout={onLogout}
-        onSwitchUserType={onSwitchUserType}
       />
       {isDrawerOpen && (
         <button

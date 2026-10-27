@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import Button from "../components/UI/Button";
 import FormField from "../components/UI/FormField";
 import StatusMessage from "../components/UI/StatusMessage";
+import { api } from "../lib/api";
 import {
   PASSWORD_MIN_LENGTH,
   authErrors,
@@ -48,24 +49,49 @@ function readValues(form) {
   );
 }
 
-function AuthForm({ page }) {
-  const { title, subtitle, image, caption, fields, submit, switchPrompt, success } = page;
-  const [errors, setErrors] = useState({});
-  const [submitted, setSubmitted] = useState(false);
+// Shows each field's error and moves focus to the first. Returns whether there were any
+function showErrors(form, errors, setErrors) {
+  setErrors(errors);
+  const [firstInvalid] = Object.keys(errors);
+  if (!firstInvalid) return false;
 
-  function handleSubmit(event) {
+  // A radio group comes back as a list with no focus() of its own
+  const control = form.elements[firstInvalid];
+  (control instanceof RadioNodeList ? control[0] : control).focus();
+  return true;
+}
+
+// The API names a field "body.email"; the form calls it "email"
+function fieldErrors(details = []) {
+  return Object.fromEntries(details.map(({ path, message }) => [path.replace("body.", ""), message]));
+}
+
+function AuthForm({ page, onSignedIn }) {
+  const { title, subtitle, image, caption, fields, submit, switchPrompt, endpoint } = page;
+  const navigate = useNavigate();
+  const [errors, setErrors] = useState({});
+  // A problem that isn't one field's: a wrong email or password, no connection
+  const [formError, setFormError] = useState("");
+  const [sending, setSending] = useState(false);
+
+  async function handleSubmit(event) {
     event.preventDefault();
     const form = event.currentTarget;
-    const nextErrors = validate(readValues(form));
-    const [firstInvalid] = Object.keys(nextErrors);
+    const values = readValues(form);
+    setFormError("");
+    if (showErrors(form, validate(values), setErrors)) return;
 
-    setErrors(nextErrors);
-    setSubmitted(!firstInvalid);
-    if (!firstInvalid) return;
-
-    // A radio group comes back as a list with no focus() of its own
-    const control = form.elements[firstInvalid];
-    (control instanceof RadioNodeList ? control[0] : control).focus();
+    // confirmPassword is only checked here; the API doesn't take it
+    const body = Object.fromEntries(Object.entries(values).filter(([name]) => name !== "confirmPassword"));
+    setSending(true);
+    try {
+      const { data } = await api(endpoint, { method: "POST", body });
+      onSignedIn(data);
+      navigate("/dashboard/home", { replace: true });
+    } catch (error) {
+      setSending(false);
+      if (!showErrors(form, fieldErrors(error.details), setErrors)) setFormError(error.message);
+    }
   }
 
   function renderField({ id, ...field }) {
@@ -84,9 +110,7 @@ function AuthForm({ page }) {
 
         {/* No error summary: on a form this short, each field shows its own
             error and focus moves to the first one */}
-        {submitted && (
-          <StatusMessage>{success}</StatusMessage>
-        )}
+        {formError && <StatusMessage variant="error">{formError}</StatusMessage>}
 
         {fields.map((row) =>
           Array.isArray(row) ? (
@@ -98,7 +122,7 @@ function AuthForm({ page }) {
           ),
         )}
 
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" disabled={sending}>
           <submit.icon aria-hidden="true" />
           {submit.label}
         </Button>
@@ -124,9 +148,12 @@ function AuthForm({ page }) {
   );
 }
 
-export default function Auth() {
+export default function Auth({ isUser, onSignedIn }) {
   const { pathname } = useParams();
   const page = authPageData[pathname];
+
+  // Already logged in: nothing to do here
+  if (isUser) return <Navigate to="/dashboard/home" replace />;
 
   // Old or mistyped links (/auth/sign-in, /auth/signup...) land on the login form
   if (!page) return <Navigate to="/auth/login" replace />;
@@ -138,7 +165,7 @@ export default function Auth() {
           where the photo is hidden, get it too */}
       <div className="honeycomb-texture auth-texture" aria-hidden="true" />
       {/* key: switching between login and sign-up starts a fresh form */}
-      <AuthForm key={pathname} page={page} />
+      <AuthForm key={pathname} page={page} onSignedIn={onSignedIn} />
     </section>
   );
 }

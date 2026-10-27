@@ -1,4 +1,4 @@
-import { LogIn, UserPlus } from "lucide-react";
+import { LogIn, MailCheck, MailX, UserPlus } from "lucide-react";
 
 // Resized copies for this page; the events keep their own full-size files
 import mediacityWaterfrontNight from "../images/site/mediacity-waterfront-night.webp";
@@ -39,8 +39,7 @@ export const authPageData = {
     ],
     submit: { label: "Log In", icon: LogIn },
     switchPrompt: { text: "Don't have an account?", label: "Sign Up", to: "/auth/sign-up" },
-    // Shown on a valid submit until the backend handlers exist
-    success: "Your details look right. Logging in will work once the backend is connected.",
+    endpoint: "/auth/login",
   },
   "sign-up": {
     title: "Create your account",
@@ -52,7 +51,7 @@ export const authPageData = {
     },
     // Hints sit on the label row, so they stay short. maxLength already
     // enforces the display name limit, and the verification email is
-    // explained in the success message instead
+    // explained by the banner on the dashboard, where sign-up lands
     fields: [
       [
         {
@@ -98,8 +97,7 @@ export const authPageData = {
     ],
     submit: { label: "Create Account", icon: UserPlus },
     switchPrompt: { text: "Already have an account?", label: "Log In", to: "/auth/login" },
-    success:
-      "Your details look right. Once the backend is connected, we'll email you a link to verify your address.",
+    endpoint: "/auth/sign-up",
   },
 };
 
@@ -112,4 +110,27 @@ export const authErrors = {
   passwordTooShort: "This password is too short.",
   passwordsDiffer: "The passwords don't match.",
   roleRequired: "Choose an account type.",
+};
+
+// /auth/verify-email, opened from the link in the verification email
+export const verifyEmailPage = {
+  checking: "Checking your link…",
+  done: {
+    icon: MailCheck,
+    title: "Email confirmed",
+    text: "Thanks. Your email address is verified.",
+  },
+  failed: {
+    icon: MailX,
+    title: "This link didn't work",
+    // The server's message says why (expired or already used); this is for a link with no token
+    text: "This link is incomplete. Open the newest email we sent, or send a new link from your dashboard.",
+  },
+  // After the reason the link failed
+  nextStep: {
+    signedIn: "You can send a new link from your dashboard.",
+    signedOut: "Log in to send a new link.",
+  },
+  toDashboard: "Go to your dashboard",
+  toLogin: "Log In",
 };

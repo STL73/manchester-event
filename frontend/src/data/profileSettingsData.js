@@ -137,12 +137,3 @@ export const passwordChangedNotification = {
 export const accountSummary = {
   memberSince: "Member since",
 };
-
-// Mock of the users table columns not held in navigationData
-// (email_verified_at, suspended_until, suspension_reason as in the schema)
-export const accountDetails = {
-  createdAt: "2026-03-14T10:22:00",
-  emailVerifiedAt: "2026-03-14T10:31:00",
-  suspendedUntil: null,
-  suspensionReason: null,
-};
