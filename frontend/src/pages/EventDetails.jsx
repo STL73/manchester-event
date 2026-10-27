@@ -7,6 +7,9 @@ import { organiserStatusLabels } from "../data/organiserEventsData";
 import { downloadEventIcs } from "../lib/calendar";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import EmptyState from "../components/UI/EmptyState";
+import PageLoading from "../components/UI/PageLoading";
+import { toEvent } from "../lib/publicEvents";
+import { useApi } from "../lib/useApi";
 
 const dayFormatter = new Intl.DateTimeFormat("en-GB", {
   weekday: "long",
@@ -148,7 +151,6 @@ function EventDetailsBody({ event, TitleTag, titleId, role, favouriteIds, onTogg
           className="event-details-image"
           src={event.image}
           alt=""
-          style={{ objectPosition: event.imagePosition }}
         />
       </div>
 
@@ -233,8 +235,10 @@ function EventDetailsBody({ event, TitleTag, titleId, role, favouriteIds, onTogg
   );
 }
 
-// `events` is the master list; canViewEvent decides what this viewer may
-// open, so a typed-in id of someone's draft reads as not found. `role` is
+// Guests and users read the event from the API (GET /events/:id), which only
+// opens what has been public, so a typed-in id of someone's draft reads as not
+// found. Organisers and admins still read `events`, the mock list, through
+// canViewEvent until their pages move to the API (Phases 5 and 7). `role` is
 // "guest" when signed out
 export default function EventDetails({
   events,
@@ -247,10 +251,19 @@ export default function EventDetails({
   const { eventId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const found = events.find((item) => String(item.eventId) === eventId);
-  const event = found && canViewEvent(found, role, organiserId) ? found : null;
+  const fromApi = role === "guest" || role === "user";
+  const request = useApi(fromApi ? `/events/${encodeURIComponent(eventId)}` : null);
+  const found = fromApi
+    ? request.payload && String(request.payload.data.eventId) === eventId && toEvent(request.payload.data)
+    : events.find((item) => String(item.eventId) === eventId);
+  const event = found && (fromApi || canViewEvent(found, role, organiserId)) ? found : null;
+  // A 404 or 400 means there is no such event to show; anything else is a
+  // fault worth trying again
+  const failed = request.error && ![400, 404].includes(request.error.status);
+  const waiting = fromApi && !event && !request.error;
   const { dashboardTitle, titleIcon: TitleIcon, goBack, allEvents } = eventDetailsPage;
   const bodyProps = { role, favouriteIds, onToggleFavourite };
+  const notFoundText = failed ? eventDetailsPage.loadError : eventDetailsPage.notFound;
 
   function handleGoBack() {
     // "default" means this is the first page in the tab's history
@@ -279,18 +292,22 @@ export default function EventDetails({
 
           {event ? (
             <EventDetailsBody event={event} TitleTag="h2" titleId="event-details-title" {...bodyProps} />
+          ) : waiting ? (
+            <PageLoading />
           ) : (
-            <EmptyState icon={TitleIcon} text={eventDetailsPage.notFound} />
+            <EmptyState icon={TitleIcon} text={notFoundText} />
           )}
         </section>
       </div>
     );
   }
 
+  if (waiting) return <PageLoading />;
+
   if (!event) {
     return (
       <section className="section-content">
-        <h1 className="heading-section section-title">Event not found</h1>
+        <h1 className="heading-section section-title">{failed ? eventDetailsPage.loadError : "Event not found"}</h1>
         <Button to="/events" variant="primary" size="md">
           Back to Events
         </Button>

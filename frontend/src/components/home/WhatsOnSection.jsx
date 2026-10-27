@@ -4,24 +4,24 @@ import Button from "../UI/Button";
 import EventCard from "../events/EventCard";
 import { homePageData } from "../../data/homePageData";
 import { whenOptions } from "../../data/exploreEventsData";
-import { bySoonest, matchesWhen } from "../../lib/eventDates";
+import { eventsPath, toEvent } from "../../lib/publicEvents";
+import { useApi } from "../../lib/useApi";
 
 function explorePath(when) {
   return when ? `/events?when=${when}` : "/events";
 }
 
-// `events` are upcoming only. Opens on the soonest range that has anything
-// in it, so the first thing a visitor sees isn't an empty list
-export default function WhatsOnSection({ events, now }) {
+// `counts` is GET /events/summary: the total and one count per date range.
+// Opens on the soonest range that has anything in it, so the first thing a
+// visitor sees isn't an empty list
+export default function WhatsOnSection({ counts }) {
   const { whatsOn } = homePageData;
-  const [when, setWhen] = useState(
-    () =>
-      whenOptions.find(({ id }) => id && events.some((event) => matchesWhen(event, id, now)))
-        ?.id ?? "",
-  );
+  const [chosen, setChosen] = useState(null);
+  const when = chosen ?? whenOptions.find(({ id }) => id && counts.when[id] > 0)?.id ?? "";
+  const total = when ? counts.when[when] : counts.total;
 
-  const matching = events.filter((event) => matchesWhen(event, when, now)).sort(bySoonest);
-  const shown = matching.slice(0, whatsOn.limit);
+  const { payload, error, loading } = useApi(eventsPath({ when, limit: whatsOn.limit }));
+  const shown = payload?.data.map(toEvent) ?? [];
 
   return (
     <section className="home-section" aria-labelledby="whats-on-title">
@@ -29,9 +29,9 @@ export default function WhatsOnSection({ events, now }) {
         <h2 className="heading-section" id="whats-on-title">
           {whatsOn.title}
         </h2>
-        {matching.length > whatsOn.limit && (
+        {total > whatsOn.limit && (
           <Button to={explorePath(when)} variant="link" size="sm">
-            {whatsOn.seeAll(matching.length)}
+            {whatsOn.seeAll(total)}
             <ArrowRight aria-hidden="true" />
           </Button>
         )}
@@ -39,21 +39,22 @@ export default function WhatsOnSection({ events, now }) {
 
       <div className="events-when" role="group" aria-label="When">
         {whenOptions.map(({ id, label }) => (
-          <button className={`pill events-when-option ${when === id ? "is-active" : ""}`} type="button" aria-pressed={when === id} onClick={() => setWhen(id)} key={id || "any"}>
+          <button className={`pill events-when-option ${when === id ? "is-active" : ""}`} type="button" aria-pressed={when === id} onClick={() => setChosen(id)} key={id || "any"}>
             {label}
           </button>
         ))}
       </div>
 
-      {shown.length === 0 ? (
+      {/* The last cards stay while the next range loads, so the row doesn't jump */}
+      {error || (payload && shown.length === 0) ? (
         <div className="events-empty-state">
-          <p className="content-p">{whatsOn.empty}</p>
+          <p className="content-p">{error ? whatsOn.loadError : whatsOn.empty}</p>
           <Button to="/events" variant="link" size="sm">
             {whatsOn.emptyLink}
           </Button>
         </div>
       ) : (
-        <div className="events-grid events-grid-three">
+        <div className="events-grid events-grid-three" aria-busy={loading}>
           {shown.map((event) => (
             <EventCard key={event.eventId} event={event} />
           ))}

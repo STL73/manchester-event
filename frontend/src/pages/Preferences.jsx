@@ -5,7 +5,8 @@ import Button from "../components/UI/Button";
 import StatusMessage from "../components/UI/StatusMessage";
 import CategoryHoneycomb from "../components/dashboard/CategoryHoneycomb";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
-import { bySoonest, isUpcoming } from "../lib/eventDates";
+import { eventsPath, toEvent } from "../lib/publicEvents";
+import { useApi } from "../lib/useApi";
 import {
   preferenceCategories,
   preferencesForm,
@@ -16,12 +17,18 @@ import {
 const dayFormatter = new Intl.DateTimeFormat("en-GB", { day: "numeric" });
 const monthFormatter = new Intl.DateTimeFormat("en-GB", { month: "short" });
 
+// An event has one category, so the events matching several are the sum of
+// each one's count
+function countFor(categoryIds, counts) {
+  return categoryIds.reduce((sum, id) => sum + (counts[id] ?? 0), 0);
+}
+
 // "2 interests · 14 upcoming events match them": what is saved, so it only
 // changes on Save
-function PreferencesSummary({ upcomingEvents, interestIds }) {
+function PreferencesSummary({ counts, interestIds }) {
   if (interestIds.length === 0) return preferencesSummary.none;
 
-  const matching = upcomingEvents.filter((event) => interestIds.includes(event.categoryId)).length;
+  const matching = countFor(interestIds, counts);
   return (
     <>
       <strong>
@@ -39,23 +46,27 @@ function sameIds(a, b) {
 }
 
 // Saved interests live in App, so the user dashboard counts the same ones
-export default function Preferences({ events, interestIds, onSaveInterests }) {
+export default function Preferences({ interestIds, onSaveInterests }) {
   const [selectedCategoryIds, setSelectedCategoryIds] = useState(interestIds);
   const [justSaved, setJustSaved] = useState(false);
   const [comingUpOpen, setComingUpOpen] = useState(false);
   const SubmitIcon = preferencesForm.submit.icon;
 
-  const now = new Date();
-  const upcomingEvents = events.filter((event) => isUpcoming(event, now));
+  // Upcoming events per category (GET /categories), keyed by slug
+  const categories = useApi("/categories");
   const countByCategory = Object.fromEntries(
-    preferenceCategories.map((category) => [
-      category.id,
-      upcomingEvents.filter((event) => event.categoryId === category.id).length,
-    ]),
+    (categories.payload?.data ?? []).map(({ slug, upcomingEvents }) => [slug, upcomingEvents]),
   );
-  const matchingEvents = upcomingEvents
-    .filter((event) => selectedCategoryIds.includes(event.categoryId))
-    .sort(bySoonest);
+  const matchingCount = countFor(selectedCategoryIds, countByCategory);
+  // The next few in the picked categories, soonest first. Sorted, so picking
+  // the same ones in another order asks for the same thing
+  const comingUp = useApi(
+    selectedCategoryIds.length > 0
+      ? eventsPath({ category: [...selectedCategoryIds].sort(), limit: yourPicks.shownCount })
+      : null,
+  );
+  const matchingEvents =
+    selectedCategoryIds.length > 0 ? (comingUp.payload?.data.map(toEvent) ?? []) : [];
   const unchanged = sameIds(selectedCategoryIds, interestIds);
   const pickedCount = selectedCategoryIds.length;
 
@@ -84,7 +95,7 @@ export default function Preferences({ events, interestIds, onSaveInterests }) {
           id="my-preferences-title"
           icon={Settings2}
           title="My Preferences"
-          summary={<PreferencesSummary upcomingEvents={upcomingEvents} interestIds={interestIds} />}
+          summary={<PreferencesSummary counts={countByCategory} interestIds={interestIds} />}
         />
         <form className="preferences-layout" onSubmit={handleSubmit}>
           <div className="panel contact-form-container preferences-picker">
@@ -119,7 +130,7 @@ export default function Preferences({ events, interestIds, onSaveInterests }) {
                     <strong>{pickedCount}</strong>{" "}
                     {pickedCount === 1 ? preferencesSummary.interest : preferencesSummary.interests}
                     <span aria-hidden="true"> · </span>
-                    <strong>{matchingEvents.length}</strong> {yourPicks.upcoming}
+                    <strong>{matchingCount}</strong> {yourPicks.upcoming}
                   </>
                 )}
               </p>
@@ -149,13 +160,14 @@ export default function Preferences({ events, interestIds, onSaveInterests }) {
 
             <div className="preferences-coming" id="preferences-coming-up">
               <h3 className="group-label preferences-coming-title">{yourPicks.comingUp}</h3>
-              {matchingEvents.length === 0 ? (
+              {/* Counted by category, so "none" never shows while the list loads */}
+              {pickedCount === 0 || (categories.payload && matchingCount === 0) ? (
                 <p className="preferences-coming-empty">
                   {pickedCount === 0 ? yourPicks.pickFirst : yourPicks.noneComing}
                 </p>
               ) : (
                 <ul className="preferences-coming-list">
-                  {matchingEvents.slice(0, yourPicks.shownCount).map((event) => {
+                  {matchingEvents.map((event) => {
                     const start = new Date(event.startDatetime);
                     return (
                       <li key={event.eventId}>

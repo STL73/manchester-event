@@ -1,25 +1,28 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import Hero from "../components/home/Hero";
 import WhatsOnSection from "../components/home/WhatsOnSection";
 import Button from "../components/UI/Button";
 import { homePageData } from "../data/homePageData";
 import { eventCategories, eventLocations } from "../data/eventsData";
-import { isUpcoming } from "../lib/eventDates";
+import { useApi } from "../lib/useApi";
+
+// Counts to fall back on if the summary can't be loaded: the sections still
+// show, with their links into Explore Events
+const noCounts = { total: 0, when: {}, areas: {} };
 
 // The shop window: a taste of what's on, and every section links into
 // Explore Events with a filter already set
-export default function Home({ events }) {
+export default function Home() {
   const { areas, categories, audiences } = homePageData;
-  // Fixed when the page opens, as on Explore Events
-  const [now] = useState(() => new Date());
-  const upcoming = events.filter((event) => isUpcoming(event, now));
+  const summary = useApi("/events/summary");
+  const counts = summary.payload?.data ?? (summary.error ? noCounts : null);
 
   return (
     <div className="page home-page">
       <Hero />
 
-      <WhatsOnSection events={upcoming} now={now} />
+      {/* Waits for the counts, so it opens on the right date range */}
+      {counts && <WhatsOnSection counts={counts} />}
 
       <section className="home-section" aria-labelledby="areas-title">
         <h2 className="heading-section" id="areas-title">
@@ -27,7 +30,7 @@ export default function Home({ events }) {
         </h2>
         <ul className="area-tiles">
           {areas.tiles.map(({ id, image, position }) => {
-            const total = upcoming.filter((event) => event.locationId === id).length;
+            const total = counts?.areas[id] ?? 0;
 
             return (
               <li className="area-tile" key={id}>
@@ -42,7 +45,8 @@ export default function Home({ events }) {
                   <span className="area-tile-name">
                     {eventLocations.find((location) => location.id === id).name}
                   </span>
-                  <span className="area-tile-count">{areas.count(total)}</span>
+                  {/* No count rather than a wrong "Nothing listed" if it failed */}
+                  {summary.payload && <span className="area-tile-count">{areas.count(total)}</span>}
                 </Link>
               </li>
             );

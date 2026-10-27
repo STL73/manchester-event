@@ -72,7 +72,6 @@ export default function EventCard({
           src={event.image}
           alt=""
           loading={preview ? "eager" : "lazy"}
-          style={{ objectPosition: event.imagePosition }}
         />
       </div>
       <div className="event-card-content">

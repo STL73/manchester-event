@@ -1,14 +1,16 @@
 import { CalendarPlus, Heart, Search } from "lucide-react";
 
-import stageConfetti from "../images/events/stage-confetti.jpg";
-import manchesterFireworksNight from "../images/events/manchester-fireworks-night.jpg";
-import arenaBlueLasers from "../images/events/arena-blue-lasers.jpg";
-import colourPowderFestival from "../images/events/colour-powder-festival.jpg";
 import townHallClockTower from "../images/site/town-hall-clock-tower.webp";
 import northernQuarterMural from "../images/site/northern-quarter-mural.webp";
 import mediacityDusk from "../images/site/mediacity-dusk.webp";
 import salfordQuaysDay from "../images/site/salford-quays-day.webp";
 import heatonParkTemple from "../images/site/heaton-park-temple.webp";
+
+// Served from public/ so the database can store the same paths
+const stageConfetti = "/images/events/stage-confetti.jpg";
+const manchesterFireworksNight = "/images/events/manchester-fireworks-night.jpg";
+const arenaBlueLasers = "/images/events/arena-blue-lasers.jpg";
+const colourPowderFestival = "/images/events/colour-powder-festival.jpg";
 
 // One job: show what's on and send visitors into Explore Events with a filter
 // already set. Home never holds the full list; who runs the site is on About.
@@ -35,6 +37,7 @@ export const homePageData = {
     limit: 3,
     seeAll: (total) => `See all ${total}`,
     empty: "Nothing listed for these dates yet.",
+    loadError: "Events couldn't be loaded just now.",
     emptyLink: "Browse every upcoming event",
   },
   areas: {

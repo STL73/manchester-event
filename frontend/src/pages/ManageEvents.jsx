@@ -141,7 +141,7 @@ function EventReview({ event, state, events, decision, onDecision, reason, onRea
 
   return (
     <div className="admin-review">
-      <img className="admin-review-photo" src={event.image} alt="" style={{ objectPosition: event.imagePosition }} />
+      <img className="admin-review-photo" src={event.image} alt="" />
       <div className="flex flex-col gap-2">
         <div className="admin-review-badges">
           <span className={`badge status-${state}`}>{statusLabels[state] ?? state}</span>
@@ -466,7 +466,7 @@ export default function ManageEvents({ events, onUpdateEventStatus }) {
                 {pageRows.map(({ event, state }) => (
                   <li className={`list-row admin-row ${openId === event.eventId ? "is-open" : ""}`} key={event.eventId}>
                     <div className="admin-row-main">
-                      <img className="admin-row-thumb" src={event.image} alt="" loading="lazy" style={{ objectPosition: event.imagePosition }} />
+                      <img className="admin-row-thumb" src={event.image} alt="" loading="lazy" />
                       <div className="admin-row-text">
                         {/* The whole row opens the panel (see .admin-row-open) */}
                         <button className="admin-row-open" type="button" onClick={() => openPanel(event.eventId)}>
