@@ -12,8 +12,9 @@ behaviour. Comments here that cite `*.php` files or PHP functions mark parity th
 The migration is half done, and **the two halves are not connected yet**:
 
 - `frontend/` is a near-complete React port that runs entirely on in-memory mock data
-- `backend/` is an Express + Drizzle skeleton: routers return placeholder strings. The full schema
-  in `src/db/schema/app.js` is applied to Neon and seeded
+- `backend/` is Express + Drizzle. Auth is real (sign-up, login, sessions, email verification;
+  Phase 1, 2026-10-26); the users and events routers still return placeholder strings. The full
+  schema in `src/db/schema/` is applied to Neon and seeded
 
 The plumbing is there (`frontend/src/lib/api.js`, a Vite proxy for `/api`), but no page calls the
 API yet. Pages are wired phase by phase, so don't assume an endpoint exists because a page shows the
@@ -101,7 +102,7 @@ npm start
 npx eslint .               # no lint script defined
 npx drizzle-kit generate   # schema -> SQL in drizzle/
 npx drizzle-kit migrate    # apply to DB_URL
-npm run db:seed            # 19 categories + demo admin (SEED_ADMIN_* in .env)
+npm run db:seed            # 19 categories + demo admin, user and organiser (SEED_* in .env)
 npm test                   # Vitest, against the Neon test branch (TEST_DB_URL)
 ```
 
@@ -116,6 +117,9 @@ The frontend has no test runner yet.
 | `backend/.env` | `ARCJET_KEY`, `ARCJET_ENV` | Arcjet; the server won't start without the key. `ARCJET_ENV=development` locally only |
 | `backend/.env` | `TEST_DB_URL` | The Neon `test` branch. `npm test` refuses to run without it |
 | `backend/.env` | `SEED_ADMIN_USERNAME`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` | Demo admin for `npm run db:seed` |
+| `backend/.env` | `SEED_USER_EMAIL`, `SEED_ORGANISER_EMAIL`, `SEED_DEMO_PASSWORD` | Optional demo user and organiser for the seed |
+| `backend/.env` | `EMAIL_USER`, `EMAIL_APP_PASSWORD`, `EMAIL_FROM_NAME` | Gmail sender (an app password). Unset locally = emails print to the terminal; required in production |
+| `backend/.env` | `APP_URL` | The frontend's address for links in emails; defaults to `http://localhost:5173`, required in production |
 | `frontend/.env` | `VITE_NEON_AUTH_URL`, `VITE_NEON_DATA_API_URL` | Defined but not yet read by any code |
 
 All `.env*` files are gitignored.

@@ -20,10 +20,13 @@ backend/
 │   ├── app.js              the Express app: middleware, routers, error handling
 │   ├── server.js           imports app and calls listen
 │   ├── config/
-│   │   ├── env.js          re-exports env vars (PORT, NODE_ENV, DB_URL, ARCJET_KEY)
+│   │   ├── env.js          re-exports env vars (PORT, NODE_ENV, DB_URL, ARCJET_KEY, EMAIL_*, APP_URL)
 │   │   └── arcjet.js       the one Arcjet client
-│   ├── lib/errors.js       AppError
-│   ├── middleware/         errorHandler (+ notFound), validate, security
+│   ├── constants/          fixed names (logActions.js: system_logs actions)
+│   ├── lib/                AppError, tokens, sessions, authTokens, email + authEmails,
+│   │                       systemLogs (logAction), users (publicUser)
+│   ├── middleware/         errorHandler (+ notFound), validate, security, auth
+│   ├── validation/         Zod schemas per resource (auth.js)
 │   ├── db/
 │   │   ├── index.js        exports `db` (Drizzle client)
 │   │   └── schema/
@@ -53,7 +56,9 @@ backend/
 ## Seed
 
 `npm run db:seed` inserts the 19 categories (slugs = frontend `eventCategories` ids) and the demo
-admin from `SEED_ADMIN_USERNAME`, `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` in `.env`. Passwords
+admin from `SEED_ADMIN_USERNAME`, `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` in `.env`, plus a
+verified Demo User and Demo Organiser when `SEED_USER_EMAIL`, `SEED_ORGANISER_EMAIL` and
+`SEED_DEMO_PASSWORD` are set (skipped otherwise). Passwords
 are hashed with `bcryptjs` (cost 12). It skips rows that already exist, so it's safe to re-run.
 
 ## Migrations
