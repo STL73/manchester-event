@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Circle, CircleCheck, CircleX } from "lucide-react";
 import Button from "../UI/Button";
+import FieldError from "../UI/FieldError";
 import PasswordInput from "../UI/PasswordInput";
+import StatusMessage from "../UI/StatusMessage";
 import { passwordForm } from "../../data/profileSettingsData";
 
 const emptyPasswords = { current: "", next: "", confirm: "" };
@@ -21,11 +23,14 @@ function PasswordRule({ id, met, touched, children }) {
 }
 
 // Change password: the button only works once the current password is in and
-// the new one is long enough and typed twice the same. Until the API exists
-// the current password isn't checked against anything
+// the new one is long enough and typed twice the same. The server checks the
+// current one; a wrong one is shown under its field
 export default function PasswordSettings({ email, onChange }) {
   const [passwords, setPasswords] = useState(emptyPasswords);
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  // { current } for a wrong current password, { form } for anything else
+  const [error, setError] = useState({});
   // Bumped after a change so the fields start again hidden, not left showing
   const [round, setRound] = useState(0);
   const { current, next, confirm } = passwords;
@@ -38,15 +43,25 @@ export default function PasswordSettings({ email, onChange }) {
     const { name, value } = event.target;
     setPasswords((currentPasswords) => ({ ...currentPasswords, [name]: value }));
     setSaved(false);
+    setError({});
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    if (!ready) return;
-    onChange();
-    setPasswords(emptyPasswords);
-    setRound((currentRound) => currentRound + 1);
-    setSaved(true);
+    if (!ready || saving) return;
+    setSaving(true);
+    setError({});
+    try {
+      await onChange({ currentPassword: current, newPassword: next });
+      setPasswords(emptyPasswords);
+      setRound((currentRound) => currentRound + 1);
+      setSaved(true);
+    } catch (saveError) {
+      const wrongCurrent = saveError.details?.find(({ path }) => path === "body.currentPassword");
+      setError(wrongCurrent ? { current: wrongCurrent.message } : { form: saveError.message });
+    } finally {
+      setSaving(false);
+    }
   }
 
   const shared = { showLabel: passwordForm.show, hideLabel: passwordForm.hide, onChange: update };
@@ -58,7 +73,16 @@ export default function PasswordSettings({ email, onChange }) {
 
       <div className="field">
         <label htmlFor="current-password">{passwordForm.current}</label>
-        <PasswordInput {...shared} id="current-password" name="current" autoComplete="current-password" value={current} />
+        <PasswordInput
+          {...shared}
+          id="current-password"
+          name="current"
+          autoComplete="current-password"
+          value={current}
+          aria-invalid={error.current ? true : undefined}
+          aria-describedby={error.current ? "current-password-error" : undefined}
+        />
+        {error.current && <FieldError id="current-password-error">{error.current}</FieldError>}
       </div>
 
       <div className="settings-two">
@@ -94,6 +118,12 @@ export default function PasswordSettings({ email, onChange }) {
         </div>
       </div>
 
+      {error.form && (
+        <StatusMessage variant="error" className="callout-compact">
+          {error.form}
+        </StatusMessage>
+      )}
+
       <div className="settings-foot">
         {saved && (
           <p className="settings-saved" role="status">
@@ -101,7 +131,7 @@ export default function PasswordSettings({ email, onChange }) {
             {passwordForm.saved}
           </p>
         )}
-        <Button type="submit" variant="primary" size="sm" disabled={!ready}>
+        <Button type="submit" variant="primary" size="sm" disabled={!ready || saving}>
           <SubmitIcon aria-hidden="true" />
           {passwordForm.submit.label}
         </Button>

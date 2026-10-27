@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Button from "../components/UI/Button";
 import FormField from "../components/UI/FormField";
 import StatusMessage from "../components/UI/StatusMessage";
@@ -13,24 +13,32 @@ import {
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Errors in the order the fields appear, so the first one gets focus.
-// Login only checks that both fields are filled in: telling someone the
-// password rules on a login form would hint at what a valid password looks like.
+// Errors in the order the fields appear, so the first one gets focus. Each
+// field is checked only on the pages that have it. Login only checks that
+// the password is filled in: telling someone the password rules on a login
+// form would hint at what a valid password looks like.
 function validate(values) {
-  const isSignUp = "confirmPassword" in values;
+  // Sign-up and reset choose a password; they have a confirmation field
+  const isNewPassword = "confirmPassword" in values;
+  // Sign-up is told by its name field: an unchosen role isn't in the form data at all
+  const isSignUp = "username" in values;
   const errors = {};
 
   if (isSignUp && !values.username) errors.username = authErrors.usernameRequired;
 
-  if (!values.email) errors.email = authErrors.emailRequired;
-  else if (!EMAIL_PATTERN.test(values.email)) errors.email = authErrors.emailInvalid;
-
-  if (!values.password) errors.password = authErrors.passwordRequired;
-  else if (isSignUp && values.password.length < PASSWORD_MIN_LENGTH) {
-    errors.password = authErrors.passwordTooShort;
+  if ("email" in values) {
+    if (!values.email) errors.email = authErrors.emailRequired;
+    else if (!EMAIL_PATTERN.test(values.email)) errors.email = authErrors.emailInvalid;
   }
 
-  if (isSignUp && values.confirmPassword !== values.password) {
+  if ("password" in values) {
+    if (!values.password) errors.password = authErrors.passwordRequired;
+    else if (isNewPassword && values.password.length < PASSWORD_MIN_LENGTH) {
+      errors.password = authErrors.passwordTooShort;
+    }
+  }
+
+  if (isNewPassword && values.confirmPassword !== values.password) {
     errors.confirmPassword = authErrors.passwordsDiffer;
   }
 
@@ -66,28 +74,44 @@ function fieldErrors(details = []) {
   return Object.fromEntries(details.map(({ path, message }) => [path.replace("body.", ""), message]));
 }
 
-function AuthForm({ page, onSignedIn }) {
-  const { title, subtitle, image, caption, fields, submit, switchPrompt, endpoint } = page;
+function AuthForm({ page, token, onAccountChange }) {
+  const { title, subtitle, image, caption, fields, forgotLink, submit, switchPrompt, endpoint } = page;
   const navigate = useNavigate();
+  // A message passed on from the page before (Log in, after a reset)
+  const notice = useLocation().state?.notice;
   const [errors, setErrors] = useState({});
-  // A problem that isn't one field's: a wrong email or password, no connection
-  const [formError, setFormError] = useState("");
+  const linkBroken = page.needsToken && !token;
+  // A problem that isn't one field's: a wrong email or password, an expired link, no connection
+  const [formError, setFormError] = useState(linkBroken ? page.missingToken : "");
   const [sending, setSending] = useState(false);
+  // Forgot password: the address a link was asked for, shown in the reply
+  const [sentTo, setSentTo] = useState("");
 
   async function handleSubmit(event) {
     event.preventDefault();
     const form = event.currentTarget;
     const values = readValues(form);
     setFormError("");
+    setSentTo("");
     if (showErrors(form, validate(values), setErrors)) return;
 
     // confirmPassword is only checked here; the API doesn't take it
     const body = Object.fromEntries(Object.entries(values).filter(([name]) => name !== "confirmPassword"));
+    if (page.needsToken) body.token = token;
     setSending(true);
     try {
-      const { data } = await api(endpoint, { method: "POST", body });
-      onSignedIn(data);
-      navigate("/dashboard/home", { replace: true });
+      const response = await api(endpoint, { method: "POST", body });
+      if (page.onSuccess === "signedIn") {
+        onAccountChange(response.data);
+        navigate("/dashboard/home", { replace: true });
+      } else if (page.onSuccess === "reset") {
+        // The reset ended every session, this browser's too if it had one
+        onAccountChange(null);
+        navigate("/auth/login", { replace: true, state: { notice: page.done } });
+      } else {
+        setSending(false);
+        setSentTo(values.email);
+      }
     } catch (error) {
       setSending(false);
       if (!showErrors(form, fieldErrors(error.details), setErrors)) setFormError(error.message);
@@ -95,7 +119,15 @@ function AuthForm({ page, onSignedIn }) {
   }
 
   function renderField({ id, ...field }) {
-    return <FormField key={id} id={id} error={errors[id]} {...field} />;
+    const hint =
+      forgotLink && id === "password" ? (
+        <Button to={forgotLink.to} variant="link" size="sm">
+          {forgotLink.label}
+        </Button>
+      ) : (
+        field.hint
+      );
+    return <FormField key={id} id={id} error={errors[id]} {...field} hint={hint} />;
   }
 
   return (
@@ -111,6 +143,14 @@ function AuthForm({ page, onSignedIn }) {
         {/* No error summary: on a form this short, each field shows its own
             error and focus moves to the first one */}
         {formError && <StatusMessage variant="error">{formError}</StatusMessage>}
+        {notice && !formError && <StatusMessage>{notice}</StatusMessage>}
+        {sentTo && (
+          <StatusMessage>
+            {page.sent(sentTo).map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </StatusMessage>
+        )}
 
         {fields.map((row) =>
           Array.isArray(row) ? (
@@ -122,7 +162,7 @@ function AuthForm({ page, onSignedIn }) {
           ),
         )}
 
-        <Button type="submit" className="w-full" disabled={sending}>
+        <Button type="submit" className="w-full" disabled={sending || linkBroken}>
           <submit.icon aria-hidden="true" />
           {submit.label}
         </Button>
@@ -148,12 +188,14 @@ function AuthForm({ page, onSignedIn }) {
   );
 }
 
-export default function Auth({ isUser, onSignedIn }) {
+export default function Auth({ isUser, onAccountChange }) {
   const { pathname } = useParams();
+  const [searchParams] = useSearchParams();
   const page = authPageData[pathname];
 
-  // Already logged in: nothing to do here
-  if (isUser) return <Navigate to="/dashboard/home" replace />;
+  // Already logged in: nothing to do here. A reset link still works, as it
+  // may be opened where someone else is logged in
+  if (isUser && pathname !== "reset-password") return <Navigate to="/dashboard/home" replace />;
 
   // Old or mistyped links (/auth/sign-in, /auth/signup...) land on the login form
   if (!page) return <Navigate to="/auth/login" replace />;
@@ -165,7 +207,7 @@ export default function Auth({ isUser, onSignedIn }) {
           where the photo is hidden, get it too */}
       <div className="honeycomb-texture auth-texture" aria-hidden="true" />
       {/* key: switching between login and sign-up starts a fresh form */}
-      <AuthForm key={pathname} page={page} onSignedIn={onSignedIn} />
+      <AuthForm key={pathname} page={page} token={searchParams.get("token")} onAccountChange={onAccountChange} />
     </section>
   );
 }

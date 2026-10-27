@@ -18,6 +18,7 @@ import {
   Trash2,
   UserCog,
   UserMinus,
+  UserPen,
   UserPlus,
   X,
 } from "lucide-react";
@@ -40,6 +41,13 @@ function userTarget(details, lookup) {
   const name = lookup.userName(details.userId) ?? details.username ?? `user #${details.userId}`;
   return lookup.userName(details.userId) ? { label: name, to: userPath(details.userId) } : { label: name };
 }
+
+// details.email on an Email Failed row: which email it was
+const failedEmails = {
+  verification: "a verification email",
+  password_reset: "a password reset email",
+  password_changed: "a password changed email",
+};
 
 const describers = {
   "Event Status Changed": (details, lookup) => ({
@@ -86,15 +94,33 @@ const describers = {
   }),
   "User Deleted": (details, lookup) => ({ kind: "accounts", tone: "danger", icon: UserMinus, verb: "deleted the account", target: userTarget(details, lookup) }),
   "Email Verified": () => ({ kind: "accounts", tone: "success", icon: MailCheck, verb: "verified their email" }),
-  // The account's own verification email; the error says why (a Gmail limit, say)
+  // One of the account's own emails; the error says why (a Gmail limit, say)
   "Email Failed": (details) => ({
     kind: "accounts",
     tone: "danger",
     icon: MailX,
-    verb: "wasn't sent a verification email",
+    verb: `wasn't sent ${failedEmails[details.email] ?? "an email"}`,
     sub: details.error,
   }),
-  "Password Changed": () => ({ kind: "accounts", icon: KeyRound, verb: "changed their password" }),
+  // From Settings, or from the emailed reset link
+  "Password Changed": (details) => ({
+    kind: "accounts",
+    icon: KeyRound,
+    verb: details?.via === "reset link" ? "reset their password" : "changed their password",
+  }),
+  "Profile Updated": (details) => ({
+    kind: "accounts",
+    icon: UserPen,
+    verb: details.fields?.includes("username") ? "changed their display name" : "changed their email settings",
+  }),
+  // The account is gone, so the row keeps only the copied name and role
+  "Account Deleted": (details) => ({
+    kind: "accounts",
+    tone: "danger",
+    icon: UserMinus,
+    verb: "deleted their own account",
+    sub: details.eventsDeleted ? `${details.eventsDeleted} unpublished events went with it` : "",
+  }),
   "Avatar Updated": () => ({ kind: "accounts", icon: ImageUp, verb: "changed their picture" }),
   "Preferences Updated": (details) => ({
     kind: "accounts",

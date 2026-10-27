@@ -12,9 +12,12 @@ behaviour. Comments here that cite `*.php` files or PHP functions mark parity th
 The migration is half done, and **the two halves are only connected for auth so far**:
 
 - `frontend/` is a near-complete React port. Login, sign-up, logout, email verification and the
-  signed-in account are real (Phase 1); every other page still runs on in-memory mock data
+  signed-in account are real (Phase 1), and so are forgot and reset password and Settings' name,
+  email switch, password and Delete account (Phase 2); every other page still runs on in-memory
+  mock data
 - `backend/` is Express + Drizzle. Auth is real (sign-up, login, sessions, email verification;
-  Phase 1, 2026-10-26); the users and events routers still return placeholder strings. The full
+  Phase 1, 2026-10-26; passwords and the account's own profile and deletion, Phase 2,
+  2026-10-27); the rest of the users router and the events router still return placeholder strings. The full
   schema in `src/db/schema/` is applied to Neon and seeded
 
 Calls go through `frontend/src/lib/api.js` and a Vite proxy for `/api`. Pages are wired phase by
