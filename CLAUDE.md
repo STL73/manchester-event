@@ -9,16 +9,18 @@ approve them and manage users. It is a rewrite of an older PHP/MySQL university 
 in a separate folder (`D:\MY PROJECTS\manchester-event-portal`). That code is the reference for
 behaviour. Comments here that cite `*.php` files or PHP functions mark parity that is deliberate.
 
-The migration is half done, and **the two halves are only connected for auth so far**:
+The migration is half done, and **the two halves are connected for auth and public events so far**:
 
 - `frontend/` is a near-complete React port. Login, sign-up, logout, email verification and the
   signed-in account are real (Phase 1), and so are forgot and reset password and Settings' name,
-  email switch, password and Delete account (Phase 2); every other page still runs on in-memory
-  mock data
+  email switch, password and Delete account (Phase 2). Home, Explore Events, About's figure,
+  Preferences and Event details for guests and users read real events (Phase 3); every other page
+  still runs on in-memory mock data
 - `backend/` is Express + Drizzle. Auth is real (sign-up, login, sessions, email verification;
   Phase 1, 2026-10-26; passwords and the account's own profile and deletion, Phase 2,
-  2026-10-27); the rest of the users router and the events router still return placeholder strings. The full
-  schema in `src/db/schema/` is applied to Neon and seeded
+  2026-10-27), and so are the public event reads and categories (Phase 3, 2026-10-27); the rest of
+  the users and events routers still return placeholder strings. The full schema in
+  `src/db/schema/` is applied to Neon and seeded, demo events included
 
 Calls go through `frontend/src/lib/api.js` and a Vite proxy for `/api`. Pages are wired phase by
 phase, so don't assume an endpoint exists because a page shows the data.
@@ -107,7 +109,8 @@ npm start
 npx eslint .               # no lint script defined
 npx drizzle-kit generate   # schema -> SQL in drizzle/
 npx drizzle-kit migrate    # apply to DB_URL
-npm run db:seed            # 19 categories + demo admin, user and organiser (SEED_* in .env)
+npm run db:seed            # 19 categories + demo admin, user and organiser (SEED_* in .env), demo events
+npm run db:seed -- --reset-events   # replace the demo events with ones dated from today
 npm test                   # Vitest, against the Neon test branch (TEST_DB_URL)
 ```
 

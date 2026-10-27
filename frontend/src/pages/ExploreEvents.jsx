@@ -10,14 +10,12 @@ import {
 // Explore Events page share the search, layout switcher and cards.
 export default function ExploreEvents({
   inDashboard = false,
-  events,
   selectedUser,
   favouriteIds,
   onToggleFavourite,
 }) {
   const browser = (
     <EventsBrowser
-      events={events}
       canFavourite={inDashboard && selectedUser?.type === "user"}
       favouriteIds={favouriteIds}
       onToggleFavourite={onToggleFavourite}

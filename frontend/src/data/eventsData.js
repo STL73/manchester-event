@@ -1,41 +1,3 @@
-import stadiumConcertDaytime from "../images/events/stadium-concert-daytime.jpg";
-import arenaRedLights from "../images/events/arena-red-lights.jpg";
-import arenaCrowdStage from "../images/events/arena-crowd-stage.jpg";
-import arenaBlueLasers from "../images/events/arena-blue-lasers.jpg";
-import arenaLightBeams from "../images/events/arena-light-beams.jpg";
-import stageConfetti from "../images/events/stage-confetti.jpg";
-import arenaStageScreens from "../images/events/arena-stage-screens.jpg";
-import stageRedSpotlights from "../images/events/stage-red-spotlights.jpg";
-import mediacityWaterfrontNight from "../images/events/mediacity-waterfront-night.jpg";
-import oldTraffordNight from "../images/events/old-trafford-night.jpg";
-import mediacityPiazzaSunset from "../images/events/mediacity-piazza-sunset.jpg";
-import berryCheesecake from "../images/events/berry-cheesecake.jpg";
-import darkChocolate from "../images/events/dark-chocolate.jpg";
-import tinselTownChristmasFair from "../images/events/tinsel-town-christmas-fair.jpg";
-import colourPowderFestival from "../images/events/colour-powder-festival.jpg";
-import crowdPurpleFireworks from "../images/events/crowd-purple-fireworks.jpg";
-import footballOnPitch from "../images/events/football-on-pitch.jpg";
-import distilleryCopperStills from "../images/events/distillery-copper-stills.jpg";
-import edSheeranGuitarPickScreen from "../images/events/ed-sheeran-guitar-pick-screen.jpg";
-import heatonParkBalloon from "../images/events/heaton-park-balloon.jpg";
-import childrenPlayingTrainSet from "../images/events/children-playing-train-set.jpg";
-import kitesInSky from "../images/events/kites-in-sky.jpg";
-import mediacityGlobeNight from "../images/events/mediacity-globe-night.jpg";
-import spaghettiTomatoBasil from "../images/events/spaghetti-tomato-basil.jpg";
-import salfordQuaysDusk from "../images/events/salford-quays-dusk.jpg";
-import tallShipModel from "../images/events/tall-ship-model.jpg";
-import edSheeran360Stage from "../images/events/ed-sheeran-360-stage.jpg";
-import filmSetCrew from "../images/events/film-set-crew.jpg";
-import comedyMicrophoneBrickWall from "../images/events/comedy-microphone-brick-wall.jpg";
-import techTalkAudience from "../images/events/tech-talk-audience.jpg";
-import bookshelfReading from "../images/events/bookshelf-reading.jpg";
-import yogaClassStretch from "../images/events/yoga-class-stretch.jpg";
-import prideFlagSky from "../images/events/pride-flag-sky.jpg";
-import studentsLaptopsCafe from "../images/events/students-laptops-cafe.jpg";
-import oldTraffordMatchCrowd from "../images/events/old-trafford-match-crowd.jpg";
-import manchesterFireworksNight from "../images/events/manchester-fireworks-night.jpg";
-import manchesterOutdoorDiningLights from "../images/events/manchester-outdoor-dining-lights.jpg";
-import manchesterCanalReflections from "../images/events/manchester-canal-reflections.jpg";
 import {
   CalendarX2,
   ChevronLeft,
@@ -50,6 +12,46 @@ import {
 } from "lucide-react";
 import { isUpcoming } from "../lib/eventDates";
 
+// Served from public/ so the database can store the same paths
+const stadiumConcertDaytime = "/images/events/stadium-concert-daytime.jpg";
+const arenaRedLights = "/images/events/arena-red-lights.jpg";
+const arenaCrowdStage = "/images/events/arena-crowd-stage.jpg";
+const arenaBlueLasers = "/images/events/arena-blue-lasers.jpg";
+const arenaLightBeams = "/images/events/arena-light-beams.jpg";
+const stageConfetti = "/images/events/stage-confetti.jpg";
+const arenaStageScreens = "/images/events/arena-stage-screens.jpg";
+const stageRedSpotlights = "/images/events/stage-red-spotlights.jpg";
+const mediacityWaterfrontNight = "/images/events/mediacity-waterfront-night.jpg";
+const oldTraffordNight = "/images/events/old-trafford-night.jpg";
+const mediacityPiazzaSunset = "/images/events/mediacity-piazza-sunset.jpg";
+const berryCheesecake = "/images/events/berry-cheesecake.jpg";
+const darkChocolate = "/images/events/dark-chocolate.jpg";
+const tinselTownChristmasFair = "/images/events/tinsel-town-christmas-fair.jpg";
+const colourPowderFestival = "/images/events/colour-powder-festival.jpg";
+const crowdPurpleFireworks = "/images/events/crowd-purple-fireworks.jpg";
+const footballOnPitch = "/images/events/football-on-pitch.jpg";
+const distilleryCopperStills = "/images/events/distillery-copper-stills.jpg";
+const edSheeranGuitarPickScreen = "/images/events/ed-sheeran-guitar-pick-screen.jpg";
+const heatonParkBalloon = "/images/events/heaton-park-balloon.jpg";
+const childrenPlayingTrainSet = "/images/events/children-playing-train-set.jpg";
+const kitesInSky = "/images/events/kites-in-sky.jpg";
+const mediacityGlobeNight = "/images/events/mediacity-globe-night.jpg";
+const spaghettiTomatoBasil = "/images/events/spaghetti-tomato-basil.jpg";
+const salfordQuaysDusk = "/images/events/salford-quays-dusk.jpg";
+const tallShipModel = "/images/events/tall-ship-model.jpg";
+const edSheeran360Stage = "/images/events/ed-sheeran-360-stage.jpg";
+const filmSetCrew = "/images/events/film-set-crew.jpg";
+const comedyMicrophoneBrickWall = "/images/events/comedy-microphone-brick-wall.jpg";
+const techTalkAudience = "/images/events/tech-talk-audience.jpg";
+const bookshelfReading = "/images/events/bookshelf-reading.jpg";
+const yogaClassStretch = "/images/events/yoga-class-stretch.jpg";
+const prideFlagSky = "/images/events/pride-flag-sky.jpg";
+const studentsLaptopsCafe = "/images/events/students-laptops-cafe.jpg";
+const oldTraffordMatchCrowd = "/images/events/old-trafford-match-crowd.jpg";
+const manchesterFireworksNight = "/images/events/manchester-fireworks-night.jpg";
+const manchesterOutdoorDiningLights = "/images/events/manchester-outdoor-dining-lights.jpg";
+const manchesterCanalReflections = "/images/events/manchester-canal-reflections.jpg";
+
 // Dashboard pages open event details inside the dashboard;
 // the public Events page opens them full screen
 export function eventDetailsPath(eventId, inDashboard) {
@@ -60,6 +62,7 @@ export const eventDetailsPage = {
   dashboardTitle: "Event Details",
   titleIcon: Eye,
   notFound: "Event not found.",
+  loadError: "This event couldn't be loaded. Check your connection and try again.",
   goBack: { label: "Go Back", icon: ChevronLeft },
   // Used when the page was opened directly and there is nothing to go back to
   goBackFallback: "/dashboard/home",
@@ -124,7 +127,6 @@ const publicFields = [
   "address",
   "externalLink",
   "image",
-  "imagePosition",
 ];
 
 export function snapshotOf(event) {
@@ -214,10 +216,6 @@ export function isPublicEvent(event) {
   return event.status === "approved";
 }
 
-// Portrait photos are cropped to 16:9 on cards and the details page; the
-// optional `imagePosition` (CSS object-position) keeps their subject in view.
-// Without it the crop is centred.
-//
 // The one master mock of the events table, joined with the organiser's and
 // admin's usernames. App holds it in state; every page reads a view of it:
 // public pages (approved), the organiser's pages (their organiserId),
@@ -672,7 +670,6 @@ export const initialEvents = [
     externalLink: "https://tickets.example.com/dessert-masterclass",
     endDatetime: null,
     image: berryCheesecake,
-    imagePosition: "center 35%",
     categoryId: "workshops-classes",
     category: "Workshops & Classes",
     locationId: "city-centre",
@@ -812,7 +809,6 @@ export const initialEvents = [
     externalLink: "https://tickets.example.com/guitar-heroes",
     endDatetime: null,
     image: edSheeranGuitarPickScreen,
-    imagePosition: "center 20%",
     categoryId: "music",
     category: "Music",
     locationId: "city-centre",
@@ -1113,7 +1109,6 @@ export const initialEvents = [
     externalLink: "https://tickets.example.com/makers-market",
     endDatetime: thisWeekend("sunday", "17:00"),
     image: manchesterOutdoorDiningLights,
-    imagePosition: "center 60%",
     categoryId: "markets-fairs",
     category: "Markets & Fairs",
     locationId: "northern-quarter",
@@ -1137,7 +1132,6 @@ export const initialEvents = [
     externalLink: "https://tickets.example.com/canal-heritage-walk",
     endDatetime: thisWeekend("sunday", "16:00"),
     image: manchesterCanalReflections,
-    imagePosition: "center 60%",
     categoryId: "history-heritage",
     category: "History & Heritage",
     locationId: "city-centre",

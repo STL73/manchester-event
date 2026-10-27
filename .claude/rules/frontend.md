@@ -23,8 +23,17 @@ functions record behaviour being matched on purpose: keep that parity unless tol
 - Data fetching: through `lib/api.js` (`api(path, { method, body })`, throws `ApiError`), with the
   Vite proxy sending `/api` to the backend. Used so far by auth (Phases 1 and 2): `App.jsx` (`/auth/me`,
   logout, and Settings' handlers), `Auth.jsx` (log in, sign up, forgot and reset password, one
-  `AuthForm` driven by `authPageData`), `VerifyEmail.jsx` and `AccountBanner`'s Resend. Every other page runs on
-  mock data until its phase
+  `AuthForm` driven by `authPageData`), `VerifyEmail.jsx` and `AccountBanner`'s Resend. Public
+  events (Phase 3): reads go through `lib/useApi.js` (`useApi(path)`: `payload`, `error`,
+  `loading`, `retry`; the last answer stays while the next loads) and `lib/publicEvents.js`
+  (`toEvent()` turns an API event into the shape `EventCard` and Event details read;
+  `eventsPath()` builds the query). `EventsBrowser` (Explore, public and dashboard), Home
+  (`/events/summary` + What's on), About's figure, Preferences (`/categories` + next 3) and
+  Event details for guests and users. Organiser and admin pages, the user dashboard's Home and
+  My Favourites still read App's mock events until their phase
+- **Event photos live in `public/images/events/`** (2026-10-27) and are referenced by path
+  (`/images/events/<file>`), the same path the database's `image_url` stores; NULL shows
+  `defaultEventImage`. There is no `imagePosition`: photos crop centred
 
 ## Layout
 
@@ -47,7 +56,7 @@ frontend/src/
 │   └── home/          public landing sections
 ├── data/              <name>Data.js mock data + helpers, one per page/feature
 ├── lib/               pure helpers (analytics.js: chart aggregation)
-└── images/            event images
+└── images/            site photos (event photos are in public/images/events)
 ```
 
 ## Styling

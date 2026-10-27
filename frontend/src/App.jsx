@@ -18,7 +18,7 @@ import { api } from "./lib/api";
 import { mockUsers } from "./data/manageUsersData";
 import { currentAdmin, getManagedEvents } from "./data/manageEventsData";
 import { currentOrganiser } from "./data/organiserEventsData";
-import { initialEvents, isPublicEvent, publicVersion, snapshotOf } from "./data/eventsData";
+import { initialEvents, publicVersion, snapshotOf } from "./data/eventsData";
 import { privacyPage, termsPage } from "./data/legalPagesData";
 import { initialFavouriteIds } from "./data/myFavouritesData";
 import { userCategoryIds } from "./data/preferencesData";
@@ -93,15 +93,10 @@ function App() {
   // Users and guests see an edit waiting for approval as its last approved
   // version (publicVersion); organisers and admins see the real record
   const audienceEvents = events.map(publicVersion);
-  // A suspended organiser's events leave the public lists (the schema's
-  // query filter); favourites and links still find them
+  // The public pages (Home, Explore Events, About, Preferences, Event details
+  // for guests and users) read events from the API since Phase 3; the user
+  // dashboard's Home and My Favourites still read this list until Phase 4
   const [users, setUsers] = useState(mockUsers);
-  const suspendedOrganiserIds = users
-    .filter((user) => user.role === "organiser" && user.accStatus === "suspended")
-    .map((user) => user.userId);
-  const publicEvents = audienceEvents.filter(
-    (event) => isPublicEvent(event) && !suspendedOrganiserIds.includes(event.organiserId),
-  );
   const organiserEvents = events.filter(
     (event) => event.organiserId === currentOrganiser.id,
   );
@@ -421,16 +416,16 @@ function App() {
               shared event link still works */}
           <Route
             path="/"
-            element={isUser ? <Navigate to="/dashboard/home" replace /> : <Home events={publicEvents} />}
+            element={isUser ? <Navigate to="/dashboard/home" replace /> : <Home />}
           />
           <Route path="/auth/verify-email" element={<VerifyEmail isUser={isUser} onVerified={refreshAccount} />} />
           <Route path="/auth/:pathname" element={<Auth isUser={isUser} onAccountChange={setAccount} />} />
-          <Route path="/about" element={<About events={publicEvents} isUser={isUser} />} />
+          <Route path="/about" element={<About isUser={isUser} />} />
           <Route path="/contact" element={<Contact onSendMessage={sendContactMessage} />} />
           <Route path="/faq" element={<Faq />} />
           <Route path="/privacy" element={<LegalPage page={privacyPage} titleId="privacy-title" />} />
           <Route path="/terms" element={<LegalPage page={termsPage} titleId="terms-title" />} />
-          <Route path="/events" element={<ExploreEvents events={publicEvents} />} />
+          <Route path="/events" element={<ExploreEvents />} />
           <Route path="/events/:eventId" element={<EventDetails events={audienceEvents} role={isUser ? userType : "guest"} organiserId={currentOrganiser.id} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
           <Route
             path="/dashboard"
@@ -452,16 +447,16 @@ function App() {
             <Route index element={<Navigate to="home" replace />} />
             <Route path="home" element={<DashboardHome selectedUser={selectedUser} account={account} users={users} events={userType === "user" ? audienceEvents : events} organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} interestIds={interestIds} contactMessages={contactMessages} notifications={notifications} />} />
             <Route element={<RoleOnly allow="user" userType={userType} />}>
-              <Route path="explore-events" element={<ExploreEvents inDashboard events={publicEvents} selectedUser={selectedUser} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
+              <Route path="explore-events" element={<ExploreEvents inDashboard selectedUser={selectedUser} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
               <Route path="my-favourites" element={<MyFavourites events={audienceEvents} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
-              <Route path="preferences" element={<Preferences events={publicEvents} interestIds={interestIds} onSaveInterests={setInterestIds} />} />
+              <Route path="preferences" element={<Preferences interestIds={interestIds} onSaveInterests={setInterestIds} />} />
             </Route>
-            <Route path="events/:eventId" element={<EventDetails inDashboard events={userType === "user" ? audienceEvents : events} role={userType} organiserId={currentOrganiser.id} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
+            <Route path="events/:eventId" element={<EventDetails inDashboard events={events} role={userType} organiserId={currentOrganiser.id} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
             <Route path="notifications" element={<Notifications selectedUser={selectedUser} notifications={notifications} onMarkRead={markNotificationsRead} />} />
             {/* The public pages the sidebar links to, opened beside it: About,
                 Privacy and Terms for everyone (under the user card), FAQs and
                 Contact for the roles with a Help menu */}
-            <Route path="about" element={<About inDashboard events={publicEvents} isUser={isUser} />} />
+            <Route path="about" element={<About inDashboard isUser={isUser} />} />
             <Route path="privacy" element={<LegalPage inDashboard page={privacyPage} titleId="privacy-title" />} />
             <Route path="terms" element={<LegalPage inDashboard page={termsPage} titleId="terms-title" />} />
             <Route element={<RoleOnly allow={["user", "organiser"]} userType={userType} />}>

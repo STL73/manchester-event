@@ -1,6 +1,8 @@
 import { CalendarSearch } from "lucide-react";
 
-import arenaLightBeams from "../images/events/arena-light-beams.jpg";
+// Served from public/ so the database can store the same paths
+const arenaLightBeams = "/images/events/arena-light-beams.jpg";
+
 
 // Public /events page intro (signed-out)
 export const publicIntro = {
@@ -28,6 +30,9 @@ export const resultsText = {
   removeFilter: (label) => `Remove filter: ${label}`,
   empty: "No upcoming events match your search.",
   clearFilters: "Clear filters",
+  loading: "Loading events…",
+  loadError: "Events couldn't be loaded. Check your connection and try again.",
+  retry: "Try again",
 };
 
 export const exploreEventsSection = {

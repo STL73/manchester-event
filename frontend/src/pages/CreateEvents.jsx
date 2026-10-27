@@ -21,7 +21,7 @@ import {
   maxImageSize,
   submitChecklist,
 } from "../data/createEventsData";
-import placeholder from "../images/events/placeholder.jpg";
+import { defaultEventImage as placeholder } from "../lib/publicEvents";
 
 const emptyForm = {
   eventName: "",
@@ -279,12 +279,7 @@ function EventFormPage({
       return;
     }
 
-    // A new photo drops the old one's focal point, chosen for that photo
-    const photo = {
-      image: image || placeholder,
-      imagePosition: image && image === event?.image ? event.imagePosition : undefined,
-    };
-    const fields = { ...eventFieldsFromForm(form), ...photo };
+    const fields = { ...eventFieldsFromForm(form), image: image || placeholder };
 
     if (isEdit) {
       onUpdateEvent(event.eventId, fields, status);
@@ -411,7 +406,6 @@ function EventFormPage({
     location: area?.name ?? "Area",
     startDatetime: form.startDatetime,
     image: image || placeholder,
-    imagePosition: image && image === event?.image ? event.imagePosition : undefined,
   };
 
   const checklistItems = submitChecklist.items.map((item) => ({

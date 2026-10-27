@@ -5,7 +5,9 @@ import LogoMark from "../UI/LogoMark";
 import Tooltip from "../UI/Tooltip";
 import { footerNav, footerText } from "../../data/navigationData";
 import { socialLinks } from "../../data/socialLinks";
-import stageConfetti from "../../images/events/stage-confetti.jpg";
+
+// Served from public/ so the database can store the same paths
+const stageConfetti = "/images/events/stage-confetti.jpg";
 
 function scrollToTop() {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

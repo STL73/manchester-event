@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CalendarDays, Grid2X2, Grid3X3, Square, X } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import Button from "../UI/Button";
@@ -7,7 +7,8 @@ import EventCard from "./EventCard";
 import SearchBar from "./SearchBar";
 import { eventCategories, eventLocations } from "../../data/eventsData";
 import { resultsText, whenOptions } from "../../data/exploreEventsData";
-import { bySoonest, isUpcoming, matchesWhen } from "../../lib/eventDates";
+import { eventsPath, toEvent } from "../../lib/publicEvents";
+import { useApi } from "../../lib/useApi";
 
 const defaultFilters = { q: "", when: "", date: "", category: "", location: "" };
 const validViews = ["three", "two", "one"];
@@ -21,15 +22,20 @@ const chipDate = new Intl.DateTimeFormat("en-GB", {
   month: "short",
 });
 
+// Values the API would refuse (a hand-typed area, a malformed date) are
+// dropped here, so the address can't turn the list into an error
 function readFilters(searchParams) {
-  const when = searchParams.get("when") ?? "";
+  const pick = (name, valid) => {
+    const value = searchParams.get(name) ?? "";
+    return valid(value) ? value : "";
+  };
 
   return {
     q: searchParams.get("q") ?? "",
-    when: validWhens.includes(when) ? when : "",
-    date: searchParams.get("date") ?? "",
-    category: searchParams.get("category") ?? "",
-    location: searchParams.get("location") ?? "",
+    when: pick("when", (value) => validWhens.includes(value)),
+    date: pick("date", (value) => /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value))),
+    category: pick("category", (value) => eventCategories.some(({ id }) => id === value)),
+    location: pick("location", (value) => eventLocations.some(({ id }) => id === value)),
   };
 }
 
@@ -60,7 +66,6 @@ function filterChips(filters) {
 }
 
 export default function EventsBrowser({
-  events,
   canFavourite = false,
   favouriteIds = [],
   onToggleFavourite,
@@ -75,42 +80,41 @@ export default function EventsBrowser({
     setSyncedSearch(searchParams.toString());
     setFilters(readFilters(searchParams));
   }
-  // Fixed when the page opens, so the list doesn't reshuffle while it's read
+  // The earliest day the date picker offers
   const [now] = useState(() => new Date());
   const view = validViews.includes(searchParams.get("view"))
     ? searchParams.get("view")
     : "three";
 
-  const filteredEvents = useMemo(() => {
-    const query = filters.q.trim().toLowerCase();
-
-    return events
-      .filter((event) => {
-        const eventDate = event.startDatetime.slice(0, 10);
-        const searchableText =
-          `${event.name} ${event.category} ${event.location}`.toLowerCase();
-
-        return (
-          isUpcoming(event, now) &&
-          matchesWhen(event, filters.when, now) &&
-          (!filters.date || eventDate === filters.date) &&
-          (!filters.category || event.categoryId === filters.category) &&
-          (!filters.location || event.locationId === filters.location) &&
-          (!query || searchableText.includes(query))
-        );
-      })
-      .sort(bySoonest);
-  }, [events, filters, now]);
+  // The server filters, sorts and pages (GET /events). It is asked for what the
+  // address says, not what is typed but not yet searched
+  const requestedPage = Math.max(Number(searchParams.get("page")) || 1, 1);
+  const { payload, error, loading, retry } = useApi(
+    eventsPath({ ...readFilters(searchParams), page: requestedPage, limit: PAGE_SIZE }),
+  );
+  const pageEvents = payload?.data.map(toEvent) ?? [];
+  const total = payload?.pagination.total ?? 0;
+  const pageCount = payload?.pagination.totalPages ?? 1;
+  const page = payload?.pagination.page ?? requestedPage;
+  const firstIndex = (page - 1) * PAGE_SIZE;
 
   const chips = filterChips(filters);
   const dateInputRef = useRef(null);
   const resultsRef = useRef(null);
 
-  // The page lives in the URL like the filters; out-of-range numbers clamp
-  const pageCount = Math.max(1, Math.ceil(filteredEvents.length / PAGE_SIZE));
-  const page = Math.min(Math.max(Number(searchParams.get("page")) || 1, 1), pageCount);
-  const firstIndex = (page - 1) * PAGE_SIZE;
-  const pageEvents = filteredEvents.slice(firstIndex, firstIndex + PAGE_SIZE);
+  // A page number past the end (typed, or the list shrank) goes to the last page
+  useEffect(() => {
+    if (!loading && payload && total > 0 && requestedPage > pageCount) {
+      setSearchParams(
+        (current) => {
+          const next = new URLSearchParams(current);
+          next.set("page", String(pageCount));
+          return next;
+        },
+        { replace: true },
+      );
+    }
+  }, [loading, payload, total, requestedPage, pageCount, setSearchParams]);
 
   // The URL follows the filters so the result can be shared or bookmarked.
   // Not carrying "page" over means a new filter starts again at page 1
@@ -228,7 +232,7 @@ export default function EventsBrowser({
       {/* Result count, then one chip per filter in use. Pagination scrolls back here */}
       <div className="w-full max-w-7xl flex flex-wrap items-center gap-2 scroll-mt-4" ref={resultsRef}>
         <p className="events-count" aria-live="polite">
-          {resultsText.count(filteredEvents.length)}
+          {payload ? resultsText.count(total) : resultsText.loading}
         </p>
         {chips.map(({ key, label }) => (
           <button className="filter-chip" type="button" aria-label={resultsText.removeFilter(label)} onClick={() => removeFilter(key)} key={key}>
@@ -243,8 +247,15 @@ export default function EventsBrowser({
         )}
       </div>
 
-      <div className={`events-grid events-grid-${view}`}>
-        {filteredEvents.length === 0 ? (
+      <div className={`events-grid events-grid-${view}`} aria-busy={loading}>
+        {error ? (
+          <div className="events-empty-state" role="alert">
+            <p className="content-p">{resultsText.loadError}</p>
+            <Button type="button" variant="secondary" size="sm" onClick={retry}>
+              {resultsText.retry}
+            </Button>
+          </div>
+        ) : !payload ? null : pageEvents.length === 0 ? (
           <div className="events-empty-state">
             <p className="content-p">{resultsText.empty}</p>
             {chips.length > 0 && (
@@ -267,7 +278,7 @@ export default function EventsBrowser({
         summary={resultsText.showing(
           firstIndex + 1,
           firstIndex + pageEvents.length,
-          filteredEvents.length,
+          total,
         )}
       />
     </>

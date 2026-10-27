@@ -4,14 +4,17 @@ import LogoMark from "../components/UI/LogoMark";
 import PageFrame from "../components/UI/PageFrame";
 import { aboutPageData } from "../data/aboutPageData";
 import { eventCategories, eventLocations } from "../data/eventsData";
+import { useApi } from "../lib/useApi";
 
-export default function About({ events, isUser, inDashboard = false }) {
+export default function About({ isUser, inDashboard = false }) {
+  // Upcoming events, what Explore Events lists. A dash until it arrives
+  const summary = useApi("/events/summary");
   const { hero, dashboardHeading, story, process, stats, closing } = aboutPageData;
   const PromiseIcon = process.promise.icon;
   // Inside the dashboard, section headings look like every other dashboard page's
   const headingClass = inDashboard ? "dashboard-title" : "heading-section";
   const numbers = [
-    { value: events.length, label: stats.events },
+    { value: summary.payload?.data.total ?? "–", label: stats.events },
     { value: eventCategories.length, label: stats.categories },
     { value: eventLocations.length, label: stats.areas },
   ];

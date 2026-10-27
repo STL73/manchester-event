@@ -1,6 +1,8 @@
 import { Mail, MapPin, RefreshCw, Send } from "lucide-react";
 
-import manchesterOutdoorDiningLights from "../images/events/manchester-outdoor-dining-lights.jpg";
+// Served from public/ so the database can store the same paths
+const manchesterOutdoorDiningLights = "/images/events/manchester-outdoor-dining-lights.jpg";
+
 
 // A task page: the most common questions sit beside the form, so many are
 // answered before a message is sent. They come from data/faqData.js (the
