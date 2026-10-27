@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { CircleCheck, ShieldCheck } from "lucide-react";
+import StatusMessage from "../UI/StatusMessage";
 import Switch from "../UI/Switch";
 import { emailSettings } from "../../data/profileSettingsData";
 
@@ -7,11 +8,20 @@ import { emailSettings } from "../../data/profileSettingsData";
 // saves as soon as it is flipped, so it says so instead of having a button
 export default function EmailSettings({ role, enabled, onChange }) {
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState("");
   const { title, text } = emailSettings.byRole[role] ?? emailSettings.byRole.user;
 
-  function toggle(nextEnabled) {
-    onChange(nextEnabled);
-    setSaved(true);
+  // The switch moves once the server has saved it, so it never shows a
+  // setting that didn't stick
+  async function toggle(nextEnabled) {
+    setSaved(false);
+    setError("");
+    try {
+      await onChange(nextEnabled);
+      setSaved(true);
+    } catch (saveError) {
+      setError(saveError.message);
+    }
   }
 
   return (
@@ -27,6 +37,11 @@ export default function EmailSettings({ role, enabled, onChange }) {
         <ShieldCheck aria-hidden="true" />
         {emailSettings.always}
       </p>
+      {error && (
+        <StatusMessage variant="error" className="callout-compact">
+          {error}
+        </StatusMessage>
+      )}
       <p className="settings-saved" role="status">
         {saved && (
           <>

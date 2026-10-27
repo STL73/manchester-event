@@ -1,4 +1,4 @@
-import { LogIn, MailCheck, MailX, UserPlus } from "lucide-react";
+import { KeyRound, LogIn, MailCheck, MailX, Send, UserPlus } from "lucide-react";
 
 // Resized copies for this page; the events keep their own full-size files
 import mediacityWaterfrontNight from "../images/site/mediacity-waterfront-night.webp";
@@ -37,9 +37,72 @@ export const authPageData = {
         autoComplete: "current-password",
       },
     ],
+    // On the password's label row, where the hint would go
+    forgotLink: { label: "Forgot password?", to: "/auth/forgot-password" },
     submit: { label: "Log In", icon: LogIn },
     switchPrompt: { text: "Don't have an account?", label: "Sign Up", to: "/auth/sign-up" },
     endpoint: "/auth/login",
+    onSuccess: "signedIn",
+  },
+  "forgot-password": {
+    title: "Forgot your password?",
+    subtitle: "Enter your account's email and we'll send you a link to choose a new one",
+    image: { src: oldTraffordNight, alt: "Old Trafford lit up at night across the water" },
+    caption: {
+      place: "Old Trafford",
+      text: "Gigs, markets and match days across Greater Manchester",
+    },
+    fields: [
+      {
+        id: "email",
+        label: "Email",
+        type: "email",
+        placeholder: "name@example.com",
+        autoComplete: "email",
+      },
+    ],
+    submit: { label: "Send Link", icon: Send },
+    switchPrompt: { text: "Remembered it?", label: "Log In", to: "/auth/login" },
+    endpoint: "/auth/forgot-password",
+    onSuccess: "sent",
+    // The same words whether or not the email has an account (decided 2026-10-27)
+    sent: (email) => [
+      `If an account uses ${email}, we've sent it a link. The link works for 1 hour.`,
+      "Nothing there? Check your spam folder, or send another.",
+    ],
+  },
+  "reset-password": {
+    title: "Choose a new password",
+    subtitle: "Every device will be logged out, so you'll log in again with the new one",
+    image: { src: mediacityWaterfrontNight, alt: "Salford Quays and the Millennium Bridge at night" },
+    caption: {
+      place: "Salford Quays",
+      text: "See what's on tonight, save the events you love, or list your own",
+    },
+    fields: [
+      {
+        id: "password",
+        label: "New password",
+        type: "password",
+        autoComplete: "new-password",
+        hint: `${PASSWORD_MIN_LENGTH}+ characters`,
+      },
+      {
+        id: "confirmPassword",
+        label: "Confirm new password",
+        type: "password",
+        autoComplete: "new-password",
+      },
+    ],
+    submit: { label: "Save Password", icon: KeyRound },
+    switchPrompt: { text: "Link expired?", label: "Send another", to: "/auth/forgot-password" },
+    endpoint: "/auth/reset-password",
+    // The link's token goes with the form
+    needsToken: true,
+    missingToken: "This link is incomplete. Open the newest email we sent, or send another link.",
+    onSuccess: "reset",
+    // Shown on Log in, where the reset leads
+    done: "Your password has been changed. Log in with the new one.",
   },
   "sign-up": {
     title: "Create your account",
@@ -98,6 +161,7 @@ export const authPageData = {
     submit: { label: "Create Account", icon: UserPlus },
     switchPrompt: { text: "Already have an account?", label: "Log In", to: "/auth/login" },
     endpoint: "/auth/sign-up",
+    onSuccess: "signedIn",
   },
 };
 

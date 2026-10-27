@@ -18,7 +18,7 @@ import { api } from "./lib/api";
 import { mockUsers } from "./data/manageUsersData";
 import { currentAdmin, getManagedEvents } from "./data/manageEventsData";
 import { currentOrganiser } from "./data/organiserEventsData";
-import { hasBeenPublic, initialEvents, isPublicEvent, publicVersion, snapshotOf } from "./data/eventsData";
+import { initialEvents, isPublicEvent, publicVersion, snapshotOf } from "./data/eventsData";
 import { privacyPage, termsPage } from "./data/legalPagesData";
 import { initialFavouriteIds } from "./data/myFavouritesData";
 import { userCategoryIds } from "./data/preferencesData";
@@ -116,9 +116,8 @@ function App() {
   // Read on the Notifications page and counted on the user dashboard, so
   // marking one read shows everywhere
   const [notifications, setNotifications] = useState(initialNotifications);
-  // Changes made on Settings (display name, picture, email switch), laid
-  // over the account until Phase 2 saves them, so the sidebar and greeting
-  // show the new name straight away. Cleared on logout
+  // The picture chosen on Settings, laid over the account until Phase 6
+  // stores it, so the sidebar and greeting show it. Cleared on logout
   const [profileChanges, setProfileChanges] = useState({});
 
   // A 401 means nobody is logged in. Any other failure (the API is down)
@@ -226,16 +225,36 @@ function App() {
     toReview: events.filter((event) => event.status === "pending").length,
     unreadMessages: contactMessages.filter((message) => !message.readAt).length,
   };
-  // An organiser whose events have ever been public can't delete their own
-  // account (the schema's deletion rule)
-  const hasPublicEvents = organiserEvents.some(hasBeenPublic);
+  // Settings' handlers. Each throws the ApiError for its section to show, and
+  // the account the server sends back updates the sidebar and greeting
+  async function saveAccount(changes) {
+    const { data } = await api("/users/me", { method: "PUT", body: changes });
+    setAccount(data);
+  }
 
-  function updateProfile(changes) {
-    setProfileChanges((current) => ({ ...current, ...changes }));
+  // The name is saved on the server; the picture stays in this tab until
+  // Phase 6 stores it
+  async function saveProfile({ user, avatarUrl }) {
+    if (user !== account.username) await saveAccount({ username: user });
+    setProfileChanges({ avatarUrl });
+  }
+
+  // The server logs out every other device and gives this one a new session
+  async function changePassword(passwords) {
+    await api("/auth/password", { method: "PUT", body: passwords });
+    addPasswordChangedNotification();
+  }
+
+  // The server checks the password and the deletion rule, and ends the session
+  async function deleteAccount(password) {
+    await api("/users/me", { method: "DELETE", body: { password } });
+    setAccount(null);
+    setProfileChanges({});
+    navigate("/");
   }
 
   // A password change is a password_changed notification, as the backend
-  // will send; newest first, like the rest of the list
+  // will send from Phase 7; newest first, like the rest of the list
   function addPasswordChangedNotification() {
     setNotifications((current) => [
       {
@@ -250,13 +269,6 @@ function App() {
       },
       ...current,
     ]);
-  }
-
-  // Until Phase 2: the account leaves the mock Manage Users and you are
-  // logged out to the public home page, but the real account stays
-  function deleteAccount() {
-    setUsers((currentUsers) => currentUsers.filter((user) => user.email !== selectedUser.email));
-    logout();
   }
 
   // If the request fails the server session may live on until it expires,
@@ -412,7 +424,7 @@ function App() {
             element={isUser ? <Navigate to="/dashboard/home" replace /> : <Home events={publicEvents} />}
           />
           <Route path="/auth/verify-email" element={<VerifyEmail isUser={isUser} onVerified={refreshAccount} />} />
-          <Route path="/auth/:pathname" element={<Auth isUser={isUser} onSignedIn={setAccount} />} />
+          <Route path="/auth/:pathname" element={<Auth isUser={isUser} onAccountChange={setAccount} />} />
           <Route path="/about" element={<About events={publicEvents} isUser={isUser} />} />
           <Route path="/contact" element={<Contact onSendMessage={sendContactMessage} />} />
           <Route path="/faq" element={<Faq />} />
@@ -464,10 +476,9 @@ function App() {
                   key={account?.userId}
                   selectedUser={selectedUser}
                   account={account}
-                  hasPublicEvents={hasPublicEvents}
-                  onSaveProfile={updateProfile}
-                  onPasswordChanged={addPasswordChangedNotification}
-                  onEmailNotificationsChange={(emailNotifications) => updateProfile({ emailNotifications })}
+                  onSaveProfile={saveProfile}
+                  onChangePassword={changePassword}
+                  onEmailNotificationsChange={(emailNotifications) => saveAccount({ emailNotifications })}
                   onDeleteAccount={deleteAccount}
                 />
               }

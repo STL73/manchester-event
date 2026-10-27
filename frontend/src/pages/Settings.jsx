@@ -15,14 +15,13 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
 });
 
 // Four sections, each saving on its own. What a role sees differs in the
-// email wording and in Delete: none for admins, a contact link for an
+// email wording and in Delete: none for admins, and the server refuses an
 // organiser whose events have been public
 export default function Settings({
   selectedUser,
   account,
-  hasPublicEvents,
   onSaveProfile,
-  onPasswordChanged,
+  onChangePassword,
   onEmailNotificationsChange,
   onDeleteAccount,
 }) {
@@ -57,7 +56,7 @@ export default function Settings({
           </SettingsSection>
 
           <SettingsSection id="settings-password" section={settingsSections.password}>
-            <PasswordSettings email={selectedUser.email} onChange={onPasswordChanged} />
+            <PasswordSettings email={selectedUser.email} onChange={onChangePassword} />
           </SettingsSection>
 
           <SettingsSection id="settings-emails" section={settingsSections.emails}>
@@ -70,7 +69,7 @@ export default function Settings({
 
           {role !== "admin" && (
             <SettingsSection id="settings-delete" section={settingsSections.deleteAccount} danger>
-              <DeleteAccount role={role} hasPublicEvents={hasPublicEvents} onDelete={onDeleteAccount} />
+              <DeleteAccount role={role} onDelete={onDeleteAccount} />
             </SettingsSection>
           )}
         </div>

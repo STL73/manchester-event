@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { BadgeCheck, Camera, CircleAlert, CircleCheck, Lock, Trash2 } from "lucide-react";
 import Button from "../UI/Button";
 import FieldError from "../UI/FieldError";
+import StatusMessage from "../UI/StatusMessage";
 import {
   allowedAvatarTypes,
   displayNameMaxLength,
@@ -10,7 +11,8 @@ import {
   profileMessages,
 } from "../../data/profileSettingsData";
 
-// Picture and display name, saved together; the email is shown locked.
+// Picture and display name, saved together (the name on the server, the
+// picture in the page until Phase 6); the email is shown locked.
 // Save stays off until something differs from what is saved
 export default function ProfileSettings({ selectedUser, emailVerified, onSave }) {
   const savedAvatar = selectedUser.avatarUrl ?? null;
@@ -18,6 +20,9 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
   const [avatarUrl, setAvatarUrl] = useState(savedAvatar);
   const [avatarError, setAvatarError] = useState("");
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  // The server's refusal: no connection, or a suspended account
+  const [error, setError] = useState("");
   const fileRef = useRef(null);
   const DefaultAvatar = selectedUser.avatar;
   const SubmitIcon = profileForm.submit.icon;
@@ -56,14 +61,22 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
     setAvatarUrl(null);
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    if (!changed || !trimmedName) return;
-    // The picture being replaced was saved before, so nothing shows it now
-    if (savedAvatar && savedAvatar !== avatarUrl) URL.revokeObjectURL(savedAvatar);
-    onSave({ user: trimmedName, avatarUrl });
-    setName(trimmedName);
-    setSaved(true);
+    if (!changed || !trimmedName || saving) return;
+    setSaving(true);
+    setError("");
+    try {
+      await onSave({ user: trimmedName, avatarUrl });
+      // The picture being replaced was saved before, so nothing shows it now
+      if (savedAvatar && savedAvatar !== avatarUrl) URL.revokeObjectURL(savedAvatar);
+      setName(trimmedName);
+      setSaved(true);
+    } catch (saveError) {
+      setError(saveError.message);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -153,6 +166,12 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
         <p className="field-hint settings-hint">{profileForm.emailHint}</p>
       </div>
 
+      {error && (
+        <StatusMessage variant="error" className="callout-compact">
+          {error}
+        </StatusMessage>
+      )}
+
       <div className="settings-foot">
         {saved && !changed && (
           <p className="settings-saved" role="status">
@@ -160,7 +179,7 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
             {profileForm.saved}
           </p>
         )}
-        <Button type="submit" variant="primary" size="sm" disabled={!changed || !trimmedName}>
+        <Button type="submit" variant="primary" size="sm" disabled={!changed || !trimmedName || saving}>
           <SubmitIcon aria-hidden="true" />
           {profileForm.submit.label}
         </Button>
