@@ -8,4 +8,7 @@ export const LOG = {
     USER_LOGOUT: 'User Logout',
     EMAIL_VERIFIED: 'Email Verified',
     EMAIL_FAILED: 'Email Failed',
+    PASSWORD_CHANGED: 'Password Changed',
+    PROFILE_UPDATED: 'Profile Updated',
+    ACCOUNT_DELETED: 'Account Deleted',
 };

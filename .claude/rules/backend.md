@@ -1,7 +1,8 @@
 # Backend Rules
 
-The backend is at an early stage: the full schema is applied to Neon and seeded, but the routers are
-still stubs that don't touch the database.
+The full schema is applied to Neon and seeded. Auth and the account's own `/users/me` are real
+(Phases 1 and 2); the rest of the users router and the events router are still stubs that don't
+touch the database.
 
 ## Stack constraints
 
@@ -26,7 +27,7 @@ backend/
 │   ├── lib/                AppError, tokens, sessions, authTokens, email + authEmails,
 │   │                       systemLogs (logAction), users (publicUser)
 │   ├── middleware/         errorHandler (+ notFound), validate, security, auth
-│   ├── validation/         Zod schemas per resource (auth.js)
+│   ├── validation/         Zod schemas per resource (auth.js, users.js)
 │   ├── db/
 │   │   ├── index.js        exports `db` (Drizzle client)
 │   │   └── schema/

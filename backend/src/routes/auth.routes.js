@@ -8,15 +8,19 @@ import { users } from '../db/schema/index.js';
 import { aj } from '../config/arcjet.js';
 import { LOG } from '../constants/logActions.js';
 import { AppError } from '../lib/errors.js';
-import { SESSION_COOKIE, startSession, findSession, endSession } from '../lib/sessions.js';
+import {
+    SESSION_COOKIE, startSession, findSession, endSession, endAllSessions, clearSessionCookie,
+} from '../lib/sessions.js';
 import { consumeAuthToken } from '../lib/authTokens.js';
-import { sendVerificationEmail } from '../lib/authEmails.js';
+import { sendVerificationEmail, sendPasswordResetEmail, sendPasswordChangedEmail } from '../lib/authEmails.js';
 import { logAction } from '../lib/systemLogs.js';
 import { publicUser, liftExpiredSuspension } from '../lib/users.js';
 import { validate } from '../middleware/validate.js';
 import { arcjetProtect } from '../middleware/security.js';
 import { requireAuth } from '../middleware/auth.js';
-import { signUpSchema, loginSchema, verifyEmailSchema } from '../validation/auth.js';
+import {
+    signUpSchema, loginSchema, verifyEmailSchema, forgotPasswordSchema, resetPasswordSchema, changePasswordSchema,
+} from '../validation/auth.js';
 
 const authRouter = Router();
 
@@ -31,6 +35,13 @@ const signUpGuard = aj?.withRule(protectSignup({
 }));
 const loginGuard = aj?.withRule(slidingWindow({ mode: 'LIVE', interval: '15m', max: 10 }));
 const resendGuard = aj?.withRule(slidingWindow({ mode: 'LIVE', characteristics: ['userId'], interval: '1h', max: 3 }));
+// Per address, so nobody can fill an inbox with reset emails, and per IP, so
+// nobody can send one to every address they can think of
+const forgotGuard = aj
+    ?.withRule(slidingWindow({ mode: 'LIVE', characteristics: ['resetEmail'], interval: '1h', max: 3 }))
+    .withRule(slidingWindow({ mode: 'LIVE', interval: '1h', max: 10 }));
+// The same limit as login: the current password can't be guessed from a stolen session
+const passwordGuard = aj?.withRule(slidingWindow({ mode: 'LIVE', characteristics: ['userId'], interval: '15m', max: 10 }));
 
 // Compared against when an email has no account, so a wrong email takes as long
 // as a wrong password and the response time can't reveal which emails exist
@@ -123,6 +134,72 @@ authRouter.post(
         // Asked for on purpose, so unlike at sign-up a failed email is reported
         const sent = await sendVerificationEmail(req.user);
         if (!sent) throw new AppError(503, "We couldn't send the email just now. Please try again later.");
+        res.status(204).end();
+    },
+);
+
+// The same reply whether or not the email has an account (decided 2026-10-27).
+// The email is sent without waiting for it, so the reply also takes the same
+// time either way; a failure still goes to System Logs
+authRouter.post(
+    '/forgot-password',
+    validate({ body: forgotPasswordSchema }),
+    arcjetProtect(forgotGuard, (req) => ({ resetEmail: req.valid.body.email })),
+    async (req, res) => {
+        const [user] = await db.select().from(users).where(eq(users.email, req.valid.body.email));
+        if (user) sendPasswordResetEmail(user).catch((err) => console.error('Password reset email failed:', err.message));
+        res.status(204).end();
+    },
+);
+
+// No login needed, like verify-email. Every session ends and the person logs
+// in with the new password (decided 2026-10-27), which also proves it works
+authRouter.post('/reset-password', validate({ body: resetPasswordSchema }), async (req, res) => {
+    const { token, password } = req.valid.body;
+    const used = await consumeAuthToken(token, 'password_reset');
+    if (!used) throw new AppError(400, 'This link has expired or has already been used.');
+
+    const [current] = await db.select().from(users).where(eq(users.userId, used.userId));
+    const [user] = await db
+        .update(users)
+        // The link reached the inbox, which is what verifying the email proves
+        .set({ password: await bcrypt.hash(password, BCRYPT_COST), emailVerifiedAt: current.emailVerifiedAt ?? new Date() })
+        .where(eq(users.userId, used.userId))
+        .returning();
+
+    await endAllSessions(user.userId);
+    clearSessionCookie(res);
+    await logAction(LOG.PASSWORD_CHANGED, user, { via: 'reset link' });
+    await sendPasswordChangedEmail(user);
+    res.status(204).end();
+});
+
+// Allowed while suspended (decided 2026-10-27): keeping an account safe isn't
+// something a suspension should stop. Every other device is logged out, and
+// this one carries on with a new session
+authRouter.put(
+    '/password',
+    requireAuth,
+    arcjetProtect(passwordGuard, (req) => ({ userId: String(req.user.userId) })),
+    validate({ body: changePasswordSchema }),
+    async (req, res) => {
+        const { currentPassword, newPassword } = req.valid.body;
+        // 400, not 401: the session is fine, and a 401 would read as being logged out
+        if (!(await bcrypt.compare(currentPassword, req.user.password))) {
+            const message = 'Your current password is incorrect.';
+            throw new AppError(400, message, [{ path: 'body.currentPassword', message }]);
+        }
+
+        const [user] = await db
+            .update(users)
+            .set({ password: await bcrypt.hash(newPassword, BCRYPT_COST) })
+            .where(eq(users.userId, req.user.userId))
+            .returning();
+
+        await endAllSessions(user.userId);
+        await startSession(res, user.userId);
+        await logAction(LOG.PASSWORD_CHANGED, user, { via: 'settings' });
+        await sendPasswordChangedEmail(user);
         res.status(204).end();
     },
 );
