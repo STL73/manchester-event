@@ -60,6 +60,8 @@ export const locations = pgTable('locations', {
     address: varchar('address', { length: 255 }).notNull(),
     latitude: numeric('latitude', { precision: 10, scale: 8, mode: 'number' }).notNull(),
     longitude: numeric('longitude', { precision: 11, scale: 8, mode: 'number' }).notNull(),
+    // One of the ids in constants/areas.js, for Explore's area filter. NULL = outside them all
+    area: varchar('area', { length: 50 }),
     ...timestamps,
 });
 

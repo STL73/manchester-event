@@ -8,6 +8,7 @@ import { notFound, errorHandler } from './middleware/errorHandler.js';
 import authRouter from './routes/auth.routes.js';
 import userRouter from './routes/user.routes.js';
 import eventRouter from './routes/event.routes.js';
+import categoryRouter from './routes/category.routes.js';
 
 // The app without app.listen(), so tests can send it requests without a port
 const app = express();
@@ -22,6 +23,7 @@ app.use(cookieParser());
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/events', eventRouter);
+app.use('/api/v1/categories', categoryRouter);
 
 app.get('/', (req, res) => {
     res.send('Hello, welcome to the Manchester Event API');

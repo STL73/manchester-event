@@ -1,14 +1,29 @@
 import { Router } from "express";
 
+import { AppError } from '../lib/errors.js';
+import { findPublicEvent, listPublicEvents, summarisePublicEvents } from '../lib/publicEvents.js';
+import { validate } from '../middleware/validate.js';
+import { eventIdParams, listEventsQuery } from '../validation/events.js';
+
 const eventRouter = Router();
 
-eventRouter.get('/', (req, res) => {
-    res.send('Get all events')
-})
+// The public lists: Explore Events, Home's What's on, Preferences, About
+eventRouter.get('/', validate({ query: listEventsQuery }), async (req, res) => {
+    res.json(await listPublicEvents(req.valid.query));
+});
 
-eventRouter.get('/:id', (req, res) => {
-    res.send('Get event details')
-})
+// Counts for Home and About. Before /:id, or "summary" would be read as an ID
+eventRouter.get('/summary', async (req, res) => {
+    res.json({ data: await summarisePublicEvents() });
+});
+
+// Event details for guests and users. An event that was never public reads as
+// not found rather than forbidden, so its existence isn't given away
+eventRouter.get('/:id', validate({ params: eventIdParams }), async (req, res) => {
+    const event = await findPublicEvent(req.valid.params.id);
+    if (!event) throw new AppError(404, 'Event not found.');
+    res.json({ data: event });
+});
 
 eventRouter.post('/', (req, res) => {
     res.send('Create event')

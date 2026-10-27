@@ -3,9 +3,9 @@
 ## Current state
 
 The shared middleware below is in place (Phase 0, 2026-10-26) and the auth routes are real
-(Phase 1, passwords Phase 2). Apart from `/users/me` (Phase 2), the users and events routers are
-still stubs that return a placeholder string
-(`res.send('Get all events')`); database access comes with each feature.
+(Phase 1, passwords Phase 2), and so are the public event reads and categories (Phase 3). The
+rest of the users and events routers are still stubs that return a placeholder string
+(`res.send('Create event')`); database access comes with each feature.
 
 ## Routing
 
@@ -15,7 +15,8 @@ All routes are versioned under `/api/v1`, one router per resource, mounted in `s
 | --- | --- |
 | `/api/v1/auth` | `routes/auth.routes.js`: `POST /sign-up`, `/login`, `/logout`, `/verify-email`, `/resend-verification`, `/forgot-password`, `/reset-password`; `GET /me`; `PUT /password` |
 | `/api/v1/users` | `routes/user.routes.js`: `PUT /me` (name, email switch), `DELETE /me` (password-confirmed); REST CRUD on `/` and `/:id`, `/me` registered first |
-| `/api/v1/events` | `routes/event.routes.js`: REST CRUD, plus `GET /user/:id`, `PUT /user/:id/cancel` |
+| `/api/v1/events` | `routes/event.routes.js`: `GET /` (public list), `GET /summary` (counts), `GET /:id` (public details), `/summary` before `/:id`; the rest of REST CRUD, `GET /user/:id`, `PUT /user/:id/cancel` still stubs |
+| `/api/v1/categories` | `routes/category.routes.js`: `GET /` (active categories A to Z, upcoming events each) |
 
 - Router files: `const xRouter = Router();` then `export default xRouter;`
 - REST verbs: `GET` list/detail, `POST` create, `PUT` update, `DELETE` remove. Actions that
@@ -103,6 +104,24 @@ effect on the next request, and a JWT can't be cancelled before it expires.
   `email_verified_at`
 
 The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unused leftovers.
+
+## Public events (decided 2026-10-27)
+
+- Every public read goes through `lib/publicEvents.js`: an event is public when it is approved or
+  cancelled, or pending or rejected with an `approved_snapshot`, which is what guests and users
+  see (and what the filters search) until an admin approves the edit. `approved_snapshot` keys are
+  the Drizzle names (`eventName`, `startDatetime`…), dates as ISO strings
+- Lists (`GET /events`, `/summary`, `/categories`) show upcoming live events only:
+  `COALESCE(end, start) >= now`, organiser active or suspension ended. `GET /:id` also opens
+  past, cancelled and suspended organisers' events; anything never public is 404
+- `GET /events` filters: `q` (name, category, venue, address; `%` and `_` taken literally),
+  `category` (one slug or several, comma-separated), `location` (an area id from
+  `constants/areas.js`, `locations.area`), `when` (`tonight`, `weekend`, `week`) or `date`,
+  `page`, `limit` (12 at most). Soonest first, then by id
+- Date windows are Europe/London, worked out in JavaScript (`lib/londonTime.js`) and passed to
+  the query rather than SQL `now()`, so tests fix "now" with Vitest's fake `Date`. The rules match
+  the frontend's `lib/eventDates.js`: tonight = starts before midnight, weekend = Friday 17:00 to
+  the end of Sunday (the one in progress at a weekend), week = before midnight 7 days on
 
 ## Status codes (decided 2026-10-26)
 
