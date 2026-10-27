@@ -2,9 +2,9 @@
 
 ## Current state
 
-Every endpoint is a stub that returns a placeholder string (`res.send('Get all events')`). The
-shared middleware below is in place (Phase 0, 2026-10-26); auth and database access come with each
-feature.
+The shared middleware below is in place (Phase 0, 2026-10-26) and the auth routes are real
+(Phase 1). The users and events routers are still stubs that return a placeholder string
+(`res.send('Get all events')`); database access comes with each feature.
 
 ## Routing
 
@@ -12,7 +12,7 @@ All routes are versioned under `/api/v1`, one router per resource, mounted in `s
 
 | Mount | File and endpoints |
 | --- | --- |
-| `/api/v1/auth` | `routes/auth.routes.js`: `POST /sign-up`, `/login`, `/logout` |
+| `/api/v1/auth` | `routes/auth.routes.js`: `POST /sign-up`, `/login`, `/logout`, `/verify-email`, `/resend-verification`; `GET /me` |
 | `/api/v1/users` | `routes/user.routes.js`: REST CRUD on `/` and `/:id` |
 | `/api/v1/events` | `routes/event.routes.js`: REST CRUD, plus `GET /user/:id`, `PUT /user/:id/cancel` |
 
@@ -23,7 +23,7 @@ All routes are versioned under `/api/v1`, one router per resource, mounted in `s
 ## Middleware order
 
 In `src/app.js`: `helmet()`, then `securityMiddleware` (Arcjet, before the body is parsed), then
-`express.json()`, then the routers, then `notFound` and `errorHandler`, last. Middleware registered
+`express.json()`, then `cookieParser()`, then the routers, then `notFound` and `errorHandler`, last. Middleware registered
 after a router never runs for that router's routes, so `express.json()` must stay above them or
 `req.body` is `undefined`.
 
@@ -46,8 +46,12 @@ after a router never runs for that router's routes, so `express.json()` must sta
   replaced)
 - **Security:** `config/arcjet.js` makes one Arcjet client (shield, bot detection allowing search
   engines and link previews). Stricter rules for a route use `aj.withRule()` at module level, never
-  per request. Rate limit = 429, bot or shield = 403; if Arcjet can't be reached the request goes
-  through. The server won't start without `ARCJET_KEY`; tests skip Arcjet
+  per request, run by `arcjetProtect(client, props)` from `middleware/security.js`. Rate limit =
+  429, bot or shield = 403, a refused email = 400 on `body.email`; if Arcjet can't be reached the
+  request goes through. The server won't start without `ARCJET_KEY`; tests skip Arcjet
+- **Local testing gotcha:** Arcjet caches a denial for the client for about a minute, and locally
+  every request comes from 127.0.0.1. One request it calls a bot (plain `curl`) makes every
+  request 403 for that minute, browser included. Send a browser user agent with `curl -A`
 
 ## Auth (decided 2026-10-26)
 
@@ -59,17 +63,42 @@ effect on the next request, and a JWT can't be cancelled before it expires.
 - Login checks the bcryptjs hash, creates a `sessions` row and sets an `httpOnly`, `sameSite: 'lax'`
   cookie (`secure` in production) holding a random ID from `crypto.randomBytes`
 - The database stores only a SHA-256 hash of each session ID and token, never the value itself
-- `requireAuth` middleware loads the user from the cookie on every request and refuses a suspended
-  account; `requireRole(...)` checks the role on the server, never only in the frontend
-- Same error for an unknown email and a wrong password; login is rate-limited
+- `requireAuth` (`middleware/auth.js`) loads the user from the `sid` cookie onto `req.user` and
+  renews a 30-day session that has fewer than 15 days left. **A suspended account gets through**
+  (it can still log in and read, with a banner); routes that change something add
+  `requireActive`, which answers 403. A suspension whose `suspended_until` has passed is lifted
+  the next time the account is seen. `requireRole(...)` checks the role on the server, never only
+  in the frontend
+- Same error for an unknown email and a wrong password ("Email or password is incorrect"), and
+  an unknown email is still compared against a dummy hash so the timing matches. Failed logins go
+  to `system_logs` (`User Login Failed`): linked to the account when the email has one, otherwise
+  only the IP; the typed email is never stored
+- Limits (decided 2026-10-26): login 10 per 15 minutes per IP; sign-up 5 per hour per IP with
+  Arcjet `protectSignup` (also refuses disposable, invalid and no-MX emails); resend verification
+  3 per hour per user
+- Sign-up logs the person in straight away and emails a verification link; an email already in
+  use is said plainly (409 on `body.email`). The link opens the frontend's `/auth/verify-email`,
+  which POSTs the token: email scanners open GET links and would use it up. Tokens are 24 hours,
+  one per user and purpose, deleted when used
+- All email goes through `sendEmail()` in `lib/email.js` (Nodemailer with Gmail). Without
+  `EMAIL_USER` locally it prints the email to the server terminal instead
 - New session ID at every login; a password change deletes all of that user's sessions
 - Sign-up rejects the `admin` role. Unverified users can log in; the event-submit route checks
   `email_verified_at`
 
 The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unused leftovers.
 
-## To decide when handlers are written
+## Status codes (decided 2026-10-26)
 
-Record each decision here once it's made:
-
-- Status codes per action
+| Code | When |
+| --- | --- |
+| 200 | Read or action with a body (`login`, `me`, `verify-email`) |
+| 201 | Something created (`sign-up`) |
+| 204 | Done, nothing to send (`logout`, `resend-verification`) |
+| 400 | Invalid input, or a request that can't apply (expired link, already verified) |
+| 401 | Not logged in, or wrong email or password |
+| 403 | Logged in but not allowed (role, suspended), or blocked by Arcjet |
+| 404 | Not found |
+| 409 | Clashes with what exists (email already in use) |
+| 429 | Rate limited |
+| 503 | A service we depend on failed (an email that was asked for couldn't be sent) |

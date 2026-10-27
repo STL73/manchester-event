@@ -1,5 +1,6 @@
 import express from 'express';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 
 import { securityMiddleware } from './middleware/security.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
@@ -15,6 +16,8 @@ app.use(helmet());
 // Before the body is parsed: a blocked request costs as little as possible
 app.use(securityMiddleware);
 app.use(express.json());
+// Fills req.cookies, where requireAuth finds the session cookie
+app.use(cookieParser());
 
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);

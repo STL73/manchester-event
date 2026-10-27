@@ -57,5 +57,27 @@ const addedAdmins = await db
     .onConflictDoNothing({ target: users.email })
     .returning({ email: users.email });
 
+// One verified account per other role, for trying each dashboard by logging in
+// as it. Optional: skipped until SEED_USER_EMAIL, SEED_ORGANISER_EMAIL and
+// SEED_DEMO_PASSWORD are set
+const { SEED_USER_EMAIL, SEED_ORGANISER_EMAIL, SEED_DEMO_PASSWORD } = process.env;
+const seedDemos = Boolean(SEED_USER_EMAIL && SEED_ORGANISER_EMAIL && SEED_DEMO_PASSWORD);
+let addedDemos = [];
+
+if (seedDemos) {
+    const password = await bcrypt.hash(SEED_DEMO_PASSWORD, 12);
+    addedDemos = await db
+        .insert(users)
+        .values([
+            { username: 'Demo User', email: SEED_USER_EMAIL.toLowerCase(), password, role: 'user', emailVerifiedAt: new Date() },
+            { username: 'Demo Organiser', email: SEED_ORGANISER_EMAIL.toLowerCase(), password, role: 'organiser', emailVerifiedAt: new Date() },
+        ])
+        .onConflictDoNothing({ target: users.email })
+        .returning({ email: users.email });
+}
+
 console.log(`Categories added: ${addedCategories.length} of ${seedCategories.length}`);
 console.log(`Admin added: ${addedAdmins.length ? addedAdmins[0].email : 'no (already exists)'}`);
+console.log(seedDemos
+    ? `Demo accounts added: ${addedDemos.length ? addedDemos.map((u) => u.email).join(', ') : 'none (already exist)'}`
+    : 'Demo accounts skipped: SEED_USER_EMAIL, SEED_ORGANISER_EMAIL and SEED_DEMO_PASSWORD are not all set');
