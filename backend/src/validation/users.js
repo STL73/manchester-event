@@ -12,3 +12,11 @@ export const updateProfileSchema = z
 export const deleteAccountSchema = z.object({
     password: currentPassword,
 });
+
+// Preferences saves every pick at once: the whole list replaces what was followed
+export const followsSchema = z.object({
+    categories: z
+        .array(z.string().regex(/^[a-z0-9-]+$/, 'Choose categories from the list.'), { error: 'Choose categories from the list.' })
+        .max(50)
+        .transform((slugs) => [...new Set(slugs)]),
+});

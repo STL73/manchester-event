@@ -1,7 +1,7 @@
 import { and, asc, count, eq, gte, ilike, inArray, isNotNull, lt, lte, or, sql } from 'drizzle-orm';
 
 import { db } from '../db/index.js';
-import { categories, events, locations, users } from '../db/schema/index.js';
+import { categories, events, favourites, locations, users } from '../db/schema/index.js';
 import { dayRange, whenRange } from './londonTime.js';
 
 // What guests and users see of an event. Every public read goes through here, so
@@ -38,7 +38,12 @@ const isLive = or(eq(events.status, 'approved'), showsSnapshot);
 const isUpcoming = (now) => gte(sql`coalesce(${pub.endDatetime}, ${pub.startDatetime})`, now);
 // A suspension whose end has passed no longer hides anything, even before the
 // account is next seen and the suspension lifted
-const organiserVisible = (now) => or(eq(users.accStatus, 'active'), lte(users.suspendedUntil, now));
+// isNotNull first: NULL (suspended until lifted) <= now is unknown, not false,
+// and an unknown would come back as null where the answer is read as a value
+const organiserVisible = (now) =>
+    or(eq(users.accStatus, 'active'), and(isNotNull(users.suspendedUntil), lte(users.suspendedUntil, now)));
+// What the lists show, and so what can be saved: live, not over, organiser not suspended
+export const isListed = (now) => and(isLive, isUpcoming(now), organiserVisible(now));
 
 const fields = {
     eventId: events.eventId,
@@ -72,7 +77,7 @@ function fromPublicEvents() {
 
 // Upcoming live events matching Explore's filters, soonest first, one page of them
 export async function listPublicEvents({ q, category, location, when, date, page, limit }, now = new Date()) {
-    const conditions = [isLive, isUpcoming(now), organiserVisible(now)];
+    const conditions = [isListed(now)];
 
     if (q) {
         // ILIKE's own wildcards are searched for as typed
@@ -111,7 +116,7 @@ export async function listPublicEvents({ q, category, location, when, date, page
 // How many upcoming live events there are in all, in each `when` range and in
 // each area: Home's What's on and area tiles, About's figure
 export async function summarisePublicEvents(now = new Date()) {
-    const live = and(isLive, isUpcoming(now), organiserVisible(now));
+    const live = isListed(now);
     const inRange = (when) => {
         const [from, to] = whenRange(when, now);
         return from ? and(gte(pub.startDatetime, from), lt(pub.startDatetime, to)) : lt(pub.startDatetime, to);
@@ -144,9 +149,41 @@ export async function summarisePublicEvents(now = new Date()) {
 
 // One event by link: anything that has been public, past, cancelled or from a
 // suspended organiser included. Anything else is null, read as not found
-export async function findPublicEvent(eventId) {
-    const [event] = await fromPublicEvents().where(and(eq(events.eventId, eventId), isPublic));
+// `listed` says whether it's in the lists, which is when it can be saved,
+// without saying why not (a suspension isn't the public's business)
+export async function findPublicEvent(eventId, now = new Date()) {
+    const [event] = await db
+        .select({ ...fields, listed: sql`${isListed(now)}`.mapWith(Boolean) })
+        .from(events)
+        .innerJoin(categories, eq(categories.categoryId, pub.categoryId))
+        .innerJoin(locations, eq(locations.locationId, pub.locationId))
+        .innerJoin(users, eq(users.userId, events.organiserId))
+        .where(and(eq(events.eventId, eventId), isPublic));
     return event ?? null;
+}
+
+// A user's saved events, past and cancelled ones too (My Favourites greys them),
+// each as the public sees it, soonest first
+export function listFavouriteEvents(userId, now = new Date()) {
+    return db
+        .select({ ...fields, listed: sql`${isListed(now)}`.mapWith(Boolean), savedAt: favourites.createdAt })
+        .from(favourites)
+        .innerJoin(events, eq(events.eventId, favourites.eventId))
+        .innerJoin(categories, eq(categories.categoryId, pub.categoryId))
+        .innerJoin(locations, eq(locations.locationId, pub.locationId))
+        .innerJoin(users, eq(users.userId, events.organiserId))
+        .where(and(eq(favourites.userId, userId), isPublic))
+        .orderBy(asc(pub.startDatetime), asc(events.eventId));
+}
+
+// Whether an event can be saved now; null when there's no public event by that id
+export async function canSaveEvent(eventId, now = new Date()) {
+    const [event] = await db
+        .select({ listed: sql`${isListed(now)}`.mapWith(Boolean) })
+        .from(events)
+        .innerJoin(users, eq(users.userId, events.organiserId))
+        .where(and(eq(events.eventId, eventId), isPublic));
+    return event ? event.listed : null;
 }
 
 // Active categories A to Z, each with how many upcoming live events it has
@@ -156,7 +193,7 @@ export async function listCategories(now = new Date()) {
         .select({ categoryId: sql`${pub.categoryId}`.as('upcoming_category_id'), total: count().as('total') })
         .from(events)
         .innerJoin(users, eq(users.userId, events.organiserId))
-        .where(and(isLive, isUpcoming(now), organiserVisible(now)))
+        .where(isListed(now))
         // By position: written out again, the expression gets its own parameters
         // and Postgres can't tell it's the one selected
         .groupBy(sql`1`)
