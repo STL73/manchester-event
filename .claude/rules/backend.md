@@ -1,7 +1,8 @@
 # Backend Rules
 
 The full schema is applied to Neon and seeded. Auth and the account's own `/users/me` are real
-(Phases 1 and 2), and so are the public event reads and categories (Phase 3); the rest of the
+(Phases 1 and 2), and so are the public event reads and categories (Phase 3) and favourites and
+category follows (Phase 4); the rest of the
 users and events routers are still stubs that don't touch the database.
 
 ## Stack constraints

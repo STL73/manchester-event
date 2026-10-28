@@ -3,7 +3,8 @@
 ## Current state
 
 The shared middleware below is in place (Phase 0, 2026-10-26) and the auth routes are real
-(Phase 1, passwords Phase 2), and so are the public event reads and categories (Phase 3). The
+(Phase 1, passwords Phase 2), and so are the public event reads and categories (Phase 3) and
+favourites and category follows (Phase 4). The
 rest of the users and events routers are still stubs that return a placeholder string
 (`res.send('Create event')`); database access comes with each feature.
 
@@ -14,7 +15,7 @@ All routes are versioned under `/api/v1`, one router per resource, mounted in `s
 | Mount | File and endpoints |
 | --- | --- |
 | `/api/v1/auth` | `routes/auth.routes.js`: `POST /sign-up`, `/login`, `/logout`, `/verify-email`, `/resend-verification`, `/forgot-password`, `/reset-password`; `GET /me`; `PUT /password` |
-| `/api/v1/users` | `routes/user.routes.js`: `PUT /me` (name, email switch), `DELETE /me` (password-confirmed); REST CRUD on `/` and `/:id`, `/me` registered first |
+| `/api/v1/users` | `routes/user.routes.js`: `PUT /me` (name, email switch), `DELETE /me` (password-confirmed), `GET /me/favourites`, `PUT` and `DELETE /me/favourites/:id`, `GET` and `PUT /me/follows`; REST CRUD on `/` and `/:id`, `/me` registered first |
 | `/api/v1/events` | `routes/event.routes.js`: `GET /` (public list), `GET /summary` (counts), `GET /:id` (public details), `/summary` before `/:id`; the rest of REST CRUD, `GET /user/:id`, `PUT /user/:id/cancel` still stubs |
 | `/api/v1/categories` | `routes/category.routes.js`: `GET /` (active categories A to Z, upcoming events each) |
 
@@ -122,6 +123,23 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
   the query rather than SQL `now()`, so tests fix "now" with Vitest's fake `Date`. The rules match
   the frontend's `lib/eventDates.js`: tonight = starts before midnight, weekend = Friday 17:00 to
   the end of Sunday (the one in progress at a weekend), week = before midnight 7 days on
+- `isListed(now)` is the lists' rule (live, not over, organiser visible) and also decides what can
+  be saved. `GET /:id` and the favourites list send it as `listed`, so Event details can leave
+  out Save without saying why (a suspension isn't the public's business)
+
+## Favourites and follows (decided 2026-10-27)
+
+- Under `/users/me`, for the `user` role only (organisers and admins 403); reads work while
+  suspended, writes are `requireActive`. Unverified accounts may save and follow
+- `PUT /me/favourites/:id` saves (204, saving twice leaves one row); an event never public is
+  404, one the lists don't show (ended, cancelled, organiser suspended) is 400. Saves made
+  before stay, and `DELETE` always works, so they can be cleared. `GET /me/favourites` lists
+  them as the public sees them, past and cancelled too, with `listed` and `savedAt`, soonest
+  first
+- `PUT /me/follows` takes `{ categories: [slug…] }` and replaces the active categories followed
+  in one `db.batch()`; an unknown or archived slug is 400 on `body.categories`. Follows of an
+  archived category are kept, since Preferences doesn't show it to untick. Answers the sorted
+  slugs, as `GET` does
 
 ## Status codes (decided 2026-10-26)
 
