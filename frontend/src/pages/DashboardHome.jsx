@@ -34,6 +34,7 @@ export default function DashboardHome({ selectedUser, account, ...props }) {
         events={props.events}
         organiserEvents={props.organiserEvents}
         favouriteIds={props.favouriteIds}
+        favouriteEvents={props.favouriteEvents}
       />
       {/* mx-4: lines up with the sections below, which pad their content 16px */}
       <AccountBanner account={account} className="mx-4" />

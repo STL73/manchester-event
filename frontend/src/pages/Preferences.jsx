@@ -36,7 +36,7 @@ function PreferencesSummary({ counts, interestIds }) {
         {interestIds.length === 1 ? preferencesSummary.interest : preferencesSummary.interests}
       </strong>
       <span aria-hidden="true"> · </span>
-      {matching} {preferencesSummary.matching}
+      {matching} {matching === 1 ? preferencesSummary.matchingOne : preferencesSummary.matching}
     </>
   );
 }
@@ -49,6 +49,8 @@ function sameIds(a, b) {
 export default function Preferences({ interestIds, onSaveInterests }) {
   const [selectedCategoryIds, setSelectedCategoryIds] = useState(interestIds);
   const [justSaved, setJustSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
   const [comingUpOpen, setComingUpOpen] = useState(false);
   const SubmitIcon = preferencesForm.submit.icon;
 
@@ -72,6 +74,7 @@ export default function Preferences({ interestIds, onSaveInterests }) {
 
   function toggleCategory(categoryId) {
     setJustSaved(false);
+    setSaveError(null);
     setSelectedCategoryIds((currentIds) =>
       currentIds.includes(categoryId)
         ? currentIds.filter((id) => id !== categoryId)
@@ -79,10 +82,18 @@ export default function Preferences({ interestIds, onSaveInterests }) {
     );
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    onSaveInterests(selectedCategoryIds);
-    setJustSaved(true);
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await onSaveInterests(selectedCategoryIds);
+      setJustSaved(true);
+    } catch (error) {
+      setSaveError(error.message);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -130,14 +141,14 @@ export default function Preferences({ interestIds, onSaveInterests }) {
                     <strong>{pickedCount}</strong>{" "}
                     {pickedCount === 1 ? preferencesSummary.interest : preferencesSummary.interests}
                     <span aria-hidden="true"> · </span>
-                    <strong>{matchingCount}</strong> {yourPicks.upcoming}
+                    <strong>{matchingCount}</strong> {matchingCount === 1 ? yourPicks.upcomingOne : yourPicks.upcoming}
                   </>
                 )}
               </p>
             </div>
 
             <div className="preferences-picks-actions">
-              <Button type="submit" variant="primary" size="md" disabled={unchanged}>
+              <Button type="submit" variant="primary" size="md" disabled={unchanged || saving}>
                 <SubmitIcon aria-hidden="true" />
                 {preferencesForm.submit.label}
               </Button>
@@ -145,6 +156,9 @@ export default function Preferences({ interestIds, onSaveInterests }) {
 
             {justSaved && (
               <StatusMessage className="preferences-picks-saved">{preferencesForm.saved}</StatusMessage>
+            )}
+            {saveError && (
+              <StatusMessage variant="error" className="preferences-picks-saved">{saveError}</StatusMessage>
             )}
 
             <button

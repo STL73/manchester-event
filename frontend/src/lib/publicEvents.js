@@ -23,6 +23,9 @@ export function toEvent(event) {
     status: event.status,
     organiserId: event.organiser.userId,
     organiser: event.organiser.username,
+    // Whether the lists show it, which is when it can be saved. Lists only
+    // hold listed events, so only details and favourites send it
+    listed: event.listed ?? true,
   };
 }
 

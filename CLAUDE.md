@@ -9,16 +9,19 @@ approve them and manage users. It is a rewrite of an older PHP/MySQL university 
 in a separate folder (`D:\MY PROJECTS\manchester-event-portal`). That code is the reference for
 behaviour. Comments here that cite `*.php` files or PHP functions mark parity that is deliberate.
 
-The migration is half done, and **the two halves are connected for auth and public events so far**:
+The migration is half done, and **the two halves are connected for auth, public events and the
+user's favourites and interests so far**:
 
 - `frontend/` is a near-complete React port. Login, sign-up, logout, email verification and the
   signed-in account are real (Phase 1), and so are forgot and reset password and Settings' name,
   email switch, password and Delete account (Phase 2). Home, Explore Events, About's figure,
-  Preferences and Event details for guests and users read real events (Phase 3); every other page
-  still runs on in-memory mock data
+  Preferences and Event details for guests and users read real events (Phase 3), and the hearts,
+  My Favourites, Preferences' picks and the user dashboard's Home are real (Phase 4, except "New
+  in your interests"); every other page still runs on in-memory mock data
 - `backend/` is Express + Drizzle. Auth is real (sign-up, login, sessions, email verification;
   Phase 1, 2026-10-26; passwords and the account's own profile and deletion, Phase 2,
-  2026-10-27), and so are the public event reads and categories (Phase 3, 2026-10-27); the rest of
+  2026-10-27), and so are the public event reads and categories (Phase 3, 2026-10-27) and
+  favourites and category follows (Phase 4, 2026-10-27); the rest of
   the users and events routers still return placeholder strings. The full schema in
   `src/db/schema/` is applied to Neon and seeded, demo events included
 

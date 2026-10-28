@@ -29,8 +29,16 @@ functions record behaviour being matched on purpose: keep that parity unless tol
   (`toEvent()` turns an API event into the shape `EventCard` and Event details read;
   `eventsPath()` builds the query). `EventsBrowser` (Explore, public and dashboard), Home
   (`/events/summary` + What's on), About's figure, Preferences (`/categories` + next 3) and
-  Event details for guests and users. Organiser and admin pages, the user dashboard's Home and
-  My Favourites still read App's mock events until their phase
+  Event details for guests and users. Favourites and interests (Phase 4): `App.jsx` loads
+  `/users/me/favourites` and `/users/me/follows` when a user-role account logs in and keeps them
+  with that account's id, so the next account never sees them. A heart changes at once
+  (`favouriteIds`) and changes back if the server refuses, with the reason in
+  `events/FavouriteError` floating over the page; `favouriteEvents` (each as the public sees
+  it) feed My Favourites, Home's cards and the greeting. Preferences awaits the save and shows
+  a refusal. Event details has no Save for an event the lists don't show (`listed`), unless it
+  is already saved. User Home's "New in your interests" and the analytics pages' saves and
+  follows stay mock until Phases 7 and 10, and organiser and admin pages read App's mock
+  events until their phase
 - **Event photos live in `public/images/events/`** (2026-10-27) and are referenced by path
   (`/images/events/<file>`), the same path the database's `image_url` stores; NULL shows
   `defaultEventImage`. There is no `imagePosition`: photos crop centred
