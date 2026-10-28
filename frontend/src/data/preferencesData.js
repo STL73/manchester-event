@@ -28,6 +28,7 @@ import { eventCategories } from "./eventsData";
 export const preferencesSummary = {
   interest: "interest",
   interests: "interests",
+  matchingOne: "upcoming event matches them",
   matching: "upcoming events match them",
   none: "Choose at least one interest to get event alerts",
 };
@@ -44,6 +45,7 @@ export const preferencesForm = {
 // saved interests
 export const yourPicks = {
   title: "Your picks",
+  upcomingOne: "upcoming event",
   upcoming: "upcoming events",
   nothing: "Nothing picked yet",
   comingUp: "Coming up for you",

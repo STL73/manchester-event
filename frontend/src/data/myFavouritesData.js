@@ -24,6 +24,13 @@ export const endedFavourites = {
 
 export const addToCalendar = { label: "Add to calendar" };
 
+// The message when a heart couldn't change (the server's reason), and how
+// long it stays before it goes by itself
+export const favouriteError = {
+  dismiss: "Dismiss",
+  shownFor: 8000,
+};
+
 // Mock of the user's rows in the favourites table (held in App state).
 // 8 has finished and 5 was cancelled, so the second section has something
 export const initialFavouriteIds = [1, 3, 4, 8, 5];

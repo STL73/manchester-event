@@ -45,7 +45,9 @@ function addEventToCalendar(event) {
   downloadEventIcs(event, `${window.location.origin}${eventDetailsPath(event.eventId, false)}`);
 }
 
-// Favourites live in App so every page shows the same hearts
+// Favourites live in App so every page shows the same hearts. events are the
+// user's saved events from the API (GET /users/me/favourites); favouriteIds
+// drops one the moment its heart is pressed, before the server answers
 export default function MyFavourites({ events, favouriteIds, onToggleFavourite }) {
   const { upcoming, ended } = splitFavourites(events, favouriteIds, new Date());
   const EndedIcon = endedFavourites.icon;

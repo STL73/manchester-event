@@ -100,7 +100,7 @@ export default function DashboardGreeting({ selectedUser, ...data }) {
         </h1>
         <p className="dashboard-greeting-status">
           {selectedUser.type === "user" ? (
-            <NextFavouriteLine events={data.events} favouriteIds={data.favouriteIds} />
+            <NextFavouriteLine events={data.favouriteEvents} favouriteIds={data.favouriteIds} />
           ) : (
             <PendingLine role={dashboardGreeting.roles[selectedUser.type]} {...data} />
           )}

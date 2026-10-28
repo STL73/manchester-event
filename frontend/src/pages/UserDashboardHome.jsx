@@ -5,7 +5,9 @@ import EventCard from "../components/events/EventCard";
 import { userInsights } from "../data/userDashboardData";
 import { getFavouriteEvents, getNextFavourite } from "../data/myFavouritesData";
 import { eventCategories, eventDetailsPath, isPublicEvent } from "../data/eventsData";
-import { isUpcoming, matchesWhen } from "../lib/eventDates";
+import { isUpcoming } from "../lib/eventDates";
+import { eventsPath } from "../lib/publicEvents";
+import { useApi } from "../lib/useApi";
 import EmptyState from "../components/UI/EmptyState";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -22,18 +24,21 @@ const dayMonth = new Intl.DateTimeFormat("en-GB", {
 });
 
 // The four Quick Insights cards: what's coming for this user, each with
-// one line of context (see DashboardCard)
-function getUserInsights({ events, favouriteIds, interestIds, notifications }) {
+// one line of context (see DashboardCard). Saved events are the user's real
+// favourites and "This week" counts real events (Phase 4); "New in your
+// interests" reads the mock events until notifications arrive in Phase 7
+function getUserInsights({ events, favouriteEvents, favouriteIds, interestIds, thisWeekCount, notifications }) {
   const now = new Date();
   const text = userInsights;
   const live = events.filter((event) => isPublicEvent(event) && isUpcoming(event, now));
   const inInterests = live.filter((event) => interestIds.includes(event.categoryId));
   const hasInterests = interestIds.length > 0;
 
-  const saved = live.filter((event) => favouriteIds.includes(event.eventId));
-  const next = getNextFavourite(events, favouriteIds);
+  const saved = favouriteEvents.filter(
+    (event) => favouriteIds.includes(event.eventId) && isPublicEvent(event) && isUpcoming(event, now),
+  );
+  const next = getNextFavourite(favouriteEvents, favouriteIds);
 
-  const thisWeek = inInterests.filter((event) => matchesWhen(event, "week", now));
   const interestNames = eventCategories
     .filter((category) => interestIds.includes(category.id))
     .map((category) => category.name)
@@ -61,7 +66,7 @@ function getUserInsights({ events, favouriteIds, interestIds, notifications }) {
     },
     {
       ...text.thisWeek,
-      count: thisWeek.length,
+      count: thisWeekCount,
       action: hasInterests ? undefined : text.thisWeek.noInterests,
       detail: interestNames,
     },
@@ -86,14 +91,32 @@ function getUserInsights({ events, favouriteIds, interestIds, notifications }) {
 
 export default function UserDashboardHome({
   events,
+  favouriteEvents,
   favouriteIds,
   interestIds,
   notifications,
   onToggleFavourite,
 }) {
   // Matches get_recent_favourites(): limit 3
-  const recentFavourites = getFavouriteEvents(events, favouriteIds).slice(0, 3);
-  const insights = getUserInsights({ events, favouriteIds, interestIds, notifications });
+  const recentFavourites = getFavouriteEvents(favouriteEvents, favouriteIds).slice(0, 3);
+  // Only the total is needed, so one event is asked for. Sorted, so the same
+  // interests always ask for the same thing
+  const thisWeek = useApi(
+    interestIds.length > 0
+      ? eventsPath({ category: [...interestIds].sort(), when: "week", limit: 1 })
+      : null,
+  );
+  // "…" while it loads and "–" if it can't, rather than a 0 that isn't true
+  const thisWeekCount =
+    interestIds.length === 0 ? 0 : thisWeek.error ? "–" : (thisWeek.payload?.pagination.total ?? "…");
+  const insights = getUserInsights({
+    events,
+    favouriteEvents,
+    favouriteIds,
+    interestIds,
+    thisWeekCount,
+    notifications,
+  });
 
   return (
     <div className="dashboard-page">

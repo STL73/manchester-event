@@ -15,6 +15,7 @@ import ScrollToTop from "./components/layout/ScrollToTop";
 import NotFound from "./pages/NotFound";
 import { getData, getUserData } from "./data/navigationData";
 import { api } from "./lib/api";
+import { toEvent } from "./lib/publicEvents";
 import { mockUsers } from "./data/manageUsersData";
 import { currentAdmin, getManagedEvents } from "./data/manageEventsData";
 import { currentOrganiser } from "./data/organiserEventsData";
@@ -27,6 +28,7 @@ import { initialNotifications } from "./data/notificationsData";
 import { passwordChangedNotification } from "./data/profileSettingsData";
 
 import PageLoading from "./components/UI/PageLoading";
+import FavouriteError from "./components/events/FavouriteError";
 import "./App.css";
 
 // The dashboard and its pages download only when someone signs in, so a
@@ -94,18 +96,27 @@ function App() {
   // version (publicVersion); organisers and admins see the real record
   const audienceEvents = events.map(publicVersion);
   // The public pages (Home, Explore Events, About, Preferences, Event details
-  // for guests and users) read events from the API since Phase 3; the user
-  // dashboard's Home and My Favourites still read this list until Phase 4
+  // for guests and users) read events from the API since Phase 3, and the
+  // user's favourites since Phase 4; "New in your interests" still reads this
+  // list until Phase 7
   const [users, setUsers] = useState(mockUsers);
   const organiserEvents = events.filter(
     (event) => event.organiserId === currentOrganiser.id,
   );
   const managedEvents = getManagedEvents(events);
-  // Shared by the user dashboard, My Favourites and Explore Events
-  const [favouriteIds, setFavouriteIds] = useState(initialFavouriteIds);
-  // The user's interests (category_follows): saved on Preferences, counted
-  // on the user dashboard
-  const [interestIds, setInterestIds] = useState(userCategoryIds);
+  // The user role's favourites and interests (category_follows), loaded from
+  // the API after login and kept with the account they belong to, so the next
+  // account to log in never sees them. favouriteIds is what the hearts show:
+  // it changes at once, and favouriteEvents (each as the public sees it)
+  // catches up when the server has answered
+  const listsUserId = userType === "user" ? account.userId : null;
+  const [userLists, setUserLists] = useState({ userId: null });
+  const listsLoaded = listsUserId !== null && userLists.userId === listsUserId;
+  const favouriteIds = listsLoaded ? userLists.favouriteIds : [];
+  const favouriteEvents = listsLoaded ? userLists.favouriteEvents : [];
+  const interestIds = listsLoaded ? userLists.interestIds : [];
+  // Why a heart couldn't change, shown over the page for a moment
+  const [favouriteError, setFavouriteError] = useState(null);
   // Sent from the public Contact form, read on the admin Contact Messages page
   const [contactMessages, setContactMessages] = useState(initialContactMessages);
   // Read on the Notifications page and counted on the user dashboard, so
@@ -123,6 +134,38 @@ function App() {
       .catch(() => setAccount(null))
       .finally(() => setAccountLoaded(true));
   }, []);
+
+  // If either list can't be read the user starts with none, rather than a
+  // dashboard that never loads; the error says so
+  useEffect(() => {
+    if (listsUserId === null) return undefined;
+    let current = true;
+    Promise.all([api("/users/me/favourites"), api("/users/me/follows")]).then(
+      ([favourites, follows]) =>
+        current &&
+        setUserLists({
+          userId: listsUserId,
+          favouriteIds: favourites.data.map((event) => event.eventId),
+          favouriteEvents: favourites.data.map(toEvent),
+          interestIds: follows.data,
+        }),
+      (error) => {
+        if (!current) return;
+        setUserLists({ userId: listsUserId, favouriteIds: [], favouriteEvents: [], interestIds: [] });
+        setFavouriteError(error.message);
+      },
+    );
+    return () => {
+      current = false;
+    };
+  }, [listsUserId]);
+
+  // Changes the lists only while they still belong to the same account
+  const updateUserLists = useCallback(
+    (userId, change) =>
+      setUserLists((current) => (current.userId === userId ? { ...current, ...change(current) } : current)),
+    [],
+  );
 
   // After the email is verified, so the banners go without a reload
   const refreshAccount = useCallback(() => {
@@ -189,13 +232,41 @@ function App() {
     );
   }
 
-  // Matches add_favourite / remove_favourites in the PHP
-  function toggleFavourite(eventId) {
-    setFavouriteIds((currentIds) =>
-      currentIds.includes(eventId)
-        ? currentIds.filter((id) => id !== eventId)
-        : [...currentIds, eventId],
-    );
+  // Matches add_favourite / remove_favourites in the PHP. The heart changes
+  // at once and changes back with the server's reason if the request fails
+  // (an event that has ended or been cancelled since the page loaded)
+  async function toggleFavourite(eventId) {
+    const userId = listsUserId;
+    const saving = !favouriteIds.includes(eventId);
+    const setSaved = (saved) =>
+      updateUserLists(userId, ({ favouriteIds: ids }) => ({
+        favouriteIds: saved ? [...ids.filter((id) => id !== eventId), eventId] : ids.filter((id) => id !== eventId),
+      }));
+
+    setFavouriteError(null);
+    setSaved(saving);
+    try {
+      await api(`/users/me/favourites/${eventId}`, { method: saving ? "PUT" : "DELETE" });
+    } catch (error) {
+      setSaved(!saving);
+      setFavouriteError(error.message);
+      return;
+    }
+    // A new save needs the event as the public sees it, for My Favourites and
+    // Home. If this read fails the heart is still right; the list catches up
+    // on the next login
+    if (saving) {
+      api("/users/me/favourites")
+        .then(({ data }) => updateUserLists(userId, () => ({ favouriteEvents: data.map(toEvent) })))
+        .catch(() => {});
+    }
+  }
+
+  // Preferences awaits this and shows the server's refusal
+  async function saveInterests(categoryIds) {
+    const userId = listsUserId;
+    const { data } = await api("/users/me/follows", { method: "PUT", body: { categories: categoryIds } });
+    updateUserLists(userId, () => ({ interestIds: data }));
   }
   const data = getData();
   // The role's sidebar links and default icon from navigationData, with the
@@ -445,11 +516,11 @@ function App() {
             }
           >
             <Route index element={<Navigate to="home" replace />} />
-            <Route path="home" element={<DashboardHome selectedUser={selectedUser} account={account} users={users} events={userType === "user" ? audienceEvents : events} organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} interestIds={interestIds} contactMessages={contactMessages} notifications={notifications} />} />
+            <Route path="home" element={<DashboardHome selectedUser={selectedUser} account={account} users={users} events={userType === "user" ? audienceEvents : events} organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} favouriteIds={favouriteIds} favouriteEvents={favouriteEvents} onToggleFavourite={toggleFavourite} interestIds={interestIds} contactMessages={contactMessages} notifications={notifications} />} />
             <Route element={<RoleOnly allow="user" userType={userType} />}>
               <Route path="explore-events" element={<ExploreEvents inDashboard selectedUser={selectedUser} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
-              <Route path="my-favourites" element={<MyFavourites events={audienceEvents} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
-              <Route path="preferences" element={<Preferences interestIds={interestIds} onSaveInterests={setInterestIds} />} />
+              <Route path="my-favourites" element={<MyFavourites events={favouriteEvents} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
+              <Route path="preferences" element={listsLoaded ? <Preferences key={listsUserId} interestIds={interestIds} onSaveInterests={saveInterests} /> : <PageLoading />} />
             </Route>
             <Route path="events/:eventId" element={<EventDetails inDashboard events={events} role={userType} organiserId={currentOrganiser.id} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
             <Route path="notifications" element={<Notifications selectedUser={selectedUser} notifications={notifications} onMarkRead={markNotificationsRead} />} />
@@ -483,14 +554,16 @@ function App() {
               <Route path="my-events" element={<MyEvents organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} />} />
               <Route path="my-events/:eventId/edit" element={<ResetOnParam param="eventId"><CreateEvents mode="edit" events={organiserEvents} onUpdateEvent={updateOrganiserEvent} onCancelEvent={cancelOrganiserEvent} onDeleteEvent={deleteOrganiserEvent} /></ResetOnParam>} />
               <Route path="my-drafts" element={<MyDrafts organiserEvents={organiserEvents} onSubmitDraft={submitDraft} onDeleteEvent={deleteOrganiserEvent} />} />
-              <Route path="event-analytics" element={<EventAnalytics organiserEvents={organiserEvents} favouriteIds={favouriteIds} interestIds={interestIds} />} />
+              {/* The analytics pages count everyone's saves and follows, so
+                  they keep the mock ones until Phase 10 */}
+              <Route path="event-analytics" element={<EventAnalytics organiserEvents={organiserEvents} favouriteIds={initialFavouriteIds} interestIds={userCategoryIds} />} />
             </Route>
             <Route element={<RoleOnly allow="admin" userType={userType} />}>
               <Route path="manage-users" element={<ManageUsers users={users} events={events} currentUserId={currentAdmin.id} onUpdateUser={updateUserStatus} onDeleteUser={deleteUser} />} />
               <Route path="manage-users/:userId/edit" element={<OpenInPanel param="userId" to="/dashboard/manage-users" />} />
               <Route path="manage-events" element={<ManageEvents events={managedEvents} onUpdateEventStatus={updateEventStatus} />} />
               <Route path="manage-events/:eventId/edit" element={<OpenInPanel param="eventId" to="/dashboard/manage-events" />} />
-              <Route path="site-analytics" element={<SiteAnalytics users={users} events={events} contactMessages={contactMessages} favouriteIds={favouriteIds} interestIds={interestIds} />} />
+              <Route path="site-analytics" element={<SiteAnalytics users={users} events={events} contactMessages={contactMessages} favouriteIds={initialFavouriteIds} interestIds={userCategoryIds} />} />
               <Route path="system-logs" element={<SystemLogs events={events} users={users} />} />
               <Route path="contact-messages" element={<ContactMessages contactMessages={contactMessages} users={users} onSetRead={setContactMessageRead} onReply={replyToContactMessage} />} />
             </Route>
@@ -502,6 +575,7 @@ function App() {
         </Routes>
       </main>
       {showFooter && <Footer />}
+      <FavouriteError message={favouriteError} onDismiss={() => setFavouriteError(null)} />
     </div>
   );
 }

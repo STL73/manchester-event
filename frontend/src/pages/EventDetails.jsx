@@ -108,7 +108,10 @@ function PanelActions({ event, state, role, isFavourite, onToggleFavourite }) {
           <CalendarArrowDown aria-hidden="true" />
           {addToCalendar.label}
         </Button>
-        {role === "user" && (
+        {/* listed: what the lists show is what can be saved, so an event
+            whose organiser is suspended has no Save; a save made before
+            keeps its heart, so it can be removed */}
+        {role === "user" && (isFavourite || event.listed !== false) && (
           <Button
             type="button"
             variant="secondary"
