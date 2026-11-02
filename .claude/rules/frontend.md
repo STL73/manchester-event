@@ -37,8 +37,14 @@ functions record behaviour being matched on purpose: keep that parity unless tol
   it) feed My Favourites, Home's cards and the greeting. Preferences awaits the save and shows
   a refusal. Event details has no Save for an event the lists don't show (`listed`), unless it
   is already saved. User Home's "New in your interests" and the analytics pages' saves and
-  follows stay mock until Phases 7 and 10, and organiser and admin pages read App's mock
-  events until their phase
+  follows stay mock until Phases 7 and 10, and admin pages read App's mock events until their
+  phase. Organiser events (Phase 5): `App.jsx` loads `/users/me/events` when an organiser logs
+  in, kept with that account's id (`organiserEvents`; `null` to pages that must wait), mapped by
+  `lib/organiserEvents.js` (`toOrganiserEvent()`: the organiser's latest version, with the
+  server's `hasBeenPublic` and `editPending`; `toLondonInput()` for datetime-local inputs). Its
+  five handlers await the API and throw the `ApiError`; the list changes only when the server
+  agrees, and each page shows the refusal in red. Event Analytics and Organiser Home's "Saved by
+  users" card still read mock data until Phase 10
 - **Event photos live in `public/images/events/`** (2026-10-27) and are referenced by path
   (`/images/events/<file>`), the same path the database's `image_url` stores; NULL shows
   `defaultEventImage`. There is no `imagePosition`: photos crop centred
@@ -190,9 +196,11 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   and Save (guests a log-in line instead) while the event is to come; an ended or cancelled
   favourite keeps only its heart. Organisers and admins check rather than attend: a status badge
   and the ticket link as a fact, no buttons. One banner at most, in the status colour: cancelled,
-  ended, pending, rejected, draft. `canViewEvent` (in `eventsData.js`) decides who may open
-  what; anything else reads as not found. The map stays a link until the backend has the venue's
-  coordinates
+  ended, pending, rejected, draft; an edit of a live event waiting or rejected says the earlier
+  version is still live (`pendingEdit`, `rejectedEdit`). Organisers open their own events from
+  `organiserEvents` and anyone else's from the public API; `canViewEvent` (in `eventsData.js`)
+  is left for the admin's mock list. The map is still a link: the venues have coordinates since
+  Phase 5, and an embedded map (Leaflet on OSM, or Google's free Maps Embed) is a later step
 - **My Events** (decided 2026-10-12): submitted events only; drafts live on My Drafts and the
   summary links to them ("6 live · 2 waiting for approval · 1 rejected · 3 drafts"). The search
   bar is Explore's (keywords, category, location, Search), and the row under it holds status
@@ -216,10 +224,15 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   (The basics, When, Where, Tickets, Photo; numbers in the logo's cell) and, beside it, a sticky
   column with the live card (`EventCard`'s `preview`), a "3 of 6 needed to submit" checklist and
   the buttons; below 56rem only the buttons show, pinned to the bottom of the screen. Labels
-  carry no ":" or "*"; the one optional field says "Optional". The area is picked from
-  `eventLocations` (Explore's filter uses it). The end must be after the start; Submit refuses
-  a start that has passed (a draft may keep one). The photo is a drop box (JPG, PNG, WebP, GIF,
-  5 MB) with Replace and Remove. Edit opens with a banner saying what saving does and ends with
+  carry no ":" or "*"; the one optional field says "Optional". Where is one **Venue** field
+  (2026-11-02): `events/VenueSearch`, a combobox over `/locations/search` (3 letters, waits
+  350 ms; arrows, Enter, Escape) that becomes a card with the address, the area the server
+  worked out and Change, with "© OpenStreetMap contributors" in both. Only its `placeId` is
+  sent. The end must be after the start; Submit refuses a start that has passed (a draft may
+  keep one, and a draft being sent is always checked). The server's refusals go under their
+  fields, the first in the form's order focused. The photo box is `locked` until Phase 6: it
+  shows the event's photo or the default with a "coming soon" line (the drop box, JPG, PNG,
+  WebP, GIF, 5 MB with Replace and Remove, is still in the code for then). Edit opens with a banner saying what saving does and ends with
   a danger zone asked in the page: Cancel for an event that has been public (`hasBeenPublic`),
   Delete for one that never was. Saving leads on: Submit to My Events' Pending view, a new
   draft to My Drafts, Save draft on an existing draft stays. Editing a live event keeps its

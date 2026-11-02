@@ -92,6 +92,65 @@
     @apply absolute inset-x-3 top-3 justify-center rounded-lg bg-background/90 px-3 py-2;
   }
 
+  /* Until Phase 6: no picking, so no dashed "drop here" look or hover */
+  .event-image-drop.is-locked {
+    @apply border-solid border-border bg-background hover:border-border;
+  }
+
+  /* VenueSearch: the suggestions float under the box, over the form */
+  .venue-search {
+    @apply relative;
+  }
+
+  .venue-options {
+    @apply absolute inset-x-0 top-full z-20 mt-1.5 flex flex-col gap-1 rounded-xl border border-border bg-card p-1.5 shadow-lg;
+  }
+
+  .venue-option {
+    @apply flex cursor-pointer flex-col rounded-lg px-3 py-2 hover:bg-accent/10;
+  }
+
+  .venue-option.is-active {
+    @apply selected;
+  }
+
+  .venue-option-name {
+    @apply text-sm font-medium text-foreground;
+  }
+
+  .venue-option-address {
+    @apply text-[13px] text-muted;
+  }
+
+  .venue-options-status {
+    @apply px-3 py-2 text-[13px] text-muted;
+  }
+
+  .venue-credit {
+    @apply self-end px-1 text-[11px] text-muted underline-offset-2 hover:underline focus-ring;
+  }
+
+  .venue-chosen {
+    @apply flex items-start gap-3 rounded-xl border border-border bg-background p-3.5 outline-none focus-visible:border-accent;
+  }
+
+  .venue-chosen-icon {
+    @apply mt-0.5 size-5 shrink-0 text-accent;
+  }
+
+  .venue-chosen-name {
+    @apply text-sm font-medium text-foreground;
+  }
+
+  .venue-chosen-address,
+  .venue-chosen-area {
+    @apply text-[13px] text-muted;
+  }
+
+  .venue-chosen .venue-credit {
+    @apply mt-1 inline-block px-0;
+  }
+
   .event-form-side {
     @apply sticky top-4 flex flex-col gap-3.5;
   }

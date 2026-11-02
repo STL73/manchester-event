@@ -44,15 +44,27 @@ export default function MyDrafts({
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   const lastEdited = drafts[0] && new Date(drafts[0].updatedAt);
 
-  function handleSubmit(event) {
-    onSubmitDraft(event.eventId);
-    setMessage({ type: "submitted" });
+  // Each awaits the server, which may refuse (an unverified email, a start
+  // that has passed since the page loaded); its reason shows in red
+  async function handleSubmit(event) {
+    setMessage(null);
+    try {
+      await onSubmitDraft(event.eventId);
+      setMessage({ type: "submitted" });
+    } catch (error) {
+      setMessage({ type: "error", text: error.message });
+    }
   }
 
   // The card has already asked (see EventCard)
-  function handleDelete(event) {
-    onDeleteEvent(event.eventId);
-    setMessage({ type: "deleted" });
+  async function handleDelete(event) {
+    setMessage(null);
+    try {
+      await onDeleteEvent(event.eventId);
+      setMessage({ type: "deleted" });
+    } catch (error) {
+      setMessage({ type: "error", text: error.message });
+    }
   }
 
   const { submitted } = myDraftsMessages;
@@ -83,7 +95,7 @@ export default function MyDrafts({
         />
 
         {message && (
-          <StatusMessage className="table-message">
+          <StatusMessage variant={message.type === "error" ? "error" : "success"} className="table-message">
             {message.type === "submitted" ? (
               <>
                 {submitted.text}{" "}

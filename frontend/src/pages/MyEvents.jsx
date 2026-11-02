@@ -95,7 +95,9 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
   const [filters, setFilters] = useState(() => readFilters(searchParams));
   // A message can arrive from Edit Event (e.g. after cancelling an event)
   const location = useLocation();
-  const [message, setMessage] = useState(location.state?.message ?? "");
+  const [message, setMessage] = useState(() =>
+    location.state?.message ? { text: location.state.message } : null,
+  );
   const gridRef = useRef(null);
   const dateInputRef = useRef(null);
   const { createFirst } = organiserEventActions;
@@ -223,10 +225,16 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
     setSearchParams({});
   }
 
-  // The card has already asked (see EventCard)
-  function handleDelete(event) {
-    onDeleteEvent(event.eventId);
-    setMessage(organiserEventMessages.eventDeleted);
+  // The card has already asked (see EventCard). The server may refuse: an
+  // event approved since the page loaded can only be cancelled
+  async function handleDelete(event) {
+    setMessage(null);
+    try {
+      await onDeleteEvent(event.eventId);
+      setMessage({ text: organiserEventMessages.eventDeleted });
+    } catch (error) {
+      setMessage({ text: error.message, variant: "error" });
+    }
   }
 
   return (
@@ -303,7 +311,7 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
         )}
 
         {message && (
-          <StatusMessage className="table-message">{message}</StatusMessage>
+          <StatusMessage variant={message.variant} className="table-message">{message.text}</StatusMessage>
         )}
 
         <div className="events-grid events-grid-three" ref={gridRef}>

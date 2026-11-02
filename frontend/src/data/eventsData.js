@@ -101,6 +101,19 @@ export const eventDetailsPage = {
       admin: "You rejected this event. The organiser can edit it and submit it again.",
     },
     draft: { icon: SquarePen, title: "Draft", text: "Only you can see it until you submit it from My Drafts." },
+    // An edit of a live event: the approved version is still what people see
+    pendingEdit: {
+      icon: Clock,
+      title: "Your changes are waiting for approval",
+      text: "The earlier version stays live until an admin approves them.",
+      admin: "The earlier version stays live until you approve the changes.",
+    },
+    rejectedEdit: {
+      icon: CircleX,
+      title: "Changes rejected",
+      text: "The earlier version is still live. Edit it from My Events to send new changes.",
+      admin: "You rejected these changes. The earlier version is still live.",
+    },
   },
 };
 
@@ -140,8 +153,10 @@ export function publicVersion(event) {
   return { ...event, ...event.approvedSnapshot, status: "approved", approvedSnapshot: null };
 }
 
-// Once public, an event can only be cancelled, never deleted
+// Once public, an event can only be cancelled, never deleted. An organiser's
+// events from the API carry the server's answer; the mock ones work it out
 export function hasBeenPublic(event) {
+  if (typeof event.hasBeenPublic === "boolean") return event.hasBeenPublic;
   return Boolean(event.approvedSnapshot) || ["approved", "past", "cancelled"].includes(event.status);
 }
 

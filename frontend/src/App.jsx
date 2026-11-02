@@ -16,10 +16,11 @@ import NotFound from "./pages/NotFound";
 import { getData, getUserData } from "./data/navigationData";
 import { api } from "./lib/api";
 import { toEvent } from "./lib/publicEvents";
+import { toOrganiserEvent } from "./lib/organiserEvents";
 import { mockUsers } from "./data/manageUsersData";
 import { currentAdmin, getManagedEvents } from "./data/manageEventsData";
 import { currentOrganiser } from "./data/organiserEventsData";
-import { initialEvents, publicVersion, snapshotOf } from "./data/eventsData";
+import { initialEvents, publicVersion } from "./data/eventsData";
 import { privacyPage, termsPage } from "./data/legalPagesData";
 import { initialFavouriteIds } from "./data/myFavouritesData";
 import { userCategoryIds } from "./data/preferencesData";
@@ -100,9 +101,18 @@ function App() {
   // user's favourites since Phase 4; "New in your interests" still reads this
   // list until Phase 7
   const [users, setUsers] = useState(mockUsers);
-  const organiserEvents = events.filter(
+  // Event Analytics still reads the mock organiser's events until Phase 10
+  // brings its figures from the API
+  const mockOrganiserEvents = events.filter(
     (event) => event.organiserId === currentOrganiser.id,
   );
+  // An organiser's own events from the API (Phase 5), kept with the account
+  // they belong to like the user's lists below. null until they arrive, so
+  // Event details can wait rather than say "not found"
+  const organiserUserId = userType === "organiser" ? account.userId : null;
+  const [organiserLists, setOrganiserLists] = useState({ userId: null, events: null });
+  const organiserEventsLoaded = organiserUserId !== null && organiserLists.userId === organiserUserId;
+  const organiserEvents = organiserEventsLoaded ? organiserLists.events : [];
   const managedEvents = getManagedEvents(events);
   // The user role's favourites and interests (category_follows), loaded from
   // the API after login and kept with the account they belong to, so the next
@@ -159,6 +169,34 @@ function App() {
       current = false;
     };
   }, [listsUserId]);
+
+  // If the list can't be read the pages show none, with the reason over the page
+  useEffect(() => {
+    if (organiserUserId === null) return undefined;
+    let current = true;
+    api("/users/me/events").then(
+      ({ data }) =>
+        current &&
+        setOrganiserLists({ userId: organiserUserId, events: data.map((event) => toOrganiserEvent(event, account)) }),
+      (error) => {
+        if (!current) return;
+        setOrganiserLists({ userId: organiserUserId, events: [] });
+        setFavouriteError(error.message);
+      },
+    );
+    return () => {
+      current = false;
+    };
+    // account is read for the name only; the list follows the account's id
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [organiserUserId]);
+
+  // Changes the organiser's list only while it still belongs to the same account
+  const updateOrganiserEvents = useCallback(
+    (userId, change) =>
+      setOrganiserLists((current) => (current.userId === userId ? { ...current, events: change(current.events) } : current)),
+    [],
+  );
 
   // Changes the lists only while they still belong to the same account
   const updateUserLists = useCallback(
@@ -394,80 +432,48 @@ function App() {
     );
   }
 
-  // Matches insert_event(): new events get the next ID, the organiser and
-  // today's dates; no admin has reviewed them yet
-  function createOrganiserEvent(newEvent) {
-    const now = new Date().toISOString();
-    setEvents((currentEvents) => [
-      ...currentEvents,
-      {
-        ...newEvent,
-        eventId: Math.max(0, ...currentEvents.map((event) => event.eventId)) + 1,
-        organiserId: currentOrganiser.id,
-        organiser: currentOrganiser.name,
-        adminId: null,
-        adminName: null,
-        adminUpdatedAt: null,
-        orgUpdatedAt: null,
-        createdAt: now,
-        updatedAt: now,
-      },
-    ]);
+  // The organiser's events (Phase 5). Each awaits the server and throws its
+  // ApiError for the page to show; the list changes only once the server has
+  // agreed. The server decides the status from the event and `submit`, as
+  // insert_event() and update_event() did in the PHP
+  async function createOrganiserEvent(body) {
+    const userId = organiserUserId;
+    const { data } = await api("/events", { method: "POST", body });
+    const created = toOrganiserEvent(data, account);
+    updateOrganiserEvents(userId, (list) => [...list, created]);
+    return created;
   }
 
-  function deleteOrganiserEvent(eventId) {
-    setEvents((currentEvents) =>
-      currentEvents.filter((event) => event.eventId !== eventId),
-    );
-  }
-
-  // Matches update_event(): saves the organiser's changes. Drafts keep the
-  // status the organiser chose; any other edit goes back to pending for the
-  // admin to approve again. Unlike the PHP (remove_favourite_after_update()),
-  // a live event keeps its last approved version public and its favourites
+  // A live event keeps its last approved version public, with its favourites,
   // until the edit is approved (schema option b, agreed 2026-10-05)
-  function updateOrganiserEvent(eventId, changes, status) {
-    const now = new Date().toISOString();
-    setEvents((currentEvents) =>
-      currentEvents.map((event) =>
-        event.eventId === eventId
-          ? {
-              ...event,
-              ...changes,
-              status,
-              approvedSnapshot:
-                event.approvedSnapshot ?? (event.status === "approved" ? snapshotOf(event) : null),
-              orgUpdatedAt: now,
-              updatedAt: now,
-            }
-          : event,
-      ),
-    );
+  async function updateOrganiserEvent(eventId, body) {
+    const userId = organiserUserId;
+    const { data } = await api(`/events/${eventId}`, { method: "PUT", body });
+    const updated = toOrganiserEvent(data, account);
+    updateOrganiserEvents(userId, (list) => list.map((event) => (event.eventId === eventId ? updated : event)));
+    return updated;
   }
 
-  // Matches the Cancel Event button in edit_event.php
-  function cancelOrganiserEvent(eventId) {
-    const now = new Date().toISOString();
-    setEvents((currentEvents) =>
-      currentEvents.map((event) =>
-        // An edit still waiting is dropped: the public version is cancelled
-        event.eventId === eventId
-          ? { ...publicVersion(event), status: "cancelled", approvedSnapshot: null, orgUpdatedAt: now, updatedAt: now }
-          : event,
-      ),
-    );
+  async function deleteOrganiserEvent(eventId) {
+    const userId = organiserUserId;
+    await api(`/events/${eventId}`, { method: "DELETE" });
+    updateOrganiserEvents(userId, (list) => list.filter((event) => event.eventId !== eventId));
+  }
+
+  // An edit still waiting is dropped: the approved version is the one cancelled
+  async function cancelOrganiserEvent(eventId) {
+    const userId = organiserUserId;
+    const { data } = await api(`/events/${eventId}/cancel`, { method: "PUT" });
+    const cancelled = toOrganiserEvent(data, account);
+    updateOrganiserEvents(userId, (list) => list.map((event) => (event.eventId === eventId ? cancelled : event)));
   }
 
   // Matches submit_draft.inc.php: the draft becomes pending
-  function submitDraft(eventId) {
-    const updatedAt = new Date().toISOString();
-    setEvents((currentEvents) =>
-      currentEvents.map((event) =>
-        event.eventId === eventId
-          ? { ...event, status: "pending", updatedAt }
-          : event,
-      ),
-    );
+  async function submitDraft(eventId) {
+    const userId = organiserUserId;
+    const { data } = await api(`/events/${eventId}/submit`, { method: "PUT" });
+    const submitted = toOrganiserEvent(data, account);
+    updateOrganiserEvents(userId, (list) => list.map((event) => (event.eventId === eventId ? submitted : event)));
   }
 
   if (!accountLoaded) return <PageLoading />;
@@ -497,7 +503,7 @@ function App() {
           <Route path="/privacy" element={<LegalPage page={privacyPage} titleId="privacy-title" />} />
           <Route path="/terms" element={<LegalPage page={termsPage} titleId="terms-title" />} />
           <Route path="/events" element={<ExploreEvents />} />
-          <Route path="/events/:eventId" element={<EventDetails events={audienceEvents} role={isUser ? userType : "guest"} organiserId={currentOrganiser.id} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
+          <Route path="/events/:eventId" element={<EventDetails events={audienceEvents} ownEvents={organiserEventsLoaded ? organiserEvents : null} role={isUser ? userType : "guest"} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
           <Route
             path="/dashboard"
             element={
@@ -522,7 +528,7 @@ function App() {
               <Route path="my-favourites" element={<MyFavourites events={favouriteEvents} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
               <Route path="preferences" element={listsLoaded ? <Preferences key={listsUserId} interestIds={interestIds} onSaveInterests={saveInterests} /> : <PageLoading />} />
             </Route>
-            <Route path="events/:eventId" element={<EventDetails inDashboard events={events} role={userType} organiserId={currentOrganiser.id} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
+            <Route path="events/:eventId" element={<EventDetails inDashboard events={events} ownEvents={organiserEventsLoaded ? organiserEvents : null} role={userType} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
             <Route path="notifications" element={<Notifications selectedUser={selectedUser} notifications={notifications} onMarkRead={markNotificationsRead} />} />
             {/* The public pages the sidebar links to, opened beside it: About,
                 Privacy and Terms for everyone (under the user card), FAQs and
@@ -552,11 +558,11 @@ function App() {
             <Route element={<RoleOnly allow="organiser" userType={userType} />}>
               <Route path="create-events" element={<CreateEvents onCreateEvent={createOrganiserEvent} />} />
               <Route path="my-events" element={<MyEvents organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} />} />
-              <Route path="my-events/:eventId/edit" element={<ResetOnParam param="eventId"><CreateEvents mode="edit" events={organiserEvents} onUpdateEvent={updateOrganiserEvent} onCancelEvent={cancelOrganiserEvent} onDeleteEvent={deleteOrganiserEvent} /></ResetOnParam>} />
+              <Route path="my-events/:eventId/edit" element={<ResetOnParam param="eventId"><CreateEvents mode="edit" events={organiserEventsLoaded ? organiserEvents : null} onUpdateEvent={updateOrganiserEvent} onCancelEvent={cancelOrganiserEvent} onDeleteEvent={deleteOrganiserEvent} /></ResetOnParam>} />
               <Route path="my-drafts" element={<MyDrafts organiserEvents={organiserEvents} onSubmitDraft={submitDraft} onDeleteEvent={deleteOrganiserEvent} />} />
               {/* The analytics pages count everyone's saves and follows, so
                   they keep the mock ones until Phase 10 */}
-              <Route path="event-analytics" element={<EventAnalytics organiserEvents={organiserEvents} favouriteIds={initialFavouriteIds} interestIds={userCategoryIds} />} />
+              <Route path="event-analytics" element={<EventAnalytics organiserEvents={mockOrganiserEvents} favouriteIds={initialFavouriteIds} interestIds={userCategoryIds} />} />
             </Route>
             <Route element={<RoleOnly allow="admin" userType={userType} />}>
               <Route path="manage-users" element={<ManageUsers users={users} events={events} currentUserId={currentAdmin.id} onUpdateUser={updateUserStatus} onDeleteUser={deleteUser} />} />
