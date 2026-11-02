@@ -35,6 +35,10 @@ const pub = {
 // Approved or cancelled, or an edit hiding behind its approved version
 const isPublic = or(inArray(events.status, ['approved', 'cancelled']), showsSnapshot);
 const isLive = or(eq(events.status, 'approved'), showsSnapshot);
+// Public at some point: it is approved or cancelled now, or an edit of it is
+// waiting with its approved version kept. Such an event can be cancelled but
+// never deleted, and its organiser can't delete their account
+export const hasBeenPublic = or(inArray(events.status, ['approved', 'cancelled']), isNotNull(events.approvedSnapshot));
 const isUpcoming = (now) => gte(sql`coalesce(${pub.endDatetime}, ${pub.startDatetime})`, now);
 // A suspension whose end has passed no longer hides anything, even before the
 // account is next seen and the suspension lifted

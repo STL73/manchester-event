@@ -1,12 +1,13 @@
 import { Router } from "express";
 import bcrypt from 'bcryptjs';
-import { and, asc, eq, inArray, isNotNull, not, notInArray, or } from 'drizzle-orm';
+import { and, asc, eq, inArray, not, notInArray } from 'drizzle-orm';
 
 import { db } from '../db/index.js';
 import { users, events, favourites, categories, categoryFollows } from '../db/schema/index.js';
 import { LOG } from '../constants/logActions.js';
 import { AppError } from '../lib/errors.js';
-import { canSaveEvent, listFavouriteEvents } from '../lib/publicEvents.js';
+import { listOrganiserEvents } from '../lib/organiserEvents.js';
+import { canSaveEvent, hasBeenPublic, listFavouriteEvents } from '../lib/publicEvents.js';
 import { clearSessionCookie } from '../lib/sessions.js';
 import { logAction } from '../lib/systemLogs.js';
 import { publicUser } from '../lib/users.js';
@@ -16,10 +17,6 @@ import { eventIdParams } from '../validation/events.js';
 import { updateProfileSchema, deleteAccountSchema, followsSchema } from '../validation/users.js';
 
 const userRouter = Router();
-
-// An event has been public once it was approved: it is approved or cancelled
-// now, or an edit of it is waiting with its approved version kept
-const hasBeenPublic = or(inArray(events.status, ['approved', 'cancelled']), isNotNull(events.approvedSnapshot));
 
 // /me before /:id, or "me" would be read as an ID.
 // A suspended account can't change its name or switch (decided 2026-10-27)
@@ -149,6 +146,12 @@ userRouter.put('/me/follows', ...asActiveUser, validate({ body: followsSchema })
             : []),
     ]);
     res.json({ data: picked.map((category) => category.slug).sort() });
+});
+
+// My Events, My Drafts and Organiser Home: every one of the organiser's events,
+// drafts and past ones included. Reading works while suspended
+userRouter.get('/me/events', requireAuth, requireRole('organiser'), async (req, res) => {
+    res.json({ data: await listOrganiserEvents(req.user.userId) });
 });
 
 userRouter.get('/', (req, res) => {

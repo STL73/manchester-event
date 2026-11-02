@@ -52,7 +52,8 @@ export const categories = pgTable('categories', {
     isActive: boolean('is_active').notNull().default(true),
 });
 
-// Shared venues and addresses, always picked from Google Places, never typed in
+// Shared venues and addresses, always picked from OpenStreetMap, never typed in
+// (lib/osm.js; Google Places until 2026-11-02). place_id is the OSM id, 'W30343319'
 export const locations = pgTable('locations', {
     locationId: integer('location_id').primaryKey().generatedAlwaysAsIdentity(),
     placeId: varchar('place_id', { length: 255 }).notNull().unique(),
