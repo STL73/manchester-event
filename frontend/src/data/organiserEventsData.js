@@ -1,4 +1,5 @@
 import { CalendarArrowUp, CalendarPlus, Pencil, Trash2 } from "lucide-react";
+import { hasBeenPublic } from "./eventsData";
 
 // Buttons shared by the organiser dashboard, My Events and My Drafts
 export const organiserEventActions = {
@@ -27,7 +28,7 @@ export const organiserEventMessages = {
 export function organiserCardActions(state, event) {
   return {
     canEdit: ["draft", "pending", "rejected", "approved"].includes(state),
-    canDelete: ["draft", "pending", "rejected"].includes(state) && !event?.approvedSnapshot,
+    canDelete: ["draft", "pending", "rejected"].includes(state) && !(event && hasBeenPublic(event)),
   };
 }
 

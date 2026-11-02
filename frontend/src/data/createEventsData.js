@@ -84,11 +84,10 @@ export const eventFormGroups = [
     id: "where",
     title: "Where",
     icon: MapPin,
-    row: true,
     fields: [
-      // An area from the list: it is what Explore's location filter uses
-      { id: "locationId", label: "Area", type: "area", placeholder: "Choose an area" },
-      { id: "address", label: "Venue and address", type: "text", placeholder: "Venue, street, postcode" },
+      // Picked from OpenStreetMap, never typed in (decided 2026-11-02). The
+      // area Explore filters by is worked out from where the venue is
+      { id: "placeId", label: "Venue", type: "venue", placeholder: "Search for the venue or its address" },
     ],
   },
   {
@@ -112,6 +111,21 @@ export const imageDrop = {
   types: "JPG, PNG, WebP or GIF, up to 5 MB",
   replace: { label: "Replace", icon: RefreshCw },
   remove: { label: "Remove", icon: X },
+  // Until Phase 6 stores photos: the event keeps the one it has, or the default
+  comingSoon: "Adding your own photo is coming soon. Until then the event shows the photo it has, or our default one.",
+};
+
+// The venue box: type, pick from OpenStreetMap's places, change if needed
+export const venueSearch = {
+  minLength: 3,
+  // Waits for the typing to pause, so a word is one search, not one per letter
+  delay: 350,
+  typeMore: "Type at least 3 letters.",
+  searching: "Searching…",
+  noResults: "No places found. Try the venue's name or its street.",
+  change: { label: "Change", icon: RefreshCw },
+  noArea: "Outside Explore's areas",
+  credit: { text: "© OpenStreetMap contributors", href: "https://www.openstreetmap.org/copyright" },
 };
 
 // handle_event_image() allowed JPG, PNG and GIF; WebP is added, as on Settings
@@ -126,7 +140,7 @@ export const submitChecklist = {
     { label: "Category", fields: ["categoryId"] },
     { label: "Description", fields: ["description"] },
     { label: "Start", fields: ["startDatetime"] },
-    { label: "Area and address", fields: ["locationId", "address"] },
+    { label: "Venue", fields: ["placeId"] },
     { label: "Ticket link", fields: ["externalLink"] },
   ],
 };
@@ -186,8 +200,7 @@ export const createEventMessages = {
   description: "Add a description.",
   startDatetime: "Choose when it starts.",
   categoryId: "Choose a category.",
-  locationId: "Choose an area.",
-  address: "Add the venue and address.",
+  placeId: "Choose the venue from the list.",
   externalLink: "Add a ticket or info link.",
   invalidUrl: "Enter a full link, starting with https://",
   endBeforeStart: "The end has to be after the start.",

@@ -45,7 +45,10 @@ function mapsUrl(event) {
 }
 
 function StateBanner({ event, state, role }) {
-  const banner = eventDetailsPage.banners[state];
+  // An edit of a live event (the organiser's editPending, the admin mock's
+  // approvedSnapshot) leaves the approved version public, so it says so
+  const isEdit = ["pending", "rejected"].includes(state) && (event.editPending || event.approvedSnapshot);
+  const banner = eventDetailsPage.banners[isEdit ? `${state}Edit` : state];
   if (!banner) return null;
   const text =
     state === "past"
@@ -240,30 +243,35 @@ function EventDetailsBody({ event, TitleTag, titleId, role, favouriteIds, onTogg
 
 // Guests and users read the event from the API (GET /events/:id), which only
 // opens what has been public, so a typed-in id of someone's draft reads as not
-// found. Organisers and admins still read `events`, the mock list, through
-// canViewEvent until their pages move to the API (Phases 5 and 7). `role` is
-// "guest" when signed out
+// found. An organiser sees their own events as they last saved them
+// (`ownEvents`, from GET /users/me/events, null while it loads) and anyone
+// else's as the public does. Admins still read `events`, the mock list,
+// through canViewEvent until Phase 7. `role` is "guest" when signed out
 export default function EventDetails({
   events,
+  ownEvents = null,
   inDashboard = false,
   role = "guest",
-  organiserId,
   favouriteIds = [],
   onToggleFavourite,
 }) {
   const { eventId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const fromApi = role === "guest" || role === "user";
+  const isOrganiser = role === "organiser";
+  const ownEvent = isOrganiser ? ownEvents?.find((item) => String(item.eventId) === eventId) : null;
+  const fromApi = role === "guest" || role === "user" || (isOrganiser && ownEvents !== null && !ownEvent);
   const request = useApi(fromApi ? `/events/${encodeURIComponent(eventId)}` : null);
-  const found = fromApi
-    ? request.payload && String(request.payload.data.eventId) === eventId && toEvent(request.payload.data)
-    : events.find((item) => String(item.eventId) === eventId);
-  const event = found && (fromApi || canViewEvent(found, role, organiserId)) ? found : null;
+  const found =
+    ownEvent ??
+    (fromApi
+      ? request.payload && String(request.payload.data.eventId) === eventId && toEvent(request.payload.data)
+      : events.find((item) => String(item.eventId) === eventId));
+  const event = found && (ownEvent || fromApi || canViewEvent(found, role)) ? found : null;
   // A 404 or 400 means there is no such event to show; anything else is a
   // fault worth trying again
   const failed = request.error && ![400, 404].includes(request.error.status);
-  const waiting = fromApi && !event && !request.error;
+  const waiting = (isOrganiser && ownEvents === null) || (fromApi && !event && !request.error);
   const { dashboardTitle, titleIcon: TitleIcon, goBack, allEvents } = eventDetailsPage;
   const bodyProps = { role, favouriteIds, onToggleFavourite };
   const notFoundText = failed ? eventDetailsPage.loadError : eventDetailsPage.notFound;

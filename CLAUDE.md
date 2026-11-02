@@ -9,20 +9,23 @@ approve them and manage users. It is a rewrite of an older PHP/MySQL university 
 in a separate folder (`D:\MY PROJECTS\manchester-event-portal`). That code is the reference for
 behaviour. Comments here that cite `*.php` files or PHP functions mark parity that is deliberate.
 
-The migration is half done, and **the two halves are connected for auth, public events and the
-user's favourites and interests so far**:
+The migration is half done, and **the two halves are connected for auth, public events, the
+user's favourites and interests, and organisers' own events so far**:
 
 - `frontend/` is a near-complete React port. Login, sign-up, logout, email verification and the
   signed-in account are real (Phase 1), and so are forgot and reset password and Settings' name,
   email switch, password and Delete account (Phase 2). Home, Explore Events, About's figure,
   Preferences and Event details for guests and users read real events (Phase 3), and the hearts,
   My Favourites, Preferences' picks and the user dashboard's Home are real (Phase 4, except "New
-  in your interests"); every other page still runs on in-memory mock data
+  in your interests"), and so are Create / Edit Event, My Events, My Drafts and Organiser Home
+  (Phase 5, except the photo and the saves figures); every other page still runs on in-memory
+  mock data
 - `backend/` is Express + Drizzle. Auth is real (sign-up, login, sessions, email verification;
   Phase 1, 2026-10-26; passwords and the account's own profile and deletion, Phase 2,
   2026-10-27), and so are the public event reads and categories (Phase 3, 2026-10-27) and
-  favourites and category follows (Phase 4, 2026-10-27); the rest of
-  the users and events routers still return placeholder strings. The full schema in
+  favourites and category follows (Phase 4, 2026-10-27) and organisers' event writes with
+  OpenStreetMap venues (Phase 5, 2026-11-02); the rest of the users and events routers still
+  return placeholder strings. The full schema in
   `src/db/schema/` is applied to Neon and seeded, demo events included
 
 Calls go through `frontend/src/lib/api.js` and a Vite proxy for `/api`. Pages are wired phase by
@@ -59,9 +62,9 @@ will need to do.
 - **Roles are real** (Phase 1, 2026-10-27). `App.jsx` asks `/auth/me` once at startup and keeps
   the answer as `account` (shows `PageLoading` until it arrives); `isUser` and `userType` are
   derived from it. Test each role's dashboard by logging in as it: the seed's admin and its Demo
-  User and Demo Organiser. The role's sidebar links still come from `navigationData.js`, and pages
-  other than auth still read mock records (the Demo Organiser sees the mock organiser's events
-  until Phase 5)
+  User and Demo Organiser. The role's sidebar links still come from `navigationData.js`. The
+  Demo Organiser's events come from the API (`organiserEvents`, loaded per account like the
+  user's favourites); admin pages and Event Analytics still read the mock list
 - **Routing:** public routes (`/`, `/events`, `/events/:eventId`, `/about`, `/contact`,
   `/auth/:pathname`) and a nested `/dashboard/*` tree, guarded only by `isUser`. Which sidebar links
   appear depends on the role. The public navbar and footer hide based on the pathname

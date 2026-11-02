@@ -106,7 +106,7 @@ function newestFirst(a, b) {
 }
 
 export default function OrganiserDashboardHome({ organiserEvents: events, onDeleteEvent }) {
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(null);
   const { createFirst } = organiserEventActions;
 
   // Matches get_recent_events()
@@ -114,10 +114,16 @@ export default function OrganiserDashboardHome({ organiserEvents: events, onDele
   const insights = getOrganiserInsights(events);
   const now = new Date();
 
-  // The card has already asked (see EventCard)
-  function handleDelete(event) {
-    onDeleteEvent(event.eventId);
-    setMessage(organiserEventMessages.eventDeleted);
+  // The card has already asked (see EventCard). The server may refuse: an
+  // event approved since the page loaded can only be cancelled
+  async function handleDelete(event) {
+    setMessage(null);
+    try {
+      await onDeleteEvent(event.eventId);
+      setMessage({ text: organiserEventMessages.eventDeleted });
+    } catch (error) {
+      setMessage({ text: error.message, variant: "error" });
+    }
   }
 
   return (
@@ -150,7 +156,7 @@ export default function OrganiserDashboardHome({ organiserEvents: events, onDele
         </h2>
 
         {message && (
-          <StatusMessage className="table-message">{message}</StatusMessage>
+          <StatusMessage variant={message.variant} className="table-message">{message.text}</StatusMessage>
         )}
 
         <div className="events-grid events-grid-three">

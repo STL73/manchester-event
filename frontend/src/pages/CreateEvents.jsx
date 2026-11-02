@@ -7,7 +7,9 @@ import StatusMessage from "../components/UI/StatusMessage";
 import EventCard from "../components/events/EventCard";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import EmptyState from "../components/UI/EmptyState";
-import { eventCategories, eventDetailsPage, eventLocations, hasBeenPublic } from "../data/eventsData";
+import PageLoading from "../components/UI/PageLoading";
+import VenueSearch from "../components/events/VenueSearch";
+import { eventCategories, eventDetailsPage, eventState, hasBeenPublic } from "../data/eventsData";
 import {
   afterSave,
   allowedImageTypes,
@@ -21,6 +23,7 @@ import {
   maxImageSize,
   submitChecklist,
 } from "../data/createEventsData";
+import { toLondonInput } from "../lib/organiserEvents";
 import { defaultEventImage as placeholder } from "../lib/publicEvents";
 
 const emptyForm = {
@@ -29,8 +32,8 @@ const emptyForm = {
   description: "",
   startDatetime: "",
   endDatetime: "",
-  locationId: "",
-  address: "",
+  // The OpenStreetMap id of the venue picked in VenueSearch
+  placeId: "",
   externalLink: "",
 };
 
@@ -38,21 +41,16 @@ const requiredFields = Object.keys(emptyForm).filter((field) => field !== "endDa
 
 const editedFormatter = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
 
-// datetime-local inputs need "YYYY-MM-DDTHH:mm"
-function toInputDateTime(value) {
-  return value ? value.slice(0, 16) : "";
-}
-
-// Fill the form from an existing event (edit mode)
+// Fill the form from an existing event (edit mode). Times as a Manchester
+// clock shows them, which is what the datetime-local inputs hold
 function formFromEvent(event) {
   return {
     eventName: event.name ?? "",
     categoryId: event.categoryId ?? "",
     description: event.description ?? "",
-    startDatetime: toInputDateTime(event.startDatetime),
-    endDatetime: toInputDateTime(event.endDatetime),
-    locationId: event.locationId ?? "",
-    address: event.address ?? "",
+    startDatetime: toLondonInput(event.startDatetime),
+    endDatetime: toLondonInput(event.endDatetime),
+    placeId: event.venue?.placeId ?? "",
     externalLink: event.externalLink ?? "",
   };
 }
@@ -90,23 +88,32 @@ function validateEvent(form, { submitting, originalStart }) {
   return errors;
 }
 
-// Turn the form into event fields
-function eventFieldsFromForm(form) {
-  const category = eventCategories.find(({ id }) => id === form.categoryId);
-  const area = eventLocations.find(({ id }) => id === form.locationId);
-
+// The form as the API takes it (POST /events, PUT /events/:id). There is no
+// status: `submit` says which button was pressed and the server decides
+function bodyFromForm(form, submit) {
   return {
-    name: form.eventName.trim(),
+    eventName: form.eventName.trim(),
+    category: form.categoryId,
     description: form.description.trim(),
     startDatetime: form.startDatetime,
     endDatetime: form.endDatetime || null,
-    categoryId: category.id,
-    category: category.name,
-    locationId: area.id,
-    location: area.name,
-    address: form.address.trim(),
-    externalLink: form.externalLink.trim(),
+    placeId: form.placeId,
+    ticketUrl: form.externalLink.trim(),
+    submit,
   };
+}
+
+// The API names some fields differently from the form
+const formFieldFor = { category: "categoryId", ticketUrl: "externalLink" };
+
+// The server's refusal as field errors ("body.ticketUrl" -> externalLink)
+function errorsFromServer(details = []) {
+  return Object.fromEntries(
+    details.map(({ path, message }) => {
+      const field = path.replace(/^body\./, "");
+      return [formFieldFor[field] ?? field, message];
+    }),
+  );
 }
 
 // One page, two modes: Create Event (create_events.php) and, on
@@ -118,10 +125,22 @@ export default function CreateEvents(props) {
 }
 
 // The photo box: drop or click to choose; once chosen the photo fills it,
-// with Replace and Remove
-function ImageDrop({ image, error, inputRef, onFile, onRemove }) {
+// with Replace and Remove. `locked` until Phase 6 stores photos: it shows the
+// event's photo, or the default one, and says choosing one is coming
+function ImageDrop({ image, error, inputRef, onFile, onRemove, locked = false }) {
   const [isDragging, setIsDragging] = useState(false);
   const errorId = "image-error";
+
+  if (locked) {
+    return (
+      <div className="flex flex-col gap-2">
+        <div className="event-image-drop has-image is-locked">
+          <img className="event-image-drop-photo" src={image || placeholder} alt="" />
+        </div>
+        <p className="field-hint" id="image-hint">{imageDrop.comingSoon}</p>
+      </div>
+    );
+  }
 
   function handleDrop(dropEvent) {
     dropEvent.preventDefault();
@@ -192,6 +211,17 @@ function EventFormPage({
   onDeleteEvent,
 }) {
   const isEdit = mode === "edit";
+  // The organiser's events arrive from the API; until then there is nothing to edit
+  if (isEdit && events === null) return <PageLoading />;
+  return (
+    <EventForm
+      {...{ isEdit, onCreateEvent, onUpdateEvent, onCancelEvent, onDeleteEvent }}
+      events={events ?? []}
+    />
+  );
+}
+
+function EventForm({ isEdit, events, onCreateEvent, onUpdateEvent, onCancelEvent, onDeleteEvent }) {
   const { eventId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -201,10 +231,15 @@ function EventFormPage({
     : null;
 
   const [form, setForm] = useState(() => (event ? formFromEvent(event) : emptyForm));
+  // The venue picked: its name, address and area show under the field
+  const [venue, setVenue] = useState(() => event?.venue ?? null);
   // The photo shown: the event's own, a new pick (an object URL) or none
   const [image, setImage] = useState(() => event?.image ?? "");
   const [errors, setErrors] = useState({});
-  const [message, setMessage] = useState("");
+  // { text, variant }: a save that worked, or the server's reason it didn't
+  const [message, setMessage] = useState(null);
+  // A save is on its way: the buttons wait, so it can't be sent twice
+  const [saving, setSaving] = useState(false);
   // "cancel" or "delete" while the danger zone asks
   const [confirming, setConfirming] = useState(false);
   const messageRef = useRef(null);
@@ -216,8 +251,9 @@ function EventFormPage({
 
   // Drafts get Save draft and Submit; anything else goes back to an admin
   const isDraft = !isEdit || event?.status === "draft";
+  // Past isn't stored: an approved event whose dates have gone by is past
   const lockedMessage =
-    event?.status === "past"
+    event && eventState(event, new Date()) === "past"
       ? createEventMessages.pastLocked
       : event?.status === "cancelled"
         ? createEventMessages.cancelledLocked
@@ -237,12 +273,21 @@ function EventFormPage({
   function handleChange(changeEvent) {
     const { name, value } = changeEvent.target;
     setForm((current) => ({ ...current, [name]: value }));
-    setMessage("");
+    setMessage(null);
+  }
+
+  function handleVenue(place) {
+    setVenue(place);
+    setForm((current) => ({ ...current, placeId: place?.placeId ?? "" }));
+    setErrors((current) => ({ ...current, placeId: undefined }));
+    setMessage(null);
+    // Change empties the field: the search box takes the focus back
+    if (!place) requestAnimationFrame(() => document.getElementById("placeId")?.focus());
   }
 
   // Mirrors the type and size checks in handle_event_image()
   function handleImageFile(file) {
-    setMessage("");
+    setMessage(null);
     const imageError = !allowedImageTypes.includes(file.type)
       ? createEventMessages.invalidImage
       : file.size > maxImageSize
@@ -261,52 +306,74 @@ function EventFormPage({
     requestAnimationFrame(() => fileInputRef.current?.focus());
   }
 
-  function handleSubmit(submitEvent) {
+  async function handleSubmit(submitEvent) {
     submitEvent.preventDefault();
-    // The button that was pressed decides the status, as in the PHP
-    const status =
-      submitEvent.nativeEvent.submitter?.name === "saveDraft" ? "draft" : "pending";
+    if (saving) return;
+    // The button that was pressed decides, as in the PHP: Save draft keeps a
+    // draft; anything else is sent for approval
+    const submit = submitEvent.nativeEvent.submitter?.name !== "saveDraft";
     const nextErrors = validateEvent(form, {
-      submitting: status === "pending",
-      originalStart: event ? toInputDateTime(event.startDatetime) : "",
+      submitting: submit,
+      originalStart: event && event.status !== "draft" ? toLondonInput(event.startDatetime) : "",
     });
 
     setErrors(nextErrors);
-    setMessage("");
+    setMessage(null);
     const firstInvalid = Object.keys(nextErrors)[0];
     if (firstInvalid) {
       document.getElementById(firstInvalid)?.focus();
       return;
     }
 
-    const fields = { ...eventFieldsFromForm(form), image: image || placeholder };
-
-    if (isEdit) {
-      onUpdateEvent(event.eventId, fields, status);
-      if (status === "draft") {
-        setMessage(createEventMessages.draftSaved);
-        return;
-      }
-      navigate(afterSave.pendingPath, {
-        state: { message: isDraft ? createEventMessages.submitted : createEventMessages.resubmitted },
-      });
+    setSaving(true);
+    let saved;
+    try {
+      saved = isEdit
+        ? await onUpdateEvent(event.eventId, bodyFromForm(form, submit))
+        : await onCreateEvent(bodyFromForm(form, submit));
+    } catch (error) {
+      // Under its field when the server names one, otherwise over the form
+      const fieldErrors = errorsFromServer(error.details);
+      setErrors(fieldErrors);
+      // The first in the form's order, not the server's
+      const firstField = Object.keys(emptyForm).find((field) => fieldErrors[field]);
+      if (firstField) document.getElementById(firstField)?.focus();
+      else setMessage({ text: error.message, variant: "error" });
+      setSaving(false);
       return;
     }
+    setSaving(false);
 
-    onCreateEvent({ ...fields, status });
-    navigate(status === "draft" ? afterSave.draftsPath : afterSave.pendingPath, {
-      state: { message: status === "draft" ? createEventMessages.createdDraft : createEventMessages.submitted },
+    if (saved.status === "draft") {
+      if (isEdit) {
+        setMessage({ text: createEventMessages.draftSaved });
+        return;
+      }
+      navigate(afterSave.draftsPath, { state: { message: createEventMessages.createdDraft } });
+      return;
+    }
+    navigate(afterSave.pendingPath, {
+      state: { message: isEdit && !isDraft ? createEventMessages.resubmitted : createEventMessages.submitted },
     });
   }
 
   // Matches the Cancel Event button in edit_event.php, asked in the page
-  function handleDangerConfirm(kind) {
+  async function handleDangerConfirm(kind) {
+    if (saving) return;
+    setSaving(true);
+    try {
+      if (kind === "cancel") await onCancelEvent(event.eventId);
+      else await onDeleteEvent(event.eventId);
+    } catch (error) {
+      setSaving(false);
+      setConfirming(false);
+      setMessage({ text: error.message, variant: "error" });
+      return;
+    }
     if (kind === "cancel") {
-      onCancelEvent(event.eventId);
       navigate(afterSave.eventsPath, { state: { message: createEventMessages.cancelled } });
       return;
     }
-    onDeleteEvent(event.eventId);
     navigate(event.status === "draft" ? afterSave.draftsPath : afterSave.eventsPath, {
       state: { message: createEventMessages.deleted },
     });
@@ -325,12 +392,23 @@ function EventFormPage({
         />
       );
     }
-    if (field.type === "category" || field.type === "area") {
-      const options = field.type === "category" ? eventCategories : eventLocations;
+    if (field.type === "venue") {
+      return (
+        <VenueSearch
+          id={field.id}
+          venue={venue}
+          placeholder={field.placeholder}
+          invalid={sharedProps["aria-invalid"]}
+          describedBy={sharedProps["aria-describedby"]}
+          onChange={handleVenue}
+        />
+      );
+    }
+    if (field.type === "category") {
       return (
         <select {...sharedProps} value={form[field.id]} onChange={handleChange}>
           <option value="">{field.placeholder}</option>
-          {options.map(({ id, name }) => (
+          {eventCategories.map(({ id, name }) => (
             <option key={id} value={id}>
               {name}
             </option>
@@ -360,6 +438,7 @@ function EventFormPage({
           inputRef={fileInputRef}
           onFile={handleImageFile}
           onRemove={handleImageRemove}
+          locked
         />
       );
     }
@@ -398,12 +477,11 @@ function EventFormPage({
 
   // What the live card shows: the form so far, with stand-ins for blanks
   const category = eventCategories.find(({ id }) => id === form.categoryId);
-  const area = eventLocations.find(({ id }) => id === form.locationId);
   const previewEvent = {
     eventId: event?.eventId ?? 0,
     name: form.eventName.trim() || "Your event's name",
     category: category?.name ?? "Category",
-    location: area?.name ?? "Area",
+    location: venue?.name ?? "Venue",
     startDatetime: form.startDatetime,
     image: image || placeholder,
   };
@@ -415,7 +493,7 @@ function EventFormPage({
   const doneCount = checklistItems.filter((item) => item.done).length;
 
   const banner = event
-    ? editBanners[event.status === "pending" && event.approvedSnapshot ? "pendingEdit" : event.status]
+    ? editBanners[event.status === "pending" && event.editPending ? "pendingEdit" : event.status]
     : null;
   const danger = event ? dangerZone[hasBeenPublic(event) ? "cancel" : "delete"] : null;
   const summaryText = event
@@ -464,7 +542,11 @@ function EventFormPage({
                 </p>
               </div>
             )}
-            {message && <StatusMessage ref={messageRef}>{message}</StatusMessage>}
+            {message && (
+              <StatusMessage ref={messageRef} variant={message.variant}>
+                {message.text}
+              </StatusMessage>
+            )}
 
             <div className="event-form-layout">
               <div className="min-w-0 flex flex-col gap-7">
@@ -508,6 +590,7 @@ function EventFormPage({
                             type="button"
                             variant="destructive"
                             size="md"
+                            disabled={saving}
                             onClick={() => handleDangerConfirm(hasBeenPublic(event) ? "cancel" : "delete")}
                           >
                             <danger.icon aria-hidden="true" />
@@ -551,17 +634,17 @@ function EventFormPage({
                   )}
                   {isDraft ? (
                     <>
-                      <Button type="submit" form="event-form" name="saveDraft" variant="secondary" size="md">
+                      <Button type="submit" form="event-form" name="saveDraft" disabled={saving} variant="secondary" size="md">
                         <saveDraft.icon aria-hidden="true" />
                         {saveDraft.label}
                       </Button>
-                      <Button type="submit" form="event-form" name="submit" variant="primary" size="md">
+                      <Button type="submit" form="event-form" name="submit" disabled={saving} variant="primary" size="md">
                         <submit.icon aria-hidden="true" />
                         {submit.label}
                       </Button>
                     </>
                   ) : (
-                    <Button type="submit" form="event-form" name="resubmit" variant="primary" size="md">
+                    <Button type="submit" form="event-form" name="resubmit" disabled={saving} variant="primary" size="md">
                       <resubmit.icon aria-hidden="true" />
                       {resubmit.label}
                     </Button>
