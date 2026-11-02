@@ -3,8 +3,9 @@
 ## Current state
 
 The shared middleware below is in place (Phase 0, 2026-10-26) and the auth routes are real
-(Phase 1, passwords Phase 2), and so are the public event reads and categories (Phase 3) and
-favourites and category follows (Phase 4). The
+(Phase 1, passwords Phase 2), and so are the public event reads and categories (Phase 3),
+favourites and category follows (Phase 4) and organisers' own events with venue search
+(Phase 5). The
 rest of the users and events routers are still stubs that return a placeholder string
 (`res.send('Create event')`); database access comes with each feature.
 
@@ -15,9 +16,10 @@ All routes are versioned under `/api/v1`, one router per resource, mounted in `s
 | Mount | File and endpoints |
 | --- | --- |
 | `/api/v1/auth` | `routes/auth.routes.js`: `POST /sign-up`, `/login`, `/logout`, `/verify-email`, `/resend-verification`, `/forgot-password`, `/reset-password`; `GET /me`; `PUT /password` |
-| `/api/v1/users` | `routes/user.routes.js`: `PUT /me` (name, email switch), `DELETE /me` (password-confirmed), `GET /me/favourites`, `PUT` and `DELETE /me/favourites/:id`, `GET` and `PUT /me/follows`; REST CRUD on `/` and `/:id`, `/me` registered first |
-| `/api/v1/events` | `routes/event.routes.js`: `GET /` (public list), `GET /summary` (counts), `GET /:id` (public details), `/summary` before `/:id`; the rest of REST CRUD, `GET /user/:id`, `PUT /user/:id/cancel` still stubs |
+| `/api/v1/users` | `routes/user.routes.js`: `PUT /me` (name, email switch), `DELETE /me` (password-confirmed), `GET /me/favourites`, `PUT` and `DELETE /me/favourites/:id`, `GET` and `PUT /me/follows`, `GET /me/events` (an organiser's own); REST CRUD on `/` and `/:id`, `/me` registered first |
+| `/api/v1/events` | `routes/event.routes.js`: `GET /` (public list), `GET /summary` (counts), `GET /:id` (public details), `/summary` before `/:id`; `POST /`, `PUT /:id`, `PUT /:id/submit`, `PUT /:id/cancel`, `DELETE /:id` (organisers) |
 | `/api/v1/categories` | `routes/category.routes.js`: `GET /` (active categories A to Z, upcoming events each) |
+| `/api/v1/locations` | `routes/location.routes.js`: `GET /search?q=` (OpenStreetMap places for the venue box) |
 
 - Router files: `const xRouter = Router();` then `export default xRouter;`
 - REST verbs: `GET` list/detail, `POST` create, `PUT` update, `DELETE` remove. Actions that
@@ -140,6 +142,42 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
   in one `db.batch()`; an unknown or archived slug is 400 on `body.categories`. Follows of an
   archived category are kept, since Preferences doesn't show it to untick. Answers the sorted
   slugs, as `GET` does
+
+## Organiser events and venues (decided 2026-11-02)
+
+- **Venues come from OpenStreetMap**, not Google Places: Google's terms let only the place ID be
+  kept for good, and `locations` keeps the name, address and coordinates. OSM's licence allows
+  that with "© OpenStreetMap contributors" shown beside the data. `lib/osm.js`: Photon
+  (photon.komoot.io) for the search box, since the public Nominatim server forbids
+  search-as-you-type; Nominatim `/lookup` for one place by id. Both are free servers that ask for
+  fair use: a `User-Agent`, a 10-minute cache of searches, 30 searches a minute per organiser.
+  A server that fails or times out (5 s) is 503
+- `GET /locations/search?q=` (organisers, active, 3+ characters): up to 5 places in Greater
+  Manchester, bus and tram stops and repeats left out, each `{ placeId, name, address, area }`.
+  `placeId` is the OSM id (`W30343319`)
+- The event's body sends **only `placeId`**. A venue not yet in `locations` is looked up on
+  Nominatim, refused (400 on `body.placeId`) outside Greater Manchester, and added; later events
+  reuse the row. Name, address and coordinates never come from the request
+- **Area** is worked out from the coordinates (`areaFor()` in `constants/areas.js`: a box per area,
+  the small ones first, NULL outside), never picked. Seeded venues keep their stored areas
+- `POST /events`, `PUT /:id`, `PUT /:id/submit`, `PUT /:id/cancel`, `DELETE /:id`: organisers,
+  `requireActive`; someone else's event is 404. No `status` in the body: `submit: true` sends it
+  for approval. Times are `YYYY-MM-DDTHH:mm` as a Manchester clock shows them (the form's
+  datetime-local), converted with `londonInstant()`; the end must be after the start
+- Sending for approval needs `email_verified_at` (403) and a start still to come (400 on
+  `body.startDatetime`), checked when the start is new to the admin: a draft being sent, or a
+  changed time. A live event that has started keeps its time and can still be edited
+- Edit: a draft stays a draft unless sent; anything else goes to pending. The first edit of a
+  live event copies it into `approved_snapshot` (later edits leave that copy alone), so the
+  public keeps the approved version and its favourites. Cancelled and ended events are 400
+- Cancel: only an event that has been public (400 otherwise). A waiting edit is dropped and the
+  snapshot's fields are restored, so the approved version is the one cancelled. Delete: only one
+  never public; the condition is in the `DELETE` itself, so one approved meanwhile is 409
+- `GET /users/me/events`: every status, as the organiser last saved it, with `hasBeenPublic` and
+  `editPending` from the server so Delete / Cancel and the banners agree with it. Reading works
+  while suspended
+- Logs: Event Created (with `status`), Event Updated, Draft Submitted, Event Cancelled, Event
+  Deleted, each `{ eventId, name }`
 
 ## Status codes (decided 2026-10-26)
 

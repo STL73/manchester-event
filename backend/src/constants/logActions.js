@@ -11,4 +11,10 @@ export const LOG = {
     PASSWORD_CHANGED: 'Password Changed',
     PROFILE_UPDATED: 'Profile Updated',
     ACCOUNT_DELETED: 'Account Deleted',
+    // details: { eventId, name } (+ status on Created)
+    EVENT_CREATED: 'Event Created',
+    EVENT_UPDATED: 'Event Updated',
+    DRAFT_SUBMITTED: 'Draft Submitted',
+    EVENT_CANCELLED: 'Event Cancelled',
+    EVENT_DELETED: 'Event Deleted',
 };

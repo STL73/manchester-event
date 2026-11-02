@@ -9,6 +9,10 @@
   `DB_URL` at it and refuses to run without it, so tests can never touch the development database
 - Arcjet is off in tests (`NODE_ENV=test`): no calls to its service, nothing rate-limited
 - Each phase adds tests for its endpoints
+- Outside services are never called: `osm.test.js` stubs `fetch` with OpenStreetMap-shaped
+  answers, and route tests replace `lib/osm.js` with `vi.mock` (Phase 5)
+- Each phase also breaks its rules one at a time on purpose (a scratchpad script edits one line,
+  runs the tests, restores the file) to show a test catches each; Phase 5 caught 29 of 29
 
 ## Still to decide
 
