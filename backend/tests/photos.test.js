@@ -296,7 +296,9 @@ describe('the profile picture', () => {
         const logs = await db
             .select()
             .from(systemLogs)
-            .where(and(eq(systemLogs.userId, ids.user), eq(systemLogs.action, 'Profile Updated')));
+            .where(and(eq(systemLogs.userId, ids.user), eq(systemLogs.action, 'Profile Updated')))
+            // Oldest first, so .at(-1) is the newest (Postgres has no order otherwise)
+            .orderBy(systemLogs.logId);
         expect(logs.at(-1).details).toEqual({ fields: ['avatar'] });
     });
 
