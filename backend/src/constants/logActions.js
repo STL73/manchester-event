@@ -19,4 +19,8 @@ export const LOG = {
     EVENT_DELETED: 'Event Deleted',
     // An admin's decision: { eventId, name, status, reason? } (Phase 7)
     EVENT_STATUS_CHANGED: 'Event Status Changed',
+    // An admin managing an account (Phase 8): { userId, username, status,
+    // reason?, until? } and { userId, username, role, eventsDeleted }
+    USER_STATUS_CHANGED: 'User Status Changed',
+    USER_DELETED: 'User Deleted',
 };

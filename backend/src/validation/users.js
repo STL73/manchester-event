@@ -21,6 +21,30 @@ export const followsSchema = z.object({
         .transform((slugs) => [...new Set(slugs)]),
 });
 
+export const userIdParams = z.object({
+    id: z.coerce.number({ error: 'Account not found.' }).int().positive(),
+});
+
+// Manage Users (Phase 8): Active, or Suspended for 7 or 30 days or until lifted
+// (null), with a reason the person reads. Leaving days out keeps the current end
+// of a suspension already in place (the panel's "Keep")
+export const accountStatusSchema = z.discriminatedUnion(
+    'status',
+    [
+        z.object({ status: z.literal('active') }),
+        z.object({
+            status: z.literal('suspended'),
+            reason: z
+                .string({ error: 'Say why, so they know what to change.' })
+                .trim()
+                .min(1, 'Say why, so they know what to change.')
+                .max(1000, 'Keep the reason under 1,000 characters.'),
+            days: z.union([z.literal(7), z.literal(30), z.null()], { error: 'Choose how long.' }).optional(),
+        }),
+    ],
+    { error: 'Choose Active or Suspended.' },
+);
+
 // Opening a notification marks it read; Mark All as Read sends all: true
 export const markReadSchema = z
     .object({
