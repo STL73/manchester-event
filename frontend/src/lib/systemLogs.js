@@ -30,6 +30,7 @@ import {
 
 const eventPath = (eventId) => `/dashboard/events/${eventId}`;
 const userPath = (userId) => `/dashboard/manage-users?open=${userId}`;
+const messagePath = (messageId) => `/dashboard/contact-messages?open=${messageId}`;
 
 // The event's current name, or the one copied into the log, or its number
 function eventTarget(details, lookup) {
@@ -94,12 +95,23 @@ const describers = {
   }),
   "User Deleted": (details, lookup) => ({ kind: "accounts", tone: "danger", icon: UserMinus, verb: "deleted the account", target: userTarget(details, lookup) }),
   "Email Verified": () => ({ kind: "accounts", tone: "success", icon: MailCheck, verb: "verified their email" }),
+  // An admin's reply to a Contact form message (Phase 9), emailed to the sender
+  "Contact Message Replied": (details) => ({
+    kind: "accounts",
+    icon: Send,
+    verb: "replied to the message from",
+    target: { label: details.name, to: messagePath(details.messageId) },
+  }),
   // One of the account's own emails; the error says why (a Gmail limit, say)
   "Email Failed": (details) => ({
     kind: "accounts",
     tone: "danger",
     icon: MailX,
-    verb: `wasn't sent ${failedEmails[details.email] ?? "an email"}`,
+    // The one email an admin sends rather than receives
+    verb:
+      details.email === "contact reply"
+        ? "couldn't send a reply to a contact message"
+        : `wasn't sent ${failedEmails[details.email] ?? "an email"}`,
     sub: details.error,
   }),
   // From Settings, or from the emailed reset link

@@ -10,8 +10,8 @@ in a separate folder (`D:\MY PROJECTS\manchester-event-portal`). That code is th
 behaviour. Comments here that cite `*.php` files or PHP functions mark parity that is deliberate.
 
 The migration is half done, and **the two halves are connected for auth, public events, the
-user's favourites and interests, organisers' own events, moderation, notifications and managing
-users so far**:
+user's favourites and interests, organisers' own events, moderation, notifications, managing
+users and contact messages so far**:
 
 - `frontend/` is a near-complete React port. Login, sign-up, logout, email verification and the
   signed-in account are real (Phase 1), and so are forgot and reset password and Settings' name,
@@ -21,14 +21,15 @@ users so far**:
   Create / Edit Event, My Events, My Drafts and Organiser Home (Phase 5, except the saves
   figures), event photos and Settings' profile picture on Cloudinary (Phase 6), and Manage
   Events, Admin Home's event cards and every role's Notifications (Phase 7), and Manage Users
-  and Admin Home's New users card (Phase 8); every other page still runs on in-memory mock data
+  and Admin Home's New users card (Phase 8), and the Contact form and Contact Messages
+  (Phase 9); every other page still runs on in-memory mock data
 - `backend/` is Express + Drizzle. Auth is real (sign-up, login, sessions, email verification;
   Phase 1, 2026-10-26; passwords and the account's own profile and deletion, Phase 2,
   2026-10-27), and so are the public event reads and categories (Phase 3, 2026-10-27) and
   favourites and category follows (Phase 4, 2026-10-27) and organisers' event writes with
   OpenStreetMap venues (Phase 5, 2026-11-02) and photos on Cloudinary (Phase 6, 2026-11-03)
-  and moderation and notifications (Phase 7, 2026-11-03) and managing users (Phase 8,
-  2026-11-03); no placeholder routes are left, and contact messages and analytics have no
+  and moderation and notifications (Phase 7, 2026-11-03) and managing users and contact
+  messages (Phases 8 and 9, 2026-11-03); no placeholder routes are left, and analytics has no
   routes yet. The full schema in `src/db/schema/` is applied to Neon and seeded, demo events
   included
 
@@ -70,9 +71,9 @@ will need to do.
   derived from it. Test each role's dashboard by logging in as it: the seed's admin and its Demo
   User and Demo Organiser. The role's sidebar links still come from `navigationData.js`. The
   Demo Organiser's events come from the API (`organiserEvents`, loaded per account like the
-  user's favourites), and so do the admin's (`managedEvents`, `managedUsers`) and every role's
-  notifications (`notifications`); System Logs, Contact Messages and the analytics pages still
-  read mock data
+  user's favourites), and so do the admin's (`managedEvents`, `managedUsers`,
+  `contactMessages`) and every role's notifications (`notifications`); System Logs and the
+  analytics pages still read mock data
 - **Routing:** public routes (`/`, `/events`, `/events/:eventId`, `/about`, `/contact`,
   `/auth/:pathname`) and a nested `/dashboard/*` tree, guarded only by `isUser`. Which sidebar links
   appear depends on the role. The public navbar and footer hide based on the pathname

@@ -16,7 +16,12 @@
   Arcjet is off and `NODE_ENV` is `test`
 - Each phase also breaks its rules one at a time on purpose (a scratchpad script edits one line,
   runs the tests, restores the file and checks it matches) to show a test catches each; Phase 5
-  caught 29 of 29, Phase 6 22 of 22, Phase 7 39 of 39, Phase 8 27 of 27. Retry a write Windows refuses, and resume from there
+  caught 29 of 29, Phase 6 22 of 22, Phase 7 39 of 39, Phase 8 27 of 27, Phase 9 29 of 29. Retry a write Windows refuses, and resume from there
+- Two guards for one rule hide each other: breaking either alone changes nothing, so the pass
+  reads MISSED twice. Phase 9's reply had a check before its `UPDATE … WHERE replied_at IS
+  NULL`; the check went, leaving the one guard that holds under a race, and a test catches it
+- Read rows back in an order (`orderBy`) before taking `.at(-1)` or `[0]`: Postgres promises
+  none, and with every test file running at once a Phase 8 test failed now and then
 - A side effect that logs its failure instead of throwing (notifications, photo deletion) needs a
   test that reads the rows it should have written: Phase 7's first `notify()` failed on every
   call while all 137 tests passed

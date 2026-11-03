@@ -11,6 +11,7 @@ import StatusMessage from "../components/UI/StatusMessage";
 import SearchBar from "../components/events/SearchBar";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import EmptyState from "../components/UI/EmptyState";
+import PageLoading from "../components/UI/PageLoading";
 import { roleLabels } from "../data/manageUsersData";
 import {
   contactMessagesPage,
@@ -71,20 +72,22 @@ function Summary({ messages }) {
 
 // Admin page from contact_messages.php (decided 2026-10-12, layout A): the
 // messages as a list; one opens in the side panel, which marks it read, as
-// opening an email does, and holds the reply. Messages come from App state,
-// so ones sent through the public Contact form appear here straight away
-export default function ContactMessages({ contactMessages, users, onSetRead, onReply }) {
+// opening an email does, and holds the reply, which the server emails to the
+// sender (Phase 9). `contactMessages` is null until the list arrives
+export default function ContactMessages({ contactMessages, users, currentUserId, onSetRead, onReply }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [reply, setReply] = useState("");
   const [replyError, setReplyError] = useState("");
   const [notice, setNotice] = useState("");
+  const [panelError, setPanelError] = useState("");
+  const [sending, setSending] = useState(false);
   const listRef = useRef(null);
   const PageIcon = contactMessagesPage.icon;
 
   // Matches get_all_contact_messages(): newest first
   const messages = useMemo(
-    () => [...contactMessages].sort((a, b) => b.sentAt.localeCompare(a.sentAt)),
+    () => [...(contactMessages ?? [])].sort((a, b) => b.sentAt.localeCompare(a.sentAt)),
     [contactMessages],
   );
 
@@ -134,6 +137,7 @@ export default function ContactMessages({ contactMessages, users, onSetRead, onR
     setReply("");
     setReplyError("");
     setNotice("");
+    setPanelError("");
     setParams({ open: messageId });
   }
 
@@ -141,13 +145,27 @@ export default function ContactMessages({ contactMessages, users, onSetRead, onR
     setParams({ open: null });
   }
 
-  function handleReply() {
+  // The reply stays typed if the server refuses it (the email couldn't be
+  // sent, or another admin answered first), with the reason in the panel
+  async function handleReply() {
     if (!reply.trim()) {
       setReplyError(messagePanel.replyRequired);
       document.getElementById("message-reply")?.focus();
       return;
     }
-    onReply(openMessage.messageId, reply.trim());
+    setSending(true);
+    setNotice("");
+    setPanelError("");
+    try {
+      await onReply(openMessage.messageId, reply.trim());
+    } catch (error) {
+      const replyRefused = error.details?.find(({ path }) => path === "body.reply");
+      if (replyRefused) setReplyError(replyRefused.message);
+      else setPanelError(error.message);
+      return;
+    } finally {
+      setSending(false);
+    }
     setReply("");
     setNotice(contactMessagesText.replySent);
   }
@@ -164,10 +182,12 @@ export default function ContactMessages({ contactMessages, users, onSetRead, onR
     messageViews.options.map((option) => [option.value, messages.filter((message) => matchesView(message, option.value)).length]),
   );
 
+  if (contactMessages === null) return <PageLoading />;
+
   const panelFooter = openMessage ? (
     <>
       {!openMessage.repliedAt && (
-        <Button type="button" variant="primary" size="md" onClick={handleReply}>
+        <Button type="button" variant="primary" size="md" onClick={handleReply} disabled={sending}>
           <messagePanel.send.icon aria-hidden="true" />
           {messagePanel.send.label}
         </Button>
@@ -312,12 +332,17 @@ export default function ContactMessages({ contactMessages, users, onSetRead, onR
               <p className="message-body">{openMessage.message}</p>
 
               {notice && <StatusMessage>{notice}</StatusMessage>}
+              {panelError && <StatusMessage variant="error">{panelError}</StatusMessage>}
 
               {openMessage.repliedAt ? (
                 <div className="callout callout-compact tone-success flex-col items-stretch gap-1.5">
                   <p className="message-reply-title">
                     <Check aria-hidden="true" />
-                    {messagePanel.repliedOn(shortDateFormatter.format(new Date(openMessage.repliedAt)))}
+                    {messagePanel.repliedOn(
+                      shortDateFormatter.format(new Date(openMessage.repliedAt)),
+                      openMessage.repliedBy === currentUserId,
+                      openMessage.repliedByName,
+                    )}
                   </p>
                   <p className="message-body-plain">{openMessage.replyBody}</p>
                 </div>
