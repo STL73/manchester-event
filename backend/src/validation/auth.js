@@ -3,7 +3,7 @@ import { z } from 'zod';
 // The same rules and wording as the sign-up and login forms
 // (frontend/src/data/authPageData.js), which check first for quick feedback
 
-const email = z
+export const email = z
     .string({ error: 'Enter your email address.' })
     .trim()
     .toLowerCase()

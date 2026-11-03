@@ -23,4 +23,6 @@ export const LOG = {
     // reason?, until? } and { userId, username, role, eventsDeleted }
     USER_STATUS_CHANGED: 'User Status Changed',
     USER_DELETED: 'User Deleted',
+    // An admin's reply to a Contact form message (Phase 9): { messageId, name }
+    CONTACT_MESSAGE_REPLIED: 'Contact Message Replied',
 };

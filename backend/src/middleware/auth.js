@@ -6,16 +6,28 @@ import { liftExpiredSuspension } from '../lib/users.js';
 // account gets through, since it can still read with a banner; routes that
 // change something add requireActive after this
 export async function requireAuth(req, res, next) {
+    if (!(await loadUser(req, res))) throw new AppError(401, 'Please log in to continue');
+    next();
+}
+
+// For a route guests can use too (the Contact form): req.user when signed in,
+// undefined otherwise
+export async function optionalAuth(req, res, next) {
+    await loadUser(req, res);
+    next();
+}
+
+async function loadUser(req, res) {
     const token = req.cookies[SESSION_COOKIE];
     const found = await findSession(token);
     if (!found) {
         // An expired or unknown cookie is removed, so the browser stops sending it
         if (token) clearSessionCookie(res);
-        throw new AppError(401, 'Please log in to continue');
+        return null;
     }
     await renewSessionIfDue(res, token, found.session);
     req.user = await liftExpiredSuspension(found.user);
-    next();
+    return req.user;
 }
 
 // Checked on the server for every request: hiding a link in the frontend protects nothing

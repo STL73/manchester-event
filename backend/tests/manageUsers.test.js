@@ -111,7 +111,10 @@ const statusNotes = (userId) =>
     db
         .select({ subject: notifications.subject, body: notifications.body })
         .from(notifications)
-        .where(and(eq(notifications.userId, userId), eq(notifications.type, 'account_status')));
+        .where(and(eq(notifications.userId, userId), eq(notifications.type, 'account_status')))
+        // Oldest first, so .at(-1) is the newest: without an order Postgres
+        // may return them any way, and did when every test file ran at once
+        .orderBy(notifications.notificationId);
 const adminLogs = (action) =>
     db
         .select({ details: systemLogs.details })
