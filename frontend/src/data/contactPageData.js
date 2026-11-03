@@ -44,6 +44,8 @@ export const contactPageData = {
     // contact_messages takes them from it server-side), so they're locked
     accountFields: ["name", "email"],
     accountHint: "From your account, so our reply reaches you.",
+    // The hidden field only bots fill in (never shown)
+    honeypotLabel: "Leave this empty",
   },
   actions: {
     submit: { label: "Send Message", icon: Send },

@@ -18,8 +18,8 @@ import { api, formWithFile } from "./lib/api";
 import { toEvent } from "./lib/publicEvents";
 import { toOrganiserEvent } from "./lib/organiserEvents";
 import { toManagedEvent } from "./lib/managedEvents";
+import { toContactMessage } from "./lib/contactMessages";
 import { mockUsers } from "./data/manageUsersData";
-import { currentAdmin } from "./data/manageEventsData";
 import { currentOrganiser } from "./data/organiserEventsData";
 import { initialEvents } from "./data/eventsData";
 import { privacyPage, termsPage } from "./data/legalPagesData";
@@ -97,8 +97,8 @@ function App() {
   // Admin Home's Recent Admin Actions, and the analytics pages (Phase 10)
   const events = initialEvents;
   // The mock accounts, likewise, for the pages that still name them: System
-  // Logs, Admin Home's Recent Admin Actions, Contact Messages and Site
-  // Analytics (Phases 9 and 10). Manage Users reads the API (Phase 8)
+  // Logs, Admin Home's Recent Admin Actions and Site Analytics (Phase 10).
+  // Manage Users (Phase 8) and Contact Messages (Phase 9) read the API
   const users = mockUsers;
   // Event Analytics still reads the mock organiser's events until Phase 10
   // brings its figures from the API
@@ -115,11 +115,14 @@ function App() {
   // The admin's events from the API (Phase 7): every one but drafts, kept with
   // the account like the organiser's. null until they arrive
   const adminUserId = userType === "admin" ? account.userId : null;
-  const [adminLists, setAdminLists] = useState({ userId: null, events: null, users: null });
+  const [adminLists, setAdminLists] = useState({ userId: null, events: null, users: null, messages: null });
   const adminListsLoaded = adminUserId !== null && adminLists.userId === adminUserId;
   const managedEvents = adminListsLoaded ? adminLists.events : null;
   // Every account, for Manage Users and Admin Home's New users card (Phase 8)
   const managedUsers = adminListsLoaded ? adminLists.users : null;
+  // Every Contact form message, for Contact Messages, Admin Home and the
+  // sidebar's unread count (Phase 9)
+  const contactMessages = adminListsLoaded ? adminLists.messages : null;
   // The user role's favourites and interests (category_follows), loaded from
   // the API after login and kept with the account they belong to, so the next
   // account to log in never sees them. favouriteIds is what the hearts show:
@@ -133,8 +136,6 @@ function App() {
   const interestIds = listsLoaded ? userLists.interestIds : [];
   // Why a heart couldn't change, shown over the page for a moment
   const [favouriteError, setFavouriteError] = useState(null);
-  // Sent from the public Contact form, read on the admin Contact Messages page
-  const [contactMessages, setContactMessages] = useState(initialContactMessages);
   // Each account's inbox from the API (Phase 7), by account id, so a late
   // answer for an account that has logged out never shows under the next.
   // null until it arrives. Read again whenever the Notifications page or a
@@ -202,13 +203,18 @@ function App() {
   useEffect(() => {
     if (adminUserId === null) return undefined;
     let current = true;
-    Promise.all([api("/events/manage"), api("/users")]).then(
-      ([managed, accounts]) =>
+    Promise.all([api("/events/manage"), api("/users"), api("/contact-messages")]).then(
+      ([managed, accounts, messages]) =>
         current &&
-        setAdminLists({ userId: adminUserId, events: managed.data.map(toManagedEvent), users: accounts.data }),
+        setAdminLists({
+          userId: adminUserId,
+          events: managed.data.map(toManagedEvent),
+          users: accounts.data,
+          messages: messages.data.map(toContactMessage),
+        }),
       (error) => {
         if (!current) return;
-        setAdminLists({ userId: adminUserId, events: [], users: [] });
+        setAdminLists({ userId: adminUserId, events: [], users: [], messages: [] });
         setFavouriteError(error.message);
       },
     );
@@ -269,49 +275,41 @@ function App() {
     api("/users/me/notifications/read", { method: "PUT", body: { ids: unread } }).catch(loadNotifications);
   }
 
-  // Matches save_contact_message(): the user ID is stored when signed in
-  function sendContactMessage({ name, email, message }) {
-    const signedInUser = isUser
-      ? users.find((user) => user.email === selectedUser.email)
-      : null;
-    setContactMessages((currentMessages) => [
-      ...currentMessages,
-      {
-        messageId:
-          Math.max(0, ...currentMessages.map((item) => item.messageId)) + 1,
-        userId: signedInUser?.userId ?? null,
-        name,
-        email,
-        message,
-        sentAt: new Date().toISOString(),
-        readAt: null,
-        repliedAt: null,
-        repliedBy: null,
-        replyBody: null,
-      },
-    ]);
+  // Matches save_contact_message() (Phase 9). Signed in, the server takes the
+  // name and email from the account and ignores the form's. Awaits the server
+  // and throws its ApiError for the form to show
+  async function sendContactMessage(fields) {
+    await api("/contact-messages", { method: "POST", body: fields });
   }
 
-  // Contact Messages: opening one reads it (read_at); Mark as unread clears it
+  // Changes the messages only while they still belong to the same admin
+  function updateContactMessages(adminId, change) {
+    setAdminLists((current) => (current.userId === adminId ? { ...current, messages: change(current.messages) } : current));
+  }
+
+  // Contact Messages: opening one reads it (read_at); Mark as unread clears
+  // it. Changes at once, and reloads the list if the server refuses
   function setContactMessageRead(messageId, isRead) {
+    const adminId = adminUserId;
     const readAt = isRead ? new Date().toISOString() : null;
-    setContactMessages((currentMessages) =>
-      currentMessages.map((item) =>
-        item.messageId === messageId && Boolean(item.readAt) !== isRead ? { ...item, readAt } : item,
+    updateContactMessages(adminId, (list) =>
+      list.map((item) => (item.messageId === messageId && Boolean(item.readAt) !== isRead ? { ...item, readAt } : item)),
+    );
+    api(`/contact-messages/${messageId}/read`, { method: "PUT", body: { read: isRead } }).catch(() =>
+      api("/contact-messages").then(
+        ({ data }) => updateContactMessages(adminId, () => data.map(toContactMessage)),
+        () => {},
       ),
     );
   }
 
-  // The reply is stored on the message (reply_body, replied_at, replied_by);
-  // sending the email itself is the backend's job
-  function replyToContactMessage(messageId, replyBody) {
-    const now = new Date().toISOString();
-    setContactMessages((currentMessages) =>
-      currentMessages.map((item) =>
-        item.messageId === messageId
-          ? { ...item, replyBody, repliedAt: now, repliedBy: currentAdmin.id, readAt: item.readAt ?? now }
-          : item,
-      ),
+  // The server emails the reply and stores it (reply_body, replied_at,
+  // replied_by). Awaits it and throws its ApiError for the panel to show
+  async function replyToContactMessage(messageId, reply) {
+    const adminId = adminUserId;
+    const { data } = await api(`/contact-messages/${messageId}/reply`, { method: "PUT", body: { reply } });
+    updateContactMessages(adminId, (list) =>
+      list.map((item) => (item.messageId === messageId ? toContactMessage(data) : item)),
     );
   }
 
@@ -369,7 +367,7 @@ function App() {
     drafts: organiserEvents.filter((event) => event.status === "draft").length,
     rejected: organiserEvents.filter((event) => event.status === "rejected").length,
     toReview: (managedEvents ?? []).filter((event) => event.status === "pending").length,
-    unreadMessages: contactMessages.filter((message) => !message.readAt).length,
+    unreadMessages: (contactMessages ?? []).filter((message) => !message.readAt).length,
   };
   // Settings' handlers. Each throws the ApiError for its section to show, and
   // the account the server sends back updates the sidebar and greeting
@@ -553,7 +551,7 @@ function App() {
             }
           >
             <Route index element={<Navigate to="home" replace />} />
-            <Route path="home" element={<DashboardHome selectedUser={selectedUser} account={account} users={managedUsers ?? []} logUsers={users} events={managedEvents ?? []} logEvents={events} organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} favouriteIds={favouriteIds} favouriteEvents={favouriteEvents} onToggleFavourite={toggleFavourite} interestIds={interestIds} contactMessages={contactMessages} notifications={notifications ?? []} onLoadNotifications={loadNotifications} />} />
+            <Route path="home" element={<DashboardHome selectedUser={selectedUser} account={account} users={managedUsers ?? []} logUsers={users} events={managedEvents ?? []} logEvents={events} organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} favouriteIds={favouriteIds} favouriteEvents={favouriteEvents} onToggleFavourite={toggleFavourite} interestIds={interestIds} contactMessages={contactMessages ?? []} notifications={notifications ?? []} onLoadNotifications={loadNotifications} />} />
             <Route element={<RoleOnly allow="user" userType={userType} />}>
               <Route path="explore-events" element={<ExploreEvents inDashboard selectedUser={selectedUser} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
               <Route path="my-favourites" element={<MyFavourites events={favouriteEvents} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
@@ -600,9 +598,9 @@ function App() {
               <Route path="manage-users/:userId/edit" element={<OpenInPanel param="userId" to="/dashboard/manage-users" />} />
               <Route path="manage-events" element={<ManageEvents events={managedEvents} currentUserId={adminUserId} onDecide={decideEvent} />} />
               <Route path="manage-events/:eventId/edit" element={<OpenInPanel param="eventId" to="/dashboard/manage-events" />} />
-              <Route path="site-analytics" element={<SiteAnalytics users={users} events={events} contactMessages={contactMessages} favouriteIds={initialFavouriteIds} interestIds={userCategoryIds} />} />
+              <Route path="site-analytics" element={<SiteAnalytics users={users} events={events} contactMessages={initialContactMessages} favouriteIds={initialFavouriteIds} interestIds={userCategoryIds} />} />
               <Route path="system-logs" element={<SystemLogs events={events} users={users} />} />
-              <Route path="contact-messages" element={<ContactMessages contactMessages={contactMessages} users={users} onSetRead={setContactMessageRead} onReply={replyToContactMessage} />} />
+              <Route path="contact-messages" element={<ContactMessages contactMessages={contactMessages} users={managedUsers ?? []} currentUserId={adminUserId} onSetRead={setContactMessageRead} onReply={replyToContactMessage} />} />
             </Route>
             <Route path="*" element={<NotFound inDashboard />} />
           </Route>

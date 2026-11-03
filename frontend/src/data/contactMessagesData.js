@@ -47,7 +47,9 @@ export const messagePanel = {
   replyLabel: (name) => `Reply to ${name}`,
   replyPlaceholder: (email) => `Write a reply. It's sent to ${email}.`,
   replyRequired: "Write a reply first.",
-  repliedOn: (date) => `You replied on ${date}`,
+  // Another admin's name, or neither once their account is gone
+  repliedOn: (date, mine, name) =>
+    mine ? `You replied on ${date}` : name ? `${name} replied on ${date}` : `Replied on ${date}`,
   send: { label: "Send reply", icon: Send },
   markUnread: { label: "Mark as unread", icon: Mail },
 };
@@ -63,8 +65,8 @@ export const contactMessagesText = {
   error: "There was an error sending your message. Please try again.",
 };
 
-// Mock of the contact_messages table (held in App state so the public
-// Contact form can add to it)
+// Mock of the contact_messages table, read only by Site Analytics' support
+// figures until Phase 10. Contact Messages reads the API (Phase 9)
 export const initialContactMessages = [
   {
     messageId: 1,

@@ -6,8 +6,8 @@ The shared middleware below is in place (Phase 0, 2026-10-26) and the auth route
 (Phase 1, passwords Phase 2), and so are the public event reads and categories (Phase 3),
 favourites and category follows (Phase 4), organisers' own events with venue search
 (Phase 5), photos on Cloudinary (Phase 6), moderation and notifications (Phase 7) and
-managing users (Phase 8). The users and events routers have no placeholder stubs left;
-contact messages (Phase 9) and analytics and logs (Phase 10) are still to come.
+managing users (Phase 8) and contact messages (Phase 9). The users and events routers have
+no placeholder stubs left; analytics and logs (Phase 10) are still to come.
 
 ## Routing
 
@@ -20,6 +20,7 @@ All routes are versioned under `/api/v1`, one router per resource, mounted in `s
 | `/api/v1/events` | `routes/event.routes.js`: `GET /` (public list), `GET /summary` (counts), `GET /:id` (public details), `/summary` and `/manage` before `/:id`; `POST /`, `PUT /:id`, `PUT /:id/submit`, `PUT /:id/cancel`, `DELETE /:id` (organisers); `GET /manage`, `PUT /:id/approve`, `/:id/reject`, `/:id/take-down` (admins) |
 | `/api/v1/categories` | `routes/category.routes.js`: `GET /` (active categories A to Z, upcoming events each) |
 | `/api/v1/locations` | `routes/location.routes.js`: `GET /search?q=` (OpenStreetMap places for the venue box) |
+| `/api/v1/contact-messages` | `routes/contact.routes.js`: `POST /` (anyone, guests too); admins: `GET /`, `PUT /:id/read`, `PUT /:id/reply` |
 
 - Router files: `const xRouter = Router();` then `export default xRouter;`
 - REST verbs: `GET` list/detail, `POST` create, `PUT` update, `DELETE` remove. Actions that
@@ -282,6 +283,28 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
   `db.batch()`; a RESTRICT failure from an event approved meanwhile is 409 too. Sessions,
   follows, favourites and notifications cascade. Logs User Deleted `{ userId, username, role,
   eventsDeleted }`
+
+## Contact messages (decided 2026-11-03)
+
+- `POST /contact-messages` takes guests and every role but admins (403). `optionalAuth`
+  (`middleware/auth.js`) loads the account when the cookie has one and carries on as a guest
+  otherwise. Signed in, only `message` is read and the name and email are the account's
+  (`memberMessageSchema`), so they can't be forged; a guest sends `name`, `email` and
+  `message` (`guestMessageSchema`). **A suspended account may write** (Slav, 2026-11-03): it
+  is how they ask about the suspension. Answers 201 `{ messageId, createdAt }`
+- Spam: a hidden `website` field (Contact.jsx keeps it off-screen and out of the tab order);
+  filled in, the answer is the same 201 and nothing is stored. Arcjet: 5 messages an hour per
+  IP and `validateEmail` (disposable, invalid, no MX: 400 under `body.email`)
+- Admins: `GET /` lists every message newest first with `repliedByName`, all at once (the page
+  filters in the browser). `PUT /:id/read` `{ read }` sets `read_at`, keeping the first time,
+  or clears it (Mark as unread). Writes are `requireActive`
+- **The reply is emailed at once** (Slav, 2026-11-03; notification emails still wait for
+  Phase 11): `PUT /:id/reply` `{ reply }` (1 to 5000 characters) claims the message with an
+  `UPDATE … WHERE replied_at IS NULL` (one reply per message; a second, or another admin's at
+  the same moment, is 409), then sends `lib/contactEmails.js` `sendContactReply()` (the reply,
+  then their message quoted). If the email fails the claim is undone, Email Failed is logged
+  and the answer is 503, so Replied never shows for a reply nobody got. Replying reads the
+  message. Logs Contact Message Replied `{ messageId, name }`
 
 ## Status codes (decided 2026-10-26)
 

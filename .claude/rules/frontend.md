@@ -58,8 +58,14 @@ functions record behaviour being matched on purpose: keep that parity unless tol
   opens Explore). Manage users (Phase 8): the admin's effect also loads `/users`
   (`managedUsers`, `null` until loaded), which Manage Users and Admin Home's New users card
   read; `updateUserStatus()` and `deleteUser()` await the API and swap in or drop the server's
-  row. System Logs, Admin Home's Recent Admin Actions, Contact Messages and Site Analytics still
-  read `initialEvents` and `mockUsers` until Phases 9 and 10
+  row. Contact messages (Phase 9): the same effect loads `/contact-messages`
+  (`contactMessages`, `null` until loaded, mapped by `lib/contactMessages.js`, which calls
+  `createdAt` `sentAt`) for Contact Messages, Admin Home's unread card and the sidebar count;
+  `setContactMessageRead()` changes at once and reloads if refused, `replyToContactMessage()`
+  awaits (the server emails the reply) and swaps in its row. The Contact form awaits
+  `sendContactMessage()`, signed in sending only the message, and has a hidden `website`
+  field for bots. System Logs, Admin Home's Recent Admin Actions and Site Analytics still
+  read `initialEvents`, `mockUsers` and `initialContactMessages` until Phase 10
 - **Event photos:** the seed's live in `public/images/events/` (2026-10-27) and are referenced
   by path (`/images/events/<file>`); organisers' own are Cloudinary addresses (Phase 6). Both
   are what the database's `image_url` stores; NULL shows `defaultEventImage`. There is no
@@ -286,8 +292,10 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
 - **Contact Messages** (decided 2026-10-12, layout A): the admin list and `UI/SidePanel`, like
   Manage Events and Users. Opening a message reads it (`readAt`, once per opening, so Admin
   Home's unread card agrees); the panel replies in the page (`replyBody`, `repliedAt`,
-  `repliedBy`; the email itself is the backend's job) or marks it unread. Pills: All, Unread,
-  Replied, From guests; the sender links to their account in Manage Users
+  `repliedBy`, `repliedByName`; the server emails it, Phase 9) or marks it unread. A refusal
+  (the email failed, another admin answered first) stays in the panel with the reply still
+  typed. Pills: All, Unread, Replied, From guests; the sender links to their account in
+  Manage Users
 - **System Logs** (decided 2026-10-12, layout A): an activity feed under day headings, 25 per
   page. `lib/systemLogs.js` `describeLog()` turns a row (`details` is an object, like the
   schema's jsonb; `role` is the copied column) into a sentence with links to the event or

@@ -3,8 +3,9 @@
 The full schema is applied to Neon and seeded. Auth and the account's own `/users/me` are real
 (Phases 1 and 2), and so are the public event reads and categories (Phase 3), favourites and
 category follows (Phase 4), organisers' event writes with OpenStreetMap venues (Phase 5),
-photos on Cloudinary (Phase 6), moderation and notifications (Phase 7) and managing users
-(Phase 8); no placeholder stubs are left in the users and events routers.
+photos on Cloudinary (Phase 6), moderation and notifications (Phase 7), managing users
+(Phase 8) and contact messages (Phase 9); no placeholder stubs are left in the users and
+events routers.
 
 ## Stack constraints
 
@@ -34,9 +35,11 @@ backend/
 │   │                       organiserEvents (own events, snapshot, venue rows), osm (Photon, Nominatim),
 │   │                       images (Cloudinary), uploads (withUpload),
 │   │                       managedEvents (the admin's list), notifications (notify*, inbox),
-│   │                       accounts (Manage Users' list, deleteAccount)
-│   ├── middleware/         errorHandler (+ notFound), validate, security, auth, upload (multer)
-│   ├── validation/         Zod schemas per resource (auth.js, users.js, events.js)
+│   │                       accounts (Manage Users' list, deleteAccount),
+│   │                       contactEmails (the admin's reply)
+│   ├── middleware/         errorHandler (+ notFound), validate, security,
+│   │                       auth (requireAuth, optionalAuth, requireRole, requireActive), upload (multer)
+│   ├── validation/         Zod schemas per resource (auth.js, users.js, events.js, contact.js)
 │   ├── db/
 │   │   ├── index.js        exports `db` (Drizzle client)
 │   │   ├── seed.js         npm run db:seed
