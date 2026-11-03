@@ -11,13 +11,16 @@ import {
   profileMessages,
 } from "../../data/profileSettingsData";
 
-// Picture and display name, saved together (the name on the server, the
-// picture in the page until Phase 6); the email is shown locked.
+// Picture and display name, saved together (the picture on Cloudinary through
+// the server, Phase 6); the email is shown locked.
 // Save stays off until something differs from what is saved
 export default function ProfileSettings({ selectedUser, emailVerified, onSave }) {
   const savedAvatar = selectedUser.avatarUrl ?? null;
   const [name, setName] = useState(selectedUser.user);
+  // What the circle shows: the saved picture, a new pick (an object URL) or none
   const [avatarUrl, setAvatarUrl] = useState(savedAvatar);
+  // The picked file, sent on Save
+  const [avatarFile, setAvatarFile] = useState(null);
   const [avatarError, setAvatarError] = useState("");
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -28,11 +31,12 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
   const SubmitIcon = profileForm.submit.icon;
 
   const trimmedName = name.trim();
-  const changed = trimmedName !== selectedUser.user || avatarUrl !== savedAvatar;
+  const removeSaved = Boolean(savedAvatar) && !avatarUrl;
+  const changed = trimmedName !== selectedUser.user || Boolean(avatarFile) || removeSaved;
 
   // An unsaved preview is only ours, so it can be freed when replaced
   function dropDraftAvatar() {
-    if (avatarUrl && avatarUrl !== savedAvatar) URL.revokeObjectURL(avatarUrl);
+    if (avatarUrl?.startsWith("blob:")) URL.revokeObjectURL(avatarUrl);
   }
 
   function handleFile(event) {
@@ -52,6 +56,7 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
     setAvatarError("");
     setSaved(false);
     setAvatarUrl(URL.createObjectURL(file));
+    setAvatarFile(file);
   }
 
   function removeAvatar() {
@@ -59,6 +64,7 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
     setAvatarError("");
     setSaved(false);
     setAvatarUrl(null);
+    setAvatarFile(null);
   }
 
   async function handleSubmit(event) {
@@ -67,13 +73,18 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
     setSaving(true);
     setError("");
     try {
-      await onSave({ user: trimmedName, avatarUrl });
-      // The picture being replaced was saved before, so nothing shows it now
-      if (savedAvatar && savedAvatar !== avatarUrl) URL.revokeObjectURL(savedAvatar);
+      const storedAvatar = await onSave({ user: trimmedName, avatarFile, removeAvatar: removeSaved });
+      // The stored picture replaces the preview, so Save goes quiet again
+      dropDraftAvatar();
+      setAvatarUrl(storedAvatar);
+      setAvatarFile(null);
       setName(trimmedName);
       setSaved(true);
     } catch (saveError) {
-      setError(saveError.message);
+      // A refused picture says why under it (type, or a file that isn't an image)
+      const pictureError = saveError.details?.find(({ path }) => path === "body.avatar");
+      if (pictureError) setAvatarError(pictureError.message);
+      else setError(saveError.message);
     } finally {
       setSaving(false);
     }

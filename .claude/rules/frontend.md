@@ -44,10 +44,14 @@ functions record behaviour being matched on purpose: keep that parity unless tol
   server's `hasBeenPublic` and `editPending`; `toLondonInput()` for datetime-local inputs). Its
   five handlers await the API and throw the `ApiError`; the list changes only when the server
   agrees, and each page shows the refusal in red. Event Analytics and Organiser Home's "Saved by
-  users" card still read mock data until Phase 10
-- **Event photos live in `public/images/events/`** (2026-10-27) and are referenced by path
-  (`/images/events/<file>`), the same path the database's `image_url` stores; NULL shows
-  `defaultEventImage`. There is no `imagePosition`: photos crop centred
+  users" card still read mock data until Phase 10. Photos (Phase 6): a picked `File` goes with
+  its save, `formWithFile(field, file, fields)` in `lib/api.js` making the multipart body and
+  `api()` sending `FormData` as it is; `createOrganiserEvent` / `updateOrganiserEvent` take it
+  as a last argument, `saveProfile` sends the picture to `/users/me/avatar`
+- **Event photos:** the seed's live in `public/images/events/` (2026-10-27) and are referenced
+  by path (`/images/events/<file>`); organisers' own are Cloudinary addresses (Phase 6). Both
+  are what the database's `image_url` stores; NULL shows `defaultEventImage`. There is no
+  `imagePosition`: photos crop centred
 
 ## Layout
 
@@ -230,9 +234,10 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   worked out and Change, with "© OpenStreetMap contributors" in both. Only its `placeId` is
   sent. The end must be after the start; Submit refuses a start that has passed (a draft may
   keep one, and a draft being sent is always checked). The server's refusals go under their
-  fields, the first in the form's order focused. The photo box is `locked` until Phase 6: it
-  shows the event's photo or the default with a "coming soon" line (the drop box, JPG, PNG,
-  WebP, GIF, 5 MB with Replace and Remove, is still in the code for then). Edit opens with a banner saying what saving does and ends with
+  fields, the first in the form's order focused (the photo last). The photo box (Phase 6): drop
+  or click, JPG, PNG, WebP, GIF, 5 MB, Replace and Remove; the file goes with Save or Submit,
+  never on pick, and Remove on a saved photo sends `removeImage`. After a save the stored photo
+  replaces the preview, so the next Save doesn't send it again. Edit opens with a banner saying what saving does and ends with
   a danger zone asked in the page: Cancel for an event that has been public (`hasBeenPublic`),
   Delete for one that never was. Saving leads on: Submit to My Events' Pending view, a new
   draft to My Drafts, Save draft on an existing draft stays. Editing a live event keeps its
@@ -302,8 +307,9 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   lands. The name, the switch, the password and Delete are real (Phase 2): each section awaits
   its App handler and shows the server's refusal, under its field when it names one. Delete
   learns from the server's 409 that an organiser has had public events (their events are mock
-  until Phase 5). Only the picture is still pretend, held in App's `profileChanges` until Phase 6
-  stores it, and the Password changed notification stays mock until Phase 7
+  until Phase 5). The picture is real too (Phase 6): the picked `File` goes on Save after the
+  name, a refusal shows under the picture, and the stored address replaces the preview. Only the
+  Password changed notification stays mock until Phase 7
 - **Hexagons in the dashboard** (decided 2026-10-11, extended 2026-10-12): each frames something
   that is already there, so the logo shows without overusing it. Every page title's icon sits in
   the logo's cell (`DashboardPageHeading`, 36 x 40); on Home the greeting's picture does

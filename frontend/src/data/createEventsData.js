@@ -111,8 +111,6 @@ export const imageDrop = {
   types: "JPG, PNG, WebP or GIF, up to 5 MB",
   replace: { label: "Replace", icon: RefreshCw },
   remove: { label: "Remove", icon: X },
-  // Until Phase 6 stores photos: the event keeps the one it has, or the default
-  comingSoon: "Adding your own photo is coming soon. Until then the event shows the photo it has, or our default one.",
 };
 
 // The venue box: type, pick from OpenStreetMap's places, change if needed

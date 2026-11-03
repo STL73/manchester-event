@@ -125,22 +125,10 @@ export default function CreateEvents(props) {
 }
 
 // The photo box: drop or click to choose; once chosen the photo fills it,
-// with Replace and Remove. `locked` until Phase 6 stores photos: it shows the
-// event's photo, or the default one, and says choosing one is coming
-function ImageDrop({ image, error, inputRef, onFile, onRemove, locked = false }) {
+// with Replace and Remove. The file goes with Save or Submit (Phase 6)
+function ImageDrop({ image, error, inputRef, onFile, onRemove }) {
   const [isDragging, setIsDragging] = useState(false);
   const errorId = "image-error";
-
-  if (locked) {
-    return (
-      <div className="flex flex-col gap-2">
-        <div className="event-image-drop has-image is-locked">
-          <img className="event-image-drop-photo" src={image || placeholder} alt="" />
-        </div>
-        <p className="field-hint" id="image-hint">{imageDrop.comingSoon}</p>
-      </div>
-    );
-  }
 
   function handleDrop(dropEvent) {
     dropEvent.preventDefault();
@@ -233,8 +221,12 @@ function EventForm({ isEdit, events, onCreateEvent, onUpdateEvent, onCancelEvent
   const [form, setForm] = useState(() => (event ? formFromEvent(event) : emptyForm));
   // The venue picked: its name, address and area show under the field
   const [venue, setVenue] = useState(() => event?.venue ?? null);
+  // The event's own photo; the default one counts as none
+  const savedImage = event?.image && event.image !== placeholder ? event.image : "";
   // The photo shown: the event's own, a new pick (an object URL) or none
-  const [image, setImage] = useState(() => event?.image ?? "");
+  const [image, setImage] = useState(savedImage);
+  // The picked file, sent with Save or Submit
+  const [imageFile, setImageFile] = useState(null);
   const [errors, setErrors] = useState({});
   // { text, variant }: a save that worked, or the server's reason it didn't
   const [message, setMessage] = useState(null);
@@ -298,11 +290,14 @@ function EventForm({ isEdit, events, onCreateEvent, onUpdateEvent, onCancelEvent
     if (imageError) return;
     if (image.startsWith("blob:")) URL.revokeObjectURL(image);
     setImage(URL.createObjectURL(file));
+    setImageFile(file);
   }
 
   function handleImageRemove() {
     if (image.startsWith("blob:")) URL.revokeObjectURL(image);
     setImage("");
+    setImageFile(null);
+    setErrors((current) => ({ ...current, image: undefined }));
     requestAnimationFrame(() => fileInputRef.current?.focus());
   }
 
@@ -326,23 +321,29 @@ function EventForm({ isEdit, events, onCreateEvent, onUpdateEvent, onCancelEvent
     }
 
     setSaving(true);
+    // Removing the event's own photo goes back to the default one
+    const body = { ...bodyFromForm(form, submit), ...(savedImage && !image && { removeImage: true }) };
     let saved;
     try {
       saved = isEdit
-        ? await onUpdateEvent(event.eventId, bodyFromForm(form, submit))
-        : await onCreateEvent(bodyFromForm(form, submit));
+        ? await onUpdateEvent(event.eventId, body, imageFile)
+        : await onCreateEvent(body, imageFile);
     } catch (error) {
       // Under its field when the server names one, otherwise over the form
       const fieldErrors = errorsFromServer(error.details);
       setErrors(fieldErrors);
-      // The first in the form's order, not the server's
-      const firstField = Object.keys(emptyForm).find((field) => fieldErrors[field]);
+      // The first in the form's order, not the server's; the photo comes last
+      const firstField = [...Object.keys(emptyForm), "image"].find((field) => fieldErrors[field]);
       if (firstField) document.getElementById(firstField)?.focus();
       else setMessage({ text: error.message, variant: "error" });
       setSaving(false);
       return;
     }
     setSaving(false);
+    // The stored photo replaces the preview, so the next Save doesn't send it again
+    if (image.startsWith("blob:")) URL.revokeObjectURL(image);
+    setImage(saved.image !== placeholder ? saved.image : "");
+    setImageFile(null);
 
     if (saved.status === "draft") {
       if (isEdit) {
@@ -438,7 +439,6 @@ function EventForm({ isEdit, events, onCreateEvent, onUpdateEvent, onCancelEvent
           inputRef={fileInputRef}
           onFile={handleImageFile}
           onRemove={handleImageRemove}
-          locked
         />
       );
     }

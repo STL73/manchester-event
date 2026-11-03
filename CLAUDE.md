@@ -18,13 +18,14 @@ user's favourites and interests, and organisers' own events so far**:
   Preferences and Event details for guests and users read real events (Phase 3), and the hearts,
   My Favourites, Preferences' picks and the user dashboard's Home are real (Phase 4, except "New
   in your interests"), and so are Create / Edit Event, My Events, My Drafts and Organiser Home
-  (Phase 5, except the photo and the saves figures); every other page still runs on in-memory
-  mock data
+  (Phase 5, except the saves figures), and event photos and Settings' profile picture on
+  Cloudinary (Phase 6); every other page still runs on in-memory mock data
 - `backend/` is Express + Drizzle. Auth is real (sign-up, login, sessions, email verification;
   Phase 1, 2026-10-26; passwords and the account's own profile and deletion, Phase 2,
   2026-10-27), and so are the public event reads and categories (Phase 3, 2026-10-27) and
   favourites and category follows (Phase 4, 2026-10-27) and organisers' event writes with
-  OpenStreetMap venues (Phase 5, 2026-11-02); the rest of the users and events routers still
+  OpenStreetMap venues (Phase 5, 2026-11-02) and photos on Cloudinary (Phase 6, 2026-11-03);
+  the rest of the users and events routers still
   return placeholder strings. The full schema in
   `src/db/schema/` is applied to Neon and seeded, demo events included
 
@@ -134,6 +135,7 @@ The frontend has no test runner yet.
 | `backend/.env` | `SEED_USER_EMAIL`, `SEED_ORGANISER_EMAIL`, `SEED_DEMO_PASSWORD` | Optional demo user and organiser for the seed |
 | `backend/.env` | `EMAIL_USER`, `EMAIL_APP_PASSWORD`, `EMAIL_FROM_NAME` | Gmail sender (an app password). Unset locally = emails print to the terminal; required in production |
 | `backend/.env` | `APP_URL` | The frontend's address for links in emails; defaults to `http://localhost:5173`, required in production |
+| `backend/.env` | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Photos (Phase 6); the server won't start without them, tests replace `lib/images.js`. `CLOUDINARY_URL` may also be there, unused |
 | `frontend/.env` | `VITE_NEON_AUTH_URL`, `VITE_NEON_DATA_API_URL` | Defined but not yet read by any code |
 
 All `.env*` files are gitignored.

@@ -4,8 +4,8 @@
 
 The shared middleware below is in place (Phase 0, 2026-10-26) and the auth routes are real
 (Phase 1, passwords Phase 2), and so are the public event reads and categories (Phase 3),
-favourites and category follows (Phase 4) and organisers' own events with venue search
-(Phase 5). The
+favourites and category follows (Phase 4), organisers' own events with venue search
+(Phase 5) and photos on Cloudinary (Phase 6). The
 rest of the users and events routers are still stubs that return a placeholder string
 (`res.send('Create event')`); database access comes with each feature.
 
@@ -16,7 +16,7 @@ All routes are versioned under `/api/v1`, one router per resource, mounted in `s
 | Mount | File and endpoints |
 | --- | --- |
 | `/api/v1/auth` | `routes/auth.routes.js`: `POST /sign-up`, `/login`, `/logout`, `/verify-email`, `/resend-verification`, `/forgot-password`, `/reset-password`; `GET /me`; `PUT /password` |
-| `/api/v1/users` | `routes/user.routes.js`: `PUT /me` (name, email switch), `DELETE /me` (password-confirmed), `GET /me/favourites`, `PUT` and `DELETE /me/favourites/:id`, `GET` and `PUT /me/follows`, `GET /me/events` (an organiser's own); REST CRUD on `/` and `/:id`, `/me` registered first |
+| `/api/v1/users` | `routes/user.routes.js`: `PUT /me` (name, email switch), `DELETE /me` (password-confirmed), `GET /me/favourites`, `PUT` and `DELETE /me/favourites/:id`, `GET` and `PUT /me/follows`, `GET /me/events` (an organiser's own), `PUT` and `DELETE /me/avatar` (the profile picture); REST CRUD on `/` and `/:id`, `/me` registered first |
 | `/api/v1/events` | `routes/event.routes.js`: `GET /` (public list), `GET /summary` (counts), `GET /:id` (public details), `/summary` before `/:id`; `POST /`, `PUT /:id`, `PUT /:id/submit`, `PUT /:id/cancel`, `DELETE /:id` (organisers) |
 | `/api/v1/categories` | `routes/category.routes.js`: `GET /` (active categories A to Z, upcoming events each) |
 | `/api/v1/locations` | `routes/location.routes.js`: `GET /search?q=` (OpenStreetMap places for the venue box) |
@@ -178,6 +178,35 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
   while suspended
 - Logs: Event Created (with `status`), Event Updated, Draft Submitted, Event Cancelled, Event
   Deleted, each `{ eventId, name }`
+
+## Photos (decided 2026-11-02)
+
+- **Cloudinary, through our server.** The browser sends the file to us; `middleware/upload.js`
+  (multer, in memory, 5 MB, JPG / PNG / WebP / GIF) checks it and `lib/images.js`, the only file
+  that knows Cloudinary, uploads it. Cloudinary's `allowed_formats` checks the content too: a
+  file it can't read is 400 under the field, Cloudinary failing is 503. The browser never names
+  a Cloudinary image, so there are no signed browser uploads to trust
+- **A photo travels with its form.** `POST /events` and `PUT /events/:id` take multipart when a
+  photo is attached: the usual body as JSON in a `data` field and the file as `image`, so
+  `eventBodySchema` reads the same booleans and nulls. JSON without a photo works as before.
+  `removeImage: true` goes back to the default photo; a file sent with it wins. Changing the
+  photo of a live event is an edit like any other
+- **Upload only once every check has passed**, then write; `withUpload()` (`lib/uploads.js`)
+  deletes the upload if the write fails. Nothing is uploaded on pick, so an abandoned form
+  leaves nothing behind
+- **Old photos are deleted** once the write has gone through: replaced, removed, a waiting
+  edit's on Cancel, a deleted event's, and an account's picture and events on Delete account.
+  `droppedPhotos()` keeps any photo `approved_snapshot` still shows (`imagePublicId` is a
+  snapshot key). Deleting is best effort and never fails a save. Seeded photos have no public id
+  and are never deleted. **Phase 7:** approving an edit must delete the snapshot's photo if the
+  row's differs
+- Stored as both the delivery URL (`image_url`, `avatar`; `f_auto,q_auto`) and the public id
+  (`image_public_id`, `avatar_public_id`). Events are kept at most 1600 px wide, pictures
+  400 x 400 cropped round the subject. Folders `manchester-event/<NODE_ENV>/events` and
+  `…/avatars`, so development's can be told apart and cleared
+- `PUT /users/me/avatar` (multipart, `avatar`; none is 400) and `DELETE /users/me/avatar`:
+  `requireActive`, logged as Profile Updated `{ fields: ['avatar'] }`, answer the account
+- 20 uploads an hour per account (Arcjet, only when a file is sent)
 
 ## Status codes (decided 2026-10-26)
 
