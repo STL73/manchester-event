@@ -14,7 +14,7 @@ import Footer from "./components/layout/Footer";
 import ScrollToTop from "./components/layout/ScrollToTop";
 import NotFound from "./pages/NotFound";
 import { getData, getUserData } from "./data/navigationData";
-import { api } from "./lib/api";
+import { api, formWithFile } from "./lib/api";
 import { toEvent } from "./lib/publicEvents";
 import { toOrganiserEvent } from "./lib/organiserEvents";
 import { mockUsers } from "./data/manageUsersData";
@@ -132,9 +132,6 @@ function App() {
   // Read on the Notifications page and counted on the user dashboard, so
   // marking one read shows everywhere
   const [notifications, setNotifications] = useState(initialNotifications);
-  // The picture chosen on Settings, laid over the account until Phase 6
-  // stores it, so the sidebar and greeting show it. Cleared on logout
-  const [profileChanges, setProfileChanges] = useState({});
 
   // A 401 means nobody is logged in. Any other failure (the API is down)
   // also shows the public site, rather than a page that can't load
@@ -317,7 +314,6 @@ function App() {
       emailNotifications: account.emailNotifications,
       ...(account.avatar && { avatarUrl: account.avatar }),
     }),
-    ...profileChanges,
   };
   // The sidebar's badges: the same filters as the Home cards, so the two agree
   const navCounts = {
@@ -334,13 +330,24 @@ function App() {
   async function saveAccount(changes) {
     const { data } = await api("/users/me", { method: "PUT", body: changes });
     setAccount(data);
+    return data;
   }
 
-  // The name is saved on the server; the picture stays in this tab until
-  // Phase 6 stores it
-  async function saveProfile({ user, avatarUrl }) {
-    if (user !== account.username) await saveAccount({ username: user });
-    setProfileChanges({ avatarUrl });
+  // The name, then the picture (Cloudinary, Phase 6), each saved on its own:
+  // if the picture fails, the name has still been saved and Save sends only the
+  // picture again. Answers the picture's address for the form to show
+  async function saveProfile({ user, avatarFile, removeAvatar }) {
+    let latest = account;
+    if (user !== account.username) latest = await saveAccount({ username: user });
+    if (avatarFile || removeAvatar) {
+      latest = (
+        await api("/users/me/avatar", avatarFile
+          ? { method: "PUT", body: formWithFile("avatar", avatarFile) }
+          : { method: "DELETE" })
+      ).data;
+      setAccount(latest);
+    }
+    return latest.avatar ?? null;
   }
 
   // The server logs out every other device and gives this one a new session
@@ -353,7 +360,6 @@ function App() {
   async function deleteAccount(password) {
     await api("/users/me", { method: "DELETE", body: { password } });
     setAccount(null);
-    setProfileChanges({});
     navigate("/");
   }
 
@@ -380,7 +386,6 @@ function App() {
   async function logout() {
     await api("/auth/logout", { method: "POST" }).catch(() => {});
     setAccount(null);
-    setProfileChanges({});
     navigate("/");
   }
 
@@ -436,9 +441,10 @@ function App() {
   // ApiError for the page to show; the list changes only once the server has
   // agreed. The server decides the status from the event and `submit`, as
   // insert_event() and update_event() did in the PHP
-  async function createOrganiserEvent(body) {
+  // A new photo (a File) goes with the form in the same request (Phase 6)
+  async function createOrganiserEvent(body, photo) {
     const userId = organiserUserId;
-    const { data } = await api("/events", { method: "POST", body });
+    const { data } = await api("/events", { method: "POST", body: photo ? formWithFile("image", photo, body) : body });
     const created = toOrganiserEvent(data, account);
     updateOrganiserEvents(userId, (list) => [...list, created]);
     return created;
@@ -446,9 +452,12 @@ function App() {
 
   // A live event keeps its last approved version public, with its favourites,
   // until the edit is approved (schema option b, agreed 2026-10-05)
-  async function updateOrganiserEvent(eventId, body) {
+  async function updateOrganiserEvent(eventId, body, photo) {
     const userId = organiserUserId;
-    const { data } = await api(`/events/${eventId}`, { method: "PUT", body });
+    const { data } = await api(`/events/${eventId}`, {
+      method: "PUT",
+      body: photo ? formWithFile("image", photo, body) : body,
+    });
     const updated = toOrganiserEvent(data, account);
     updateOrganiserEvents(userId, (list) => list.map((event) => (event.eventId === eventId ? updated : event)));
     return updated;

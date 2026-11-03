@@ -11,15 +11,26 @@ export class ApiError extends Error {
   }
 }
 
+// A form with a photo (Phase 6): the file under its field's name and the rest
+// of the form as JSON in `data`, which the server reads back as the usual body
+export function formWithFile(field, file, fields) {
+  const form = new FormData();
+  if (fields !== undefined) form.append("data", JSON.stringify(fields));
+  form.append(field, file);
+  return form;
+}
+
 export async function api(path, { method = "GET", body } = {}) {
+  // FormData goes as it is: the browser sets the multipart header and boundary
+  const isForm = body instanceof FormData;
   let response;
   try {
     response = await fetch(`/api/v1${path}`, {
       method,
       // Sends the session cookie with every request
       credentials: "include",
-      headers: body === undefined ? undefined : { "Content-Type": "application/json" },
-      body: body === undefined ? undefined : JSON.stringify(body),
+      headers: body === undefined || isForm ? undefined : { "Content-Type": "application/json" },
+      body: body === undefined || isForm ? body : JSON.stringify(body),
     });
   } catch {
     throw new ApiError(0, "Can't reach the server. Check your connection and try again.");
