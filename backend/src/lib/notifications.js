@@ -1,8 +1,9 @@
-import { and, desc, eq, inArray, isNull } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 
 import { db } from '../db/index.js';
-import { categoryFollows, favourites, notifications, users } from '../db/schema/index.js';
+import { categoryFollows, events, favourites, notifications, users } from '../db/schema/index.js';
 import { NOTIFY } from '../constants/notificationTypes.js';
+import { isListed } from './publicEvents.js';
 
 // The in-app inbox (Phase 7, decided 2026-10-05 and 2026-11-03): rows only, no
 // email yet (Phase 11 sends them in the background). Every notification is
@@ -133,7 +134,10 @@ export const messages = {
 
 // The inbox, newest first. 200 covers months of use; read ones older than 90
 // days will be cleared by the Phase 11 job
-export function listNotifications(userId) {
+// `listed` is the lists' rule for the row's event, so User Home's "New in your
+// interests" counts only events Explore still shows: a follower who didn't save
+// one is never told it was cancelled. False without an event
+export function listNotifications(userId, now = new Date()) {
     return db
         .select({
             notificationId: notifications.notificationId,
@@ -143,8 +147,11 @@ export function listNotifications(userId) {
             body: notifications.body,
             readAt: notifications.readAt,
             createdAt: notifications.createdAt,
+            listed: sql`coalesce(${isListed(now)}, false)`.mapWith(Boolean),
         })
         .from(notifications)
+        .leftJoin(events, eq(events.eventId, notifications.eventId))
+        .leftJoin(users, eq(users.userId, events.organiserId))
         .where(eq(notifications.userId, userId))
         .orderBy(desc(notifications.createdAt), desc(notifications.notificationId))
         .limit(200);

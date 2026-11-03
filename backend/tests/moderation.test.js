@@ -182,7 +182,7 @@ describe('approving', () => {
         const res = await approve(event.eventId);
 
         expect(res.status).toBe(200);
-        expect(res.body.data).toMatchObject({ eventId: event.eventId, status: 'approved', adminName: `${PREFIX}admin`, approvedSnapshot: null });
+        expect(res.body.data).toMatchObject({ eventId: event.eventId, status: 'approved', adminId: ids.admin, adminName: `${PREFIX}admin`, approvedSnapshot: null });
         const row = await readRow(event.eventId);
         expect(row).toMatchObject({ status: 'approved', rejectionReason: null, adminUpdatedBy: ids.admin });
         expect(row.adminUpdatedAt).not.toBeNull();
@@ -205,6 +205,21 @@ describe('approving', () => {
         const event = await insertEvent({ categoryId: ids.otherCategory });
         expect((await approve(event.eventId)).status).toBe(200);
         expect(recipients(await sentAbout(event.eventId), 'category_new_event')).toEqual([]);
+    });
+
+    // A follower who didn't save it is never told of the cancellation, so the
+    // inbox says whether Explore still shows it (User Home's count)
+    it('lets the follower\'s inbox tell whether the event is still listed', async () => {
+        const event = await insertEvent();
+        expect((await approve(event.eventId)).status).toBe(200);
+        const announced = async () =>
+            (await agents.follower.get('/api/v1/users/me/notifications')).body.data.find(
+                (row) => row.eventId === event.eventId && row.type === 'category_new_event',
+            );
+
+        expect((await announced()).listed).toBe(true);
+        expect((await takeDown(event.eventId, 'Not a real event')).status).toBe(200);
+        expect((await announced()).listed).toBe(false);
     });
 
     it('replaces the live version with an edit, deletes the old photo, and tells the people who saved it', async () => {

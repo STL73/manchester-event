@@ -211,7 +211,7 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
 ## Moderation and notifications (decided 2026-11-03)
 
 - **Admins' list:** `GET /events/manage` (admins), every event but drafts, newest first, in the
-  organiser list's shape plus `organiser`, `adminUpdatedAt`, `adminName` and `approvedSnapshot`
+  organiser list's shape plus `organiser`, `adminUpdatedAt`, `adminId`, `adminName` and `approvedSnapshot`
   in the same shape (category and venue looked up), so Manage Events can show what an edit
   changed. All of them at once; the page filters in the browser (Slav, 2026-11-03)
 - **Decisions** (`requireActive` admins; a draft is 404): `PUT /:id/approve`, `PUT /:id/reject`
@@ -248,7 +248,9 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
 | `user_registered` | admins | sign-up |
 
 - **Inbox:** `GET /users/me/notifications` (every role, also while suspended): the newest 200,
-  each `{ notificationId, eventId, type, subject, body, readAt, createdAt }`.
+  each `{ notificationId, eventId, type, subject, body, readAt, createdAt, listed }`; `listed`
+  is `isListed` for the row's event (false without one), so User Home counts only new events
+  Explore still shows: a follower who didn't save one is never told it was cancelled.
   `PUT /users/me/notifications/read` takes `{ ids: [...] }` or `{ all: true }` (400 for both or
   neither), changes only the account's own unread rows, keeps the first read time, answers 204;
   allowed while suspended. No push: the frontend reloads it

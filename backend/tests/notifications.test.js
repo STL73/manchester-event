@@ -78,7 +78,9 @@ describe('the inbox', () => {
 
         expect(res.status).toBe(200);
         expect(res.body.data.map((row) => row.subject)).toEqual(['Newer', 'Older']);
-        expect(Object.keys(res.body.data[0]).sort()).toEqual(['body', 'createdAt', 'eventId', 'notificationId', 'readAt', 'subject', 'type']);
+        expect(Object.keys(res.body.data[0]).sort()).toEqual(['body', 'createdAt', 'eventId', 'listed', 'notificationId', 'readAt', 'subject', 'type']);
+        // No event, nothing to list
+        expect(res.body.data[0].listed).toBe(false);
         expect(res.body.data[0].readAt).not.toBeNull();
 
         const suspended = await agents.suspended.get('/api/v1/users/me/notifications');

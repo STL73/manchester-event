@@ -37,6 +37,8 @@ export async function listManagedEvents(eventId = null) {
             ...eventFields,
             organiser: { userId: users.userId, username: users.username },
             adminUpdatedAt: events.adminUpdatedAt,
+            // Who decided last, so the page can say "by you"
+            adminId: events.adminUpdatedBy,
             adminName: admins.username,
             approvedSnapshot: events.approvedSnapshot,
         })
