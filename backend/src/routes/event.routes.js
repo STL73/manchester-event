@@ -6,8 +6,10 @@ import { db } from '../db/index.js';
 import { events } from '../db/schema/index.js';
 import { LOG } from '../constants/logActions.js';
 import { AppError } from '../lib/errors.js';
+import { deleteImage } from '../lib/images.js';
 import {
     categoryIdFor,
+    droppedPhotos,
     findOrganiserEvent,
     findOwnEvent,
     fromSnapshot,
@@ -18,7 +20,9 @@ import {
 } from '../lib/organiserEvents.js';
 import { findPublicEvent, hasBeenPublic, listPublicEvents, summarisePublicEvents } from '../lib/publicEvents.js';
 import { logAction } from '../lib/systemLogs.js';
+import { withUpload } from '../lib/uploads.js';
 import { requireAuth, requireActive, requireRole } from '../middleware/auth.js';
+import { acceptImage } from '../middleware/upload.js';
 import { validate } from '../middleware/validate.js';
 import { eventBodySchema, eventIdParams, listEventsQuery } from '../validation/events.js';
 
@@ -66,21 +70,34 @@ async function columnsFrom({ eventName, category, description, startDatetime, en
     return { eventName, eventDescription: description, startDatetime, endDatetime, categoryId, locationId, ticketUrl };
 }
 
-// Create Event: Save draft, or Submit for approval
-eventRouter.post('/', ...asOrganiser, validate({ body: eventBodySchema }), async (req, res) => {
+// The photo's columns: a new upload, the default one (removeImage), or unchanged
+function imageColumns(uploaded, removeImage) {
+    if (uploaded) return { imageUrl: uploaded.url, imagePublicId: uploaded.publicId };
+    return removeImage ? { imageUrl: null, imagePublicId: null } : {};
+}
+
+// Create Event: Save draft, or Submit for approval. Create and Edit take the
+// form as JSON, or with a photo as multipart (Phase 6); the photo is uploaded
+// only once every check has passed
+eventRouter.post('/', ...asOrganiser, ...acceptImage('image'), validate({ body: eventBodySchema }), async (req, res) => {
     const now = new Date();
     const { submit } = req.valid.body;
     if (submit) checkSubmittable(req.user, req.valid.body.startDatetime, true, now);
+    const columns = await columnsFrom(req.valid.body);
 
-    const [event] = await db
-        .insert(events)
-        .values({
-            ...(await columnsFrom(req.valid.body)),
-            organiserId: req.user.userId,
-            status: submit ? 'pending' : 'draft',
-            organiserUpdatedAt: submit ? now : null,
-        })
-        .returning();
+    const event = await withUpload(req.file, 'image', async (uploaded) => {
+        const [inserted] = await db
+            .insert(events)
+            .values({
+                ...columns,
+                ...imageColumns(uploaded, false),
+                organiserId: req.user.userId,
+                status: submit ? 'pending' : 'draft',
+                organiserUpdatedAt: submit ? now : null,
+            })
+            .returning();
+        return inserted;
+    });
 
     await logAction(LOG.EVENT_CREATED, req.user, { eventId: event.eventId, name: event.eventName, status: event.status });
     res.status(201).json({ data: await findOrganiserEvent(event.eventId) });
@@ -90,8 +107,9 @@ eventRouter.post('/', ...asOrganiser, validate({ body: eventBodySchema }), async
 // for an admin to approve again. Editing a live event keeps its approved
 // version public, with its favourites, until the edit is approved (option b,
 // 2026-10-05): the first edit copies it into approved_snapshot, later edits
-// before the review leave that copy alone. Cancelled and ended events are final
-eventRouter.put('/:id', ...asOrganiser, validate({ params: eventIdParams, body: eventBodySchema }), async (req, res) => {
+// before the review leave that copy alone, photo included. Cancelled and ended
+// events are final
+eventRouter.put('/:id', ...asOrganiser, ...acceptImage('image'), validate({ params: eventIdParams, body: eventBodySchema }), async (req, res) => {
     const now = new Date();
     const row = await findOwnEvent(req.valid.params.id, req.user.userId);
     if (row.status === 'cancelled') throw new AppError(400, 'A cancelled event can\'t be edited.');
@@ -104,16 +122,19 @@ eventRouter.put('/:id', ...asOrganiser, validate({ params: eventIdParams, body: 
         checkSubmittable(req.user, startDatetime, startIsNew, now);
     }
 
-    await db
-        .update(events)
-        .set({
-            ...(await columnsFrom(req.valid.body)),
-            status,
-            approvedSnapshot: row.status === 'approved' ? snapshotOf(row) : row.approvedSnapshot,
-            // Draft saves don't count as the organiser updating it
-            organiserUpdatedAt: status === 'pending' ? now : row.organiserUpdatedAt,
-        })
-        .where(eq(events.eventId, row.eventId));
+    const changes = {
+        ...(await columnsFrom(req.valid.body)),
+        status,
+        approvedSnapshot: row.status === 'approved' ? snapshotOf(row) : row.approvedSnapshot,
+        // Draft saves don't count as the organiser updating it
+        organiserUpdatedAt: status === 'pending' ? now : row.organiserUpdatedAt,
+    };
+    const saved = await withUpload(req.file, 'image', async (uploaded) => {
+        const set = { ...changes, ...imageColumns(uploaded, req.valid.body.removeImage) };
+        await db.update(events).set(set).where(eq(events.eventId, row.eventId));
+        return set;
+    });
+    await Promise.all(droppedPhotos(row, { ...row, ...saved }).map(deleteImage));
 
     const action = row.status === 'draft' && status === 'pending' ? LOG.DRAFT_SUBMITTED : LOG.EVENT_UPDATED;
     await logAction(action, req.user, { eventId: row.eventId, name: req.valid.body.eventName });
@@ -146,10 +167,10 @@ eventRouter.put('/:id/cancel', ...asOrganiser, validate({ params: eventIdParams 
     if (isOver(row)) throw new AppError(400, 'This event has ended, so it can\'t be cancelled.');
 
     const restored = row.approvedSnapshot ? fromSnapshot(row.approvedSnapshot) : {};
-    await db
-        .update(events)
-        .set({ ...restored, status: 'cancelled', approvedSnapshot: null, organiserUpdatedAt: new Date() })
-        .where(eq(events.eventId, row.eventId));
+    const set = { ...restored, status: 'cancelled', approvedSnapshot: null, organiserUpdatedAt: new Date() };
+    await db.update(events).set(set).where(eq(events.eventId, row.eventId));
+    // The waiting edit's photo, if it had its own
+    await Promise.all(droppedPhotos(row, { ...row, ...set }).map(deleteImage));
 
     await logAction(LOG.EVENT_CANCELLED, req.user, { eventId: row.eventId, name: restored.eventName ?? row.eventName });
     res.json({ data: await findOrganiserEvent(row.eventId) });
@@ -163,8 +184,9 @@ eventRouter.delete('/:id', ...asOrganiser, validate({ params: eventIdParams }), 
     const [deleted] = await db
         .delete(events)
         .where(and(eq(events.eventId, row.eventId), not(hasBeenPublic)))
-        .returning({ eventId: events.eventId });
+        .returning({ eventId: events.eventId, imagePublicId: events.imagePublicId });
     if (!deleted) throw new AppError(409, 'This event has been public, so it can only be cancelled.');
+    await deleteImage(deleted.imagePublicId);
 
     await logAction(LOG.EVENT_DELETED, req.user, { eventId: row.eventId, name: row.eventName });
     res.status(204).end();
