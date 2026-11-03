@@ -127,12 +127,6 @@ export const profileMessages = {
   nameRequired: "Enter a display name.",
 };
 
-// Added to Notifications when the password changes (password_changed)
-export const passwordChangedNotification = {
-  subject: "Password Changed",
-  body: "Your password was just changed. If this wasn't you, contact us straight away.",
-};
-
 // The line under the page title
 export const accountSummary = {
   memberSince: "Member since",

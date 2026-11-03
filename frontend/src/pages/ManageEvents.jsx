@@ -12,6 +12,7 @@ import PeriodSwitcher from "../components/charts/PeriodSwitcher";
 import SearchBar from "../components/events/SearchBar";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import EmptyState from "../components/UI/EmptyState";
+import PageLoading from "../components/UI/PageLoading";
 import {
   eventCategories,
   eventDetailsPath,
@@ -19,7 +20,6 @@ import {
   eventState,
 } from "../data/eventsData";
 import {
-  currentAdmin,
   eventPanel,
   eventSortOptions,
   eventStatuses,
@@ -71,9 +71,9 @@ function daysSince(value, now) {
 }
 
 // The line under an event's name: what happened to it last
-function contextLine(event, state, now) {
+function contextLine(event, state, now, currentUserId) {
   const { context } = manageEventsPage;
-  const byYou = event.adminId === currentAdmin.id ? "you" : event.adminName;
+  const byYou = event.adminId === currentUserId ? "you" : event.adminName;
   if (state === "pending") {
     const days = daysSince(submittedAt(event), now);
     return event.approvedSnapshot ? context.pendingEdit(days) : context.pending(days);
@@ -83,6 +83,10 @@ function contextLine(event, state, now) {
   }
   if (state === "rejected" && event.adminUpdatedAt) {
     return context.rejected(shortDateFormatter.format(new Date(event.adminUpdatedAt)), byYou);
+  }
+  // A reason on a cancelled event means an admin took it down
+  if (state === "cancelled" && event.rejectionReason && event.adminUpdatedAt) {
+    return context.takenDown(shortDateFormatter.format(new Date(event.adminUpdatedAt)), byYou);
   }
   return context[state] ?? "";
 }
@@ -209,14 +213,14 @@ function EventReview({ event, state, events, decision, onDecision, reason, onRea
 
       {event.description && <p className="admin-review-description">{event.description}</p>}
 
-      {state === "rejected" && event.rejectionReason && (
+      {["rejected", "cancelled"].includes(state) && event.rejectionReason && (
         <p className="callout callout-compact admin-note">
           <strong>{eventPanel.rejectedReason}</strong>
           {event.rejectionReason}
         </p>
       )}
 
-      {(pending || decision === "reject") && (
+      {(pending || decision === "takeDown") && (
         <div className="admin-decision">
           {pending && (
             <PeriodSwitcher
@@ -229,7 +233,7 @@ function EventReview({ event, state, events, decision, onDecision, reason, onRea
               onChange={onDecision}
             />
           )}
-          {decision === "reject" ? (
+          {decision !== "approve" ? (
             <div className="field">
               <label htmlFor="reject-reason">
                 {eventPanel.reasonLabel} <span className="field-hint">({eventPanel.reasonHint})</span>
@@ -237,7 +241,7 @@ function EventReview({ event, state, events, decision, onDecision, reason, onRea
               <textarea
                 id="reject-reason"
                 rows="3"
-                placeholder={eventPanel.reasonPlaceholder}
+                placeholder={decision === "takeDown" ? eventPanel.takeDown.reasonPlaceholder : eventPanel.reasonPlaceholder}
                 value={reason}
                 aria-invalid={Boolean(reasonError)}
                 aria-describedby={reasonError ? "reject-reason-error" : undefined}
@@ -251,26 +255,31 @@ function EventReview({ event, state, events, decision, onDecision, reason, onRea
         </div>
       )}
 
-      {state === "approved" && decision !== "reject" && <p className="callout callout-compact admin-note">{eventPanel.liveNote}</p>}
+      {state === "approved" && decision !== "takeDown" && <p className="callout callout-compact admin-note">{eventPanel.liveNote}</p>}
     </div>
   );
 }
 
 // Manage Events (decided 2026-10-12, layout A): opens on the review queue;
 // a row opens the event in a side panel, where a pending one is approved or
-// rejected with a reason. Matches get_all_events() (no drafts)
-export default function ManageEvents({ events, onUpdateEventStatus }) {
+// rejected with a reason, and a live one can be taken down (cancelled, with a
+// reason; decided 2026-11-03). `events` is App's list from GET /events/manage
+// (no drafts), null while it loads. Each decision awaits the server (Phase 7)
+export default function ManageEvents({ events, currentUserId, onDecide }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState(() => readFilters(searchParams));
   const [decision, setDecision] = useState("approve");
   const [reason, setReason] = useState("");
   const [reasonError, setReasonError] = useState("");
   const [message, setMessage] = useState("");
+  // The server's refusal, shown in the panel, and whether a decision is on its way
+  const [panelError, setPanelError] = useState("");
+  const [saving, setSaving] = useState(false);
   const listRef = useRef(null);
   const now = useMemo(() => new Date(), []);
 
   const rows = useMemo(
-    () => events.map((event) => ({ event, state: eventState(event, now) })),
+    () => (events ?? []).map((event) => ({ event, state: eventState(event, now) })),
     [events, now],
   );
   const counts = rows.reduce(
@@ -321,6 +330,7 @@ export default function ManageEvents({ events, onUpdateEventStatus }) {
     setDecision("approve");
     setReason("");
     setReasonError("");
+    setPanelError("");
     setMessage("");
     setParams({ open: eventId });
   }
@@ -339,41 +349,54 @@ export default function ManageEvents({ events, onUpdateEventStatus }) {
     setFilters((current) => ({ ...current, [name]: value }));
   }
 
-  function handleDecision() {
+  // The panel stays open with the server's reason if it refuses: an event
+  // another admin decided first, or one whose time has passed
+  async function handleDecision() {
     const { event } = openRow;
-    if (decision === "reject") {
-      if (!reason.trim()) {
-        setReasonError(eventPanel.reasonRequired);
-        document.getElementById("reject-reason")?.focus();
-        return;
-      }
-      onUpdateEventStatus(event.eventId, "rejected", reason.trim());
-      setMessage(manageEventsDecisions.rejected);
-    } else {
-      onUpdateEventStatus(event.eventId, "approved");
-      setMessage(manageEventsDecisions.approved);
+    if (decision !== "approve" && !reason.trim()) {
+      setReasonError(decision === "takeDown" ? eventPanel.takeDown.reasonRequired : eventPanel.reasonRequired);
+      document.getElementById("reject-reason")?.focus();
+      return;
     }
+    setSaving(true);
+    setPanelError("");
+    try {
+      if (decision === "approve") await onDecide(event.eventId, "approve");
+      else await onDecide(event.eventId, decision === "takeDown" ? "take-down" : "reject", reason.trim());
+    } catch (error) {
+      const reasonRefused = error.details?.find(({ path }) => path === "body.reason");
+      if (reasonRefused) setReasonError(reasonRefused.message);
+      else setPanelError(error.message);
+      return;
+    } finally {
+      setSaving(false);
+    }
+    setMessage(manageEventsDecisions[decision]);
     closePanel();
   }
 
+  if (events === null) return <PageLoading />;
+
   const viewOptions = eventViews.options.map((option) => ({ ...option, count: counts[option.value] ?? 0 }));
-  const isReview = openRow && (openRow.state === "pending" || decision === "reject");
+  const isReview = openRow && (openRow.state === "pending" || decision === "takeDown");
+  const action = { approve: eventPanel.approve, reject: eventPanel.reject, takeDown: eventPanel.takeDown }[decision];
 
   const panelFooter = openRow ? (
     isReview ? (
       <Button
         type="button"
-        variant={decision === "reject" ? "danger" : "primary"}
+        variant={decision === "approve" ? "primary" : "danger"}
         size="md"
+        disabled={saving}
         onClick={handleDecision}
       >
-        {decision === "reject" ? <eventPanel.reject.icon aria-hidden="true" /> : <eventPanel.approve.icon aria-hidden="true" />}
-        {decision === "reject" ? eventPanel.reject.submit : eventPanel.approve.submit}
+        <action.icon aria-hidden="true" />
+        {action.submit}
       </Button>
     ) : (
       <>
         {openRow.state === "approved" && (
-          <Button type="button" variant="danger" size="md" onClick={() => setDecision("reject")}>
+          <Button type="button" variant="danger" size="md" onClick={() => setDecision("takeDown")}>
             <eventPanel.takeDown.icon aria-hidden="true" />
             {eventPanel.takeDown.label}
           </Button>
@@ -476,7 +499,7 @@ export default function ManageEvents({ events, onUpdateEventStatus }) {
                           {state === "pending" && event.approvedSnapshot && (
                             <span className="badge tone-accent">{manageEventsPage.editOfLive}</span>
                           )}
-                          {contextLine(event, state, now)}
+                          {contextLine(event, state, now, currentUserId)}
                         </span>
                       </div>
                     </div>
@@ -514,6 +537,7 @@ export default function ManageEvents({ events, onUpdateEventStatus }) {
           onClose={closePanel}
           footer={panelFooter}
         >
+          {panelError && <StatusMessage variant="error">{panelError}</StatusMessage>}
           {openRow && (
             <EventReview
               event={openRow.event}
@@ -523,6 +547,7 @@ export default function ManageEvents({ events, onUpdateEventStatus }) {
               onDecision={(next) => {
                 setDecision(next);
                 setReasonError("");
+                setPanelError("");
               }}
               reason={reason}
               onReason={(next) => {

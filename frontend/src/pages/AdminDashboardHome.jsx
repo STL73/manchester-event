@@ -102,10 +102,13 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   minute: "2-digit",
 });
 
-export default function AdminDashboardHome({ users, events, contactMessages }) {
+// `events` is the Manage Events list from the API (Phase 7). Recent Admin
+// Actions are still mock log rows naming the mock events (`logEvents`) until
+// System Logs reads the API in Phase 10
+export default function AdminDashboardHome({ users, events, logEvents, contactMessages }) {
   const ViewAllIcon = viewAllLogsAction.icon;
   const insights = getAdminInsights({ users, events, contactMessages });
-  const lookup = logLookup(events, users);
+  const lookup = logLookup(logEvents, users);
 
   return (
     <div className="dashboard-page">

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import AccountBanner from "../components/dashboard/AccountBanner";
 import DashboardGreeting from "../components/dashboard/DashboardGreeting";
 import AdminDashboardHome from "./AdminDashboardHome";
@@ -10,8 +11,12 @@ const dashboardByRole = {
   admin: AdminDashboardHome,
 };
 
-export default function DashboardHome({ selectedUser, account, ...props }) {
+export default function DashboardHome({ selectedUser, account, onLoadNotifications, ...props }) {
   const DashboardComponent = dashboardByRole[selectedUser?.type];
+  // Every Home counts unread notifications, and nothing pushes new ones
+  useEffect(() => {
+    onLoadNotifications?.();
+  }, [onLoadNotifications]);
 
   if (!DashboardComponent) {
     return (

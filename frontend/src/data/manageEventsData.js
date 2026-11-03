@@ -1,4 +1,4 @@
-import { Check, ClipboardList, Eye, GitCompare, X } from "lucide-react";
+import { CalendarX2, Check, ClipboardList, Eye, GitCompare, X } from "lucide-react";
 
 // Every event status; drafts are never listed on Manage Events,
 // but the label and .status-draft colour are ready for My Drafts
@@ -39,6 +39,7 @@ export const manageEventsPage = {
     pendingEdit: (days) => (days === 0 ? "Edit sent today" : `Edit sent ${days === 1 ? "1 day" : `${days} days`} ago`),
     approved: (date, admin) => `Approved ${date}${admin ? ` by ${admin}` : ""}`,
     rejected: (date, admin) => `Rejected ${date}${admin ? ` by ${admin}` : ""}`,
+    takenDown: (date, admin) => `Taken down ${date}${admin ? ` by ${admin}` : ""}`,
     past: "Took place",
     cancelled: "Cancelled by the organiser",
   },
@@ -80,7 +81,7 @@ export const eventPanel = {
       startDatetime: "Starts",
       endDatetime: "Ends",
       category: "Category",
-      location: "Area",
+      location: "Venue",
       address: "Address",
       externalLink: "Ticket link",
       image: "Photo",
@@ -98,24 +99,27 @@ export const eventPanel = {
   reasonHint: "required",
   reasonPlaceholder: "e.g. The ticket link doesn't work. Fix it and send it again.",
   reasonRequired: "Tell the organiser what to change.",
-  liveNote: "To take it down, reject it with a reason; the organiser can fix it and send it again.",
-  takeDown: { label: "Reject this event", icon: X },
+  // Taking a live event down cancels it (decided 2026-11-03): once public, an
+  // event is never hidden as though it hadn't been, and its saves stay
+  liveNote: "To take it down, cancel it with a reason. People who saved it are told, and it can't be undone.",
+  takeDown: {
+    label: "Cancel this event",
+    submit: "Cancel the event and tell people",
+    icon: CalendarX2,
+    reasonPlaceholder: "e.g. This isn't a real event. Tell the organiser why it was taken down.",
+    reasonRequired: "Tell the organiser why it was taken down.",
+  },
   openPage: { label: "Open the event page", icon: Eye },
   rejectedReason: "Reason given",
 };
 
 // After a decision
 export const manageEventsDecisions = {
-  approved: "Approved. It's live on Explore.",
-  rejected: "Rejected. The organiser can see your reason.",
+  approve: "Approved. It's live on Explore.",
+  reject: "Rejected. The organiser can see your reason.",
+  takeDown: "Cancelled. The organiser and everyone who saved it are told.",
 };
 
-// Mock of the logged-in admin, stored as admin_updated_by
+// Mock of the logged-in admin, for the pages still on mock data (Manage Users
+// and Contact Messages, Phases 8 and 9)
 export const currentAdmin = { id: 1, name: "adminName" };
-
-// Matches get_all_events(): every status except drafts, newest first
-export function getManagedEvents(events) {
-  return events
-    .filter((event) => event.status !== "draft")
-    .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-}

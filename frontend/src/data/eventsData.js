@@ -125,49 +125,11 @@ export function eventState(event, now) {
   return event.status;
 }
 
-// The fields the public sees. Editing a live event copies them into
-// approvedSnapshot (approved_snapshot in the schema), so the last approved
-// version stays public, favourites and all, until an admin approves the edit
-const publicFields = [
-  "name",
-  "description",
-  "startDatetime",
-  "endDatetime",
-  "categoryId",
-  "category",
-  "locationId",
-  "location",
-  "address",
-  "externalLink",
-  "image",
-];
-
-export function snapshotOf(event) {
-  return Object.fromEntries(publicFields.map((field) => [field, event[field]]));
-}
-
-// What users and guests see: an edit waiting for approval (or rejected)
-// shows as its last approved version
-export function publicVersion(event) {
-  if (!event.approvedSnapshot || !["pending", "rejected"].includes(event.status)) return event;
-  return { ...event, ...event.approvedSnapshot, status: "approved", approvedSnapshot: null };
-}
-
 // Once public, an event can only be cancelled, never deleted. An organiser's
 // events from the API carry the server's answer; the mock ones work it out
 export function hasBeenPublic(event) {
   if (typeof event.hasBeenPublic === "boolean") return event.hasBeenPublic;
   return Boolean(event.approvedSnapshot) || ["approved", "past", "cancelled"].includes(event.status);
-}
-
-// Who may open which event, as the API will check it: everyone sees what
-// has been public (approved, past or cancelled); an organiser also sees
-// their own; an admin sees everything but other people's drafts, as on
-// Manage Events. Anything else reads as not found
-export function canViewEvent(event, role, organiserId) {
-  if (["approved", "past", "cancelled"].includes(event.status)) return true;
-  if (role === "admin") return event.status !== "draft";
-  return role === "organiser" && event.organiserId === organiserId;
 }
 
 // The categories table from the PHP project's insert data, in the same order
@@ -234,7 +196,7 @@ export function isPublicEvent(event) {
 // The one master mock of the events table, joined with the organiser's and
 // admin's usernames. App holds it in state; every page reads a view of it:
 // public pages (approved), the organiser's pages (their organiserId),
-// Manage Events (everything but drafts) and event details (canViewEvent).
+// Manage Users, System Logs and the analytics pages (until Phases 8 and 10).
 export const initialEvents = [
   {
     eventId: 1,

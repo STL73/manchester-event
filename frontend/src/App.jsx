@@ -17,16 +17,15 @@ import { getData, getUserData } from "./data/navigationData";
 import { api, formWithFile } from "./lib/api";
 import { toEvent } from "./lib/publicEvents";
 import { toOrganiserEvent } from "./lib/organiserEvents";
+import { toManagedEvent } from "./lib/managedEvents";
 import { mockUsers } from "./data/manageUsersData";
-import { currentAdmin, getManagedEvents } from "./data/manageEventsData";
+import { currentAdmin } from "./data/manageEventsData";
 import { currentOrganiser } from "./data/organiserEventsData";
-import { initialEvents, publicVersion } from "./data/eventsData";
+import { initialEvents } from "./data/eventsData";
 import { privacyPage, termsPage } from "./data/legalPagesData";
 import { initialFavouriteIds } from "./data/myFavouritesData";
 import { userCategoryIds } from "./data/preferencesData";
 import { initialContactMessages } from "./data/contactMessagesData";
-import { initialNotifications } from "./data/notificationsData";
-import { passwordChangedNotification } from "./data/profileSettingsData";
 
 import PageLoading from "./components/UI/PageLoading";
 import FavouriteError from "./components/events/FavouriteError";
@@ -91,15 +90,12 @@ function App() {
   const [accountLoaded, setAccountLoaded] = useState(false);
   const isUser = Boolean(account);
   const userType = account?.role;
-  // The one events list; every page reads a view of it (see eventsData.js)
-  const [events, setEvents] = useState(initialEvents);
-  // Users and guests see an edit waiting for approval as its last approved
-  // version (publicVersion); organisers and admins see the real record
-  const audienceEvents = events.map(publicVersion);
-  // The public pages (Home, Explore Events, About, Preferences, Event details
-  // for guests and users) read events from the API since Phase 3, and the
-  // user's favourites since Phase 4; "New in your interests" still reads this
-  // list until Phase 7
+  // The mock events list (see eventsData.js). Every page that shows events
+  // reads the API now (public pages Phase 3, favourites Phase 4, organisers
+  // Phase 5, admins Phase 7); it is left for the pages still on mock data,
+  // which name its events: Manage Users and System Logs (Phases 8 and 10),
+  // Admin Home's Recent Admin Actions, and the analytics pages (Phase 10)
+  const events = initialEvents;
   const [users, setUsers] = useState(mockUsers);
   // Event Analytics still reads the mock organiser's events until Phase 10
   // brings its figures from the API
@@ -113,7 +109,11 @@ function App() {
   const [organiserLists, setOrganiserLists] = useState({ userId: null, events: null });
   const organiserEventsLoaded = organiserUserId !== null && organiserLists.userId === organiserUserId;
   const organiserEvents = organiserEventsLoaded ? organiserLists.events : [];
-  const managedEvents = getManagedEvents(events);
+  // The admin's events from the API (Phase 7): every one but drafts, kept with
+  // the account like the organiser's. null until they arrive
+  const adminUserId = userType === "admin" ? account.userId : null;
+  const [adminLists, setAdminLists] = useState({ userId: null, events: null });
+  const managedEvents = adminUserId !== null && adminLists.userId === adminUserId ? adminLists.events : null;
   // The user role's favourites and interests (category_follows), loaded from
   // the API after login and kept with the account they belong to, so the next
   // account to log in never sees them. favouriteIds is what the hearts show:
@@ -129,9 +129,13 @@ function App() {
   const [favouriteError, setFavouriteError] = useState(null);
   // Sent from the public Contact form, read on the admin Contact Messages page
   const [contactMessages, setContactMessages] = useState(initialContactMessages);
-  // Read on the Notifications page and counted on the user dashboard, so
-  // marking one read shows everywhere
-  const [notifications, setNotifications] = useState(initialNotifications);
+  // Each account's inbox from the API (Phase 7), by account id, so a late
+  // answer for an account that has logged out never shows under the next.
+  // null until it arrives. Read again whenever the Notifications page or a
+  // Home opens, as nothing pushes new ones
+  const [inboxes, setInboxes] = useState({});
+  const accountId = account?.userId ?? null;
+  const notifications = accountId === null ? null : (inboxes[accountId] ?? null);
 
   // A 401 means nobody is logged in. Any other failure (the API is down)
   // also shows the public site, rather than a page that can't load
@@ -188,6 +192,35 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organiserUserId]);
 
+  // If the list can't be read the pages show none, with the reason over the page
+  useEffect(() => {
+    if (adminUserId === null) return undefined;
+    let current = true;
+    api("/events/manage").then(
+      ({ data }) => current && setAdminLists({ userId: adminUserId, events: data.map(toManagedEvent) }),
+      (error) => {
+        if (!current) return;
+        setAdminLists({ userId: adminUserId, events: [] });
+        setFavouriteError(error.message);
+      },
+    );
+    return () => {
+      current = false;
+    };
+  }, [adminUserId]);
+
+  // If the inbox can't be read the pages keep what they had (none the first time)
+  const loadNotifications = useCallback(() => {
+    if (accountId === null) return;
+    api("/users/me/notifications")
+      .then(({ data }) => setInboxes((current) => ({ ...current, [accountId]: data })))
+      .catch(() => setInboxes((current) => ({ ...current, [accountId]: current[accountId] ?? [] })));
+  }, [accountId]);
+
+  useEffect(() => {
+    loadNotifications();
+  }, [loadNotifications]);
+
   // Changes the organiser's list only while it still belongs to the same account
   const updateOrganiserEvents = useCallback(
     (userId, change) =>
@@ -209,16 +242,23 @@ function App() {
       .catch(() => setAccount(null));
   }, []);
 
-  // Sets read_at on the ones not read yet; a read notification keeps its time
+  // Sets read_at on the ones not read yet; a read notification keeps its time.
+  // The envelope changes at once; if the server refuses, the inbox is read
+  // again so it shows what is stored
   function markNotificationsRead(notificationIds) {
+    const userId = accountId;
+    const unread = (notifications ?? [])
+      .filter((notification) => notificationIds.includes(notification.notificationId) && !notification.readAt)
+      .map((notification) => notification.notificationId);
+    if (unread.length === 0) return;
     const readAt = new Date().toISOString();
-    setNotifications((current) =>
-      current.map((notification) =>
-        notificationIds.includes(notification.notificationId) && !notification.readAt
-          ? { ...notification, readAt }
-          : notification,
+    setInboxes((current) => ({
+      ...current,
+      [userId]: current[userId].map((notification) =>
+        unread.includes(notification.notificationId) ? { ...notification, readAt } : notification,
       ),
-    );
+    }));
+    api("/users/me/notifications/read", { method: "PUT", body: { ids: unread } }).catch(loadNotifications);
   }
 
   // Matches save_contact_message(): the user ID is stored when signed in
@@ -317,12 +357,10 @@ function App() {
   };
   // The sidebar's badges: the same filters as the Home cards, so the two agree
   const navCounts = {
-    unreadNotifications: notifications.filter(
-      (notification) => notification.recipient === userType && !notification.readAt,
-    ).length,
+    unreadNotifications: (notifications ?? []).filter((notification) => !notification.readAt).length,
     drafts: organiserEvents.filter((event) => event.status === "draft").length,
     rejected: organiserEvents.filter((event) => event.status === "rejected").length,
-    toReview: events.filter((event) => event.status === "pending").length,
+    toReview: (managedEvents ?? []).filter((event) => event.status === "pending").length,
     unreadMessages: contactMessages.filter((message) => !message.readAt).length,
   };
   // Settings' handlers. Each throws the ApiError for its section to show, and
@@ -350,10 +388,11 @@ function App() {
     return latest.avatar ?? null;
   }
 
-  // The server logs out every other device and gives this one a new session
+  // The server logs out every other device, gives this one a new session and
+  // adds a password_changed notification, which the inbox then shows
   async function changePassword(passwords) {
     await api("/auth/password", { method: "PUT", body: passwords });
-    addPasswordChangedNotification();
+    loadNotifications();
   }
 
   // The server checks the password and the deletion rule, and ends the session
@@ -361,24 +400,6 @@ function App() {
     await api("/users/me", { method: "DELETE", body: { password } });
     setAccount(null);
     navigate("/");
-  }
-
-  // A password change is a password_changed notification, as the backend
-  // will send from Phase 7; newest first, like the rest of the list
-  function addPasswordChangedNotification() {
-    setNotifications((current) => [
-      {
-        notificationId: Math.max(0, ...current.map((item) => item.notificationId)) + 1,
-        recipient: userType,
-        eventId: null,
-        type: "password_changed",
-        subject: passwordChangedNotification.subject,
-        body: passwordChangedNotification.body,
-        createdAt: new Date().toISOString(),
-        readAt: null,
-      },
-      ...current,
-    ]);
   }
 
   // If the request fails the server session may live on until it expires,
@@ -415,25 +436,21 @@ function App() {
     );
   }
 
-  // Matches update_event_status(): records which admin changed it and when.
-  // Approving publishes a pending edit, so the old public copy goes; a
-  // rejection keeps its reason (rejection_reason) for the organiser
-  function updateEventStatus(eventId, status, rejectionReason = null) {
-    const adminUpdatedAt = new Date().toISOString();
-    setEvents((currentEvents) =>
-      currentEvents.map((event) =>
-        event.eventId === eventId
-          ? {
-              ...event,
-              status,
-              approvedSnapshot: status === "approved" ? null : event.approvedSnapshot,
-              rejectionReason: status === "rejected" ? rejectionReason : null,
-              adminId: currentAdmin.id,
-              adminName: currentAdmin.name,
-              adminUpdatedAt,
-            }
-          : event,
-      ),
+  // Manage Events' decisions (Phase 7): "approve", "reject" or "take-down",
+  // the last two with the reason the organiser reads. Awaits the server and
+  // throws its ApiError for the panel to show; the list changes only once it
+  // agrees. The server records who decided and tells everyone concerned
+  async function decideEvent(eventId, decision, reason) {
+    const userId = adminUserId;
+    const { data } = await api(`/events/${eventId}/${decision}`, {
+      method: "PUT",
+      body: reason === undefined ? undefined : { reason },
+    });
+    const decided = toManagedEvent(data);
+    setAdminLists((current) =>
+      current.userId === userId
+        ? { ...current, events: current.events.map((event) => (event.eventId === eventId ? decided : event)) }
+        : current,
     );
   }
 
@@ -512,7 +529,7 @@ function App() {
           <Route path="/privacy" element={<LegalPage page={privacyPage} titleId="privacy-title" />} />
           <Route path="/terms" element={<LegalPage page={termsPage} titleId="terms-title" />} />
           <Route path="/events" element={<ExploreEvents />} />
-          <Route path="/events/:eventId" element={<EventDetails events={audienceEvents} ownEvents={organiserEventsLoaded ? organiserEvents : null} role={isUser ? userType : "guest"} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
+          <Route path="/events/:eventId" element={<EventDetails ownEvents={organiserEventsLoaded ? organiserEvents : null} role={isUser ? userType : "guest"} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
           <Route
             path="/dashboard"
             element={
@@ -531,14 +548,14 @@ function App() {
             }
           >
             <Route index element={<Navigate to="home" replace />} />
-            <Route path="home" element={<DashboardHome selectedUser={selectedUser} account={account} users={users} events={userType === "user" ? audienceEvents : events} organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} favouriteIds={favouriteIds} favouriteEvents={favouriteEvents} onToggleFavourite={toggleFavourite} interestIds={interestIds} contactMessages={contactMessages} notifications={notifications} />} />
+            <Route path="home" element={<DashboardHome selectedUser={selectedUser} account={account} users={users} events={managedEvents ?? []} logEvents={events} organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} favouriteIds={favouriteIds} favouriteEvents={favouriteEvents} onToggleFavourite={toggleFavourite} interestIds={interestIds} contactMessages={contactMessages} notifications={notifications ?? []} onLoadNotifications={loadNotifications} />} />
             <Route element={<RoleOnly allow="user" userType={userType} />}>
               <Route path="explore-events" element={<ExploreEvents inDashboard selectedUser={selectedUser} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
               <Route path="my-favourites" element={<MyFavourites events={favouriteEvents} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
               <Route path="preferences" element={listsLoaded ? <Preferences key={listsUserId} interestIds={interestIds} onSaveInterests={saveInterests} /> : <PageLoading />} />
             </Route>
-            <Route path="events/:eventId" element={<EventDetails inDashboard events={events} ownEvents={organiserEventsLoaded ? organiserEvents : null} role={userType} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
-            <Route path="notifications" element={<Notifications selectedUser={selectedUser} notifications={notifications} onMarkRead={markNotificationsRead} />} />
+            <Route path="events/:eventId" element={<EventDetails inDashboard ownEvents={userType === "admin" ? managedEvents : organiserEventsLoaded ? organiserEvents : null} role={userType} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
+            <Route path="notifications" element={<Notifications notifications={notifications} onLoad={loadNotifications} onMarkRead={markNotificationsRead} />} />
             {/* The public pages the sidebar links to, opened beside it: About,
                 Privacy and Terms for everyone (under the user card), FAQs and
                 Contact for the roles with a Help menu */}
@@ -576,7 +593,7 @@ function App() {
             <Route element={<RoleOnly allow="admin" userType={userType} />}>
               <Route path="manage-users" element={<ManageUsers users={users} events={events} currentUserId={currentAdmin.id} onUpdateUser={updateUserStatus} onDeleteUser={deleteUser} />} />
               <Route path="manage-users/:userId/edit" element={<OpenInPanel param="userId" to="/dashboard/manage-users" />} />
-              <Route path="manage-events" element={<ManageEvents events={managedEvents} onUpdateEventStatus={updateEventStatus} />} />
+              <Route path="manage-events" element={<ManageEvents events={managedEvents} currentUserId={adminUserId} onDecide={decideEvent} />} />
               <Route path="manage-events/:eventId/edit" element={<OpenInPanel param="eventId" to="/dashboard/manage-events" />} />
               <Route path="site-analytics" element={<SiteAnalytics users={users} events={events} contactMessages={contactMessages} favouriteIds={initialFavouriteIds} interestIds={userCategoryIds} />} />
               <Route path="system-logs" element={<SystemLogs events={events} users={users} />} />

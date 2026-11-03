@@ -1,7 +1,7 @@
 import { CalendarArrowDown, CalendarDays, Heart, MapPin, Tag, UserRound } from "lucide-react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Button from "../components/UI/Button";
-import { canViewEvent, eventDetailsPage, eventDetailsPath, eventState } from "../data/eventsData";
+import { eventDetailsPage, eventDetailsPath, eventState } from "../data/eventsData";
 import { addToCalendar } from "../data/myFavouritesData";
 import { organiserStatusLabels } from "../data/organiserEventsData";
 import { downloadEventIcs } from "../lib/calendar";
@@ -45,9 +45,9 @@ function mapsUrl(event) {
 }
 
 function StateBanner({ event, state, role }) {
-  // An edit of a live event (the organiser's editPending, the admin mock's
-  // approvedSnapshot) leaves the approved version public, so it says so
-  const isEdit = ["pending", "rejected"].includes(state) && (event.editPending || event.approvedSnapshot);
+  // An edit of a live event (editPending, from the server) leaves the approved
+  // version public, so it says so
+  const isEdit = ["pending", "rejected"].includes(state) && event.editPending;
   const banner = eventDetailsPage.banners[isEdit ? `${state}Edit` : state];
   if (!banner) return null;
   const text =
@@ -61,8 +61,9 @@ function StateBanner({ event, state, role }) {
       <p>
         <strong>{banner.title}</strong>
         {text}
-        {/* rejection_reason: what the admin asked to change */}
-        {state === "rejected" && event.rejectionReason && (
+        {/* rejection_reason: what the admin asked to change, or why an admin
+            took the event down. Only the organiser's and admin's lists carry it */}
+        {["rejected", "cancelled"].includes(state) && event.rejectionReason && (
           <span className="event-details-banner-reason">
             {eventDetailsPage.rejectionReason} “{event.rejectionReason}”
           </span>
@@ -245,10 +246,10 @@ function EventDetailsBody({ event, TitleTag, titleId, role, favouriteIds, onTogg
 // opens what has been public, so a typed-in id of someone's draft reads as not
 // found. An organiser sees their own events as they last saved them
 // (`ownEvents`, from GET /users/me/events, null while it loads) and anyone
-// else's as the public does. Admins still read `events`, the mock list,
-// through canViewEvent until Phase 7. `role` is "guest" when signed out
+// else's as the public does. Admins read theirs from the same prop, the
+// Manage Events list (GET /events/manage, Phase 7): every event but drafts,
+// so a draft's id reads as not found. `role` is "guest" when signed out
 export default function EventDetails({
-  events,
   ownEvents = null,
   inDashboard = false,
   role = "guest",
@@ -259,19 +260,18 @@ export default function EventDetails({
   const navigate = useNavigate();
   const location = useLocation();
   const isOrganiser = role === "organiser";
-  const ownEvent = isOrganiser ? ownEvents?.find((item) => String(item.eventId) === eventId) : null;
+  const hasOwnList = isOrganiser || role === "admin";
+  const ownEvent = hasOwnList ? ownEvents?.find((item) => String(item.eventId) === eventId) : null;
   const fromApi = role === "guest" || role === "user" || (isOrganiser && ownEvents !== null && !ownEvent);
   const request = useApi(fromApi ? `/events/${encodeURIComponent(eventId)}` : null);
-  const found =
+  const event =
     ownEvent ??
-    (fromApi
-      ? request.payload && String(request.payload.data.eventId) === eventId && toEvent(request.payload.data)
-      : events.find((item) => String(item.eventId) === eventId));
-  const event = found && (ownEvent || fromApi || canViewEvent(found, role)) ? found : null;
+    ((fromApi && request.payload && String(request.payload.data.eventId) === eventId && toEvent(request.payload.data)) ||
+      null);
   // A 404 or 400 means there is no such event to show; anything else is a
   // fault worth trying again
   const failed = request.error && ![400, 404].includes(request.error.status);
-  const waiting = (isOrganiser && ownEvents === null) || (fromApi && !event && !request.error);
+  const waiting = (hasOwnList && ownEvents === null) || (fromApi && !event && !request.error);
   const { dashboardTitle, titleIcon: TitleIcon, goBack, allEvents } = eventDetailsPage;
   const bodyProps = { role, favouriteIds, onToggleFavourite };
   const notFoundText = failed ? eventDetailsPage.loadError : eventDetailsPage.notFound;
