@@ -72,7 +72,8 @@ export async function findOwnEvent(eventId, organiserId) {
 
 // The fields kept in approved_snapshot: the Drizzle names, dates as ISO strings,
 // the same as the seed writes and lib/publicEvents.js reads
-const SNAPSHOT_KEYS = ['eventName', 'eventDescription', 'startDatetime', 'endDatetime', 'locationId', 'categoryId', 'ticketUrl', 'imageUrl'];
+// (imagePublicId since Phase 6; an older snapshot reads it as NULL, a seed photo)
+const SNAPSHOT_KEYS = ['eventName', 'eventDescription', 'startDatetime', 'endDatetime', 'locationId', 'categoryId', 'ticketUrl', 'imageUrl', 'imagePublicId'];
 
 export function snapshotOf(row) {
     return JSON.parse(JSON.stringify(Object.fromEntries(SNAPSHOT_KEYS.map((key) => [key, row[key]]))));
@@ -92,6 +93,19 @@ export function isOver(row, now = new Date()) {
     if (!['approved', 'cancelled'].includes(row.status) && !row.approvedSnapshot) return false;
     const shown = row.approvedSnapshot && row.status !== 'approved' ? fromSnapshot(row.approvedSnapshot) : row;
     return (shown.endDatetime ?? shown.startDatetime) < now;
+}
+
+// The Cloudinary photos a row still shows: its own and its approved version's
+function photosOf(row) {
+    return [row.imagePublicId, row.approvedSnapshot?.imagePublicId].filter(Boolean);
+}
+
+// The photos `before` showed that `after` no longer does, to delete once the
+// write has gone through. An edit of a live event moves the old photo into the
+// snapshot, so it stays until the edit is approved or the event cancelled
+export function droppedPhotos(before, after) {
+    const kept = new Set(photosOf(after));
+    return [...new Set(photosOf(before))].filter((publicId) => !kept.has(publicId));
 }
 
 export function wasPublic(row) {

@@ -39,6 +39,8 @@ export const users = pgTable('users', {
     emailNotifications: boolean('email_notifications').notNull().default(true),
     // NULL = the frontend shows the default icon
     avatar: varchar('avatar', { length: 255 }),
+    // Cloudinary's id for the picture, so a replaced one can be deleted
+    avatarPublicId: varchar('avatar_public_id', { length: 255 }),
     ...timestamps,
 });
 
@@ -81,6 +83,9 @@ export const events = pgTable('events', {
     ticketUrl: varchar('ticket_url', { length: 500 }),
     // NULL = the frontend shows the default image
     imageUrl: varchar('image_url', { length: 1000 }),
+    // Cloudinary's id for the photo, so a replaced one can be deleted. NULL for
+    // the seed's photos, which are files in the frontend
+    imagePublicId: varchar('image_public_id', { length: 255 }),
     status: eventStatusEnum('status').notNull().default('draft'),
     // Required by the app when an admin rejects
     rejectionReason: text('rejection_reason'),

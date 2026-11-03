@@ -22,6 +22,13 @@
       "when": 1793126587604,
       "tag": "0002_mighty_jack_flag",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793655015980,
+      "tag": "0003_glossy_sleeper",
+      "breakpoints": true
     }
   ]
 }

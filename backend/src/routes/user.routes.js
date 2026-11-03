@@ -6,13 +6,16 @@ import { db } from '../db/index.js';
 import { users, events, favourites, categories, categoryFollows } from '../db/schema/index.js';
 import { LOG } from '../constants/logActions.js';
 import { AppError } from '../lib/errors.js';
+import { deleteImage } from '../lib/images.js';
 import { listOrganiserEvents } from '../lib/organiserEvents.js';
 import { canSaveEvent, hasBeenPublic, listFavouriteEvents } from '../lib/publicEvents.js';
 import { clearSessionCookie } from '../lib/sessions.js';
 import { logAction } from '../lib/systemLogs.js';
+import { withUpload } from '../lib/uploads.js';
 import { publicUser } from '../lib/users.js';
 import { validate } from '../middleware/validate.js';
 import { requireAuth, requireActive, requireRole } from '../middleware/auth.js';
+import { acceptImage } from '../middleware/upload.js';
 import { eventIdParams } from '../validation/events.js';
 import { updateProfileSchema, deleteAccountSchema, followsSchema } from '../validation/users.js';
 
@@ -27,6 +30,39 @@ userRouter.put('/me', requireAuth, requireActive, validate({ body: updateProfile
         .where(eq(users.userId, req.user.userId))
         .returning();
     await logAction(LOG.PROFILE_UPDATED, user, { fields: Object.keys(req.valid.body) });
+    res.json({ data: publicUser(user) });
+});
+
+// Settings' profile picture (Phase 6), its own route so PUT /me keeps the
+// email switch's rules to itself. Cloudinary crops it square round the subject
+async function setAvatar(userId, uploaded) {
+    const [user] = await db
+        .update(users)
+        .set({ avatar: uploaded?.url ?? null, avatarPublicId: uploaded?.publicId ?? null })
+        .where(eq(users.userId, userId))
+        .returning();
+    return user;
+}
+
+// Once the account points at its new picture (or none): the old one goes
+async function afterAvatarChange(previous, user) {
+    if (previous.avatarPublicId !== user.avatarPublicId) await deleteImage(previous.avatarPublicId);
+    await logAction(LOG.PROFILE_UPDATED, user, { fields: ['avatar'] });
+}
+
+userRouter.put('/me/avatar', requireAuth, requireActive, ...acceptImage('avatar'), async (req, res) => {
+    if (!req.file) {
+        const message = 'Choose a picture.';
+        throw new AppError(400, message, [{ path: 'body.avatar', message }]);
+    }
+    const user = await withUpload(req.file, 'avatar', (uploaded) => setAvatar(req.user.userId, uploaded));
+    await afterAvatarChange(req.user, user);
+    res.json({ data: publicUser(user) });
+});
+
+userRouter.delete('/me/avatar', requireAuth, requireActive, async (req, res) => {
+    const user = await setAvatar(req.user.userId, null);
+    await afterAvatarChange(req.user, user);
     res.json({ data: publicUser(user) });
 });
 
@@ -62,9 +98,11 @@ userRouter.delete(
         const [deletedEvents] = await db.batch([
             db.delete(events)
                 .where(and(eq(events.organiserId, userId), not(hasBeenPublic)))
-                .returning({ eventId: events.eventId }),
+                .returning({ eventId: events.eventId, imagePublicId: events.imagePublicId }),
             db.delete(users).where(eq(users.userId, userId)),
         ]);
+        // Their pictures go too, once the account is gone (none were ever public)
+        await Promise.all([req.user.avatarPublicId, ...deletedEvents.map((event) => event.imagePublicId)].map(deleteImage));
 
         // Logged with no account to link to: the name and role are copied
         await logAction(LOG.ACCOUNT_DELETED, { username, role }, { userId, eventsDeleted: deletedEvents.length });

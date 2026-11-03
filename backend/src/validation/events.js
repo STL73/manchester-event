@@ -50,7 +50,7 @@ const londonDateTime = (message) => z
 // Create and Edit Event. There is no status: the route decides it from the
 // button (submit) and the event's state, so an organiser can never approve
 // their own event. The venue comes as its OSM id only; its details are looked
-// up on the server. The photo comes in Phase 6
+// up on the server. A new photo comes as a file beside the form (middleware/upload.js)
 export const eventBodySchema = z
     .object({
         eventName: z.string({ error: 'Enter the event\'s name.' }).trim().min(1, 'Enter the event\'s name.').max(255, 'Keep the name under 255 characters.'),
@@ -63,6 +63,8 @@ export const eventBodySchema = z
             .url({ protocol: /^https?$/, error: 'Enter a link starting with https://' })
             .max(500, 'Keep the link under 500 characters.'),
         submit: z.boolean().default(false),
+        // Back to the default photo. A file sent at the same time wins
+        removeImage: z.boolean().default(false),
     })
     .refine((body) => !body.endDatetime || body.endDatetime > body.startDatetime, {
         message: 'The end must be after the start.',
