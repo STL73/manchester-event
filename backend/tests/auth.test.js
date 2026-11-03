@@ -4,7 +4,7 @@ import { eq, gt, inArray, like, max } from 'drizzle-orm';
 
 import app from '../src/app.js';
 import { db } from '../src/db/index.js';
-import { users, sessions, authTokens, systemLogs, events, categories, locations } from '../src/db/schema/index.js';
+import { users, sessions, authTokens, systemLogs, events, categories, locations, notifications } from '../src/db/schema/index.js';
 import { newToken, hashToken } from '../src/lib/tokens.js';
 import { sendEmail } from '../src/lib/email.js';
 
@@ -39,6 +39,8 @@ afterAll(async () => {
     await db.delete(locations).where(like(locations.placeId, `${EMAIL_PREFIX}%`));
     await db.delete(categories).where(like(categories.slug, `${EMAIL_PREFIX}%`));
     await db.delete(systemLogs).where(gt(systemLogs.logId, firstLogId));
+    // "New user" rows went to the branch's own admin, so they don't go with the test accounts
+    await db.delete(notifications).where(like(notifications.body, `%${EMAIL_PREFIX}%`));
 });
 
 function sessionCookie(res) {

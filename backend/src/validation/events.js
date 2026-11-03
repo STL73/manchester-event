@@ -74,3 +74,12 @@ export const eventBodySchema = z
 export const locationSearchQuery = z.object({
     q: z.string({ error: 'Type at least 3 letters.' }).trim().min(3, 'Type at least 3 letters.').max(100, 'Keep the search under 100 characters.'),
 });
+
+// Reject and take down: the organiser reads the reason, so one is required
+export const decisionReasonSchema = z.object({
+    reason: z
+        .string({ error: 'Tell the organiser what to change.' })
+        .trim()
+        .min(1, 'Tell the organiser what to change.')
+        .max(1000, 'Keep the reason under 1,000 characters.'),
+});

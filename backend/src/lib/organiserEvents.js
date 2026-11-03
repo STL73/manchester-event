@@ -9,7 +9,7 @@ import { hasBeenPublic } from './publicEvents.js';
 // An organiser's own events (My Events, My Drafts, Organiser Home, Edit Event):
 // every status, as the organiser last saved them, not as the public sees them
 
-const fields = {
+export const eventFields = {
     eventId: events.eventId,
     name: events.eventName,
     description: events.eventDescription,
@@ -41,7 +41,7 @@ const fields = {
 
 function fromOrganiserEvents() {
     return db
-        .select(fields)
+        .select(eventFields)
         .from(events)
         .innerJoin(categories, eq(categories.categoryId, events.categoryId))
         .innerJoin(locations, eq(locations.locationId, events.locationId))

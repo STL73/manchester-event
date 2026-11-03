@@ -16,7 +16,10 @@
   Arcjet is off and `NODE_ENV` is `test`
 - Each phase also breaks its rules one at a time on purpose (a scratchpad script edits one line,
   runs the tests, restores the file and checks it matches) to show a test catches each; Phase 5
-  caught 29 of 29, Phase 6 22 of 22. Retry a write Windows refuses, and resume from there
+  caught 29 of 29, Phase 6 22 of 22, Phase 7 39 of 39. Retry a write Windows refuses, and resume from there
+- A side effect that logs its failure instead of throwing (notifications, photo deletion) needs a
+  test that reads the rows it should have written: Phase 7's first `notify()` failed on every
+  call while all 137 tests passed
 
 ## Still to decide
 

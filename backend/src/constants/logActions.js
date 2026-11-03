@@ -17,4 +17,6 @@ export const LOG = {
     DRAFT_SUBMITTED: 'Draft Submitted',
     EVENT_CANCELLED: 'Event Cancelled',
     EVENT_DELETED: 'Event Deleted',
+    // An admin's decision: { eventId, name, status, reason? } (Phase 7)
+    EVENT_STATUS_CHANGED: 'Event Status Changed',
 };

@@ -7,6 +7,7 @@ import { users, events, favourites, categories, categoryFollows } from '../db/sc
 import { LOG } from '../constants/logActions.js';
 import { AppError } from '../lib/errors.js';
 import { deleteImage } from '../lib/images.js';
+import { listNotifications, markRead } from '../lib/notifications.js';
 import { listOrganiserEvents } from '../lib/organiserEvents.js';
 import { canSaveEvent, hasBeenPublic, listFavouriteEvents } from '../lib/publicEvents.js';
 import { clearSessionCookie } from '../lib/sessions.js';
@@ -17,7 +18,7 @@ import { validate } from '../middleware/validate.js';
 import { requireAuth, requireActive, requireRole } from '../middleware/auth.js';
 import { acceptImage } from '../middleware/upload.js';
 import { eventIdParams } from '../validation/events.js';
-import { updateProfileSchema, deleteAccountSchema, followsSchema } from '../validation/users.js';
+import { updateProfileSchema, deleteAccountSchema, followsSchema, markReadSchema } from '../validation/users.js';
 
 const userRouter = Router();
 
@@ -190,6 +191,17 @@ userRouter.put('/me/follows', ...asActiveUser, validate({ body: followsSchema })
 // drafts and past ones included. Reading works while suspended
 userRouter.get('/me/events', requireAuth, requireRole('organiser'), async (req, res) => {
     res.json({ data: await listOrganiserEvents(req.user.userId) });
+});
+
+// The inbox (Phase 7), every role's. Reading and marking read work while
+// suspended: marking read changes nothing anyone else sees
+userRouter.get('/me/notifications', requireAuth, async (req, res) => {
+    res.json({ data: await listNotifications(req.user.userId) });
+});
+
+userRouter.put('/me/notifications/read', requireAuth, validate({ body: markReadSchema }), async (req, res) => {
+    await markRead(req.user.userId, req.valid.body);
+    res.status(204).end();
 });
 
 userRouter.get('/', (req, res) => {
