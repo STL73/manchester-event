@@ -5,7 +5,7 @@
 The shared middleware below is in place (Phase 0, 2026-10-26) and the auth routes are real
 (Phase 1, passwords Phase 2), and so are the public event reads and categories (Phase 3),
 favourites and category follows (Phase 4), organisers' own events with venue search
-(Phase 5) and photos on Cloudinary (Phase 6). The
+(Phase 5), photos on Cloudinary (Phase 6) and moderation and notifications (Phase 7). The
 rest of the users and events routers are still stubs that return a placeholder string
 (`res.send('Create event')`); database access comes with each feature.
 
@@ -16,8 +16,8 @@ All routes are versioned under `/api/v1`, one router per resource, mounted in `s
 | Mount | File and endpoints |
 | --- | --- |
 | `/api/v1/auth` | `routes/auth.routes.js`: `POST /sign-up`, `/login`, `/logout`, `/verify-email`, `/resend-verification`, `/forgot-password`, `/reset-password`; `GET /me`; `PUT /password` |
-| `/api/v1/users` | `routes/user.routes.js`: `PUT /me` (name, email switch), `DELETE /me` (password-confirmed), `GET /me/favourites`, `PUT` and `DELETE /me/favourites/:id`, `GET` and `PUT /me/follows`, `GET /me/events` (an organiser's own), `PUT` and `DELETE /me/avatar` (the profile picture); REST CRUD on `/` and `/:id`, `/me` registered first |
-| `/api/v1/events` | `routes/event.routes.js`: `GET /` (public list), `GET /summary` (counts), `GET /:id` (public details), `/summary` before `/:id`; `POST /`, `PUT /:id`, `PUT /:id/submit`, `PUT /:id/cancel`, `DELETE /:id` (organisers) |
+| `/api/v1/users` | `routes/user.routes.js`: `PUT /me` (name, email switch), `DELETE /me` (password-confirmed), `GET /me/favourites`, `PUT` and `DELETE /me/favourites/:id`, `GET` and `PUT /me/follows`, `GET /me/events` (an organiser's own), `PUT` and `DELETE /me/avatar` (the profile picture), `GET /me/notifications`, `PUT /me/notifications/read`; REST CRUD on `/` and `/:id`, `/me` registered first |
+| `/api/v1/events` | `routes/event.routes.js`: `GET /` (public list), `GET /summary` (counts), `GET /:id` (public details), `/summary` and `/manage` before `/:id`; `POST /`, `PUT /:id`, `PUT /:id/submit`, `PUT /:id/cancel`, `DELETE /:id` (organisers); `GET /manage`, `PUT /:id/approve`, `/:id/reject`, `/:id/take-down` (admins) |
 | `/api/v1/categories` | `routes/category.routes.js`: `GET /` (active categories A to Z, upcoming events each) |
 | `/api/v1/locations` | `routes/location.routes.js`: `GET /search?q=` (OpenStreetMap places for the venue box) |
 
@@ -198,8 +198,8 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
   edit's on Cancel, a deleted event's, and an account's picture and events on Delete account.
   `droppedPhotos()` keeps any photo `approved_snapshot` still shows (`imagePublicId` is a
   snapshot key). Deleting is best effort and never fails a save. Seeded photos have no public id
-  and are never deleted. **Phase 7:** approving an edit must delete the snapshot's photo if the
-  row's differs
+  and are never deleted. Approving an edit deletes the snapshot's photo when the row's differs
+  (Phase 7)
 - Stored as both the delivery URL (`image_url`, `avatar`; `f_auto,q_auto`) and the public id
   (`image_public_id`, `avatar_public_id`). Events are kept at most 1600 px wide, pictures
   400 x 400 cropped round the subject. Folders `manchester-event/<NODE_ENV>/events` and
@@ -207,6 +207,53 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
 - `PUT /users/me/avatar` (multipart, `avatar`; none is 400) and `DELETE /users/me/avatar`:
   `requireActive`, logged as Profile Updated `{ fields: ['avatar'] }`, answer the account
 - 20 uploads an hour per account (Arcjet, only when a file is sent)
+
+## Moderation and notifications (decided 2026-11-03)
+
+- **Admins' list:** `GET /events/manage` (admins), every event but drafts, newest first, in the
+  organiser list's shape plus `organiser`, `adminUpdatedAt`, `adminName` and `approvedSnapshot`
+  in the same shape (category and venue looked up), so Manage Events can show what an edit
+  changed. All of them at once; the page filters in the browser (Slav, 2026-11-03)
+- **Decisions** (`requireActive` admins; a draft is 404): `PUT /:id/approve`, `PUT /:id/reject`
+  and `PUT /:id/take-down`, the last two with `{ reason }` (1 to 1000 characters, under
+  `body.reason`). Each answers the event in the list's shape and logs Event Status Changed
+  `{ eventId, name, status, reason? }`. The status read is part of the `UPDATE`, so a second
+  admin deciding at the same moment gets 409
+- Only a **pending** event is approved or rejected (400 otherwise). One never public whose start
+  has passed is Expired (400); an edit of a live event can be decided until the live version
+  has ended. Approve clears `approved_snapshot` and `rejection_reason` and records
+  `admin_updated_at` / `admin_updated_by`. Reject keeps the snapshot, so a rejected edit leaves
+  the approved version public
+- **Take down** (Slav chose admin cancel over reject, 2026-11-03): an approved event that hasn't
+  ended becomes cancelled, saves kept, the reason in `rejection_reason`. A reject would make it
+  look never public, and deletable. On a cancelled event a reason therefore means an admin took it
+  down, which is why the organiser's Cancel clears an old one
+- **Notifications are inbox rows only** (Slav, 2026-11-03): emails come with Phase 11's
+  background jobs; the password emails are unchanged. `lib/notifications.js` holds who gets each
+  type and its wording (plain text); type names are in `constants/notificationTypes.js` and
+  match the frontend's `notificationTypes`. Recipients are read, then all their rows go in one
+  `INSERT` (Drizzle's `insert().select()` needs every column in the table's order, so it was
+  dropped). Written after the change succeeds; a failure goes to the server log and never fails
+  the request
+
+| Type | To | When |
+| --- | --- | --- |
+| `event_pending_review` | admins | an event starts waiting (created and sent, a draft sent, a live or rejected one edited); not again for each save while it waits |
+| `event_status` | the organiser | approved, rejected or taken down; the reason in the body |
+| `category_new_event` | active users following the category | the first approval (no `approved_snapshot`) |
+| `event_update` | users who saved it | an edit of a live event approved |
+| `event_cancelled` | users who saved it | the organiser cancels, or an admin takes it down |
+| `event_cancelled_by_organiser` | admins | the organiser cancels |
+| `password_changed` | the account | Settings or a reset link |
+| `user_registered` | admins | sign-up |
+
+- **Inbox:** `GET /users/me/notifications` (every role, also while suspended): the newest 200,
+  each `{ notificationId, eventId, type, subject, body, readAt, createdAt }`.
+  `PUT /users/me/notifications/read` takes `{ ids: [...] }` or `{ all: true }` (400 for both or
+  neither), changes only the account's own unread rows, keeps the first read time, answers 204;
+  allowed while suspended. No push: the frontend reloads it
+- `account_status` comes with suspension (Phase 8), reminders and clearing read rows after 90
+  days with the scheduled jobs (Phase 11)
 
 ## Status codes (decided 2026-10-26)
 

@@ -13,6 +13,7 @@ import {
 } from '../lib/sessions.js';
 import { consumeAuthToken } from '../lib/authTokens.js';
 import { sendVerificationEmail, sendPasswordResetEmail, sendPasswordChangedEmail } from '../lib/authEmails.js';
+import { messages, notifyAdmins, notifyUser } from '../lib/notifications.js';
 import { logAction } from '../lib/systemLogs.js';
 import { publicUser, liftExpiredSuspension } from '../lib/users.js';
 import { validate } from '../middleware/validate.js';
@@ -67,6 +68,7 @@ authRouter.post(
         }
 
         await logAction(LOG.USER_REGISTERED, user, { role, email });
+        await notifyAdmins(messages.userRegistered(user));
         // Logged in straight away; an unverified account can do everything but submit events.
         // If the email fails the account still stands, and Settings can send another
         await startSession(res, user.userId);
@@ -170,6 +172,7 @@ authRouter.post('/reset-password', validate({ body: resetPasswordSchema }), asyn
     await endAllSessions(user.userId);
     clearSessionCookie(res);
     await logAction(LOG.PASSWORD_CHANGED, user, { via: 'reset link' });
+    await notifyUser(user.userId, messages.passwordChanged());
     await sendPasswordChangedEmail(user);
     res.status(204).end();
 });
@@ -199,6 +202,7 @@ authRouter.put(
         await endAllSessions(user.userId);
         await startSession(res, user.userId);
         await logAction(LOG.PASSWORD_CHANGED, user, { via: 'settings' });
+        await notifyUser(user.userId, messages.passwordChanged());
         await sendPasswordChangedEmail(user);
         res.status(204).end();
     },

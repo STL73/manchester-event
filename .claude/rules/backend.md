@@ -2,8 +2,8 @@
 
 The full schema is applied to Neon and seeded. Auth and the account's own `/users/me` are real
 (Phases 1 and 2), and so are the public event reads and categories (Phase 3), favourites and
-category follows (Phase 4), organisers' event writes with OpenStreetMap venues (Phase 5) and
-photos on Cloudinary (Phase 6); the rest of the
+category follows (Phase 4), organisers' event writes with OpenStreetMap venues (Phase 5),
+photos on Cloudinary (Phase 6) and moderation and notifications (Phase 7); the rest of the
 users and events routers are still stubs that don't touch the database.
 
 ## Stack constraints
@@ -25,13 +25,15 @@ backend/
 │   ├── config/
 │   │   ├── env.js          re-exports env vars (PORT, NODE_ENV, DB_URL, ARCJET_KEY, EMAIL_*, APP_URL, CLOUDINARY_*)
 │   │   └── arcjet.js       the one Arcjet client
-│   ├── constants/          fixed names (logActions.js: system_logs actions; areas.js: area
+│   ├── constants/          fixed names (logActions.js: system_logs actions;
+│   │                       notificationTypes.js: notifications.type; areas.js: area
 │   │                       ids, areaFor() boxes, Greater Manchester's bounds)
 │   ├── lib/                AppError, tokens, sessions, authTokens, email + authEmails,
 │   │                       systemLogs (logAction), users (publicUser),
 │   │                       publicEvents (every public read), londonTime (date windows),
 │   │                       organiserEvents (own events, snapshot, venue rows), osm (Photon, Nominatim),
-│   │                       images (Cloudinary), uploads (withUpload)
+│   │                       images (Cloudinary), uploads (withUpload),
+│   │                       managedEvents (the admin's list), notifications (notify*, inbox)
 │   ├── middleware/         errorHandler (+ notFound), validate, security, auth, upload (multer)
 │   ├── validation/         Zod schemas per resource (auth.js, users.js, events.js)
 │   ├── db/

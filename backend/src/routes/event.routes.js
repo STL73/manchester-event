@@ -3,10 +3,12 @@ import { Router } from "express";
 import { and, eq, not } from 'drizzle-orm';
 
 import { db } from '../db/index.js';
-import { events } from '../db/schema/index.js';
+import { categories, events } from '../db/schema/index.js';
 import { LOG } from '../constants/logActions.js';
 import { AppError } from '../lib/errors.js';
 import { deleteImage } from '../lib/images.js';
+import { findManagedEvent, listManagedEvents } from '../lib/managedEvents.js';
+import { messages, notifyAdmins, notifyFavouriters, notifyFollowers, notifyUser } from '../lib/notifications.js';
 import {
     categoryIdFor,
     droppedPhotos,
@@ -24,7 +26,7 @@ import { withUpload } from '../lib/uploads.js';
 import { requireAuth, requireActive, requireRole } from '../middleware/auth.js';
 import { acceptImage } from '../middleware/upload.js';
 import { validate } from '../middleware/validate.js';
-import { eventBodySchema, eventIdParams, listEventsQuery } from '../validation/events.js';
+import { decisionReasonSchema, eventBodySchema, eventIdParams, listEventsQuery } from '../validation/events.js';
 
 const eventRouter = Router();
 
@@ -36,6 +38,12 @@ eventRouter.get('/', validate({ query: listEventsQuery }), async (req, res) => {
 // Counts for Home and About. Before /:id, or "summary" would be read as an ID
 eventRouter.get('/summary', async (req, res) => {
     res.json({ data: await summarisePublicEvents() });
+});
+
+// Manage Events and Admin Home (Phase 7): every event but drafts, for admins.
+// Before /:id too
+eventRouter.get('/manage', requireAuth, requireRole('admin'), async (req, res) => {
+    res.json({ data: await listManagedEvents() });
 });
 
 // Event details for guests and users. An event that was never public reads as
@@ -99,6 +107,7 @@ eventRouter.post('/', ...asOrganiser, ...acceptImage('image'), validate({ body: 
         return inserted;
     });
 
+    if (submit) await notifyAdmins(messages.pendingReview({ eventId: event.eventId, name: event.eventName }, 'new'));
     await logAction(LOG.EVENT_CREATED, req.user, { eventId: event.eventId, name: event.eventName, status: event.status });
     res.status(201).json({ data: await findOrganiserEvent(event.eventId) });
 });
@@ -136,6 +145,11 @@ eventRouter.put('/:id', ...asOrganiser, ...acceptImage('image'), validate({ para
     });
     await Promise.all(droppedPhotos(row, { ...row, ...saved }).map(deleteImage));
 
+    // Admins hear when it starts waiting, not at every save while it waits
+    if (status === 'pending' && row.status !== 'pending') {
+        const kind = { draft: 'new', approved: 'edit' }[row.status] ?? 'again';
+        await notifyAdmins(messages.pendingReview({ eventId: row.eventId, name: req.valid.body.eventName }, kind));
+    }
     const action = row.status === 'draft' && status === 'pending' ? LOG.DRAFT_SUBMITTED : LOG.EVENT_UPDATED;
     await logAction(action, req.user, { eventId: row.eventId, name: req.valid.body.eventName });
     res.json({ data: await findOrganiserEvent(row.eventId) });
@@ -153,6 +167,7 @@ eventRouter.put('/:id/submit', ...asOrganiser, validate({ params: eventIdParams 
         .set({ status: 'pending', organiserUpdatedAt: now })
         .where(eq(events.eventId, row.eventId));
 
+    await notifyAdmins(messages.pendingReview({ eventId: row.eventId, name: row.eventName }, 'new'));
     await logAction(LOG.DRAFT_SUBMITTED, req.user, { eventId: row.eventId, name: row.eventName });
     res.json({ data: await findOrganiserEvent(row.eventId) });
 });
@@ -167,12 +182,17 @@ eventRouter.put('/:id/cancel', ...asOrganiser, validate({ params: eventIdParams 
     if (isOver(row)) throw new AppError(400, 'This event has ended, so it can\'t be cancelled.');
 
     const restored = row.approvedSnapshot ? fromSnapshot(row.approvedSnapshot) : {};
-    const set = { ...restored, status: 'cancelled', approvedSnapshot: null, organiserUpdatedAt: new Date() };
+    // A reason on a cancelled event means an admin took it down, so an old
+    // rejection of a waiting edit doesn't stay
+    const set = { ...restored, status: 'cancelled', approvedSnapshot: null, rejectionReason: null, organiserUpdatedAt: new Date() };
     await db.update(events).set(set).where(eq(events.eventId, row.eventId));
     // The waiting edit's photo, if it had its own
     await Promise.all(droppedPhotos(row, { ...row, ...set }).map(deleteImage));
 
-    await logAction(LOG.EVENT_CANCELLED, req.user, { eventId: row.eventId, name: restored.eventName ?? row.eventName });
+    const event = { eventId: row.eventId, name: restored.eventName ?? row.eventName };
+    await notifyFavouriters(messages.cancelled(event, false));
+    await notifyAdmins(messages.cancelledByOrganiser(event, req.user.username));
+    await logAction(LOG.EVENT_CANCELLED, req.user, event);
     res.json({ data: await findOrganiserEvent(row.eventId) });
 });
 
@@ -190,6 +210,98 @@ eventRouter.delete('/:id', ...asOrganiser, validate({ params: eventIdParams }), 
 
     await logAction(LOG.EVENT_DELETED, req.user, { eventId: row.eventId, name: row.eventName });
     res.status(204).end();
+});
+
+// Admins' decisions (Phase 7, decided 2026-10-05 and 2026-11-03). Each is
+// checked against the row as it is now, and the status is part of the UPDATE,
+// so a second admin deciding at the same moment gets 409 rather than a
+// second decision
+const asAdmin = [requireAuth, requireActive, requireRole('admin')];
+
+// Only an event waiting for review is decided. One that never went public and
+// whose start has passed is Expired: nobody can go any more. An edit of a live
+// event can still be decided until the live version has ended
+function checkDecidable(row, now) {
+    if (row.status !== 'pending') throw new AppError(400, 'Only an event waiting for review can be approved or rejected.');
+    const expired = row.approvedSnapshot ? isOver(row, now) : row.startDatetime < now;
+    if (expired) throw new AppError(400, 'This event\'s time has passed, so it can no longer be reviewed.');
+}
+
+async function decide(row, set) {
+    const [saved] = await db
+        .update(events)
+        .set(set)
+        .where(and(eq(events.eventId, row.eventId), eq(events.status, row.status)))
+        .returning();
+    if (!saved) throw new AppError(409, 'This event changed while you were deciding. Reload to see it as it is now.');
+    return saved;
+}
+
+async function categoryName(categoryId) {
+    const [category] = await db.select({ name: categories.name }).from(categories).where(eq(categories.categoryId, categoryId));
+    return category.name;
+}
+
+// Approve. An edit of a live event replaces the live version, so its approved
+// copy goes, and with it the copy's photo if the edit brought its own. The
+// first approval is when it is new to the public: its category's followers
+// hear. Later ones are changes: the people who saved it hear
+eventRouter.put('/:id/approve', ...asAdmin, validate({ params: eventIdParams }), async (req, res) => {
+    const now = new Date();
+    const row = await findManagedEvent(req.valid.params.id);
+    checkDecidable(row, now);
+    const wasEdit = Boolean(row.approvedSnapshot);
+
+    const saved = await decide(row, {
+        status: 'approved',
+        approvedSnapshot: null,
+        rejectionReason: null,
+        adminUpdatedAt: now,
+        adminUpdatedBy: req.user.userId,
+    });
+    await Promise.all(droppedPhotos(row, saved).map(deleteImage));
+
+    const event = { eventId: saved.eventId, name: saved.eventName };
+    await notifyUser(saved.organiserId, messages.approved(event, wasEdit));
+    if (wasEdit) await notifyFavouriters(messages.updated(event));
+    else await notifyFollowers(saved.categoryId, messages.newInCategory(event, await categoryName(saved.categoryId)));
+    await logAction(LOG.EVENT_STATUS_CHANGED, req.user, { ...event, status: 'approved' });
+    res.json({ data: (await listManagedEvents(saved.eventId))[0] });
+});
+
+// Reject, with the reason the organiser reads. A rejected edit of a live
+// event keeps its approved copy, so the public still sees that version
+eventRouter.put('/:id/reject', ...asAdmin, validate({ params: eventIdParams, body: decisionReasonSchema }), async (req, res) => {
+    const now = new Date();
+    const row = await findManagedEvent(req.valid.params.id);
+    checkDecidable(row, now);
+    const { reason } = req.valid.body;
+
+    const saved = await decide(row, { status: 'rejected', rejectionReason: reason, adminUpdatedAt: now, adminUpdatedBy: req.user.userId });
+
+    const event = { eventId: saved.eventId, name: saved.eventName };
+    await notifyUser(saved.organiserId, messages.rejected(event, Boolean(row.approvedSnapshot), reason));
+    await logAction(LOG.EVENT_STATUS_CHANGED, req.user, { ...event, status: 'rejected', reason });
+    res.json({ data: (await listManagedEvents(saved.eventId))[0] });
+});
+
+// Take a live event down (decided 2026-11-03): it is cancelled, as if its
+// organiser had, because once public an event is never hidden as though it
+// hadn't been. Saves stay and their owners hear; the organiser gets the reason
+eventRouter.put('/:id/take-down', ...asAdmin, validate({ params: eventIdParams, body: decisionReasonSchema }), async (req, res) => {
+    const now = new Date();
+    const row = await findManagedEvent(req.valid.params.id);
+    if (row.status !== 'approved') throw new AppError(400, 'Only a live event can be taken down.');
+    if (isOver(row, now)) throw new AppError(400, 'This event has ended, so it can\'t be cancelled.');
+    const { reason } = req.valid.body;
+
+    const saved = await decide(row, { status: 'cancelled', rejectionReason: reason, adminUpdatedAt: now, adminUpdatedBy: req.user.userId });
+
+    const event = { eventId: saved.eventId, name: saved.eventName };
+    await notifyUser(saved.organiserId, messages.takenDown(event, reason));
+    await notifyFavouriters(messages.cancelled(event, true));
+    await logAction(LOG.EVENT_STATUS_CHANGED, req.user, { ...event, status: 'cancelled', reason });
+    res.json({ data: (await listManagedEvents(saved.eventId))[0] });
 });
 
 export default eventRouter;

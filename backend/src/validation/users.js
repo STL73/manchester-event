@@ -20,3 +20,11 @@ export const followsSchema = z.object({
         .max(50)
         .transform((slugs) => [...new Set(slugs)]),
 });
+
+// Opening a notification marks it read; Mark All as Read sends all: true
+export const markReadSchema = z
+    .object({
+        ids: z.array(z.number().int().positive(), { error: 'Choose notifications to mark.' }).min(1).max(200).optional(),
+        all: z.literal(true).optional(),
+    })
+    .refine((body) => Boolean(body.ids) !== Boolean(body.all), 'Send either ids or all.');
