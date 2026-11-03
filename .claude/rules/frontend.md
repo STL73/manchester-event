@@ -36,9 +36,8 @@ functions record behaviour being matched on purpose: keep that parity unless tol
   `events/FavouriteError` floating over the page; `favouriteEvents` (each as the public sees
   it) feed My Favourites, Home's cards and the greeting. Preferences awaits the save and shows
   a refusal. Event details has no Save for an event the lists don't show (`listed`), unless it
-  is already saved. User Home's "New in your interests" and the analytics pages' saves and
-  follows stay mock until Phases 7 and 10, and admin pages read App's mock events until their
-  phase. Organiser events (Phase 5): `App.jsx` loads `/users/me/events` when an organiser logs
+  is already saved. The analytics pages' saves and follows stay mock until Phase 10. Organiser
+  events (Phase 5): `App.jsx` loads `/users/me/events` when an organiser logs
   in, kept with that account's id (`organiserEvents`; `null` to pages that must wait), mapped by
   `lib/organiserEvents.js` (`toOrganiserEvent()`: the organiser's latest version, with the
   server's `hasBeenPublic` and `editPending`; `toLondonInput()` for datetime-local inputs). Its
@@ -47,7 +46,17 @@ functions record behaviour being matched on purpose: keep that parity unless tol
   users" card still read mock data until Phase 10. Photos (Phase 6): a picked `File` goes with
   its save, `formWithFile(field, file, fields)` in `lib/api.js` making the multipart body and
   `api()` sending `FormData` as it is; `createOrganiserEvent` / `updateOrganiserEvent` take it
-  as a last argument, `saveProfile` sends the picture to `/users/me/avatar`
+  as a last argument, `saveProfile` sends the picture to `/users/me/avatar`. Moderation and
+  notifications (Phase 7): for an admin `App.jsx` loads `/events/manage` once (`managedEvents`,
+  mapped by `lib/managedEvents.js` `toManagedEvent()`, the snapshot in the same shape), and
+  Manage Events filters it in the browser; `decideEvent()` awaits approve, reject or take-down
+  and swaps in the server's answer. Every role's inbox is `/users/me/notifications`, kept with
+  the account's id (`notifications`, `null` until loaded), reloaded when Notifications or a
+  Home opens and after a password change; `markNotificationsRead()` changes at once, sends the
+  ids and reloads if the server refuses. User Home's "New in your interests" counts the
+  `category_new_event` notifications of the last 7 days whose event is still `listed` (View
+  opens Explore). Manage Users, System Logs and Site
+  Analytics still read `initialEvents` until Phases 8 and 10
 - **Event photos:** the seed's live in `public/images/events/` (2026-10-27) and are referenced
   by path (`/images/events/<file>`); organisers' own are Cloudinary addresses (Phase 6). Both
   are what the database's `image_url` stores; NULL shows `defaultEventImage`. There is no
@@ -165,9 +174,10 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
 
 ## Required patterns
 
-- **One events list.** `initialEvents` in `data/eventsData.js` is the single source. `App.jsx`
-  holds it in state and derives views (`publicEvents`, `organiserEvents`, `managedEvents`). Never
-  add a second event array in another data file; derive from the one list
+- **One events list.** Wired pages read the API (`organiserEvents`, `managedEvents`, the
+  public reads). `initialEvents` in `data/eventsData.js` is constant mock data for the pages not
+  yet wired (Phase 7 took it out of state). Never add a second mock event array in another data
+  file
 - **State that crosses pages lives in `App.jsx`** and goes down as props (users, favourites,
   contact messages). There is no context or store yet, so don't add one without discussing it
 - **Page copy and config live in `data/`**, not inline in the page: titles, nav, form fields,
@@ -202,8 +212,8 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   and the ticket link as a fact, no buttons. One banner at most, in the status colour: cancelled,
   ended, pending, rejected, draft; an edit of a live event waiting or rejected says the earlier
   version is still live (`pendingEdit`, `rejectedEdit`). Organisers open their own events from
-  `organiserEvents` and anyone else's from the public API; `canViewEvent` (in `eventsData.js`)
-  is left for the admin's mock list. The map is still a link: the venues have coordinates since
+  `organiserEvents`, admins any event from `managedEvents` (Phase 7), and anyone else's from
+  the public API. The map is still a link: the venues have coordinates since
   Phase 5, and an embedded map (Leaflet on OSM, or Google's free Maps Embed) is a later step
 - **My Events** (decided 2026-10-12): submitted events only; drafts live on My Drafts and the
   summary links to them ("6 live · 2 waiting for approval · 1 rejected · 3 drafts"). The search
@@ -241,7 +251,7 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   a danger zone asked in the page: Cancel for an event that has been public (`hasBeenPublic`),
   Delete for one that never was. Saving leads on: Submit to My Events' Pending view, a new
   draft to My Drafts, Save draft on an existing draft stays. Editing a live event keeps its
-  last approved version public with its favourites (`approvedSnapshot`, `publicVersion`, the
+  last approved version public with its favourites (`approved_snapshot` on the server, the
   schema's option b) until an admin approves the edit
 - **Manage Events / Manage Users** (decided 2026-10-12, layout A): Explore's search bar
   (keywords alone on Users, `SearchBar`'s `showFilters`), `UI/FilterPills` with counts and
@@ -251,7 +261,10 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   the old `/:id/edit` addresses open it). Events open on "Needs review", oldest waiting first;
   the panel shows the whole event, what changed since approval for an edit of a live event,
   and Approve / Reject, a reason required (`rejectionReason`, shown to the organiser on Edit
-  Event and Event details). Users: only Active / Suspended can be set (`emailVerifiedAt` NULL is
+  Event and Event details). A live event has "Cancel this event" instead (2026-11-03, the
+  server's take-down): cancelled with a reason, saves kept, savers told; a cancelled event
+  with a reason reads "Taken down … by". A refusal (another admin decided first, an expired
+  event) stays in the panel. Users: only Active / Suspended can be set (`emailVerifiedAt` NULL is
   a read-only "Unverified" label, never a status); suspending asks how long (`suspendedUntil`,
   NULL = until lifted) and why; a suspended organiser's events leave the public lists; Delete
   only where the schema allows (not admins, not yourself, not an organiser whose events have
@@ -264,7 +277,7 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   fits a desktop or tablet screen, a laptop scrolls about 3 rows. Below 24rem the type icon hides
   so the subject gets two lines. An All / Unread (n) switch (`PeriodSwitcher`, `?show=unread`)
   sits above the list; rows read while Unread is showing stay until the view or page changes. No
-  type filter or search for now
+  type filter or search for now. Rows are the server's (Phase 7), its newest 200
 - **Contact Messages** (decided 2026-10-12, layout A): the admin list and `UI/SidePanel`, like
   Manage Events and Users. Opening a message reads it (`readAt`, once per opening, so Admin
   Home's unread card agrees); the panel replies in the page (`replyBody`, `repliedAt`,
@@ -308,8 +321,8 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   its App handler and shows the server's refusal, under its field when it names one. Delete
   learns from the server's 409 that an organiser has had public events (their events are mock
   until Phase 5). The picture is real too (Phase 6): the picked `File` goes on Save after the
-  name, a refusal shows under the picture, and the stored address replaces the preview. Only the
-  Password changed notification stays mock until Phase 7
+  name, a refusal shows under the picture, and the stored address replaces the preview. The
+  Password changed notification is the server's (Phase 7); App reloads the inbox after a change
 - **Hexagons in the dashboard** (decided 2026-10-11, extended 2026-10-12): each frames something
   that is already there, so the logo shows without overusing it. Every page title's icon sits in
   the logo's cell (`DashboardPageHeading`, 36 x 40); on Home the greeting's picture does

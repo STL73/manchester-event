@@ -26,12 +26,10 @@ const dayMonth = new Intl.DateTimeFormat("en-GB", {
 // The four Quick Insights cards: what's coming for this user, each with
 // one line of context (see DashboardCard). Saved events are the user's real
 // favourites and "This week" counts real events (Phase 4); "New in your
-// interests" reads the mock events until notifications arrive in Phase 7
-function getUserInsights({ events, favouriteEvents, favouriteIds, interestIds, thisWeekCount, notifications }) {
+// interests" counts the category_new_event notifications (Phase 7)
+function getUserInsights({ favouriteEvents, favouriteIds, interestIds, thisWeekCount, notifications }) {
   const now = new Date();
   const text = userInsights;
-  const live = events.filter((event) => isPublicEvent(event) && isUpcoming(event, now));
-  const inInterests = live.filter((event) => interestIds.includes(event.categoryId));
   const hasInterests = interestIds.length > 0;
 
   const saved = favouriteEvents.filter(
@@ -44,14 +42,21 @@ function getUserInsights({ events, favouriteEvents, favouriteIds, interestIds, t
     .map((category) => category.name)
     .join(", ");
 
-  // Approved in the last 7 days: the moment category_new_event is sent
-  const newForYou = inInterests.filter(
-    (event) => now - new Date(event.adminUpdatedAt) <= 7 * DAY,
+  // Sent when an event in a followed category is first approved; one event
+  // counts once, and only while Explore still shows it (`listed`), since
+  // View leads there
+  const newForYou = new Set(
+    notifications
+      .filter(
+        (notification) =>
+          notification.type === "category_new_event" &&
+          notification.listed &&
+          now - new Date(notification.createdAt) <= 7 * DAY,
+      )
+      .map((notification) => notification.eventId),
   );
 
-  const unread = notifications.filter(
-    (notification) => notification.recipient === "user" && !notification.readAt,
-  );
+  const unread = notifications.filter((notification) => !notification.readAt);
 
   return [
     {
@@ -72,7 +77,7 @@ function getUserInsights({ events, favouriteEvents, favouriteIds, interestIds, t
     },
     {
       ...text.newForYou,
-      count: newForYou.length,
+      count: newForYou.size,
       action: hasInterests ? text.newForYou.view : text.newForYou.noInterests,
       detail: text.newForYou.none,
     },
@@ -90,7 +95,6 @@ function getUserInsights({ events, favouriteEvents, favouriteIds, interestIds, t
 }
 
 export default function UserDashboardHome({
-  events,
   favouriteEvents,
   favouriteIds,
   interestIds,
@@ -110,7 +114,6 @@ export default function UserDashboardHome({
   const thisWeekCount =
     interestIds.length === 0 ? 0 : thisWeek.error ? "–" : (thisWeek.payload?.pagination.total ?? "…");
   const insights = getUserInsights({
-    events,
     favouriteEvents,
     favouriteIds,
     interestIds,

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Bell, ChevronDown } from "lucide-react";
 import Button from "../components/UI/Button";
@@ -8,6 +8,7 @@ import PeriodSwitcher from "../components/charts/PeriodSwitcher";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import { eventDetailsPath } from "../data/eventsData";
 import EmptyState from "../components/UI/EmptyState";
+import PageLoading from "../components/UI/PageLoading";
 import {
   notificationActions,
   notificationGroup,
@@ -118,8 +119,10 @@ function NotificationRow({ notification, group, isOpen, onToggle, onMarkRead }) 
 }
 
 // Read state lives in App (read_at), so Home's unread card agrees with
-// this page and marking one read survives leaving the page
-export default function Notifications({ selectedUser, notifications: allNotifications, onMarkRead }) {
+// this page and marking one read survives leaving the page. The inbox is the
+// account's own from the API (Phase 7), null until it arrives, and is read
+// again each time the page opens, as nothing pushes new ones
+export default function Notifications({ notifications: loaded, onLoad, onMarkRead }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [openId, setOpenId] = useState(null);
   // Read while the Unread view is showing: they stay on screen until the
@@ -127,10 +130,11 @@ export default function Notifications({ selectedUser, notifications: allNotifica
   const [keptIds, setKeptIds] = useState([]);
   const listRef = useRef(null);
 
-  const role = selectedUser?.type ?? "user";
-  const notifications = allNotifications.filter(
-    (notification) => notification.recipient === role,
-  );
+  useEffect(() => {
+    onLoad();
+  }, [onLoad]);
+
+  const notifications = loaded ?? [];
   const unreadCount = notifications.filter((notification) => !notification.readAt).length;
   const newest = notifications[0] && new Date(notifications[0].createdAt);
   const { markAllRead } = notificationActions;
@@ -201,6 +205,8 @@ export default function Notifications({ selectedUser, notifications: allNotifica
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     listRef.current?.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
   }
+
+  if (loaded === null) return <PageLoading />;
 
   return (
     <div className="dashboard-page">
