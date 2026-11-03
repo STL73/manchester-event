@@ -1,24 +1,32 @@
 import { Router } from "express";
 import bcrypt from 'bcryptjs';
-import { and, asc, eq, inArray, not, notInArray } from 'drizzle-orm';
+import { and, asc, eq, inArray, notInArray } from 'drizzle-orm';
 
 import { db } from '../db/index.js';
-import { users, events, favourites, categories, categoryFollows } from '../db/schema/index.js';
+import { users, favourites, categories, categoryFollows } from '../db/schema/index.js';
 import { LOG } from '../constants/logActions.js';
+import { deleteAccount, listManagedUsers } from '../lib/accounts.js';
 import { AppError } from '../lib/errors.js';
 import { deleteImage } from '../lib/images.js';
-import { listNotifications, markRead } from '../lib/notifications.js';
+import { listNotifications, markRead, messages, notifyUser } from '../lib/notifications.js';
 import { listOrganiserEvents } from '../lib/organiserEvents.js';
-import { canSaveEvent, hasBeenPublic, listFavouriteEvents } from '../lib/publicEvents.js';
+import { canSaveEvent, listFavouriteEvents } from '../lib/publicEvents.js';
 import { clearSessionCookie } from '../lib/sessions.js';
 import { logAction } from '../lib/systemLogs.js';
 import { withUpload } from '../lib/uploads.js';
-import { publicUser } from '../lib/users.js';
+import { liftExpiredSuspension, publicUser } from '../lib/users.js';
 import { validate } from '../middleware/validate.js';
 import { requireAuth, requireActive, requireRole } from '../middleware/auth.js';
 import { acceptImage } from '../middleware/upload.js';
 import { eventIdParams } from '../validation/events.js';
-import { updateProfileSchema, deleteAccountSchema, followsSchema, markReadSchema } from '../validation/users.js';
+import {
+    accountStatusSchema,
+    deleteAccountSchema,
+    followsSchema,
+    markReadSchema,
+    updateProfileSchema,
+    userIdParams,
+} from '../validation/users.js';
 
 const userRouter = Router();
 
@@ -84,29 +92,13 @@ userRouter.delete(
             throw new AppError(400, message, [{ path: 'body.password', message }]);
         }
 
-        const [publicEvent] = await db
-            .select({ eventId: events.eventId })
-            .from(events)
-            .where(and(eq(events.organiserId, userId), hasBeenPublic))
-            .limit(1);
-        if (publicEvent) {
-            throw new AppError(409, 'Your account has events that have been public, so it can\'t be deleted here. Please contact us.');
-        }
-
-        // One batch runs as one transaction. If an event went public since the
-        // check, events.organiser_id's RESTRICT stops the user delete and the
-        // whole batch is undone. Sessions, tokens, favourites and follows cascade
-        const [deletedEvents] = await db.batch([
-            db.delete(events)
-                .where(and(eq(events.organiserId, userId), not(hasBeenPublic)))
-                .returning({ eventId: events.eventId, imagePublicId: events.imagePublicId }),
-            db.delete(users).where(eq(users.userId, userId)),
-        ]);
-        // Their pictures go too, once the account is gone (none were ever public)
-        await Promise.all([req.user.avatarPublicId, ...deletedEvents.map((event) => event.imagePublicId)].map(deleteImage));
+        const eventsDeleted = await deleteAccount(
+            req.user,
+            'Your account has events that have been public, so it can\'t be deleted here. Please contact us.',
+        );
 
         // Logged with no account to link to: the name and role are copied
-        await logAction(LOG.ACCOUNT_DELETED, { username, role }, { userId, eventsDeleted: deletedEvents.length });
+        await logAction(LOG.ACCOUNT_DELETED, { username, role }, { userId, eventsDeleted });
         clearSessionCookie(res);
         res.status(204).end();
     },
@@ -204,24 +196,95 @@ userRouter.put('/me/notifications/read', requireAuth, validate({ body: markReadS
     res.status(204).end();
 });
 
-userRouter.get('/', (req, res) => {
-    res.send('Get all users')
-})
+// Manage Users (Phase 8). Accounts are made by sign-up and admins by the seed,
+// so there's no create; the list carries everything the panel shows. Admin
+// accounts aren't changed here, nor your own (decided 2026-11-03)
+const asAdmin = [requireAuth, requireActive, requireRole('admin')];
+const DAY = 24 * 60 * 60 * 1000;
+const untilFormatter = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+});
 
-userRouter.get('/:id', (req, res) => {
-    res.send('Get user details')
-})
+async function findManagedAccount(req) {
+    const { id } = req.valid.params;
+    if (id === req.user.userId) throw new AppError(400, 'This is your account. Change it on Settings.');
+    const [account] = await db.select().from(users).where(eq(users.userId, id));
+    if (!account) throw new AppError(404, 'Account not found.');
+    if (account.role === 'admin') throw new AppError(403, 'Admin accounts can\'t be changed here.');
+    // A suspension whose end has passed is over, whatever the row still says
+    return liftExpiredSuspension(account);
+}
 
-userRouter.post('/', (req, res) => {
-    res.send('Create new user')
-})
+userRouter.get('/', ...asAdmin, async (req, res) => {
+    res.json({ data: await listManagedUsers() });
+});
 
-userRouter.put('/:id', (req, res) => {
-    res.send('Update user')
-})
+// Suspending takes effect on the person's next request (requireActive reads the
+// account each time), so their sessions are left alone: they can still sign in
+// and read, with the banner (decided 2026-11-03)
+userRouter.put(
+    '/:id/status',
+    ...asAdmin,
+    validate({ params: userIdParams, body: accountStatusSchema }),
+    async (req, res) => {
+        const account = await findManagedAccount(req);
+        const body = req.valid.body;
 
-userRouter.delete('/:id', (req, res) => {
-    res.send('Delete user')
-})
+        if (body.status === 'active') {
+            // Already active: nothing to change, log or tell
+            if (account.accStatus === 'active') return res.json({ data: (await listManagedUsers(account.userId))[0] });
+            await db
+                .update(users)
+                .set({ accStatus: 'active', suspendedUntil: null, suspensionReason: null })
+                .where(eq(users.userId, account.userId));
+            await logAction(LOG.USER_STATUS_CHANGED, req.user, { userId: account.userId, username: account.username, status: 'active' });
+            await notifyUser(account.userId, messages.reactivated());
+            return res.json({ data: (await listManagedUsers(account.userId))[0] });
+        }
+
+        let until;
+        if (body.days === undefined) {
+            if (account.accStatus !== 'suspended') {
+                const message = 'Choose how long.';
+                throw new AppError(400, message, [{ path: 'body.days', message }]);
+            }
+            until = account.suspendedUntil;
+        } else {
+            until = body.days ? new Date(Date.now() + body.days * DAY) : null;
+        }
+
+        await db
+            .update(users)
+            .set({ accStatus: 'suspended', suspendedUntil: until, suspensionReason: body.reason })
+            .where(eq(users.userId, account.userId));
+        await logAction(LOG.USER_STATUS_CHANGED, req.user, {
+            userId: account.userId,
+            username: account.username,
+            status: 'suspended',
+            reason: body.reason,
+            until: until?.toISOString() ?? null,
+        });
+        // A changed length or reason is told again, with the new terms
+        await notifyUser(account.userId, messages.suspended(until && untilFormatter.format(until), body.reason));
+        res.json({ data: (await listManagedUsers(account.userId))[0] });
+    },
+);
+
+userRouter.delete('/:id', ...asAdmin, validate({ params: userIdParams }), async (req, res) => {
+    const account = await findManagedAccount(req);
+    const eventsDeleted = await deleteAccount(account, 'This account has events that have been public, so it can only be suspended.');
+    await logAction(LOG.USER_DELETED, req.user, {
+        userId: account.userId,
+        username: account.username,
+        role: account.role,
+        eventsDeleted,
+    });
+    res.status(204).end();
+});
 
 export default userRouter;

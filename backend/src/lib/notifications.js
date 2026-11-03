@@ -125,6 +125,18 @@ export const messages = {
         subject: 'Password Changed',
         body: 'Your password was just changed. If this wasn\'t you, contact us straight away.',
     }),
+    // Suspension (Phase 8). `until` is a date already worded for the person, or
+    // null for until an admin lifts it
+    suspended: (until, reason) => ({
+        type: NOTIFY.ACCOUNT_STATUS,
+        subject: 'Account Suspended',
+        body: `Your account has been suspended ${until ? `until ${until}` : 'until an admin lifts it'}. You can still sign in and look around, but you can't make changes. Reason: ${reason}`,
+    }),
+    reactivated: () => ({
+        type: NOTIFY.ACCOUNT_STATUS,
+        subject: 'Account Reactivated',
+        body: 'Your account is active again. You can make changes as before.',
+    }),
     userRegistered: ({ username, email, role }) => ({
         type: NOTIFY.USER_REGISTERED,
         subject: 'New User Registered',
