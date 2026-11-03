@@ -79,6 +79,9 @@ export const userPanel = {
   suspendedUntil: (date) => `Suspended until ${date}`,
   suspendedOpen: "Suspended until lifted",
   self: "This is your account. Change it on Settings.",
+  // Admin accounts come from the seed and aren't suspended or deleted here
+  // (decided 2026-11-03)
+  adminTarget: "Admin accounts can't be changed here.",
   save: { label: "Save", icon: Save },
   delete: {
     text: "Delete the account and everything in it.",
@@ -88,10 +91,7 @@ export const userPanel = {
     keep: "Keep it",
     confirm: "Delete permanently",
   },
-  noDelete: {
-    admin: "Admin accounts can't be deleted here.",
-    publicEvents: "Has public events, so it can only be suspended.",
-  },
+  noDelete: "Has public events, so it can only be suspended.",
 };
 
 // Messages from manage_users_view, delete_user and edit_user PHP files

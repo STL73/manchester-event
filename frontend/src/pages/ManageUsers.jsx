@@ -12,7 +12,7 @@ import PeriodSwitcher from "../components/charts/PeriodSwitcher";
 import SearchBar from "../components/events/SearchBar";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import EmptyState from "../components/UI/EmptyState";
-import { hasBeenPublic } from "../data/eventsData";
+import PageLoading from "../components/UI/PageLoading";
 import {
   accountStatuses,
   manageUsersMessages,
@@ -24,17 +24,10 @@ import {
   userViews,
 } from "../data/manageUsersData";
 
-const DAY = 24 * 60 * 60 * 1000;
-
 const joinedFormatter = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" });
 const untilFormatter = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
 
 const statusLabels = Object.fromEntries(accountStatuses.map(({ value, label }) => [value, label]));
-
-// suspended_until for a suspension of so many days, from the moment of saving
-function daysFromNow(days) {
-  return new Date(Date.now() + days * DAY).toISOString();
-}
 
 // Two letters for the hexagon avatar
 function initials(name) {
@@ -78,9 +71,11 @@ function StatusBadges({ user }) {
   );
 }
 
-// The panel's form: status, and for a suspension how long and why
+// The panel's form: status, and for a suspension how long and why. Your own
+// account and other admins' aren't changed here (decided 2026-11-03)
 function AccountForm({ user, isSelf, form, onChange, reasonError }) {
   if (isSelf) return <p className="callout callout-compact admin-note">{userPanel.self}</p>;
+  if (user.role === "admin") return <p className="callout callout-compact admin-note">{userPanel.adminTarget}</p>;
   const suspended = form.accStatus === "suspended";
   const lengthOptions = [
     // An existing suspension can be kept as it is
@@ -149,15 +144,20 @@ function formFor(user) {
 
 // Manage Users (decided 2026-10-12, layout A): the accounts as a list; a row
 // opens the account in a side panel to suspend or reactivate it (with how
-// long and why) or, where the schema allows, delete it
-export default function ManageUsers({ users, events, currentUserId, onUpdateUser, onDeleteUser }) {
+// long and why) or, where the schema allows, delete it. `users` is App's list
+// from GET /users (Phase 8), null while it loads; each change awaits the server
+export default function ManageUsers({ users: loaded, currentUserId, onUpdateUser, onDeleteUser }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [form, setForm] = useState(null);
   const [reasonError, setReasonError] = useState("");
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [message, setMessage] = useState("");
+  // The server's refusal, shown in the panel, and whether a change is on its way
+  const [panelError, setPanelError] = useState("");
+  const [saving, setSaving] = useState(false);
   const listRef = useRef(null);
+  const users = useMemo(() => loaded ?? [], [loaded]);
 
   const counts = Object.fromEntries(
     userViews.options.map((option) => [option.value, users.filter((user) => matchesView(user, option.value)).length]),
@@ -199,6 +199,7 @@ export default function ManageUsers({ users, events, currentUserId, onUpdateUser
   function openPanel(userId) {
     setForm(null);
     setReasonError("");
+    setPanelError("");
     setConfirmingDelete(false);
     setMessage("");
     setParams({ open: userId });
@@ -208,49 +209,71 @@ export default function ManageUsers({ users, events, currentUserId, onUpdateUser
     setParams({ open: null });
   }
 
-  // What the open account owns, for the delete rule: once any of its events
-  // has been public it can only be suspended (the schema's rule)
+  // What the open account owns, from the server: how many events it has sent
+  // and whether any has been public, after which it can only be suspended
+  // (the schema's rule). Admins, yourself included, aren't changed here
   function accountFacts(user) {
-    const own = events.filter((event) => event.organiserId === user.userId && event.status !== "draft");
-    const hasPublic = own.some(hasBeenPublic);
     const isSelf = user.userId === currentUserId;
-    const deleteBlock = user.role === "admin" ? "admin" : hasPublic ? "publicEvents" : null;
-    return { count: own.length, hasPublic, isSelf, canDelete: !isSelf && !deleteBlock, deleteBlock };
+    const locked = isSelf || user.role === "admin";
+    return {
+      count: user.eventCount,
+      hasPublic: user.hasBeenPublic,
+      isSelf,
+      locked,
+      canDelete: !locked && !user.hasBeenPublic,
+    };
+  }
+
+  // Runs one change against the server. The panel stays open with the
+  // server's reason if it refuses; a refused reason goes under its field
+  async function save(change, done) {
+    setSaving(true);
+    setPanelError("");
+    try {
+      await change();
+    } catch (error) {
+      const reasonRefused = error.details?.find(({ path }) => path === "body.reason");
+      if (reasonRefused) setReasonError(reasonRefused.message);
+      else setPanelError(error.message);
+      return;
+    } finally {
+      setSaving(false);
+    }
+    setMessage(done);
+    closePanel();
   }
 
   function handleSave() {
     const { accStatus, length, reason } = panelForm;
-    if (accStatus === "suspended" && !reason.trim()) {
+    if (accStatus === "active") {
+      save(() => onUpdateUser(openUser.userId, { status: "active" }), manageUsersMessages.statusUpdated);
+      return;
+    }
+    if (!reason.trim()) {
       setReasonError(userPanel.reasonRequired);
       document.getElementById("suspend-reason")?.focus();
       return;
     }
-    const days = suspensionLengths.find((option) => option.value === length)?.days;
-    const suspendedUntil =
-      length === "keep"
-        ? openUser.suspendedUntil
-        : days
-          ? daysFromNow(days)
-          : null;
-    onUpdateUser(openUser.userId, { accStatus, suspendedUntil, suspensionReason: reason.trim() || null });
-    setMessage(manageUsersMessages.statusUpdated);
-    closePanel();
+    // Keep leaves days out, so the server keeps the current end
+    const body = { status: "suspended", reason: reason.trim() };
+    if (length !== "keep") body.days = suspensionLengths.find((option) => option.value === length)?.days ?? null;
+    save(() => onUpdateUser(openUser.userId, body), manageUsersMessages.statusUpdated);
   }
 
   function handleDelete() {
-    onDeleteUser(openUser.userId);
-    setMessage(manageUsersMessages.userDeleted);
-    closePanel();
+    save(() => onDeleteUser(openUser.userId), manageUsersMessages.userDeleted);
   }
+
+  if (loaded === null) return <PageLoading />;
 
   const viewOptions = userViews.options.map((option) => ({ ...option, count: counts[option.value] }));
   const facts = openUser ? accountFacts(openUser) : null;
   const { delete: remove } = userPanel;
 
   const panelFooter =
-    openUser && !facts.isSelf ? (
+    openUser && !facts.locked ? (
       <>
-        <Button type="button" variant="primary" size="md" onClick={handleSave}>
+        <Button type="button" variant="primary" size="md" disabled={saving} onClick={handleSave}>
           <userPanel.save.icon aria-hidden="true" />
           {userPanel.save.label}
         </Button>
@@ -263,7 +286,7 @@ export default function ManageUsers({ users, events, currentUserId, onUpdateUser
                   <Button type="button" variant="secondary" size="sm" onClick={() => setConfirmingDelete(false)}>
                     {remove.keep}
                   </Button>
-                  <Button type="button" variant="destructive" size="sm" onClick={handleDelete}>
+                  <Button type="button" variant="destructive" size="sm" disabled={saving} onClick={handleDelete}>
                     <remove.icon aria-hidden="true" />
                     {remove.confirm}
                   </Button>
@@ -279,7 +302,7 @@ export default function ManageUsers({ users, events, currentUserId, onUpdateUser
               </>
             )
           ) : (
-            <span>{userPanel.noDelete[facts.deleteBlock]}</span>
+            <span>{userPanel.noDelete}</span>
           )}
         </div>
       </>
@@ -370,7 +393,6 @@ export default function ManageUsers({ users, events, currentUserId, onUpdateUser
                   <span />
                 </li>
                 {pageUsers.map((user) => {
-                  const own = events.filter((event) => event.organiserId === user.userId && event.status !== "draft").length;
                   return (
                     <li className={`list-row admin-row ${openId === user.userId ? "is-open" : ""}`} key={user.userId}>
                       <div className="admin-row-main">
@@ -390,7 +412,7 @@ export default function ManageUsers({ users, events, currentUserId, onUpdateUser
                       <span className="admin-row-cell admin-row-meta">
                         {joinedFormatter.format(new Date(user.createdAt))}
                         <span className="admin-row-sub">
-                          {suspensionText(user) || (user.role === "organiser" ? manageUsersPage.eventsCount(own) : "")}
+                          {suspensionText(user) || (user.role === "organiser" ? manageUsersPage.eventsCount(user.eventCount) : "")}
                         </span>
                       </span>
                       <span className="admin-row-action" aria-hidden="true">
@@ -421,6 +443,7 @@ export default function ManageUsers({ users, events, currentUserId, onUpdateUser
           onClose={closePanel}
           footer={panelFooter}
         >
+          {panelError && <StatusMessage variant="error">{panelError}</StatusMessage>}
           {openUser && (
             <div className="admin-review">
               <div className="admin-account-head">
@@ -477,6 +500,7 @@ export default function ManageUsers({ users, events, currentUserId, onUpdateUser
                 onChange={(changes) => {
                   setForm({ ...panelForm, ...changes });
                   setReasonError("");
+                  setPanelError("");
                 }}
                 reasonError={reasonError}
               />
