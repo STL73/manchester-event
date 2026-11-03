@@ -5,9 +5,9 @@
 The shared middleware below is in place (Phase 0, 2026-10-26) and the auth routes are real
 (Phase 1, passwords Phase 2), and so are the public event reads and categories (Phase 3),
 favourites and category follows (Phase 4), organisers' own events with venue search
-(Phase 5), photos on Cloudinary (Phase 6) and moderation and notifications (Phase 7). The
-rest of the users and events routers are still stubs that return a placeholder string
-(`res.send('Create event')`); database access comes with each feature.
+(Phase 5), photos on Cloudinary (Phase 6), moderation and notifications (Phase 7) and
+managing users (Phase 8). The users and events routers have no placeholder stubs left;
+contact messages (Phase 9) and analytics and logs (Phase 10) are still to come.
 
 ## Routing
 
@@ -16,7 +16,7 @@ All routes are versioned under `/api/v1`, one router per resource, mounted in `s
 | Mount | File and endpoints |
 | --- | --- |
 | `/api/v1/auth` | `routes/auth.routes.js`: `POST /sign-up`, `/login`, `/logout`, `/verify-email`, `/resend-verification`, `/forgot-password`, `/reset-password`; `GET /me`; `PUT /password` |
-| `/api/v1/users` | `routes/user.routes.js`: `PUT /me` (name, email switch), `DELETE /me` (password-confirmed), `GET /me/favourites`, `PUT` and `DELETE /me/favourites/:id`, `GET` and `PUT /me/follows`, `GET /me/events` (an organiser's own), `PUT` and `DELETE /me/avatar` (the profile picture), `GET /me/notifications`, `PUT /me/notifications/read`; REST CRUD on `/` and `/:id`, `/me` registered first |
+| `/api/v1/users` | `routes/user.routes.js`: `PUT /me` (name, email switch), `DELETE /me` (password-confirmed), `GET /me/favourites`, `PUT` and `DELETE /me/favourites/:id`, `GET` and `PUT /me/follows`, `GET /me/events` (an organiser's own), `PUT` and `DELETE /me/avatar` (the profile picture), `GET /me/notifications`, `PUT /me/notifications/read`; `/me` registered first; admins: `GET /` (every account), `PUT /:id/status`, `DELETE /:id` |
 | `/api/v1/events` | `routes/event.routes.js`: `GET /` (public list), `GET /summary` (counts), `GET /:id` (public details), `/summary` and `/manage` before `/:id`; `POST /`, `PUT /:id`, `PUT /:id/submit`, `PUT /:id/cancel`, `DELETE /:id` (organisers); `GET /manage`, `PUT /:id/approve`, `/:id/reject`, `/:id/take-down` (admins) |
 | `/api/v1/categories` | `routes/category.routes.js`: `GET /` (active categories A to Z, upcoming events each) |
 | `/api/v1/locations` | `routes/location.routes.js`: `GET /search?q=` (OpenStreetMap places for the venue box) |
@@ -246,6 +246,7 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
 | `event_cancelled_by_organiser` | admins | the organiser cancels |
 | `password_changed` | the account | Settings or a reset link |
 | `user_registered` | admins | sign-up |
+| `account_status` | the account | suspended (until when, and why), its terms changed, or reactivated (Phase 8) |
 
 - **Inbox:** `GET /users/me/notifications` (every role, also while suspended): the newest 200,
   each `{ notificationId, eventId, type, subject, body, readAt, createdAt, listed }`; `listed`
@@ -254,8 +255,33 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
   `PUT /users/me/notifications/read` takes `{ ids: [...] }` or `{ all: true }` (400 for both or
   neither), changes only the account's own unread rows, keeps the first read time, answers 204;
   allowed while suspended. No push: the frontend reloads it
-- `account_status` comes with suspension (Phase 8), reminders and clearing read rows after 90
-  days with the scheduled jobs (Phase 11)
+- Reminders and clearing read rows after 90 days come with the scheduled jobs (Phase 11)
+
+## Manage users (decided 2026-11-03)
+
+- **Admins only** (`requireActive` admins), under `/users`. Accounts are made by sign-up and
+  admins by the seed, so there's no create. **Admin accounts aren't changed here** (403), nor
+  your own (400, "Change it on Settings"); an unknown id is 404 (Slav, 2026-11-03)
+- `GET /users`: every account, newest first, as `publicUser()` plus `updatedAt`, `eventCount`
+  (every event but drafts) and `hasBeenPublic` (`lib/accounts.js` `listManagedUsers()`), so the
+  panel's counts and Delete rule come from the server. All at once; the page filters in the
+  browser, like Manage Events
+- `PUT /users/:id/status`: `{ status: 'active' }` or `{ status: 'suspended', reason, days }`,
+  `days` 7, 30 or `null` (until lifted), left out to keep the current end (only while already
+  suspended, 400 under `body.days` otherwise); the reason 1 to 1000 characters, under
+  `body.reason`. The server works out `suspended_until`; reactivating clears it and the reason.
+  Answers the account in the list's shape. Logs User Status Changed `{ userId, username,
+  status, reason?, until? }` and sends `account_status`; reactivating an active account
+  changes, logs and sends nothing
+- **A suspension doesn't end sessions** (Slav, 2026-11-03): `requireActive` reads the account on
+  every request, so it applies from the next one, and the person keeps reading with the banner.
+  `liftExpiredSuspension()` runs on the target first, so an ended suspension isn't kept
+- `DELETE /users/:id`: 204, the same rule as Settings' Delete through `deleteAccount()`
+  (`lib/accounts.js`): an organiser whose events have been public is 409 (they can only be
+  suspended), otherwise their never-public events, photos and the account go in one
+  `db.batch()`; a RESTRICT failure from an event approved meanwhile is 409 too. Sessions,
+  follows, favourites and notifications cascade. Logs User Deleted `{ userId, username, role,
+  eventsDeleted }`
 
 ## Status codes (decided 2026-10-26)
 

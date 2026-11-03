@@ -55,8 +55,11 @@ functions record behaviour being matched on purpose: keep that parity unless tol
   Home opens and after a password change; `markNotificationsRead()` changes at once, sends the
   ids and reloads if the server refuses. User Home's "New in your interests" counts the
   `category_new_event` notifications of the last 7 days whose event is still `listed` (View
-  opens Explore). Manage Users, System Logs and Site
-  Analytics still read `initialEvents` until Phases 8 and 10
+  opens Explore). Manage users (Phase 8): the admin's effect also loads `/users`
+  (`managedUsers`, `null` until loaded), which Manage Users and Admin Home's New users card
+  read; `updateUserStatus()` and `deleteUser()` await the API and swap in or drop the server's
+  row. System Logs, Admin Home's Recent Admin Actions, Contact Messages and Site Analytics still
+  read `initialEvents` and `mockUsers` until Phases 9 and 10
 - **Event photos:** the seed's live in `public/images/events/` (2026-10-27) and are referenced
   by path (`/images/events/<file>`); organisers' own are Cloudinary addresses (Phase 6). Both
   are what the database's `image_url` stores; NULL shows `defaultEventImage`. There is no
@@ -265,10 +268,12 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   server's take-down): cancelled with a reason, saves kept, savers told; a cancelled event
   with a reason reads "Taken down … by". A refusal (another admin decided first, an expired
   event) stays in the panel. Users: only Active / Suspended can be set (`emailVerifiedAt` NULL is
-  a read-only "Unverified" label, never a status); suspending asks how long (`suspendedUntil`,
-  NULL = until lifted) and why; a suspended organiser's events leave the public lists; Delete
-  only where the schema allows (not admins, not yourself, not an organiser whose events have
-  been public), asked in the panel
+  a read-only "Unverified" label, never a status); suspending asks how long (7 or 30 days, until
+  lifted, or Keep) and why, and sends `{ status, reason, days }` for the server to work out
+  `suspendedUntil`; a suspended organiser's events leave the public lists; Delete only where
+  the schema allows (not yourself, not an organiser whose events have been public: the
+  server's `eventCount` and `hasBeenPublic`), asked in the panel. Admins' accounts show no form
+  (2026-11-03). A refusal stays in the panel
 - **Notifications** (decided 2026-10-11): read state lives in `App.jsx` (`readAt`), so Home's
   unread card agrees. Rows grouped Today / Earlier this week / Earlier, collapsed to type icon,
   subject and time (64px); opening one shows the message and marks it read, one open at a time,

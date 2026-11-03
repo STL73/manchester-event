@@ -96,7 +96,10 @@ function App() {
   // which name its events: Manage Users and System Logs (Phases 8 and 10),
   // Admin Home's Recent Admin Actions, and the analytics pages (Phase 10)
   const events = initialEvents;
-  const [users, setUsers] = useState(mockUsers);
+  // The mock accounts, likewise, for the pages that still name them: System
+  // Logs, Admin Home's Recent Admin Actions, Contact Messages and Site
+  // Analytics (Phases 9 and 10). Manage Users reads the API (Phase 8)
+  const users = mockUsers;
   // Event Analytics still reads the mock organiser's events until Phase 10
   // brings its figures from the API
   const mockOrganiserEvents = events.filter(
@@ -112,8 +115,11 @@ function App() {
   // The admin's events from the API (Phase 7): every one but drafts, kept with
   // the account like the organiser's. null until they arrive
   const adminUserId = userType === "admin" ? account.userId : null;
-  const [adminLists, setAdminLists] = useState({ userId: null, events: null });
-  const managedEvents = adminUserId !== null && adminLists.userId === adminUserId ? adminLists.events : null;
+  const [adminLists, setAdminLists] = useState({ userId: null, events: null, users: null });
+  const adminListsLoaded = adminUserId !== null && adminLists.userId === adminUserId;
+  const managedEvents = adminListsLoaded ? adminLists.events : null;
+  // Every account, for Manage Users and Admin Home's New users card (Phase 8)
+  const managedUsers = adminListsLoaded ? adminLists.users : null;
   // The user role's favourites and interests (category_follows), loaded from
   // the API after login and kept with the account they belong to, so the next
   // account to log in never sees them. favouriteIds is what the hearts show:
@@ -192,15 +198,17 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [organiserUserId]);
 
-  // If the list can't be read the pages show none, with the reason over the page
+  // If a list can't be read the pages show none, with the reason over the page
   useEffect(() => {
     if (adminUserId === null) return undefined;
     let current = true;
-    api("/events/manage").then(
-      ({ data }) => current && setAdminLists({ userId: adminUserId, events: data.map(toManagedEvent) }),
+    Promise.all([api("/events/manage"), api("/users")]).then(
+      ([managed, accounts]) =>
+        current &&
+        setAdminLists({ userId: adminUserId, events: managed.data.map(toManagedEvent), users: accounts.data }),
       (error) => {
         if (!current) return;
-        setAdminLists({ userId: adminUserId, events: [] });
+        setAdminLists({ userId: adminUserId, events: [], users: [] });
         setFavouriteError(error.message);
       },
     );
@@ -410,30 +418,27 @@ function App() {
     navigate("/");
   }
 
-  function deleteUser(userId) {
-    setUsers((currentUsers) =>
-      currentUsers.filter((user) => user.userId !== userId),
-    );
+  // Manage Users (Phase 8). Each awaits the server and throws its ApiError for
+  // the panel to show; the list changes only once it agrees
+  // The admin's lists are kept with the admin's id, so a reply that lands after
+  // a log-out changes nothing
+  function updateManagedUsers(adminId, change) {
+    setAdminLists((current) => (current.userId === adminId ? { ...current, users: change(current.users) } : current));
   }
 
-  // Matches update_user_status(), plus the schema's suspended_until (NULL
-  // = until lifted) and suspension_reason; lifting a suspension clears both
-  function updateUserStatus(userId, { accStatus, suspendedUntil = null, suspensionReason = null }) {
-    const updatedAt = new Date().toISOString();
-    const suspended = accStatus === "suspended";
-    setUsers((currentUsers) =>
-      currentUsers.map((user) =>
-        user.userId === userId
-          ? {
-              ...user,
-              accStatus,
-              suspendedUntil: suspended ? suspendedUntil : null,
-              suspensionReason: suspended ? suspensionReason : null,
-              updatedAt,
-            }
-          : user,
-      ),
-    );
+  async function deleteUser(accountId) {
+    const userId = adminUserId;
+    await api(`/users/${accountId}`, { method: "DELETE" });
+    updateManagedUsers(userId, (list) => list.filter((user) => user.userId !== accountId));
+  }
+
+  // { status: "active" } or { status: "suspended", reason, days }: 7, 30 or
+  // null (until lifted), left out to keep the current end. The server works
+  // out suspended_until and tells the person
+  async function updateUserStatus(accountId, body) {
+    const userId = adminUserId;
+    const { data } = await api(`/users/${accountId}/status`, { method: "PUT", body });
+    updateManagedUsers(userId, (list) => list.map((user) => (user.userId === accountId ? data : user)));
   }
 
   // Manage Events' decisions (Phase 7): "approve", "reject" or "take-down",
@@ -548,7 +553,7 @@ function App() {
             }
           >
             <Route index element={<Navigate to="home" replace />} />
-            <Route path="home" element={<DashboardHome selectedUser={selectedUser} account={account} users={users} events={managedEvents ?? []} logEvents={events} organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} favouriteIds={favouriteIds} favouriteEvents={favouriteEvents} onToggleFavourite={toggleFavourite} interestIds={interestIds} contactMessages={contactMessages} notifications={notifications ?? []} onLoadNotifications={loadNotifications} />} />
+            <Route path="home" element={<DashboardHome selectedUser={selectedUser} account={account} users={managedUsers ?? []} logUsers={users} events={managedEvents ?? []} logEvents={events} organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} favouriteIds={favouriteIds} favouriteEvents={favouriteEvents} onToggleFavourite={toggleFavourite} interestIds={interestIds} contactMessages={contactMessages} notifications={notifications ?? []} onLoadNotifications={loadNotifications} />} />
             <Route element={<RoleOnly allow="user" userType={userType} />}>
               <Route path="explore-events" element={<ExploreEvents inDashboard selectedUser={selectedUser} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
               <Route path="my-favourites" element={<MyFavourites events={favouriteEvents} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
@@ -591,7 +596,7 @@ function App() {
               <Route path="event-analytics" element={<EventAnalytics organiserEvents={mockOrganiserEvents} favouriteIds={initialFavouriteIds} interestIds={userCategoryIds} />} />
             </Route>
             <Route element={<RoleOnly allow="admin" userType={userType} />}>
-              <Route path="manage-users" element={<ManageUsers users={users} events={events} currentUserId={currentAdmin.id} onUpdateUser={updateUserStatus} onDeleteUser={deleteUser} />} />
+              <Route path="manage-users" element={<ManageUsers users={managedUsers} currentUserId={adminUserId} onUpdateUser={updateUserStatus} onDeleteUser={deleteUser} />} />
               <Route path="manage-users/:userId/edit" element={<OpenInPanel param="userId" to="/dashboard/manage-users" />} />
               <Route path="manage-events" element={<ManageEvents events={managedEvents} currentUserId={adminUserId} onDecide={decideEvent} />} />
               <Route path="manage-events/:eventId/edit" element={<OpenInPanel param="eventId" to="/dashboard/manage-events" />} />
