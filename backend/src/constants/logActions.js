@@ -26,3 +26,20 @@ export const LOG = {
     // An admin's reply to a Contact form message (Phase 9): { messageId, name }
     CONTACT_MESSAGE_REPLIED: 'Contact Message Replied',
 };
+
+// System Logs' pills (Phase 10). They match the `kind` the frontend's
+// describers give each action: Sign-ins includes the failed ones, and
+// Accounts is every action in neither list, so a new name lands there as
+// it does on the page. Admins only is the copied role, not an action.
+// admin-actions isn't a pill: Admin Home's Recent Admin Actions, an admin's
+// rows without their sign-ins and sign-outs (Slav, 2026-11-04)
+export const LOG_EVENT_ACTIONS = [
+    LOG.EVENT_CREATED,
+    LOG.EVENT_UPDATED,
+    LOG.DRAFT_SUBMITTED,
+    LOG.EVENT_CANCELLED,
+    LOG.EVENT_DELETED,
+    LOG.EVENT_STATUS_CHANGED,
+];
+export const LOG_SIGN_IN_ACTIONS = [LOG.USER_LOGIN, LOG.USER_LOGOUT, LOG.USER_LOGIN_FAILED];
+export const LOG_VIEWS = ['all', 'events', 'accounts', 'signins', 'failed', 'admin', 'admin-actions'];

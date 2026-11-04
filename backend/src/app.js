@@ -11,6 +11,8 @@ import eventRouter from './routes/event.routes.js';
 import categoryRouter from './routes/category.routes.js';
 import locationRouter from './routes/location.routes.js';
 import contactRouter from './routes/contact.routes.js';
+import analyticsRouter from './routes/analytics.routes.js';
+import logRouter from './routes/log.routes.js';
 
 // The app without app.listen(), so tests can send it requests without a port
 const app = express();
@@ -28,6 +30,8 @@ app.use('/api/v1/events', eventRouter);
 app.use('/api/v1/categories', categoryRouter);
 app.use('/api/v1/locations', locationRouter);
 app.use('/api/v1/contact-messages', contactRouter);
+app.use('/api/v1/analytics', analyticsRouter);
+app.use('/api/v1/logs', logRouter);
 
 app.get('/', (req, res) => {
     res.send('Hello, welcome to the Manchester Event API');
