@@ -3,7 +3,8 @@ import Button from "../components/UI/Button";
 import DashboardCard from "../components/UI/DashboardCard";
 import {
   adminInsights,
-  recentAdminActions,
+  recentAdminActionsPath,
+  recentAdminActionsText,
   viewAllLogsAction,
 } from "../data/adminDashboardData";
 import { isPublicEvent } from "../data/eventsData";
@@ -12,6 +13,7 @@ import { isUpcoming, matchesWhen } from "../lib/eventDates";
 import EmptyState from "../components/UI/EmptyState";
 import LogEntry from "../components/dashboard/LogEntry";
 import { describeLog, logLookup } from "../lib/systemLogs";
+import { useApi } from "../lib/useApi";
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -103,13 +105,13 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
 });
 
 // `events` is the Manage Events list from the API (Phase 7) and `users` the
-// Manage Users one (Phase 8). Recent Admin Actions are still mock log rows
-// naming the mock events and accounts (`logEvents`, `logUsers`) until System
-// Logs reads the API in Phase 10
-export default function AdminDashboardHome({ users, events, logEvents, logUsers, contactMessages }) {
+// Manage Users one (Phase 8). Recent Admin Actions are the newest log rows by
+// admins (Phase 10), asked for as the page opens
+export default function AdminDashboardHome({ users, events, contactMessages }) {
   const ViewAllIcon = viewAllLogsAction.icon;
   const insights = getAdminInsights({ users, events, contactMessages });
-  const lookup = logLookup(logEvents, logUsers);
+  const { payload: logPayload, error: logError } = useApi(recentAdminActionsPath);
+  const recentAdminActions = logPayload?.data;
 
   return (
     <div className="dashboard-page">
@@ -139,8 +141,10 @@ export default function AdminDashboardHome({ users, events, logEvents, logUsers,
           <Logs className="dashboard-title-icon" aria-hidden="true" />
           Recent Admin Actions
         </h2>
-        {recentAdminActions.length === 0 ? (
-          <EmptyState icon={Logs} text="No recent admin actions." />
+        {logError ? (
+          <EmptyState icon={Logs} text={recentAdminActionsText.loadError} />
+        ) : !recentAdminActions ? null : recentAdminActions.length === 0 ? (
+          <EmptyState icon={Logs} text={recentAdminActionsText.empty} />
         ) : (
           // Recent Admin Actions: the log list (its own card) and View All Logs under it
           <div className="w-full flex flex-col items-start gap-4">
@@ -150,7 +154,7 @@ export default function AdminDashboardHome({ users, events, logEvents, logUsers,
                 <LogEntry
                   key={log.logId}
                   log={log}
-                  description={describeLog(log, lookup)}
+                  description={describeLog(log, logLookup(log))}
                   time={dateFormatter.format(new Date(log.createdAt))}
                 />
               ))}

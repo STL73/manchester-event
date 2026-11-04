@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Clock, Heart } from "lucide-react";
+import Button from "../components/UI/Button";
 import DashboardCard from "../components/UI/DashboardCard";
 import FilterPills from "../components/UI/FilterPills";
 import ChartCard from "../components/charts/ChartCard";
@@ -37,6 +38,7 @@ import {
 } from "../lib/analytics";
 import { isUpcoming } from "../lib/eventDates";
 import {
+  analyticsLoadText,
   cardTrend,
   chartText,
   emailTones,
@@ -47,7 +49,9 @@ import {
   statusTones,
   weekGridText,
 } from "../data/analyticsData";
-import { allFollows, allSaves, signInLogs } from "../data/analyticsActivityData";
+import PageLoading from "../components/UI/PageLoading";
+import StatusMessage from "../components/UI/StatusMessage";
+import { useApi } from "../lib/useApi";
 import { eventCategories, eventState } from "../data/eventsData";
 import { eventStatuses } from "../data/manageEventsData";
 import { accountStatuses } from "../data/manageUsersData";
@@ -89,10 +93,12 @@ function waitTone(ms) {
   return ms >= DAY ? "warning" : "muted";
 }
 
-// Admin analytics (admin_stats.php), counted live from the shared users,
-// events and contact messages, so it updates after Manage Users, Manage
-// Events and Contact Messages changes
-export default function SiteAnalytics({ users, events, contactMessages, favouriteIds, interestIds }) {
+// Admin analytics (admin_stats.php), counted in the browser from App's
+// accounts, events and contact messages (the admin's lists from the API, so it
+// follows Manage Users, Manage Events and Contact Messages changes) and the
+// saves, followers and failed sign-ins the server sends as it opens (Phase 10).
+// Events are every one sent for approval: drafts stay their organiser's
+export default function SiteAnalytics({ users, events, contactMessages }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
   const tab = siteAnalyticsTabs.some((option) => option.value === tabParam)
@@ -106,7 +112,23 @@ export default function SiteAnalytics({ users, events, contactMessages, favourit
   const SectionIcon = siteAnalyticsSection.icon;
   const now = new Date();
 
-  const saves = allSaves(favouriteIds);
+  const { payload, error, retry } = useApi("/analytics/site");
+
+  if (error) {
+    return (
+      <div className="dashboard-page">
+        <StatusMessage variant="error">
+          <p>{analyticsLoadText.error}</p>
+          <Button type="button" variant="secondary" size="sm" onClick={retry} className="self-start">
+            {analyticsLoadText.retry}
+          </Button>
+        </StatusMessage>
+      </div>
+    );
+  }
+  if (!payload || !users || !events || !contactMessages) return <PageLoading />;
+
+  const { saves, follows, failedSignIns } = payload.data;
   const savesSummary = getSavesSummary(saves, now);
   const record = getApprovalRecord(events, now);
   const lists = { users, events, saves };
@@ -244,7 +266,7 @@ export default function SiteAnalytics({ users, events, contactMessages, favourit
 
   // Engagement: what is public and still to come
   const upcoming = events.filter((event) => event.status === "approved" && isUpcoming(event, now));
-  const supplyRows = getSupplyAndDemand(allFollows(interestIds), events, eventCategories, now).map(
+  const supplyRows = getSupplyAndDemand(follows, events, eventCategories, now).map(
     (row) => ({
       ...row,
       // For the data table: "–" where nothing is coming up to divide by
@@ -274,7 +296,7 @@ export default function SiteAnalytics({ users, events, contactMessages, favourit
 
   // Safety and support
   const failedRows = countOverTime(
-    signInLogs.filter((log) => log.action === "User Login Failed"),
+    failedSignIns,
     (log) => log.createdAt,
     "day",
     { bounds: getRangeBounds({ days: 14 }, now) },

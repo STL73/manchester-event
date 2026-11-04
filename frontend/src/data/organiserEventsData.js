@@ -40,7 +40,3 @@ export const organiserStatusLabels = { approved: "live" };
 export function editEventPath(eventId) {
   return `/dashboard/my-events/${eventId}/edit`;
 }
-
-// Mock of the logged-in organiser (organiserName in the users mock).
-// Their events are the master events list filtered by this id.
-export const currentOrganiser = { id: 3, name: "organiserName" };

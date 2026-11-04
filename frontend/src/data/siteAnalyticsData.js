@@ -134,7 +134,7 @@ export const siteAnalyticsCharts = {
       { key: "rejectedShare", heading: "Rejected %" },
     ],
   },
-  eventsByStatus: { title: "Events by Status", description: "All events, drafts included.", xHeading: "Status" },
+  eventsByStatus: { title: "Events by Status", description: "Every event sent for approval. Drafts stay private to their organisers.", xHeading: "Status" },
   waiting: {
     title: "Waiting Longest",
     description: "Pending events, oldest first.",

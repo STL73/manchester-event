@@ -7,10 +7,11 @@ import SearchBar from "../components/events/SearchBar";
 import LogEntry from "../components/dashboard/LogEntry";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import EmptyState from "../components/UI/EmptyState";
-import { describeLog, logLookup, matchesLogView } from "../lib/systemLogs";
+import StatusMessage from "../components/UI/StatusMessage";
+import { describeLog, logLookup } from "../lib/systemLogs";
+import { useApi } from "../lib/useApi";
 import {
   logViews,
-  systemLogs,
   systemLogsMessages,
   systemLogsPage,
   systemLogsSection,
@@ -31,50 +32,37 @@ function dayLabel(value, now) {
   return dayFormatter.format(new Date(value));
 }
 
-// Admin page from system_logs.php (the newest 100 logged actions), as an
-// activity feed by day (decided 2026-10-12, layout A): each entry a sentence
-// with links to the event or account it names, filtered by kind
-export default function SystemLogs({ events, users }) {
+// Admin page from system_logs.php, as an activity feed by day (decided
+// 2026-10-12, layout A): each entry a sentence with links to the event or
+// account it names. The view, search and page are the server's (Phase 10,
+// decided 2026-11-04), so every row is reachable, not only the newest 100
+export default function SystemLogs() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const listRef = useRef(null);
   const now = useMemo(() => new Date(), []);
   const SectionIcon = systemLogsSection.icon;
 
-  const entries = useMemo(() => {
-    const lookup = logLookup(events, users);
-    return systemLogs.map((log) => ({ log, description: describeLog(log, lookup) }));
-  }, [events, users]);
-
   const viewParam = searchParams.get("view");
   const view = logViews.options.some((option) => option.value === viewParam) ? viewParam : "all";
+  const q = (searchParams.get("q") ?? "").trim();
+  const requestedPage = Math.max(Number(searchParams.get("page")) || 1, 1);
 
-  const counts = Object.fromEntries(
-    logViews.options.map((option) => [
-      option.value,
-      entries.filter(({ log, description }) => matchesLogView(log, description, option.value)).length,
-    ]),
-  );
+  const apiQuery = new URLSearchParams({ limit: String(systemLogsPage.pageSize) });
+  if (view !== "all") apiQuery.set("view", view);
+  if (q) apiQuery.set("q", q);
+  if (requestedPage > 1) apiQuery.set("page", String(requestedPage));
+  const { payload, error, loading, retry } = useApi(`/logs?${apiQuery}`);
 
-  const filtered = useMemo(() => {
-    const q = (searchParams.get("q") ?? "").trim().toLowerCase();
-    return entries.filter(({ log, description }) => {
-      const text = [log.username, log.action, description.verb, description.target?.label, description.sub]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      return matchesLogView(log, description, view) && (!q || text.includes(q));
-    });
-  }, [entries, searchParams, view]);
-
-  const { pageSize } = systemLogsPage;
-  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const page = Math.min(Math.max(Number(searchParams.get("page")) || 1, 1), pageCount);
-  const firstIndex = (page - 1) * pageSize;
-  const pageEntries = filtered.slice(firstIndex, firstIndex + pageSize);
+  const entries = (payload?.data ?? []).map((log) => ({ log, description: describeLog(log, logLookup(log)) }));
+  const counts = payload?.counts ?? {};
+  const { page, totalPages: pageCount, total } = payload?.pagination ?? { page: 1, totalPages: 1, total: 0 };
+  const firstIndex = (page - 1) * systemLogsPage.pageSize;
+  // Nothing logged at all, rather than nothing matching
+  const noLogs = payload && counts.all === 0 && !q;
 
   // Day groups from this page only, as Notifications does
-  const days = pageEntries.reduce((groups, entry) => {
+  const days = entries.reduce((groups, entry) => {
     const key = dayKey(entry.log.createdAt);
     const last = groups[groups.length - 1];
     if (last?.key === key) last.entries.push(entry);
@@ -101,11 +89,16 @@ export default function SystemLogs({ events, users }) {
           icon={SectionIcon}
           title={systemLogsSection.title}
           summary={
-            entries.length > 0 && (
+            counts.all > 0 && (
               <>
-                <strong>{entries.length}</strong> {summary.entries(entries.length)}
-                <span aria-hidden="true"> · </span>
-                {summary.newest} {dayFormatter.format(new Date(entries[0].log.createdAt))}
+                <strong>{counts.all}</strong> {summary.entries(counts.all)}
+                {/* The newest only when this page starts with it */}
+                {view === "all" && page === 1 && entries.length > 0 && (
+                  <>
+                    <span aria-hidden="true"> · </span>
+                    {summary.newest} {dayFormatter.format(new Date(entries[0].log.createdAt))}
+                  </>
+                )}
                 {counts.failed > 0 && (
                   <>
                     <span aria-hidden="true"> · </span>
@@ -117,7 +110,14 @@ export default function SystemLogs({ events, users }) {
           }
         />
 
-        {entries.length === 0 ? (
+        {error ? (
+          <StatusMessage variant="error">
+            <p>{systemLogsMessages.loadError}</p>
+            <Button type="button" variant="secondary" size="sm" onClick={retry} className="self-start">
+              {systemLogsMessages.retry}
+            </Button>
+          </StatusMessage>
+        ) : !payload ? null : noLogs ? (
           <EmptyState icon={SectionIcon} text={systemLogsMessages.noLogs} />
         ) : (
           <>
@@ -142,7 +142,7 @@ export default function SystemLogs({ events, users }) {
               />
             </div>
 
-            {filtered.length === 0 ? (
+            {entries.length === 0 ? (
               <EmptyState icon={SectionIcon} text={systemLogsMessages.noMatches}>
                 <Button
                   type="button"
@@ -157,7 +157,7 @@ export default function SystemLogs({ events, users }) {
                 </Button>
               </EmptyState>
             ) : (
-              <div className="flex w-full flex-col" ref={listRef}>
+              <div className="flex w-full flex-col" ref={listRef} aria-busy={loading}>
                 {days.map((day) => (
                   <Fragment key={day.key}>
                     <h2 className="group-label log-day">{day.label}</h2>
@@ -178,7 +178,7 @@ export default function SystemLogs({ events, users }) {
                 setParams({ page: next > 1 ? String(next) : null });
                 listRef.current?.scrollIntoView({ block: "start" });
               }}
-              summary={systemLogsPage.paging(firstIndex + 1, firstIndex + pageEntries.length, filtered.length)}
+              summary={systemLogsPage.paging(firstIndex + 1, firstIndex + entries.length, total)}
             />
           </>
         )}

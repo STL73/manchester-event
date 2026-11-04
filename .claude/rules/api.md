@@ -7,7 +7,7 @@ The shared middleware below is in place (Phase 0, 2026-10-26) and the auth route
 favourites and category follows (Phase 4), organisers' own events with venue search
 (Phase 5), photos on Cloudinary (Phase 6), moderation and notifications (Phase 7) and
 managing users (Phase 8) and contact messages (Phase 9). The users and events routers have
-no placeholder stubs left; analytics and logs (Phase 10) are still to come.
+no placeholder stubs left. System Logs and the analytics rows (Phase 10) came last.
 
 ## Routing
 
@@ -21,6 +21,8 @@ All routes are versioned under `/api/v1`, one router per resource, mounted in `s
 | `/api/v1/categories` | `routes/category.routes.js`: `GET /` (active categories A to Z, upcoming events each) |
 | `/api/v1/locations` | `routes/location.routes.js`: `GET /search?q=` (OpenStreetMap places for the venue box) |
 | `/api/v1/contact-messages` | `routes/contact.routes.js`: `POST /` (anyone, guests too); admins: `GET /`, `PUT /:id/read`, `PUT /:id/reply` |
+| `/api/v1/analytics` | `routes/analytics.routes.js`: `GET /site` (admins), `GET /organiser` (organisers) |
+| `/api/v1/logs` | `routes/log.routes.js`: `GET /?view=&q=&page=&limit=` (admins) |
 
 - Router files: `const xRouter = Router();` then `export default xRouter;`
 - REST verbs: `GET` list/detail, `POST` create, `PUT` update, `DELETE` remove. Actions that
@@ -305,6 +307,37 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
   then their message quoted). If the email fails the claim is undone, Email Failed is logged
   and the answer is 503, so Replied never shows for a reply nobody got. Replying reads the
   message. Logs Contact Message Replied `{ messageId, name }`
+
+## System Logs and analytics (decided 2026-11-04)
+
+- **System Logs are filtered and paged on the server** (Slav, 2026-11-04): the table grows with
+  every sign-in, so the PHP's "newest 100" would hide the rest. `GET /logs` (admins, suspended
+  ones too: it only reads) takes `view` (`all`, `events`, `accounts`, `signins`, `failed`,
+  `admin`), `q`, `page` and `limit` (25, the page's size; Admin Home asks for 5 with
+  `view=admin-actions`, an admin's rows without sign-ins and sign-outs: Slav, 2026-11-04).
+  Newest first. It answers `{ data, counts, pagination }`: `counts` is what each
+  pill would show for the same search, so the counts follow the search box
+- The views match the frontend describers' `kind` through `constants/logActions.js`
+  (`LOG_EVENT_ACTIONS`, `LOG_SIGN_IN_ACTIONS`): Sign-ins includes the failed ones, Accounts is
+  every action in neither list (a new action lands there, as on the page), Admins only is the
+  copied `role`
+- `q` searches what the sentence shows (`ILIKE`, `%` and `_` taken literally): the copied
+  username, the action, the details' `name`, `username`, `email` and `reason`, and the event's
+  and named account's names now. Each row also carries `eventName`, `actorName` and
+  `targetName` as they are now, NULL once deleted, so the page links only to what still exists
+- **Analytics figures are worked out in the browser** (Slav, 2026-11-04): the server sends only
+  the rows `frontend/src/lib/analytics.js` reads that no other page loads (`lib/analytics.js`),
+  and never who saved or followed. `GET /analytics/site` (admins): every save as `{ eventId,
+  createdAt }`, followers per category `{ categoryId: slug, count }`, failed sign-ins of the
+  last 15 days (the chart shows 14 in London days). `GET /analytics/organiser` (organisers):
+  saves on their own events, followers of the categories they post in, and `audience`, each
+  person once. Both read while suspended
+- Followers are counted by `notifyFollowers()`'s rule: active `user` accounts, the people a
+  new event would reach. Users, events and messages come from the admin's lists App already
+  holds; events there leave out drafts, which stay their organiser's
+- Approval rate and review time use each event's latest `organiser_updated_at` /
+  `admin_updated_at`: only the last round counts, since Event Updated doesn't record whether
+  an edit went for review
 
 ## Status codes (decided 2026-10-26)
 

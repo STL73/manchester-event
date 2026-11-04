@@ -377,11 +377,12 @@ export function getOrganiserActivity(users, events, now = new Date(), limit = 4)
 // Per category: people following it, the public events coming up in it and
 // followers per event (how big an audience each of those events can reach;
 // null when nothing is coming up). A fact, not a judgement: nobody on the
-// page creates events (decided 2026-10-20)
+// page creates events (decided 2026-10-20). `follows` is the server's
+// followers per category, [{ categoryId, count }] (Phase 10)
 export function getSupplyAndDemand(follows, events, categories, now = new Date()) {
   return categories
     .map((category) => {
-      const followers = follows.filter((follow) => follow.categoryId === category.id).length;
+      const followers = followersOf(follows, category.id);
       const upcoming = events.filter(
         (event) =>
           event.categoryId === category.id &&
@@ -400,13 +401,14 @@ export function getSupplyAndDemand(follows, events, categories, now = new Date()
     .sort((a, b) => b.followers - a.followers || b.upcoming - a.upcoming);
 }
 
+function followersOf(follows, categoryId) {
+  return follows.find((row) => row.categoryId === categoryId)?.count ?? 0;
+}
+
 // Followers of each of `categoryIds`, most followed first
 export function getCategoryReach(follows, categoryIds) {
   return categoryIds
-    .map((categoryId) => ({
-      key: categoryId,
-      count: follows.filter((follow) => follow.categoryId === categoryId).length,
-    }))
+    .map((categoryId) => ({ key: categoryId, count: followersOf(follows, categoryId) }))
     .sort((a, b) => b.count - a.count);
 }
 

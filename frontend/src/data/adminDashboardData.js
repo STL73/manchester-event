@@ -9,8 +9,6 @@ import {
   Users,
 } from "lucide-react";
 
-import { systemLogs } from "./systemLogsData";
-
 const daysLabel = (days) => (days === 1 ? "1 day" : `${days} days`);
 
 // Admin home Quick Insights: what needs the admin and how the site is doing.
@@ -81,6 +79,12 @@ export const viewAllLogsAction = {
   icon: Logs,
 };
 
-// Matches get_recent_admin_actions(): the newest 5 logs by admins, found
-// by the role copied into each row (system_logs.role in the schema)
-export const recentAdminActions = systemLogs.filter((log) => log.role === "admin").slice(0, 5);
+// get_recent_admin_actions(): the newest 5 logs by admins, found by the role
+// copied into each row (system_logs.role in the schema), but without their
+// sign-ins and sign-outs, which pushed every decision off the card (Slav,
+// 2026-11-04, Phase 10)
+export const recentAdminActionsPath = "/logs?view=admin-actions&limit=5";
+export const recentAdminActionsText = {
+  empty: "No recent admin actions.",
+  loadError: "Recent admin actions couldn't be loaded just now.",
+};

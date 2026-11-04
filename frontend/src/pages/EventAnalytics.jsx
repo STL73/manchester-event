@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Heart } from "lucide-react";
+import Button from "../components/UI/Button";
 import DashboardCard from "../components/UI/DashboardCard";
 import FilterPills from "../components/UI/FilterPills";
 import ChartCard from "../components/charts/ChartCard";
@@ -28,13 +29,13 @@ import {
 } from "../lib/analytics";
 import { bySoonest, isUpcoming } from "../lib/eventDates";
 import {
+  analyticsLoadText,
   chartText,
   eventStatusOrder,
   savesTrend,
   statusTones,
   weekGridText,
 } from "../data/analyticsData";
-import { allFollows, allSaves } from "../data/analyticsActivityData";
 import {
   defaultEventRange,
   eventAnalyticsCards,
@@ -49,6 +50,9 @@ import { eventCategories, eventState } from "../data/eventsData";
 import { eventStatuses } from "../data/manageEventsData";
 import { organiserStatusLabels } from "../data/organiserEventsData";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
+import PageLoading from "../components/UI/PageLoading";
+import StatusMessage from "../components/UI/StatusMessage";
+import { useApi } from "../lib/useApi";
 
 // Organisers see "approved" as "Live", as on My Events and Event details
 const statusLabels = Object.fromEntries(
@@ -68,10 +72,10 @@ const shortDate = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "sho
 const time = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit" });
 const monthName = new Intl.DateTimeFormat("en-GB", { month: "long" });
 
-// Organiser analytics (event_stats.php), counted live from the shared
-// organiser events list and App's favourites and interests, so it updates
-// when events are created or deleted, or a heart is clicked
-export default function EventAnalytics({ organiserEvents, favouriteIds, interestIds }) {
+// Organiser analytics (event_stats.php), counted in the browser from the
+// organiser's events (App's, from the API) and the saves and followers the
+// server sends as the page opens (Phase 10)
+export default function EventAnalytics({ organiserEvents }) {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get("tab");
   const tab = eventAnalyticsTabs.some((option) => option.value === tabParam)
@@ -83,26 +87,39 @@ export default function EventAnalytics({ organiserEvents, favouriteIds, interest
   const charts = eventAnalyticsCharts;
   const SectionIcon = eventAnalyticsSection.icon;
   const now = new Date();
+  // Saves on these events and their categories' followers (Phase 10); the
+  // events themselves are App's, null until they arrive
+  const { payload, error, retry } = useApi("/analytics/organiser");
 
-  const ownIds = new Set(organiserEvents.map((event) => event.eventId));
+  if (error) {
+    return (
+      <div className="dashboard-page">
+        <StatusMessage variant="error">
+          <p>{analyticsLoadText.error}</p>
+          <Button type="button" variant="secondary" size="sm" onClick={retry} className="self-start">
+            {analyticsLoadText.retry}
+          </Button>
+        </StatusMessage>
+      </div>
+    );
+  }
+  if (!payload || !organiserEvents) return <PageLoading />;
+
   const eventById = new Map(organiserEvents.map((event) => [event.eventId, event]));
-  const saves = allSaves(favouriteIds).filter((save) => ownIds.has(save.eventId));
+  const { saves, follows, audience } = payload.data;
   const savesPerEvent = countBy(saves, (save) => save.eventId);
   const savesOf = (eventId) => savesPerEvent.find((row) => row.key === eventId)?.count ?? 0;
   const savesSummary = getSavesSummary(saves, now);
   const record = getApprovalRecord(organiserEvents, now);
 
   // Reach is everyone who could hear about a new event: followers of any
-  // category the organiser posts in, each person counted once
+  // category the organiser posts in, each person counted once (the server's
+  // `audience`, since the follows come without who)
   const categoryIds = [...new Set(organiserEvents.map((event) => event.categoryId))];
-  const follows = allFollows(interestIds).filter((follow) =>
-    categoryIds.includes(follow.categoryId),
-  );
   const reachRows = getCategoryReach(follows, categoryIds).map((row) => ({
     ...row,
     label: categoryNames.get(row.key) ?? row.key,
   }));
-  const audience = new Set(follows.map((follow) => follow.userId)).size;
 
   const live = organiserEvents
     .filter((event) => event.status === "approved" && isUpcoming(event, now))

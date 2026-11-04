@@ -16,7 +16,11 @@
   Arcjet is off and `NODE_ENV` is `test`
 - Each phase also breaks its rules one at a time on purpose (a scratchpad script edits one line,
   runs the tests, restores the file and checks it matches) to show a test catches each; Phase 5
-  caught 29 of 29, Phase 6 22 of 22, Phase 7 39 of 39, Phase 8 27 of 27, Phase 9 29 of 29. Retry a write Windows refuses, and resume from there
+  caught 29 of 29, Phase 6 22 of 22, Phase 7 39 of 39, Phase 8 27 of 27, Phase 9 29 of 29,
+  Phase 10 27 of 27. Retry a write Windows refuses, and resume from there
+- Rows other test files write at the same moment (sign-ins, logs) can't be counted exactly.
+  Give the rows a test makes a marker of their own and search for it: Phase 10's log rows
+  carry a token that the test accounts' own sign-ins don't, so the pill counts are exact
 - Two guards for one rule hide each other: breaking either alone changes nothing, so the pass
   reads MISSED twice. Phase 9's reply had a check before its `UPDATE … WHERE replied_at IS
   NULL`; the check went, leaving the one guard that holds under a race, and a test catches it
