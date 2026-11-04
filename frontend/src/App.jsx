@@ -19,13 +19,7 @@ import { toEvent } from "./lib/publicEvents";
 import { toOrganiserEvent } from "./lib/organiserEvents";
 import { toManagedEvent } from "./lib/managedEvents";
 import { toContactMessage } from "./lib/contactMessages";
-import { mockUsers } from "./data/manageUsersData";
-import { currentOrganiser } from "./data/organiserEventsData";
-import { initialEvents } from "./data/eventsData";
 import { privacyPage, termsPage } from "./data/legalPagesData";
-import { initialFavouriteIds } from "./data/myFavouritesData";
-import { userCategoryIds } from "./data/preferencesData";
-import { initialContactMessages } from "./data/contactMessagesData";
 
 import PageLoading from "./components/UI/PageLoading";
 import FavouriteError from "./components/events/FavouriteError";
@@ -90,21 +84,6 @@ function App() {
   const [accountLoaded, setAccountLoaded] = useState(false);
   const isUser = Boolean(account);
   const userType = account?.role;
-  // The mock events list (see eventsData.js). Every page that shows events
-  // reads the API now (public pages Phase 3, favourites Phase 4, organisers
-  // Phase 5, admins Phase 7); it is left for the pages still on mock data,
-  // which name its events: Manage Users and System Logs (Phases 8 and 10),
-  // Admin Home's Recent Admin Actions, and the analytics pages (Phase 10)
-  const events = initialEvents;
-  // The mock accounts, likewise, for the pages that still name them: System
-  // Logs, Admin Home's Recent Admin Actions and Site Analytics (Phase 10).
-  // Manage Users (Phase 8) and Contact Messages (Phase 9) read the API
-  const users = mockUsers;
-  // Event Analytics still reads the mock organiser's events until Phase 10
-  // brings its figures from the API
-  const mockOrganiserEvents = events.filter(
-    (event) => event.organiserId === currentOrganiser.id,
-  );
   // An organiser's own events from the API (Phase 5), kept with the account
   // they belong to like the user's lists below. null until they arrive, so
   // Event details can wait rather than say "not found"
@@ -551,7 +530,7 @@ function App() {
             }
           >
             <Route index element={<Navigate to="home" replace />} />
-            <Route path="home" element={<DashboardHome selectedUser={selectedUser} account={account} users={managedUsers ?? []} logUsers={users} events={managedEvents ?? []} logEvents={events} organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} favouriteIds={favouriteIds} favouriteEvents={favouriteEvents} onToggleFavourite={toggleFavourite} interestIds={interestIds} contactMessages={contactMessages ?? []} notifications={notifications ?? []} onLoadNotifications={loadNotifications} />} />
+            <Route path="home" element={<DashboardHome selectedUser={selectedUser} account={account} users={managedUsers ?? []} events={managedEvents ?? []} organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} favouriteIds={favouriteIds} favouriteEvents={favouriteEvents} onToggleFavourite={toggleFavourite} interestIds={interestIds} contactMessages={contactMessages ?? []} notifications={notifications ?? []} onLoadNotifications={loadNotifications} />} />
             <Route element={<RoleOnly allow="user" userType={userType} />}>
               <Route path="explore-events" element={<ExploreEvents inDashboard selectedUser={selectedUser} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
               <Route path="my-favourites" element={<MyFavourites events={favouriteEvents} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
@@ -589,17 +568,15 @@ function App() {
               <Route path="my-events" element={<MyEvents organiserEvents={organiserEvents} onDeleteEvent={deleteOrganiserEvent} />} />
               <Route path="my-events/:eventId/edit" element={<ResetOnParam param="eventId"><CreateEvents mode="edit" events={organiserEventsLoaded ? organiserEvents : null} onUpdateEvent={updateOrganiserEvent} onCancelEvent={cancelOrganiserEvent} onDeleteEvent={deleteOrganiserEvent} /></ResetOnParam>} />
               <Route path="my-drafts" element={<MyDrafts organiserEvents={organiserEvents} onSubmitDraft={submitDraft} onDeleteEvent={deleteOrganiserEvent} />} />
-              {/* The analytics pages count everyone's saves and follows, so
-                  they keep the mock ones until Phase 10 */}
-              <Route path="event-analytics" element={<EventAnalytics organiserEvents={mockOrganiserEvents} favouriteIds={initialFavouriteIds} interestIds={userCategoryIds} />} />
+              <Route path="event-analytics" element={<EventAnalytics organiserEvents={organiserEventsLoaded ? organiserEvents : null} />} />
             </Route>
             <Route element={<RoleOnly allow="admin" userType={userType} />}>
               <Route path="manage-users" element={<ManageUsers users={managedUsers} currentUserId={adminUserId} onUpdateUser={updateUserStatus} onDeleteUser={deleteUser} />} />
               <Route path="manage-users/:userId/edit" element={<OpenInPanel param="userId" to="/dashboard/manage-users" />} />
               <Route path="manage-events" element={<ManageEvents events={managedEvents} currentUserId={adminUserId} onDecide={decideEvent} />} />
               <Route path="manage-events/:eventId/edit" element={<OpenInPanel param="eventId" to="/dashboard/manage-events" />} />
-              <Route path="site-analytics" element={<SiteAnalytics users={users} events={events} contactMessages={initialContactMessages} favouriteIds={initialFavouriteIds} interestIds={userCategoryIds} />} />
-              <Route path="system-logs" element={<SystemLogs events={events} users={users} />} />
+              <Route path="site-analytics" element={<SiteAnalytics users={managedUsers} events={managedEvents} contactMessages={contactMessages} />} />
+              <Route path="system-logs" element={<SystemLogs />} />
               <Route path="contact-messages" element={<ContactMessages contactMessages={contactMessages} users={managedUsers ?? []} currentUserId={adminUserId} onSetRead={setContactMessageRead} onReply={replyToContactMessage} />} />
             </Route>
             <Route path="*" element={<NotFound inDashboard />} />

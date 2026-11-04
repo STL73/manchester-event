@@ -91,7 +91,8 @@ export const eventAnalyticsCharts = {
       allTime: "All time",
       events: (count) => `across ${count} ${count === 1 ? "event" : "events"}`,
       busiest: "Busiest day",
-      busiestShare: (share) => `1 in ${Math.round(1 / share)} saves`,
+      // "1 in 1 saves" read oddly when every save fell on the one day
+      busiestShare: (share) => (share === 1 ? "all saves" : `1 in ${Math.round(1 / share)} saves`),
       none: "None yet",
     },
     callout: (count, month) => `${count} in ${month}`,

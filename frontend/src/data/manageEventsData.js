@@ -119,7 +119,3 @@ export const manageEventsDecisions = {
   reject: "Rejected. The organiser can see your reason.",
   takeDown: "Cancelled. The organiser and everyone who saved it are told.",
 };
-
-// Mock of the logged-in admin, for the pages still on mock data (Manage Users
-// and Contact Messages, Phases 8 and 9)
-export const currentAdmin = { id: 1, name: "adminName" };

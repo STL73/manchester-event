@@ -4,8 +4,8 @@ The full schema is applied to Neon and seeded. Auth and the account's own `/user
 (Phases 1 and 2), and so are the public event reads and categories (Phase 3), favourites and
 category follows (Phase 4), organisers' event writes with OpenStreetMap venues (Phase 5),
 photos on Cloudinary (Phase 6), moderation and notifications (Phase 7), managing users
-(Phase 8) and contact messages (Phase 9); no placeholder stubs are left in the users and
-events routers.
+(Phase 8), contact messages (Phase 9) and System Logs and the analytics rows (Phase 10);
+no placeholder stubs are left in the users and events routers.
 
 ## Stack constraints
 
@@ -26,20 +26,21 @@ backend/
 │   ├── config/
 │   │   ├── env.js          re-exports env vars (PORT, NODE_ENV, DB_URL, ARCJET_KEY, EMAIL_*, APP_URL, CLOUDINARY_*)
 │   │   └── arcjet.js       the one Arcjet client
-│   ├── constants/          fixed names (logActions.js: system_logs actions;
+│   ├── constants/          fixed names (logActions.js: system_logs actions and System Logs' views;
 │   │                       notificationTypes.js: notifications.type; areas.js: area
 │   │                       ids, areaFor() boxes, Greater Manchester's bounds)
 │   ├── lib/                AppError, tokens, sessions, authTokens, email + authEmails,
-│   │                       systemLogs (logAction), users (publicUser),
+│   │                       systemLogs (logAction, listLogs), users (publicUser),
 │   │                       publicEvents (every public read), londonTime (date windows),
 │   │                       organiserEvents (own events, snapshot, venue rows), osm (Photon, Nominatim),
 │   │                       images (Cloudinary), uploads (withUpload),
 │   │                       managedEvents (the admin's list), notifications (notify*, inbox),
 │   │                       accounts (Manage Users' list, deleteAccount),
-│   │                       contactEmails (the admin's reply)
+│   │                       contactEmails (the admin's reply),
+│   │                       analytics (the analytics pages' saves, followers, failed sign-ins)
 │   ├── middleware/         errorHandler (+ notFound), validate, security,
 │   │                       auth (requireAuth, optionalAuth, requireRole, requireActive), upload (multer)
-│   ├── validation/         Zod schemas per resource (auth.js, users.js, events.js, contact.js)
+│   ├── validation/         Zod schemas per resource (auth.js, users.js, events.js, contact.js, logs.js)
 │   ├── db/
 │   │   ├── index.js        exports `db` (Drizzle client)
 │   │   ├── seed.js         npm run db:seed

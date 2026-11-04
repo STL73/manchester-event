@@ -36,14 +36,13 @@ functions record behaviour being matched on purpose: keep that parity unless tol
   `events/FavouriteError` floating over the page; `favouriteEvents` (each as the public sees
   it) feed My Favourites, Home's cards and the greeting. Preferences awaits the save and shows
   a refusal. Event details has no Save for an event the lists don't show (`listed`), unless it
-  is already saved. The analytics pages' saves and follows stay mock until Phase 10. Organiser
+  is already saved. Organiser
   events (Phase 5): `App.jsx` loads `/users/me/events` when an organiser logs
   in, kept with that account's id (`organiserEvents`; `null` to pages that must wait), mapped by
   `lib/organiserEvents.js` (`toOrganiserEvent()`: the organiser's latest version, with the
   server's `hasBeenPublic` and `editPending`; `toLondonInput()` for datetime-local inputs). Its
   five handlers await the API and throw the `ApiError`; the list changes only when the server
-  agrees, and each page shows the refusal in red. Event Analytics and Organiser Home's "Saved by
-  users" card still read mock data until Phase 10. Photos (Phase 6): a picked `File` goes with
+  agrees, and each page shows the refusal in red. Photos (Phase 6): a picked `File` goes with
   its save, `formWithFile(field, file, fields)` in `lib/api.js` making the multipart body and
   `api()` sending `FormData` as it is; `createOrganiserEvent` / `updateOrganiserEvent` take it
   as a last argument, `saveProfile` sends the picture to `/users/me/avatar`. Moderation and
@@ -64,8 +63,15 @@ functions record behaviour being matched on purpose: keep that parity unless tol
   `setContactMessageRead()` changes at once and reloads if refused, `replyToContactMessage()`
   awaits (the server emails the reply) and swaps in its row. The Contact form awaits
   `sendContactMessage()`, signed in sending only the message, and has a hidden `website`
-  field for bots. System Logs, Admin Home's Recent Admin Actions and Site Analytics still
-  read `initialEvents`, `mockUsers` and `initialContactMessages` until Phase 10
+  field for bots. System Logs and analytics (Phase 10) read their own rows as they open with
+  `useApi`, not through `App.jsx`, since no other page shares them: System Logs sends its
+  view, search and page to `/logs` and shows the server's page and pill counts; Admin Home's
+  Recent Admin Actions is `/logs?view=admin-actions&limit=5` (no sign-ins); `logLookup(log)` reads each row's
+  `eventName`, `actorName` and `targetName`. Site Analytics reads `/analytics/site` with
+  App's `managedUsers`, `managedEvents` and `contactMessages`; Event Analytics and Organiser
+  Home's "Saved by users" card read `/analytics/organiser` with `organiserEvents`. The
+  figures are still `lib/analytics.js`'s, its follower helpers taking `{ categoryId, count }`
+  rows. No page reads mock data
 - **Event photos:** the seed's live in `public/images/events/` (2026-10-27) and are referenced
   by path (`/images/events/<file>`); organisers' own are Cloudinary addresses (Phase 6). Both
   are what the database's `image_url` stores; NULL shows `defaultEventImage`. There is no
@@ -90,7 +96,7 @@ frontend/src/
 │   ├── charts/        Recharts wrappers
 │   ├── dashboard/     greeting and weather bar
 │   └── home/          public landing sections
-├── data/              <name>Data.js mock data + helpers, one per page/feature
+├── data/              <name>Data.js page copy, config + helpers, one per page/feature
 ├── lib/               pure helpers (analytics.js: chart aggregation)
 └── images/            site photos (event photos are in public/images/events)
 ```
@@ -183,10 +189,9 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
 
 ## Required patterns
 
-- **One events list.** Wired pages read the API (`organiserEvents`, `managedEvents`, the
-  public reads). `initialEvents` in `data/eventsData.js` is constant mock data for the pages not
-  yet wired (Phase 7 took it out of state). Never add a second mock event array in another data
-  file
+- **One events list.** Every page reads the API (`organiserEvents`, `managedEvents`, the
+  public reads); the mock events, accounts, messages, saves and follows were removed in
+  Phase 10 (2026-11-04). Never add a mock event array back
 - **State that crosses pages lives in `App.jsx`** and goes down as props (users, favourites,
   contact messages). There is no context or store yet, so don't add one without discussing it
 - **Page copy and config live in `data/`**, not inline in the page: titles, nav, form fields,
@@ -301,7 +306,9 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   schema's jsonb; `role` is the copied column) into a sentence with links to the event or
   account it names; `components/dashboard/LogEntry` draws it, and Admin Home's Recent Admin
   Actions uses the same entries. Pills: Events, Accounts, Sign-ins, Failed sign-ins (red, the
-  `danger` tone on `FilterPills`), Admins only
+  `danger` tone on `FilterPills`), Admins only. The view, search and page are the server's
+  (Phase 10), so the pill counts follow the search; a new describer `kind` needs the same
+  action added to `backend/src/constants/logActions.js`
 - **Event Analytics / Site Analytics** (decided 2026-10-20, layout B, from a preview Slav chose
   panel by panel): four stat cards (the one exception to "stat cards only on Home"), then
   `UI/FilterPills` as section tabs (`?tab=`, the first one keeps a clean address), one section
@@ -309,8 +316,8 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   Audience, Approval, What and where. Admin: Users, Events, Saves, Review Time (not Admin Home's
   `siteTotalsCards`); tabs Growth, Moderation, Engagement, Safety and support. Every figure is one
   function in `lib/analytics.js`, copy in `eventAnalyticsData.js` / `siteAnalyticsData.js`, shared
-  tones and copy in `analyticsData.js`; saves, follows and sign-in rows come from
-  `analyticsActivityData.js` until the API exists. Every panel is a `ChartCard` with its data
+  tones and copy in `analyticsData.js`; saves, followers per category and failed sign-ins come
+  from `/analytics/site` and `/analytics/organiser` (Phase 10). Every panel is a `ChartCard` with its data
   table (`table={false}` only for lists and facts). Charts: Recharts for lines and columns
   (`TrendChart`, `TimelineChart`, `DecisionChart`, `CountBarChart`), CSS for the rest
   (`StatusDonut`, `ShareBar`, `ReachHoneycomb`, `WeekTimeGrid`, `FunnelSteps`,
@@ -410,7 +417,7 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   8px corners). Search and filter bars are the exception the other way: their fields are pills
   too, on Home, Explore Events and My Events, since they read as one control rather than a form.
   `type` defaults to `"button"`, so pass `type="submit"` on form buttons
-- `src/data/eventsData.js`: single source of truth for events (see above)
+- `src/data/eventsData.js`: the categories, statuses and event helpers every page shares
 
 ## Commands
 

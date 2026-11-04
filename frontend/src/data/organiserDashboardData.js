@@ -43,5 +43,7 @@ export const organiserInsights = {
     icon: Heart,
     mostSaved: "Most saved:",
     none: "Not saved by anyone yet",
+    loading: "Counting saves…",
+    loadError: "Saves couldn't be loaded just now",
   },
 };

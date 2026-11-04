@@ -1,6 +1,5 @@
 // Events from the API (GET /events, /events/:id) in the shape the pages and
-// EventCard already read, so they work the same with the mock events the
-// organiser and admin pages still use until Phases 5 and 7
+// EventCard read, the same shape as an organiser's and an admin's events
 
 export const defaultEventImage = "/images/events/placeholder.jpg";
 

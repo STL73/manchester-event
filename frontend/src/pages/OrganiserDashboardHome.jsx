@@ -5,7 +5,6 @@ import DashboardCard from "../components/UI/DashboardCard";
 import EventCard from "../components/events/EventCard";
 import StatusMessage from "../components/UI/StatusMessage";
 import { eventDetailsPath, eventState } from "../data/eventsData";
-import { favouriteCounts } from "../data/myFavouritesData";
 import { organiserInsights } from "../data/organiserDashboardData";
 import {
   editEventPath,
@@ -16,6 +15,8 @@ import {
 } from "../data/organiserEventsData";
 import { bySoonest, isUpcoming } from "../lib/eventDates";
 import EmptyState from "../components/UI/EmptyState";
+import { countBy } from "../lib/analytics";
+import { useApi } from "../lib/useApi";
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -34,8 +35,10 @@ function oldest(events, getDate) {
   return [...events].sort((a, b) => getDate(a).localeCompare(getDate(b)))[0];
 }
 
-// The five Quick Insights cards, from the organiser's own events
-function getOrganiserInsights(events) {
+// The five Quick Insights cards, from the organiser's own events and the
+// saves on them (GET /analytics/organiser, Phase 10; null until it answers,
+// and `savesFailed` if it couldn't)
+function getOrganiserInsights(events, saveRows, savesFailed) {
   const now = new Date();
   const text = organiserInsights;
   const byStatus = (status) => events.filter((event) => event.status === status);
@@ -53,7 +56,9 @@ function getOrganiserInsights(events) {
   const drafts = byStatus("draft");
   const oldestDraft = oldest(drafts, (event) => event.createdAt);
 
-  const saves = live.map((event) => ({ event, count: favouriteCounts[event.eventId] ?? 0 }));
+  const perEvent = countBy(saveRows ?? [], (save) => save.eventId);
+  const savesOf = (eventId) => perEvent.find((row) => row.key === eventId)?.count ?? 0;
+  const saves = live.map((event) => ({ event, count: savesOf(event.eventId) }));
   const totalSaves = saves.reduce((total, item) => total + item.count, 0);
   const mostSaved = [...saves].sort((a, b) => b.count - a.count)[0];
 
@@ -90,14 +95,14 @@ function getOrganiserInsights(events) {
       },
       detail: text.drafts.none,
     },
-    {
-      ...text.saved,
-      count: totalSaves,
-      detail:
-        totalSaves > 0
-          ? `${text.saved.mostSaved} ${mostSaved.event.name}`
-          : text.saved.none,
-    },
+    // No figure until the server has answered, rather than a 0 that isn't true
+    saveRows
+      ? {
+          ...text.saved,
+          count: totalSaves,
+          detail: totalSaves > 0 ? `${text.saved.mostSaved} ${mostSaved.event.name}` : text.saved.none,
+        }
+      : { ...text.saved, detail: savesFailed ? text.saved.loadError : text.saved.loading },
   ];
 }
 
@@ -111,7 +116,8 @@ export default function OrganiserDashboardHome({ organiserEvents: events, onDele
 
   // Matches get_recent_events()
   const recentEvents = [...events].sort(newestFirst).slice(0, 3);
-  const insights = getOrganiserInsights(events);
+  const { payload: analytics, error: analyticsError } = useApi("/analytics/organiser");
+  const insights = getOrganiserInsights(events, analytics?.data.saves ?? null, Boolean(analyticsError));
   const now = new Date();
 
   // The card has already asked (see EventCard). The server may refuse: an

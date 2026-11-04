@@ -167,17 +167,12 @@ export function describeLog(log, lookup) {
   };
 }
 
-// Builds the lookups describeLog() needs from the shared state
-export function logLookup(events, users) {
+// The lookups describeLog() needs, from one row of GET /logs (Phase 10): the
+// server sends the event's and accounts' names as they are now, null for one
+// since deleted, so the sentence links only to what still exists
+export function logLookup(log) {
   return {
-    eventName: (eventId) => events.find((event) => event.eventId === eventId)?.name ?? null,
-    userName: (userId) => users.find((user) => user.userId === userId)?.username ?? null,
+    eventName: () => log.eventName,
+    userName: (userId) => (userId === log.userId ? log.actorName : log.targetName),
   };
-}
-
-export function matchesLogView(log, description, view) {
-  if (view === "all") return true;
-  if (view === "admin") return log.role === "admin";
-  if (view === "signins") return description.kind === "signins" || description.kind === "failed";
-  return description.kind === view;
 }

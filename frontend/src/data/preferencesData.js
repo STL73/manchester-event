@@ -91,6 +91,3 @@ export function categoryIcon(categoryId) {
 export const preferenceCategories = [...eventCategories].sort((a, b) =>
   a.name.localeCompare(b.name),
 );
-
-// Mock of the user's rows in the notification_preferences table
-export const userCategoryIds = ["music", "community-culture"];

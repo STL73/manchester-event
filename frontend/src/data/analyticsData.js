@@ -126,3 +126,9 @@ export const reachText = {
   keyFewer: "Fewer followers",
   keyMore: "More",
 };
+
+// When the analytics rows (GET /analytics/site or /organiser) can't be read
+export const analyticsLoadText = {
+  error: "The figures couldn't be loaded. Check your connection and try again.",
+  retry: "Try again",
+};

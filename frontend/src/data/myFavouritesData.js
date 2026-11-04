@@ -31,25 +31,6 @@ export const favouriteError = {
   shownFor: 8000,
 };
 
-// Mock of the user's rows in the favourites table (held in App state).
-// 8 has finished and 5 was cancelled, so the second section has something
-export const initialFavouriteIds = [1, 3, 4, 8, 5];
-
-// Mock of COUNT(*) per event_id across everyone's favourites, which
-// organisers see for their own events. Unlisted events have none
-export const favouriteCounts = {
-  1: 24,
-  2: 9,
-  3: 12,
-  4: 15,
-  18: 6,
-  37: 4,
-  43: 17,
-  44: 3,
-  51: 7,
-  52: 5,
-};
-
 // Matches get_user_favourites(): approved events only, newest start date first.
 // Home's recent favourites use it; My Favourites splits the list below
 export function getFavouriteEvents(events, favouriteIds) {
