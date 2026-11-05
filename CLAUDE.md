@@ -12,7 +12,8 @@ behaviour. Comments here that cite `*.php` files or PHP functions mark parity th
 The two halves are **connected for every page** since Phase 10 (2026-11-04): auth, public
 events, the user's favourites and interests, organisers' own events, moderation,
 notifications, managing users, contact messages, System Logs and the analytics pages.
-Scheduled jobs (Phase 11) and deployment (Phase 12) are still to come:
+Scheduled jobs (reminders, notification emails, clean-ups) run inside the API since Phase 11
+(2026-11-05). Deployment (Phase 12) is still to come:
 
 - `frontend/` is a near-complete React port. Login, sign-up, logout, email verification and the
   signed-in account are real (Phase 1), and so are forgot and reset password and Settings' name,
@@ -31,8 +32,9 @@ Scheduled jobs (Phase 11) and deployment (Phase 12) are still to come:
   OpenStreetMap venues (Phase 5, 2026-11-02) and photos on Cloudinary (Phase 6, 2026-11-03)
   and moderation and notifications (Phase 7, 2026-11-03) and managing users and contact
   messages (Phases 8 and 9, 2026-11-03) and System Logs and the analytics rows (Phase 10,
-  2026-11-04); no placeholder routes are left. The full schema in `src/db/schema/` is
-  applied to Neon and seeded, demo events included
+  2026-11-04); no placeholder routes are left. Scheduled jobs (Phase 11, 2026-11-05):
+  event reminders, the notification email outbox and a nightly clean-up, on node-cron. The
+  full schema in `src/db/schema/` is applied to Neon and seeded, demo events included
 
 Calls go through `frontend/src/lib/api.js` and a Vite proxy for `/api`. Pages are wired phase by
 phase, so don't assume an endpoint exists because a page shows the data.
@@ -128,6 +130,7 @@ npx drizzle-kit generate   # schema -> SQL in drizzle/
 npx drizzle-kit migrate    # apply to DB_URL
 npm run db:seed            # 19 categories + demo admin, user and organiser (SEED_* in .env), demo events
 npm run db:seed -- --reset-events   # replace the demo events with ones dated from today
+npm run jobs               # every scheduled job once, now (they also run on a timer in npm run dev)
 npm test                   # Vitest, against the Neon test branch (TEST_DB_URL)
 ```
 
