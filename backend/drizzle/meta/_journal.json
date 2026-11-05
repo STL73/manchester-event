@@ -29,6 +29,13 @@
       "when": 1793655015980,
       "tag": "0003_glossy_sleeper",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793899295748,
+      "tag": "0004_complete_psylocke",
+      "breakpoints": true
     }
   ]
 }

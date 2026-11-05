@@ -2,13 +2,10 @@ import { APP_URL } from '../config/env.js';
 import { LOG } from '../constants/logActions.js';
 import { createAuthToken } from './authTokens.js';
 import { sendEmail } from './email.js';
+import { escapeHtml } from './html.js';
 import { logAction } from './systemLogs.js';
 
 // The display name is typed by the user, so it's escaped before going into HTML
-function escapeHtml(value) {
-    return value.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
-}
-
 function verificationEmail(username, link) {
     return {
         subject: 'Confirm your email for Manchester Event Portal',

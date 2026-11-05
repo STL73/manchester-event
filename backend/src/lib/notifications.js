@@ -5,8 +5,9 @@ import { categoryFollows, events, favourites, notifications, users } from '../db
 import { NOTIFY } from '../constants/notificationTypes.js';
 import { isListed } from './publicEvents.js';
 
-// The in-app inbox (Phase 7, decided 2026-10-05 and 2026-11-03): rows only, no
-// email yet (Phase 11 sends them in the background). Every notification is
+// The in-app inbox (Phase 7, decided 2026-10-05 and 2026-11-03). The rows are
+// also the outbox: Phase 11's email job (jobs.js) mails them later, so a
+// request never waits on Gmail. Every notification is
 // written after the change it reports has gone through, and a failure is logged
 // rather than thrown: the decision or the cancel has happened either way
 
@@ -137,6 +138,20 @@ export const messages = {
         subject: 'Account Reactivated',
         body: 'Your account is active again. You can make changes as before.',
     }),
+    // The saver's reminders (decided 2026-10-11), `when` already worded:
+    // "Thursday 12 November at 19:30" and "19:30"
+    reminderWeek: ({ eventId, name }, when) => ({
+        type: NOTIFY.EVENT_REMINDER_WEEK,
+        eventId,
+        subject: `A week to go: ${name}`,
+        body: `Your favourite event "${name}" is a week away, on ${when}.`,
+    }),
+    reminderDay: ({ eventId, name }, time) => ({
+        type: NOTIFY.EVENT_REMINDER_DAY,
+        eventId,
+        subject: `Tomorrow: ${name}`,
+        body: `Your favourite event "${name}" is tomorrow, starting at ${time}.`,
+    }),
     userRegistered: ({ username, email, role }) => ({
         type: NOTIFY.USER_REGISTERED,
         subject: 'New User Registered',
@@ -145,7 +160,7 @@ export const messages = {
 };
 
 // The inbox, newest first. 200 covers months of use; read ones older than 90
-// days will be cleared by the Phase 11 job
+// days are cleared by the nightly clean-up (jobs.js)
 // `listed` is the lists' rule for the row's event, so User Home's "New in your
 // interests" counts only events Explore still shows: a follower who didn't save
 // one is never told it was cancelled. False without an event
