@@ -12,7 +12,7 @@ const parts = new Intl.DateTimeFormat('en-GB', {
 });
 
 // [year, month, day, hour, minute] on a London clock at that moment
-function londonParts(date) {
+export function londonParts(date) {
     const found = parts.formatToParts(date);
     const part = (type) => Number(found.find((p) => p.type === type).value);
     return [part('year'), part('month'), part('day'), part('hour'), part('minute')];

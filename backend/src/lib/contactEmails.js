@@ -1,10 +1,8 @@
 import { sendEmail } from './email.js';
+import { escapeHtml } from './html.js';
 
 // Everything here was typed by the sender or the admin, so it's escaped
 // before going into HTML, and line breaks are kept
-function escapeHtml(value) {
-    return value.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
-}
 const paragraphs = (value) => escapeHtml(value).replace(/\n/g, '<br>');
 
 // The admin's reply to a Contact form message, with the message quoted under

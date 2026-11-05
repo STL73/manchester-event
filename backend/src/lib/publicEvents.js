@@ -20,7 +20,7 @@ function current(column, key, type) {
     return sql`case when ${showsSnapshot} then (${events.approvedSnapshot} ->> ${key})::${sql.raw(type)} else ${column} end`;
 }
 
-const pub = {
+export const pub = {
     name: current(events.eventName, 'eventName', 'text'),
     description: current(events.eventDescription, 'eventDescription', 'text'),
     startDatetime: current(events.startDatetime, 'startDatetime', 'timestamptz').mapWith(events.startDatetime),

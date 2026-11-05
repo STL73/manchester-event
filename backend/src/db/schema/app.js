@@ -124,7 +124,8 @@ export const categoryFollows = pgTable('category_follows', {
     index('category_follows_category_id_idx').on(table.categoryId),
 ]);
 
-// In-app inbox. Emails are sent directly; failures go to system_logs
+// In-app inbox, and the outbox for notification emails: the email job sends
+// rows with no email_sent_at (Phase 11); failures go to system_logs
 export const notifications = pgTable('notifications', {
     notificationId: integer('notification_id').primaryKey().generatedAlwaysAsIdentity(),
     userId: integer('user_id').notNull().references(() => users.userId, { onDelete: 'cascade' }),
@@ -135,13 +136,20 @@ export const notifications = pgTable('notifications', {
     // Plain text; escaping happens when it's rendered
     body: text('body').notNull(),
     readAt: timestamptz('read_at'),
+    // When the email job sent it; NULL = not (yet) emailed
+    emailSentAt: timestamptz('email_sent_at'),
     createdAt,
 }, (table) => [
     index('notifications_user_id_idx').on(table.userId),
-    // One reminder per user per event, however often the reminder job runs
+    // Each reminder once per user per event, however often the reminder job
+    // runs: a week before and the day before (decided 2026-10-11)
     uniqueIndex('notifications_event_reminder_unique')
-        .on(table.userId, table.eventId)
-        .where(sql`type = 'event_reminder'`),
+        .on(table.userId, table.eventId, table.type)
+        .where(sql`type IN ('event_reminder_week', 'event_reminder_day')`),
+    // The email job reads only the rows still to send
+    index('notifications_email_unsent_idx')
+        .on(table.createdAt)
+        .where(sql`email_sent_at IS NULL`),
 ]);
 
 export const systemLogs = pgTable('system_logs', {
