@@ -7,11 +7,12 @@ The shared middleware below is in place (Phase 0, 2026-10-26) and the auth route
 favourites and category follows (Phase 4), organisers' own events with venue search
 (Phase 5), photos on Cloudinary (Phase 6), moderation and notifications (Phase 7) and
 managing users (Phase 8) and contact messages (Phase 9). The users and events routers have
-no placeholder stubs left. System Logs and the analytics rows (Phase 10) came last.
+no placeholder stubs left. System Logs and the analytics rows (Phase 10) came last of the
+routes; Phase 11 added the scheduled jobs, which have no routes of their own.
 
 ## Routing
 
-All routes are versioned under `/api/v1`, one router per resource, mounted in `src/app.js` (`server.js` only calls `listen`):
+All routes are versioned under `/api/v1`, one router per resource, mounted in `src/app.js` (`server.js` only calls `listen` and starts the scheduled jobs):
 
 | Mount | File and endpoints |
 | --- | --- |
@@ -231,8 +232,8 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
   ended becomes cancelled, saves kept, the reason in `rejection_reason`. A reject would make it
   look never public, and deletable. On a cancelled event a reason therefore means an admin took it
   down, which is why the organiser's Cancel clears an old one
-- **Notifications are inbox rows only** (Slav, 2026-11-03): emails come with Phase 11's
-  background jobs; the password emails are unchanged. `lib/notifications.js` holds who gets each
+- **Notifications are inbox rows, emailed later by a job** (Slav, 2026-11-03; emails since
+  Phase 11, see Scheduled jobs); the password emails are unchanged. `lib/notifications.js` holds who gets each
   type and its wording (plain text); type names are in `constants/notificationTypes.js` and
   match the frontend's `notificationTypes`. Recipients are read, then all their rows go in one
   `INSERT` (Drizzle's `insert().select()` needs every column in the table's order, so it was
@@ -250,6 +251,8 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
 | `password_changed` | the account | Settings or a reset link |
 | `user_registered` | admins | sign-up |
 | `account_status` | the account | suspended (until when, and why), its terms changed, or reactivated (Phase 8) |
+| `event_reminder_week` | users who saved it | 09:00 London a week before its day (Phase 11) |
+| `event_reminder_day` | users who saved it | 09:00 London the day before (Phase 11) |
 
 - **Inbox:** `GET /users/me/notifications` (every role, also while suspended): the newest 200,
   each `{ notificationId, eventId, type, subject, body, readAt, createdAt, listed }`; `listed`
@@ -258,7 +261,7 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
   `PUT /users/me/notifications/read` takes `{ ids: [...] }` or `{ all: true }` (400 for both or
   neither), changes only the account's own unread rows, keeps the first read time, answers 204;
   allowed while suspended. No push: the frontend reloads it
-- Reminders and clearing read rows after 90 days come with the scheduled jobs (Phase 11)
+- Reminders, the emails and clearing read rows after 90 days are the scheduled jobs (Phase 11)
 
 ## Manage users (decided 2026-11-03)
 
@@ -300,8 +303,8 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
 - Admins: `GET /` lists every message newest first with `repliedByName`, all at once (the page
   filters in the browser). `PUT /:id/read` `{ read }` sets `read_at`, keeping the first time,
   or clears it (Mark as unread). Writes are `requireActive`
-- **The reply is emailed at once** (Slav, 2026-11-03; notification emails still wait for
-  Phase 11): `PUT /:id/reply` `{ reply }` (1 to 5000 characters) claims the message with an
+- **The reply is emailed at once** (Slav, 2026-11-03; notification emails go through the
+  Phase 11 outbox instead): `PUT /:id/reply` `{ reply }` (1 to 5000 characters) claims the message with an
   `UPDATE … WHERE replied_at IS NULL` (one reply per message; a second, or another admin's at
   the same moment, is 409), then sends `lib/contactEmails.js` `sendContactReply()` (the reply,
   then their message quoted). If the email fails the claim is undone, Email Failed is logged
@@ -338,6 +341,39 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
 - Approval rate and review time use each event's latest `organiser_updated_at` /
   `admin_updated_at`: only the last round counts, since Event Updated doesn't record whether
   an edit went for review
+
+## Scheduled jobs (decided 2026-11-05)
+
+- **node-cron inside the API** (Slav, 2026-11-05): `lib/scheduler.js` starts them from
+  `server.js` (not `app.js`, so tests never do), on London clocks with `noOverlap`: emails every
+  5 minutes, reminders every 15, the clean-up at 03:30. `runJob()` logs a failure to the server
+  log and never throws. `npm run jobs` (`src/runJobs.js`) runs all three once, reminders first,
+  for trying them by hand or a host's own scheduler in Phase 12
+- Each job in `lib/jobs.js` is a function of `now` that does whatever is due and not yet done,
+  so a server asleep at 09:00 catches up on its next run and running twice changes nothing
+- **Reminders** (decided 2026-10-11): `event_reminder_week` at 09:00 London a week before the
+  day the event starts, `event_reminder_day` at 09:00 the day before, to everyone who saved it.
+  Only events `isListed` shows, at the public version's time and name (`pub`, so a waiting
+  edit's new date doesn't count). Not when the save came after the reminder fell due. Each
+  only on its own day, since the wording counts from it: a week one missed until the next
+  day, or a day one until the event's day, isn't sent late. The unique index on
+  `(user_id, event_id, type)` for the two types keeps each to one row (`onConflictDoNothing`);
+  a date change after sending is covered by `event_update`
+- **Emails are an outbox** (Slav, 2026-11-05): `notifications.email_sent_at` (migration 0004).
+  The job sends rows of `EMAILED_TYPES` (every type but `user_registered` and
+  `password_changed`, which has its own email) created in the last 24 hours, oldest first, 100
+  a run, to **verified** addresses (Slav, 2026-11-05) whose owner has `email_notifications`
+  on; `account_status` (`ALWAYS_EMAILED_TYPES`) goes even with it off. Each row is claimed
+  with an `UPDATE … WHERE email_sent_at IS NULL` before its email, so two runs can't both send
+  it; a failed email gives the claim back to be tried next run, logs Email Failed
+  `{ email: 'notification', notificationId, error }` and ends the run (Gmail refusing one
+  usually means all; about 500 a day). After 24 hours a row stays in the inbox only
+- `lib/notificationEmails.js`: the row's subject and body, a link to `/dashboard/events/:id`
+  (each role's own view) or `/dashboard/notifications`, and the Settings link to turn them off,
+  left out of security emails. `lib/html.js` `escapeHtml()` is shared by every email file
+- **Clean-up** (decided 2026-10-05): read notifications after 90 days, contact messages after
+  12 months, and sessions and email links that have expired (`expires_at <= now`, the
+  complement of the checks that accept them), in one `db.batch()`
 
 ## Status codes (decided 2026-10-26)
 

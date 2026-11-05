@@ -58,20 +58,22 @@ export const passwordForm = {
 };
 
 // The schema has one email_notifications switch per account; what it
-// covers depends on the role (organisers and admins have no favourites)
+// covers depends on the role (organisers and admins have no favourites).
+// Each line names what the backend's email job sends that role
+// (EMAILED_TYPES, Phase 11): new sign-ups stay in the admin's inbox
 export const emailSettings = {
   byRole: {
     user: {
       title: "Event emails",
-      text: "Reminders before your favourite events, changes to them, and new events in your interests",
+      text: "Reminders a week and a day before your favourite events, changes or cancellations, and new events in your interests",
     },
     organiser: {
       title: "Emails about your events",
-      text: "When an event you submitted is approved or not approved, with the reason",
+      text: "When an event you submitted is approved, not approved or cancelled by an admin, with the reason",
     },
     admin: {
       title: "Admin emails",
-      text: "Events waiting for review, new sign-ups, and events cancelled by their organiser",
+      text: "Events waiting for review and events cancelled by their organiser",
     },
   },
   always: "Security emails, such as a password change or an account status change, are always sent.",

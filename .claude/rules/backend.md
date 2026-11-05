@@ -5,7 +5,9 @@ The full schema is applied to Neon and seeded. Auth and the account's own `/user
 category follows (Phase 4), organisers' event writes with OpenStreetMap venues (Phase 5),
 photos on Cloudinary (Phase 6), moderation and notifications (Phase 7), managing users
 (Phase 8), contact messages (Phase 9) and System Logs and the analytics rows (Phase 10);
-no placeholder stubs are left in the users and events routers.
+no placeholder stubs are left in the users and events routers. The scheduled jobs
+(reminders, the notification email outbox, the nightly clean-up) run on node-cron inside the
+API (Phase 11).
 
 ## Stack constraints
 
@@ -22,7 +24,8 @@ no placeholder stubs are left in the users and events routers.
 backend/
 ├── src/
 │   ├── app.js              the Express app: middleware, routers, error handling
-│   ├── server.js           imports app and calls listen
+│   ├── server.js           imports app, calls listen and starts the scheduled jobs
+│   ├── runJobs.js          npm run jobs: every job once, then exit
 │   ├── config/
 │   │   ├── env.js          re-exports env vars (PORT, NODE_ENV, DB_URL, ARCJET_KEY, EMAIL_*, APP_URL, CLOUDINARY_*)
 │   │   └── arcjet.js       the one Arcjet client
@@ -37,7 +40,9 @@ backend/
 │   │                       managedEvents (the admin's list), notifications (notify*, inbox),
 │   │                       accounts (Manage Users' list, deleteAccount),
 │   │                       contactEmails (the admin's reply),
-│   │                       analytics (the analytics pages' saves, followers, failed sign-ins)
+│   │                       analytics (the analytics pages' saves, followers, failed sign-ins),
+│   │                       jobs (reminders, email outbox, clean-up), scheduler (node-cron),
+│   │                       notificationEmails (a row as an email), html (escapeHtml)
 │   ├── middleware/         errorHandler (+ notFound), validate, security,
 │   │                       auth (requireAuth, optionalAuth, requireRole, requireActive), upload (multer)
 │   ├── validation/         Zod schemas per resource (auth.js, users.js, events.js, contact.js, logs.js)
@@ -105,4 +110,5 @@ Never edit a generated migration that has already been applied. Generate a new o
 
 ## Commands
 
-Run from `backend/`: `npm run dev` (nodemon), `npm start`, `npm test`, `npx eslint .`.
+Run from `backend/`: `npm run dev` (nodemon), `npm start`, `npm test`, `npx eslint .`,
+`npm run jobs` (every scheduled job once).
