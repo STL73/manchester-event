@@ -39,12 +39,9 @@ export function getFavouriteEvents(events, favouriteIds) {
     .sort((a, b) => b.startDatetime.localeCompare(a.startDatetime));
 }
 
-// Where a favourite stands. The mock still stores "past" on some events;
-// the database won't, so an approved event whose time has gone counts too.
-// Anything else (an event taken back to pending, say) isn't shown
-export function favouriteState(event, now) {
+// Where a favourite stands: upcoming, past or cancelled; anything else isn't shown
+function favouriteState(event, now) {
   if (event.status === "cancelled") return "cancelled";
-  if (event.status === "past") return "past";
   if (isPublicEvent(event)) return isUpcoming(event, now) ? "upcoming" : "past";
   return null;
 }

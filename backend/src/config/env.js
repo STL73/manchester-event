@@ -3,7 +3,6 @@ import 'dotenv/config';
 export const {
     PORT,
     NODE_ENV,
-    DB_URL,
     ARCJET_KEY,
     EMAIL_USER,
     EMAIL_APP_PASSWORD,

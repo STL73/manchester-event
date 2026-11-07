@@ -27,21 +27,6 @@
   --color-draft: oklch(86.5% 0.127 207.078); /* cyan-300 */
   --color-past: oklch(87.2% 0.01 258.338); /* gray-300 */
   --font-sans: "Poppins", system-ui, sans-serif;
-
-  /* --color-green-accent: #c2fec9;
-  --color-green-accent-highlight: #77fd87;
-  --color-green-accent-dark: #5c8a61;
-  --color-accent: #d4d8fe;
-  --color-accent-highlight: #aab3fd; */
-  /* --font-poppins: "Poppins", sans-serif;
-  --font-montserrat: "Montserrat", sans-serif;
-  --font-palanquin: "Palanquin", sans-serif;
-  --font-inter: "Inter", sans-serif;
-  --font-nunito: "Nunito", sans-serif;
-  --font-roboto: "Roboto", sans-serif;
-  --font-space-grotesk: "Space Grotesk", serif;
-  --font-lato: "Lato", sans-serif;
-  --font-open-sans: "Open Sans", sans-serif; */
 }
 
 /* The classes, by where they are used: base (utility, element defaults,

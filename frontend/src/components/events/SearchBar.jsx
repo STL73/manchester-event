@@ -1,25 +1,20 @@
-import { CalendarDays, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import Button from "../UI/Button";
 
+// The search form: keywords, plus category and location unless showFilters is false
 export default function SearchBar({
   filters,
   categories,
   locations,
   onChange,
   onSubmit,
-  children,
-  submitLabel = "Search",
-  submitIcon: SubmitIcon = Search,
-  // Explore Events picks its date with the date pills instead
-  showDate = true,
-  // The admin lists search by keywords alone (Manage Users)
+  // The admin lists search by keywords alone
   showFilters = true,
   placeholder = "Search events, keywords...",
-  className = "",
 }) {
   return (
     <form
-      className={`events-search ${className}`}
+      className={showFilters ? "events-search" : "events-search events-search-keywords-only"}
       role="search"
       aria-label="Search events"
       onSubmit={onSubmit}
@@ -34,31 +29,10 @@ export default function SearchBar({
         name="q"
         type="search"
         value={filters.q}
-        className="events-search-input events-search-keywords"
+        className="events-search-input"
         placeholder={placeholder}
         onChange={onChange}
       />
-
-      {showDate && (
-        <>
-          <label className="sr-only" htmlFor="event-date">
-            Date
-          </label>
-          {/* The browser's calendar button is made invisible but stays
-              clickable on top of a Lucide icon in the accent colour */}
-          <div className="relative min-w-0">
-            <input
-              id="event-date"
-              name="date"
-              type="date"
-              value={filters.date}
-              className="events-search-input"
-              onChange={onChange}
-            />
-            <CalendarDays className="date-field-icon" aria-hidden="true" />
-          </div>
-        </>
-      )}
 
       {showFilters && (
         <>
@@ -100,12 +74,9 @@ export default function SearchBar({
         </>
       )}
 
-      {/* Extra fields */}
-      {children}
-
       <Button type="submit" variant="primary" size="md">
-        <SubmitIcon aria-hidden="true" />
-        {submitLabel}
+        <Search aria-hidden="true" />
+        Search
       </Button>
     </form>
   );

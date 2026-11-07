@@ -6,7 +6,7 @@ import {
   PanelLeftOpen,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { mockWeather } from "../../data/weatherData";
+import { describeWeather, weatherPlace } from "../../data/weatherData";
 
 function formatDate(date) {
   return new Intl.DateTimeFormat("en-GB", {
@@ -24,8 +24,38 @@ function formatTime(date) {
   }).format(date);
 }
 
-// Phones open the sidebar as a drawer (a menu); wide screens switch between
-// the full sidebar and its icon rail
+// Manchester's weather now, reloaded every 15 minutes; null until the first reading arrives
+function useWeather() {
+  const [weather, setWeather] = useState(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    async function load() {
+      try {
+        const response = await fetch(weatherPlace.url, { signal: controller.signal });
+        if (!response.ok) throw new Error(`Weather: ${response.status}`);
+        const { current } = await response.json();
+        setWeather({
+          temperature: Math.round(current.temperature_2m),
+          ...describeWeather(current.weather_code, current.is_day === 1),
+        });
+      } catch {
+        // No weather is no harm: the bar keeps the last reading, or shows none
+      }
+    }
+    load();
+    const timer = window.setInterval(load, weatherPlace.refreshMs);
+    return () => {
+      controller.abort();
+      window.clearInterval(timer);
+    };
+  }, []);
+
+  return weather;
+}
+
+// The bar above every dashboard page: sidebar toggle, weather, date and time.
+// Phones open the sidebar as a drawer; wide screens switch to its icon rail
 export default function WeatherDateBar({
   isNarrow,
   isSidebarOpen,
@@ -33,7 +63,7 @@ export default function WeatherDateBar({
   toggleRef,
 }) {
   const [now, setNow] = useState(() => new Date());
-  const WeatherIcon = mockWeather.icon;
+  const weather = useWeather();
   let ToggleIcon = isSidebarOpen ? PanelLeftClose : PanelLeftOpen;
   let toggleLabel = isSidebarOpen ? "Collapse sidebar" : "Expand sidebar";
   if (isNarrow) {
@@ -65,15 +95,19 @@ export default function WeatherDateBar({
       <div className="dashboard-utility-items">
         {/* Each item: icon + one text block, so on narrow screens the text
             wraps inside its block and the icon stays beside it */}
-        <div className="dashboard-utility-item">
-          <WeatherIcon className="dashboard-utility-icon" aria-hidden="true" />
-          <span className="dashboard-utility-text">
-            <span>{mockWeather.location}</span>
-            <strong>{mockWeather.temperature}°C</strong>
-            <span>{mockWeather.condition}</span>
-          </span>
-        </div>
-        <div className="dashboard-utility-divider" aria-hidden="true" />
+        {weather && (
+          <>
+            <div className="dashboard-utility-item">
+              <weather.icon className="dashboard-utility-icon" aria-hidden="true" />
+              <span className="dashboard-utility-text">
+                <span>{weatherPlace.label}</span>
+                <strong>{weather.temperature}°C</strong>
+                <span>{weather.condition}</span>
+              </span>
+            </div>
+            <div className="dashboard-utility-divider" aria-hidden="true" />
+          </>
+        )}
         <div className="dashboard-utility-item">
           <CalendarDays className="dashboard-utility-icon" aria-hidden="true" />
           <span className="dashboard-utility-text">{formatDate(now)}</span>

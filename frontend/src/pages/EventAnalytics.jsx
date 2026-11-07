@@ -370,7 +370,7 @@ export default function EventAnalytics({ organiserEvents }) {
                 <ChartList items={mostSavedItems} />
               </ChartCard>
               <ChartCard id="saves-by-category" rows={savesCategoryRows} {...charts.savesByCategory}>
-                <CountBarChart rows={savesCategoryRows} valueLabel="saves" horizontal />
+                <CountBarChart rows={savesCategoryRows} valueLabel="saves" />
               </ChartCard>
             </>
           )}
@@ -426,10 +426,10 @@ export default function EventAnalytics({ organiserEvents }) {
                 </div>
               </ChartCard>
               <ChartCard id="events-by-category" rows={categoryRows} {...charts.byCategory}>
-                <CountBarChart rows={categoryRows} horizontal />
+                <CountBarChart rows={categoryRows} />
               </ChartCard>
               <ChartCard id="events-by-location" rows={locationRows} {...charts.byLocation}>
-                <CountBarChart rows={locationRows} horizontal />
+                <CountBarChart rows={locationRows} />
               </ChartCard>
             </>
           )}

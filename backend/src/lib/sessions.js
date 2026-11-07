@@ -1,4 +1,4 @@
-import { and, eq, gt, lt } from 'drizzle-orm';
+import { and, eq, gt } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { sessions, users } from '../db/schema/index.js';
 import { NODE_ENV } from '../config/env.js';
@@ -32,8 +32,6 @@ export function clearSessionCookie(res) {
 // A new session ID at every login, so an ID someone planted before login is worthless
 export async function startSession(res, userId) {
     const { token, hash } = newToken();
-    // The user's expired sessions are tidied up here rather than by a scheduled job
-    await db.delete(sessions).where(and(eq(sessions.userId, userId), lt(sessions.expiresAt, new Date())));
     await db.insert(sessions).values({ sessionId: hash, userId, expiresAt: new Date(Date.now() + SESSION_LENGTH) });
     setSessionCookie(res, token);
 }

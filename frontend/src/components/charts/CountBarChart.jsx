@@ -2,7 +2,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Cell,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -12,87 +11,41 @@ import ChartTooltip from "./ChartTooltip";
 import { chartColours, chartOpacity } from "../../data/analyticsData";
 import { themeColour } from "../../lib/themeColour";
 
-// Column chart for counts per category/status/location.
-// One colour by default; pass `tones` ({ key: theme token }) when colour means
-// something (e.g. status), otherwise every bar uses the accent.
-// `horizontal` lays the bars sideways, one row per name, for long lists with
-// long names (Events by Category); the height grows with the number of rows.
-export default function CountBarChart({
-  rows,
-  tones,
-  valueLabel = "events",
-  horizontal = false,
-}) {
+// Sideways bar chart of counts, one row per name; the height grows with the rows
+export default function CountBarChart({ rows, valueLabel = "events" }) {
   const axisTick = { fill: chartColours.axisText, fontSize: 12 };
-  const fill = (row) => themeColour(tones?.[row.key] ?? "accent");
-  const tooltip = (
-    <Tooltip
-      cursor={{ fill: chartColours.accent, fillOpacity: chartOpacity.barHover }}
-      content={<ChartTooltip valueLabel={valueLabel} getColour={fill} />}
-    />
-  );
-
-  if (horizontal) {
-    return (
-      <ResponsiveContainer width="100%" height={rows.length * 32 + 32}>
-        <BarChart
-          data={rows}
-          layout="vertical"
-          margin={{ top: 0, right: 16, bottom: 0, left: 8 }}
-        >
-          <CartesianGrid horizontal={false} stroke={chartColours.grid} />
-          <XAxis
-            type="number"
-            allowDecimals={false}
-            tick={axisTick}
-            tickLine={false}
-            axisLine={false}
-          />
-          <YAxis
-            type="category"
-            dataKey="label"
-            width={170}
-            tick={axisTick}
-            tickLine={false}
-            axisLine={{ stroke: chartColours.grid }}
-            interval={0}
-          />
-          {tooltip}
-          {/* Thin bars, 4px rounded end, square at the baseline */}
-          <Bar dataKey="count" maxBarSize={18} radius={[0, 4, 4, 0]}>
-            {rows.map((row) => (
-              <Cell key={row.key} fill={fill(row)} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
-    );
-  }
+  const accent = themeColour("accent");
 
   return (
-    <ResponsiveContainer width="100%" height={240}>
-      <BarChart data={rows} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
-        <CartesianGrid vertical={false} stroke={chartColours.grid} />
+    <ResponsiveContainer width="100%" height={rows.length * 32 + 32}>
+      <BarChart
+        data={rows}
+        layout="vertical"
+        margin={{ top: 0, right: 16, bottom: 0, left: 8 }}
+      >
+        <CartesianGrid horizontal={false} stroke={chartColours.grid} />
         <XAxis
-          dataKey="label"
-          tick={axisTick}
-          tickLine={false}
-          axisLine={{ stroke: chartColours.grid }}
-          interval={0}
-        />
-        <YAxis
+          type="number"
           allowDecimals={false}
           tick={axisTick}
           tickLine={false}
           axisLine={false}
         />
-        {tooltip}
-        {/* Thin bars (max 24px), 4px rounded top, square at the baseline */}
-        <Bar dataKey="count" maxBarSize={24} radius={[4, 4, 0, 0]}>
-          {rows.map((row) => (
-            <Cell key={row.key} fill={fill(row)} />
-          ))}
-        </Bar>
+        <YAxis
+          type="category"
+          dataKey="label"
+          width={170}
+          tick={axisTick}
+          tickLine={false}
+          axisLine={{ stroke: chartColours.grid }}
+          interval={0}
+        />
+        <Tooltip
+          cursor={{ fill: chartColours.accent, fillOpacity: chartOpacity.barHover }}
+          content={<ChartTooltip valueLabel={valueLabel} getColour={() => accent} />}
+        />
+        {/* Thin bars, 4px rounded end, square at the baseline */}
+        <Bar dataKey="count" fill={accent} maxBarSize={18} radius={[0, 4, 4, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

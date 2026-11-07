@@ -181,19 +181,15 @@ export function getSiteTotals(users, events) {
 }
 
 // ---------------------------------------------------------------------------
-// Analytics round (2026-10-20): the figures behind the new panels. Each takes
-// the lists and `now`, so the pages stay plain and the API can return the
-// same shapes later.
+// The figures behind the analytics panels. Each takes the lists and `now`.
 
 const HOUR = 3600000;
 const DAY = 24 * HOUR;
 
-// Events that have been public at some point: approved, ended or called off
-// (only a public event can be cancelled; one that never was is deleted)
-const WENT_PUBLIC = ["approved", "past", "cancelled"];
+// Events that have been public: approved or cancelled (only a public event can be cancelled)
+const WENT_PUBLIC = ["approved", "cancelled"];
 
-// When an event was last sent for review: the organiser's last change. The
-// backend will take it from the "Draft Submitted" log instead
+// When an event was last sent for review: the organiser's last change
 function submittedAt(event) {
   return new Date(event.orgUpdatedAt ?? event.createdAt);
 }
@@ -443,12 +439,12 @@ export function getBusiestSlot(grid) {
 export function getSupportSummary(messages, now = new Date()) {
   const replyTimes = messages
     .filter((message) => message.repliedAt)
-    .map((message) => new Date(message.repliedAt) - new Date(message.sentAt));
+    .map((message) => new Date(message.repliedAt) - new Date(message.createdAt));
   return {
     averageReply: average(replyTimes),
     unread: messages.filter((message) => !message.readAt).length,
     overdue: messages.filter(
-      (message) => !message.repliedAt && now - new Date(message.sentAt) > 3 * DAY,
+      (message) => !message.repliedAt && now - new Date(message.createdAt) > 3 * DAY,
     ).length,
     replySpeed: [
       { key: "day", count: replyTimes.filter((ms) => ms < DAY).length },

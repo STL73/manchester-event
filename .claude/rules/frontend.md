@@ -58,8 +58,7 @@ functions record behaviour being matched on purpose: keep that parity unless tol
   (`managedUsers`, `null` until loaded), which Manage Users and Admin Home's New users card
   read; `updateUserStatus()` and `deleteUser()` await the API and swap in or drop the server's
   row. Contact messages (Phase 9): the same effect loads `/contact-messages`
-  (`contactMessages`, `null` until loaded, mapped by `lib/contactMessages.js`, which calls
-  `createdAt` `sentAt`) for Contact Messages, Admin Home's unread card and the sidebar count;
+  (`contactMessages`, `null` until loaded, the API's rows as they are) for Contact Messages, Admin Home's unread card and the sidebar count;
   `setContactMessageRead()` changes at once and reloads if refused, `replyToContactMessage()`
   awaits (the server emails the reply) and swaps in its row. The Contact form awaits
   `sendContactMessage()`, signed in sending only the message, and has a hidden `website`

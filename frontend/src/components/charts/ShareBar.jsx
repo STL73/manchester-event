@@ -4,8 +4,7 @@ function percent(count, total) {
 }
 
 // One bar split into the shares of a whole, and a legend with each part's
-// count and percentage. `tones` maps a row's key to a tone (as on
-// CountBarChart); keys in `striped` are drawn as grey stripes, for something
+// count and percentage. `tones` maps a row's key to a tone; keys in `striped` are drawn as grey stripes, for something
 // switched off rather than another flat grey (decided 2026-10-20)
 export default function ShareBar({ title, rows, tones, striped = [] }) {
   const total = rows.reduce((sum, row) => sum + row.count, 0);

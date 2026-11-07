@@ -128,10 +128,9 @@ export default function SystemLogs() {
                 submitEvent.preventDefault();
                 setParams({ q: query.trim(), page: null });
               }}
-              showDate={false}
+             
               showFilters={false}
               placeholder={systemLogsPage.searchPlaceholder}
-              className="events-search-keywords-only"
             />
             <div className="events-when-row">
               <FilterPills

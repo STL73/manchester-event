@@ -131,12 +131,10 @@
     @apply text-base leading-7 text-muted;
   }
 
-  /* Keywords gets double width; the Search button is only as wide as it needs.
-     Pill fields, like Home's search. 40px corners = the fields' 24px radius
-     plus the 16px padding, so the bar curves evenly round them in one row,
-     two rows (My Events) or stacked on phones */
+  /* Keywords (double width) | Category | Location | Search. 40px corners =
+     the fields' 24px radius plus the 16px padding */
   .events-search {
-    @apply w-full max-w-7xl p-4 grid grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto] gap-3 rounded-[40px] bg-card;
+    @apply w-full max-w-7xl p-4 grid grid-cols-[minmax(0,2fr)_repeat(2,minmax(0,1fr))_auto] gap-3 rounded-[40px] bg-card;
   }
 
   .events-search-input {
@@ -145,25 +143,9 @@
     color-scheme: dark;
   }
 
-  /* Date field: the browser's calendar button stays clickable but invisible,
-     over a Lucide icon in the accent colour (same as the sidebar icons) */
-  .events-search-input[type="date"]::-webkit-calendar-picker-indicator {
-    opacity: 0;
-    cursor: pointer;
-  }
-
-  .date-field-icon {
-    @apply pointer-events-none absolute right-5 top-1/2 size-5 -translate-y-1/2 text-accent;
-  }
-
-  /* Explore Events: no date field (the date pills pick it), so Keywords (2)
-     | Category | Location | Search */
+  /* The admin lists: Keywords | Search */
   .events-search-keywords-only {
     @apply grid-cols-[minmax(0,1fr)_auto];
-  }
-
-  .events-search-no-date {
-    @apply grid-cols-[minmax(0,2fr)_repeat(2,minmax(0,1fr))_auto];
   }
 
   /* Date pills on the left, the layout switch on the right */
@@ -936,21 +918,9 @@
       @apply grid-cols-2;
     }
 
-    .events-search-keywords {
-      @apply col-span-2;
-    }
-
-    /* Without the date field: Keywords | Category, then Location | Search */
-    .events-search-no-date .events-search-keywords {
-      @apply col-span-1;
-    }
-
+    /* Keywords | Category, then Location | Search */
     .events-search-keywords-only {
       @apply grid-cols-[minmax(0,1fr)_auto];
-    }
-
-    .events-search-keywords-only .events-search-keywords {
-      @apply col-span-1;
     }
 
     .events-grid-three {
@@ -967,10 +937,6 @@
 
     .events-search {
       @apply grid-cols-1;
-    }
-
-    .events-search-keywords {
-      @apply col-span-1;
     }
 
     .events-grid-three,

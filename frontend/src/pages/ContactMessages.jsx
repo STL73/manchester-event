@@ -59,7 +59,7 @@ function Summary({ messages }) {
         text.allRead
       )}
       <span aria-hidden="true"> · </span>
-      {text.newest} {shortDateFormatter.format(new Date(messages[0].sentAt))}
+      {text.newest} {shortDateFormatter.format(new Date(messages[0].createdAt))}
       {replied > 0 && (
         <>
           <span aria-hidden="true"> · </span>
@@ -87,7 +87,7 @@ export default function ContactMessages({ contactMessages, users, currentUserId,
 
   // Matches get_all_contact_messages(): newest first
   const messages = useMemo(
-    () => [...(contactMessages ?? [])].sort((a, b) => b.sentAt.localeCompare(a.sentAt)),
+    () => [...(contactMessages ?? [])].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
     [contactMessages],
   );
 
@@ -222,10 +222,9 @@ export default function ContactMessages({ contactMessages, users, currentUserId,
                 submitEvent.preventDefault();
                 setParams({ q: query.trim(), page: null });
               }}
-              showDate={false}
+             
               showFilters={false}
               placeholder={contactMessagesPage.searchPlaceholder}
-              className="events-search-keywords-only"
             />
             <div className="events-when-row">
               <FilterPills
@@ -277,7 +276,7 @@ export default function ContactMessages({ contactMessages, users, currentUserId,
                     <span className="message-meta">
                       {message.repliedAt && <span className="badge tone-success">{contactMessagesPage.replied}</span>}
                       {!message.userId && <span className="badge tone-accent">{contactMessagesPage.guest}</span>}
-                      <time dateTime={message.sentAt}>{shortDateFormatter.format(new Date(message.sentAt))}</time>
+                      <time dateTime={message.createdAt}>{shortDateFormatter.format(new Date(message.createdAt))}</time>
                     </span>
                   </li>
                 ))}
@@ -327,7 +326,7 @@ export default function ContactMessages({ contactMessages, users, currentUserId,
                 </div>
               </div>
               <p className="admin-hint">
-                {messagePanel.sent} {fullDateFormatter.format(new Date(openMessage.sentAt))}
+                {messagePanel.sent} {fullDateFormatter.format(new Date(openMessage.createdAt))}
               </p>
               <p className="message-body">{openMessage.message}</p>
 

@@ -1,12 +1,9 @@
 import {
   CalendarCheck,
-  Calendars,
   ClipboardClock,
   Logs,
   MessageSquareText,
   UserRoundPlus,
-  UserRoundSearch,
-  Users,
 } from "lucide-react";
 
 const daysLabel = (days) => (days === 1 ? "1 day" : `${days} days`);
@@ -43,35 +40,6 @@ export const adminInsights = {
     weekend: (count) => `${count} this weekend`,
   },
 };
-
-// Site Analytics' total cards. No counts here: the page fills them in live
-// with getSiteTotals() (lib/analytics.js)
-export const siteTotalsCards = [
-  {
-    id: "events",
-    title: "Total Events",
-    icon: Calendars,
-  },
-  {
-    id: "pendingEvents",
-    title: "Events Waiting Approval",
-    icon: ClipboardClock,
-    tone: "warning",
-    action: { label: "Review", to: "/dashboard/manage-events" },
-  },
-  {
-    id: "users",
-    title: "Total Users",
-    icon: Users,
-  },
-  {
-    id: "unverifiedUsers",
-    title: "Unverified Accounts",
-    icon: UserRoundSearch,
-    // Nothing for the admin to do: only the user can verify their email
-    detail: "Can't submit events or get emails yet",
-  },
-];
 
 export const viewAllLogsAction = {
   label: "View All Logs",
