@@ -11,7 +11,6 @@ export function toManagedEvent(event) {
     ...toOrganiserEvent(event, event.organiser),
     adminId: event.adminId,
     adminName: event.adminName,
-    adminUpdatedAt: event.adminUpdatedAt,
     // A venue or category since removed reads as the current one
     approvedSnapshot:
       snapshot &&

@@ -37,6 +37,9 @@ export const eventFields = {
     updatedAt: events.updatedAt,
     // When it was last sent for review; Organiser Home counts the days waiting
     organiserUpdatedAt: events.organiserUpdatedAt,
+    // When an admin last decided it (not who); Event Analytics' review times
+    // and latest rejections read it
+    adminUpdatedAt: events.adminUpdatedAt,
 };
 
 function fromOrganiserEvents() {

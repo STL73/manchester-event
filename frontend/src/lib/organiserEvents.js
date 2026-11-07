@@ -35,6 +35,7 @@ export function toOrganiserEvent(event, organiser) {
     createdAt: event.createdAt,
     updatedAt: event.updatedAt,
     orgUpdatedAt: event.organiserUpdatedAt,
+    adminUpdatedAt: event.adminUpdatedAt,
     // Organisers check events rather than save them
     listed: false,
   };

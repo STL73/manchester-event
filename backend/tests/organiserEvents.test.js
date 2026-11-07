@@ -140,7 +140,13 @@ describe('who may use the organiser routes', () => {
     });
 
     it('lists only the organiser\'s own events, every status, and lets a suspended one read', async () => {
-        const mine = await insertEvent({ eventName: `${PREFIX}Mine`, status: 'rejected', rejectionReason: 'Too vague.' });
+        const decidedAt = new Date('2026-10-20T09:15:00Z');
+        const mine = await insertEvent({
+            eventName: `${PREFIX}Mine`,
+            status: 'rejected',
+            rejectionReason: 'Too vague.',
+            adminUpdatedAt: decidedAt,
+        });
         const theirs = await insertEvent({ eventName: `${PREFIX}Theirs`, organiserId: ids.other });
 
         const { status, body } = await agents.organiser.get('/api/v1/users/me/events');
@@ -149,6 +155,8 @@ describe('who may use the organiser routes', () => {
         expect(found).toMatchObject({
             status: 'rejected',
             rejectionReason: 'Too vague.',
+            // When it was decided: Event Analytics' review times and rejections read it
+            adminUpdatedAt: decidedAt.toISOString(),
             hasBeenPublic: false,
             editPending: false,
             category: { slug: `${PREFIX}music` },
