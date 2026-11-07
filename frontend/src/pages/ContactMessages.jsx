@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Check } from "lucide-react";
 import Button from "../components/UI/Button";
 import FieldError from "../components/UI/FieldError";
@@ -23,6 +23,7 @@ import {
 } from "../data/contactMessagesData";
 import { formatDateTime, formatDayMonth } from "../lib/formatDates";
 import { fieldErrors } from "../lib/api";
+import { readPage, useUrlParams } from "../hooks/useUrlParams";
 
 function initials(name) {
   return name.replace(/[^a-z]/gi, "").slice(0, 2).toUpperCase();
@@ -68,7 +69,7 @@ function Summary({ messages }) {
 // opening an email does, and holds the reply, which the server emails to the
 // sender (Phase 9). `contactMessages` is null until the list arrives
 export default function ContactMessages({ contactMessages, users, currentUserId, onSetRead, onReply }) {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams, setParams, setPage } = useUrlParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [reply, setReply] = useState("");
   const [replyError, setReplyError] = useState("");
@@ -113,18 +114,9 @@ export default function ContactMessages({ contactMessages, users, currentUserId,
 
   const { pageSize } = contactMessagesPage;
   const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const page = Math.min(Math.max(Number(searchParams.get("page")) || 1, 1), pageCount);
+  const page = readPage(searchParams, pageCount);
   const firstIndex = (page - 1) * pageSize;
   const pageMessages = filtered.slice(firstIndex, firstIndex + pageSize);
-
-  function setParams(changes) {
-    const nextParams = new URLSearchParams(searchParams);
-    Object.entries(changes).forEach(([key, value]) => {
-      if (value === null || value === "") nextParams.delete(key);
-      else nextParams.set(key, value);
-    });
-    setSearchParams(nextParams);
-  }
 
   function openPanel(messageId) {
     setReply("");
@@ -280,7 +272,7 @@ export default function ContactMessages({ contactMessages, users, currentUserId,
               page={page}
               pageCount={pageCount}
               onPageChange={(next) => {
-                setParams({ page: next > 1 ? String(next) : null });
+                setPage(next);
                 listRef.current?.scrollIntoView({ block: "start" });
               }}
               summary={contactMessagesPage.paging(firstIndex + 1, firstIndex + pageMessages.length, filtered.length)}

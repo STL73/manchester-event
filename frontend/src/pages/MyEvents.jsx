@@ -1,5 +1,5 @@
 import { Fragment, useMemo, useRef, useState } from "react";
-import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { CalendarCheck, CalendarDays, X } from "lucide-react";
 import FilterPills from "../components/UI/FilterPills";
 import SortSelect from "../components/UI/SortSelect";
@@ -30,6 +30,8 @@ import {
   organiserEventMessages,
 } from "../data/organiserEventsData";
 import { formatShortDay } from "../lib/formatDates";
+import { readPage, useUrlParams } from "../hooks/useUrlParams";
+import { useDeleteEvent } from "../hooks/useDeleteEvent";
 
 // The search bar's fields, the same bar as Explore Events: they apply on
 // Search, like the PHP GET form. Status and sort sit in the row under it
@@ -86,13 +88,9 @@ function Summary({ counts, draftCount }) {
 }
 
 export default function MyEvents({ organiserEvents, onDeleteEvent }) {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams, setParams, setPage, setSearchParams } = useUrlParams();
   const [filters, setFilters] = useState(() => readFilters(searchParams));
-  // A message can arrive from Edit Event (e.g. after cancelling an event)
-  const location = useLocation();
-  const [message, setMessage] = useState(() =>
-    location.state?.message ? { text: location.state.message } : null,
-  );
+  const { message, deleteEvent } = useDeleteEvent(onDeleteEvent, organiserEventMessages.eventDeleted);
   const gridRef = useRef(null);
   const dateInputRef = useRef(null);
   const { createFirst } = organiserEventActions;
@@ -145,7 +143,7 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
 
   // The page lives in the URL, as on Explore Events; out-of-range numbers clamp
   const pageCount = Math.max(1, Math.ceil(filteredEvents.length / myEventsPageSize));
-  const page = Math.min(Math.max(Number(searchParams.get("page")) || 1, 1), pageCount);
+  const page = readPage(searchParams, pageCount);
   const firstIndex = (page - 1) * myEventsPageSize;
   const pageEvents = filteredEvents.slice(firstIndex, firstIndex + myEventsPageSize);
 
@@ -183,34 +181,19 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
   }
 
   function handleDateChange(nextDate) {
-    const nextParams = new URLSearchParams(searchParams);
-    if (nextDate) nextParams.set("date", nextDate);
-    else nextParams.delete("date");
-    nextParams.delete("page");
-    setSearchParams(nextParams);
+    setParams({ date: nextDate, page: null });
   }
 
   function handleSortChange(nextSort) {
-    const nextParams = new URLSearchParams(searchParams);
-    if (nextSort === "newest") nextParams.delete("sort");
-    else nextParams.set("sort", nextSort);
-    nextParams.delete("page");
-    setSearchParams(nextParams);
+    setParams({ sort: nextSort === "newest" ? null : nextSort, page: null });
   }
 
   function handleStatusChange(nextStatus) {
-    const nextParams = new URLSearchParams(searchParams);
-    if (nextStatus === "all") nextParams.delete("status");
-    else nextParams.set("status", nextStatus);
-    nextParams.delete("page");
-    setSearchParams(nextParams);
+    setParams({ status: nextStatus === "all" ? null : nextStatus, page: null });
   }
 
   function handlePageChange(nextPage) {
-    const nextParams = new URLSearchParams(searchParams);
-    if (nextPage > 1) nextParams.set("page", String(nextPage));
-    else nextParams.delete("page");
-    setSearchParams(nextParams);
+    setPage(nextPage);
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     gridRef.current?.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
   }
@@ -218,18 +201,6 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
   function clearFilters() {
     setFilters(defaultFilters);
     setSearchParams({});
-  }
-
-  // The card has already asked (see EventCard). The server may refuse: an
-  // event approved since the page loaded can only be cancelled
-  async function handleDelete(event) {
-    setMessage(null);
-    try {
-      await onDeleteEvent(event.eventId);
-      setMessage({ text: organiserEventMessages.eventDeleted });
-    } catch (error) {
-      setMessage({ text: error.message, variant: "error" });
-    }
   }
 
   return (
@@ -339,7 +310,7 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
                   statusLabel={statusLabel(state, "organiser")}
                   muted={state === "past" || state === "cancelled"}
                   editTo={canEdit ? editEventPath(event.eventId) : undefined}
-                  onDelete={canDelete ? handleDelete : undefined}
+                  onDelete={canDelete ? deleteEvent : undefined}
                 />
               );
             })

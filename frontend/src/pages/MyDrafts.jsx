@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { SquarePen } from "lucide-react";
 import EventCard from "../components/events/EventCard";
 import StatusMessage from "../components/UI/StatusMessage";
@@ -16,6 +15,7 @@ import {
 } from "../data/myDraftsData";
 import { editEventPath, organiserEventActions } from "../data/organiserEventsData";
 import { formatDayMonth } from "../lib/formatDates";
+import { useDeleteEvent } from "../hooks/useDeleteEvent";
 
 // The same cards as My Events (decided 2026-10-12; the PHP had a table), so
 // a draft looks the way it will once live. Submit is each card's labelled
@@ -25,12 +25,8 @@ export default function MyDrafts({
   onSubmitDraft,
   onDeleteEvent,
 }) {
-  // { type: "submitted" | "deleted" }, or { text } passed from Create Event
-  // (a new draft) or Edit Event (a deleted one); the submitted one links
-  const location = useLocation();
-  const [message, setMessage] = useState(() =>
-    location.state?.message ? { text: location.state.message } : null,
-  );
+  // { text, variant }, or { type: "submitted" }, the one that links
+  const { message, setMessage, deleteEvent } = useDeleteEvent(onDeleteEvent, myDraftsMessages.draftDeleted);
   const { submitDraft } = organiserEventActions;
   const now = new Date();
 
@@ -48,18 +44,7 @@ export default function MyDrafts({
       await onSubmitDraft(event.eventId);
       setMessage({ type: "submitted" });
     } catch (error) {
-      setMessage({ type: "error", text: error.message });
-    }
-  }
-
-  // The card has already asked (see EventCard)
-  async function handleDelete(event) {
-    setMessage(null);
-    try {
-      await onDeleteEvent(event.eventId);
-      setMessage({ type: "deleted" });
-    } catch (error) {
-      setMessage({ type: "error", text: error.message });
+      setMessage({ text: error.message, variant: "error" });
     }
   }
 
@@ -91,7 +76,7 @@ export default function MyDrafts({
         />
 
         {message && (
-          <StatusMessage variant={message.type === "error" ? "error" : "success"} className="table-message">
+          <StatusMessage variant={message.variant} className="table-message">
             {message.type === "submitted" ? (
               <>
                 {submitted.text}{" "}
@@ -101,7 +86,7 @@ export default function MyDrafts({
                 .
               </>
             ) : (
-              (message.text ?? myDraftsMessages.draftDeleted)
+              message.text
             )}
           </StatusMessage>
         )}
@@ -128,7 +113,7 @@ export default function MyDrafts({
                   }
                   notice={canSubmit ? undefined : datePassedNotice}
                   editTo={editEventPath(draft.eventId)}
-                  onDelete={handleDelete}
+                  onDelete={deleteEvent}
                 />
               );
             })

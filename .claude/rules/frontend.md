@@ -98,6 +98,8 @@ frontend/src/
 ├── data/              <name>Data.js page copy, config + helpers, one per page/feature
 ├── lib/               pure helpers (analytics.js: chart aggregation; formatDates,
 │                      eventStatus, favourites; api.js with fieldErrors())
+├── hooks/             useUrlParams (setParams, setPage, readPage: page state in the
+│                      address), useDeleteEvent (an organiser card's delete and message)
 └── images/            site photos (event photos are in public/images/events)
 ```
 

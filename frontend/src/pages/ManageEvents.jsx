@@ -1,5 +1,4 @@
 import { useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import { CalendarDays, MapPin, Ticket, UserRound } from "lucide-react";
 import Button from "../components/UI/Button";
 import FieldError from "../components/UI/FieldError";
@@ -25,6 +24,7 @@ import {
 } from "../data/manageEventsData";
 import { daysSince, formatDayMonth, formatLongDay, formatShortDayTime, formatTimeRange } from "../lib/formatDates";
 import { fieldErrors } from "../lib/api";
+import { readPage, useUrlParams } from "../hooks/useUrlParams";
 
 // The search bar's fields; view, sort, page and the open panel live in the
 // URL too, so a link (or Back) brings the same list back
@@ -229,7 +229,7 @@ function EventReview({ event, state, events, decision, onDecision, reason, onRea
 // reason; decided 2026-11-03). `events` is App's list from GET /events/manage
 // (no drafts), null while it loads. Each decision awaits the server (Phase 7)
 export default function ManageEvents({ events, currentUserId, onDecide }) {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams, setParams, setPage } = useUrlParams();
   const [filters, setFilters] = useState(() => readFilters(searchParams));
   const [decision, setDecision] = useState("approve");
   const [reason, setReason] = useState("");
@@ -276,18 +276,9 @@ export default function ManageEvents({ events, currentUserId, onDecide }) {
 
   const { pageSize } = manageEventsPage;
   const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const page = Math.min(Math.max(Number(searchParams.get("page")) || 1, 1), pageCount);
+  const page = readPage(searchParams, pageCount);
   const firstIndex = (page - 1) * pageSize;
   const pageRows = filtered.slice(firstIndex, firstIndex + pageSize);
-
-  function setParams(changes) {
-    const nextParams = new URLSearchParams(searchParams);
-    Object.entries(changes).forEach(([key, value]) => {
-      if (value === null || value === "") nextParams.delete(key);
-      else nextParams.set(key, value);
-    });
-    setSearchParams(nextParams);
-  }
 
   function openPanel(eventId) {
     setDecision("approve");
@@ -485,7 +476,7 @@ export default function ManageEvents({ events, currentUserId, onDecide }) {
               page={page}
               pageCount={pageCount}
               onPageChange={(next) => {
-                setParams({ page: next > 1 ? String(next) : null });
+                setPage(next);
                 listRef.current?.scrollIntoView({ block: "start" });
               }}
               summary={manageEventsPage.paging(firstIndex + 1, firstIndex + pageRows.length, filtered.length)}

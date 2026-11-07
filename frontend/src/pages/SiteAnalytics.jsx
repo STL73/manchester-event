@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import { Clock, Heart } from "lucide-react";
 import Button from "../components/UI/Button";
 import DashboardCard from "../components/UI/DashboardCard";
@@ -52,6 +51,7 @@ import {
 import PageLoading from "../components/UI/PageLoading";
 import StatusMessage from "../components/UI/StatusMessage";
 import { useApi } from "../lib/useApi";
+import { useUrlParams } from "../hooks/useUrlParams";
 import { eventCategories } from "../data/eventsData";
 import { accountStatuses } from "../data/manageUsersData";
 import { eventState, statusLabel } from "../lib/eventStatus";
@@ -93,7 +93,7 @@ function waitTone(ms) {
 // saves, followers and failed sign-ins the server sends as it opens (Phase 10).
 // Events are every one sent for approval: drafts stay their organiser's
 export default function SiteAnalytics({ users, events, contactMessages }) {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams, setParams } = useUrlParams();
   const tabParam = searchParams.get("tab");
   const tab = siteAnalyticsTabs.some((option) => option.value === tabParam)
     ? tabParam
@@ -321,10 +321,7 @@ export default function SiteAnalytics({ users, events, contactMessages }) {
 
   // The first section is the default, so it keeps the address clean
   function handleTabChange(nextTab) {
-    const nextParams = new URLSearchParams(searchParams);
-    if (nextTab === siteAnalyticsTabs[0].value) nextParams.delete("tab");
-    else nextParams.set("tab", nextTab);
-    setSearchParams(nextParams);
+    setParams({ tab: nextTab === siteAnalyticsTabs[0].value ? null : nextTab });
   }
 
   return (

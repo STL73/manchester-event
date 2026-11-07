@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import { Bell, ChevronDown } from "lucide-react";
 import Button from "../components/UI/Button";
 import Pagination from "../components/UI/Pagination";
@@ -21,6 +20,7 @@ import {
   notificationsView,
 } from "../data/notificationsData";
 import { formatDayMonth, formatShortDay, formatTime } from "../lib/formatDates";
+import { readPage, useUrlParams } from "../hooks/useUrlParams";
 
 // One row: collapsed to icon, subject and time; opening it shows the full
 // message and, only when it is about an event, View event. Cancelled events
@@ -108,7 +108,7 @@ function NotificationRow({ notification, group, isOpen, onToggle, onMarkRead }) 
 // account's own from the API (Phase 7), null until it arrives, and is read
 // again each time the page opens, as nothing pushes new ones
 export default function Notifications({ notifications: loaded, onLoad, onMarkRead }) {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams, setParams, setPage } = useUrlParams();
   const [openId, setOpenId] = useState(null);
   // Read while the Unread view is showing: they stay on screen until the
   // view or page changes, so a message doesn't vanish as it is opened
@@ -133,7 +133,7 @@ export default function Notifications({ notifications: loaded, onLoad, onMarkRea
 
   // The page lives in the URL, as on Explore Events; out-of-range numbers clamp
   const pageCount = Math.max(1, Math.ceil(visible.length / notificationsPageSize));
-  const page = Math.min(Math.max(Number(searchParams.get("page")) || 1, 1), pageCount);
+  const page = readPage(searchParams, pageCount);
   const firstIndex = (page - 1) * notificationsPageSize;
   const pageNotifications = visible.slice(firstIndex, firstIndex + notificationsPageSize);
 
@@ -171,20 +171,13 @@ export default function Notifications({ notifications: loaded, onLoad, onMarkRea
 
   // A new view starts at page 1, like a new filter on Explore Events
   function handleViewChange(nextView) {
-    const nextParams = new URLSearchParams(searchParams);
-    if (nextView === "unread") nextParams.set("show", "unread");
-    else nextParams.delete("show");
-    nextParams.delete("page");
-    setSearchParams(nextParams);
+    setParams({ show: nextView === "unread" ? "unread" : null, page: null });
     setKeptIds([]);
     setOpenId(null);
   }
 
   function handlePageChange(nextPage) {
-    const nextParams = new URLSearchParams(searchParams);
-    if (nextPage > 1) nextParams.set("page", String(nextPage));
-    else nextParams.delete("page");
-    setSearchParams(nextParams);
+    setPage(nextPage);
     setKeptIds([]);
     setOpenId(null);
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

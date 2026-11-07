@@ -1,5 +1,4 @@
 import { Fragment, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import Button from "../components/UI/Button";
 import FilterPills from "../components/UI/FilterPills";
 import Pagination from "../components/UI/Pagination";
@@ -17,6 +16,7 @@ import {
   systemLogsSection,
 } from "../data/systemLogsData";
 import { formatShortDay } from "../lib/formatDates";
+import { readPage, useUrlParams } from "../hooks/useUrlParams";
 
 function dayKey(value) {
   const date = new Date(value);
@@ -36,7 +36,7 @@ function dayLabel(value, now) {
 // account it names. The view, search and page are the server's (Phase 10,
 // decided 2026-11-04), so every row is reachable, not only the newest 100
 export default function SystemLogs() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams, setParams, setPage } = useUrlParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const listRef = useRef(null);
   const now = useMemo(() => new Date(), []);
@@ -45,7 +45,7 @@ export default function SystemLogs() {
   const viewParam = searchParams.get("view");
   const view = logViews.options.some((option) => option.value === viewParam) ? viewParam : "all";
   const q = (searchParams.get("q") ?? "").trim();
-  const requestedPage = Math.max(Number(searchParams.get("page")) || 1, 1);
+  const requestedPage = readPage(searchParams);
 
   const apiQuery = new URLSearchParams({ limit: String(systemLogsPage.pageSize) });
   if (view !== "all") apiQuery.set("view", view);
@@ -68,15 +68,6 @@ export default function SystemLogs() {
     else groups.push({ key, label: dayLabel(entry.log.createdAt, now), entries: [entry] });
     return groups;
   }, []);
-
-  function setParams(changes) {
-    const nextParams = new URLSearchParams(searchParams);
-    Object.entries(changes).forEach(([key, value]) => {
-      if (value === null || value === "") nextParams.delete(key);
-      else nextParams.set(key, value);
-    });
-    setSearchParams(nextParams);
-  }
 
   const { summary } = systemLogsPage;
 
@@ -173,7 +164,7 @@ export default function SystemLogs() {
               page={page}
               pageCount={pageCount}
               onPageChange={(next) => {
-                setParams({ page: next > 1 ? String(next) : null });
+                setPage(next);
                 listRef.current?.scrollIntoView({ block: "start" });
               }}
               summary={systemLogsPage.paging(firstIndex + 1, firstIndex + entries.length, total)}

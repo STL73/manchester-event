@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { CalendarDays, Grid2X2, Grid3X3, Square, X } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
 import Button from "../UI/Button";
 import Pagination from "../UI/Pagination";
 import EventCard from "./EventCard";
@@ -9,6 +8,7 @@ import { eventCategories, eventLocations } from "../../data/eventsData";
 import { resultsText, whenOptions } from "../../data/exploreEventsData";
 import { eventsPath, toEvent } from "../../lib/publicEvents";
 import { useApi } from "../../lib/useApi";
+import { readPage, useUrlParams } from "../../hooks/useUrlParams";
 import { formatShortDay } from "../../lib/formatDates";
 
 const defaultFilters = { q: "", when: "", date: "", category: "", location: "" };
@@ -65,7 +65,7 @@ export default function EventsBrowser({
   favouriteIds = [],
   onToggleFavourite,
 }) {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams, setParams, setPage, setSearchParams } = useUrlParams();
   const [filters, setFilters] = useState(() => readFilters(searchParams));
   // A link can change the address while this page is open (the footer's
   // "Tonight", the navbar's Explore Events). When the address no longer
@@ -83,7 +83,7 @@ export default function EventsBrowser({
 
   // The server filters, sorts and pages (GET /events). It is asked for what the
   // address says, not what is typed but not yet searched
-  const requestedPage = Math.max(Number(searchParams.get("page")) || 1, 1);
+  const requestedPage = readPage(searchParams);
   const { payload, error, loading, retry } = useApi(
     eventsPath({ ...readFilters(searchParams), page: requestedPage, limit: PAGE_SIZE }),
   );
@@ -160,21 +160,14 @@ export default function EventsBrowser({
   }
 
   function handlePageChange(nextPage) {
-    const nextParams = new URLSearchParams(searchParams);
-    if (nextPage > 1) nextParams.set("page", String(nextPage));
-    else nextParams.delete("page");
-    setSyncedSearch(nextParams.toString());
-    setSearchParams(nextParams);
+    setSyncedSearch(setPage(nextPage).toString());
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     resultsRef.current?.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
   }
 
   function handleViewChange(nextView) {
-    const nextParams = new URLSearchParams(searchParams);
-    nextParams.set("view", nextView);
     // Only the layout changed: keep any filters typed but not yet searched
-    setSyncedSearch(nextParams.toString());
-    setSearchParams(nextParams);
+    setSyncedSearch(setParams({ view: nextView }).toString());
   }
 
   function removeFilter(key) {

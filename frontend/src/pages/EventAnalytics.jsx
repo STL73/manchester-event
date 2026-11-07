@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import { Heart } from "lucide-react";
 import Button from "../components/UI/Button";
 import DashboardCard from "../components/UI/DashboardCard";
@@ -52,6 +51,7 @@ import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import PageLoading from "../components/UI/PageLoading";
 import StatusMessage from "../components/UI/StatusMessage";
 import { useApi } from "../lib/useApi";
+import { useUrlParams } from "../hooks/useUrlParams";
 import { formatDayMonth, formatMonthLong, formatTime } from "../lib/formatDates";
 
 const categoryNames = new Map(eventCategories.map((category) => [category.id, category.name]));
@@ -61,7 +61,7 @@ const UP_NEXT = 5;
 // organiser's events (App's, from the API) and the saves and followers the
 // server sends as the page opens (Phase 10)
 export default function EventAnalytics({ organiserEvents }) {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const { searchParams, setParams } = useUrlParams();
   const tabParam = searchParams.get("tab");
   const tab = eventAnalyticsTabs.some((option) => option.value === tabParam)
     ? tabParam
@@ -254,10 +254,7 @@ export default function EventAnalytics({ organiserEvents }) {
 
   // The first section is the default, so it keeps the address clean
   function handleTabChange(nextTab) {
-    const nextParams = new URLSearchParams(searchParams);
-    if (nextTab === eventAnalyticsTabs[0].value) nextParams.delete("tab");
-    else nextParams.set("tab", nextTab);
-    setSearchParams(nextParams);
+    setParams({ tab: nextTab === eventAnalyticsTabs[0].value ? null : nextTab });
   }
 
   return (

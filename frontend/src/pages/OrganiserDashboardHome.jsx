@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { CalendarCheck, ChartNoAxesColumn } from "lucide-react";
 import Button from "../components/UI/Button";
 import DashboardCard from "../components/UI/DashboardCard";
@@ -18,6 +17,7 @@ import EmptyState from "../components/UI/EmptyState";
 import { countBy } from "../lib/analytics";
 import { useApi } from "../lib/useApi";
 import { daysSince, formatShortDay } from "../lib/formatDates";
+import { useDeleteEvent } from "../hooks/useDeleteEvent";
 
 // The oldest of a list by a date field, or undefined when it's empty
 function oldest(events, getDate) {
@@ -100,7 +100,7 @@ function newestFirst(a, b) {
 }
 
 export default function OrganiserDashboardHome({ organiserEvents: events, onDeleteEvent }) {
-  const [message, setMessage] = useState(null);
+  const { message, deleteEvent } = useDeleteEvent(onDeleteEvent, organiserEventMessages.eventDeleted);
   const { createFirst } = organiserEventActions;
 
   // Matches get_recent_events()
@@ -108,18 +108,6 @@ export default function OrganiserDashboardHome({ organiserEvents: events, onDele
   const { payload: analytics, error: analyticsError } = useApi("/analytics/organiser");
   const insights = getOrganiserInsights(events, analytics?.data.saves ?? null, Boolean(analyticsError));
   const now = new Date();
-
-  // The card has already asked (see EventCard). The server may refuse: an
-  // event approved since the page loaded can only be cancelled
-  async function handleDelete(event) {
-    setMessage(null);
-    try {
-      await onDeleteEvent(event.eventId);
-      setMessage({ text: organiserEventMessages.eventDeleted });
-    } catch (error) {
-      setMessage({ text: error.message, variant: "error" });
-    }
-  }
 
   return (
     <div className="dashboard-page">
@@ -174,7 +162,7 @@ export default function OrganiserDashboardHome({ organiserEvents: events, onDele
                   status={state}
                   statusLabel={statusLabel(state, "organiser")}
                   editTo={canEdit ? editEventPath(event.eventId) : undefined}
-                  onDelete={canDelete ? handleDelete : undefined}
+                  onDelete={canDelete ? deleteEvent : undefined}
                 />
               );
             })
