@@ -46,31 +46,16 @@ import {
   timelineSeries,
   timelineStatuses,
 } from "../data/eventAnalyticsData";
-import { eventCategories, eventState } from "../data/eventsData";
-import { eventStatuses } from "../data/manageEventsData";
-import { organiserStatusLabels } from "../data/organiserEventsData";
+import { eventCategories } from "../data/eventsData";
+import { eventState, statusLabel } from "../lib/eventStatus";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import PageLoading from "../components/UI/PageLoading";
 import StatusMessage from "../components/UI/StatusMessage";
 import { useApi } from "../lib/useApi";
-
-// Organisers see "approved" as "Live", as on My Events and Event details
-const statusLabels = Object.fromEntries(
-  eventStatuses.map(({ value, label }) => {
-    const organiserLabel = organiserStatusLabels[value];
-    return [value, organiserLabel ? capitalise(organiserLabel) : label];
-  }),
-);
-
-function capitalise(text) {
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
+import { formatDayMonth, formatMonthLong, formatTime } from "../lib/formatDates";
 
 const categoryNames = new Map(eventCategories.map((category) => [category.id, category.name]));
 const UP_NEXT = 5;
-const shortDate = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
-const time = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit" });
-const monthName = new Intl.DateTimeFormat("en-GB", { month: "long" });
 
 // Organiser analytics (event_stats.php), counted in the browser from the
 // organiser's events (App's, from the API) and the saves and followers the
@@ -139,7 +124,7 @@ export default function EventAnalytics({ organiserEvents }) {
       ...liveCard,
       id: "live",
       count: live.length,
-      detail: live.length ? liveCard.next(shortDate.format(new Date(live[0].startDatetime))) : liveCard.none,
+      detail: live.length ? liveCard.next(formatDayMonth(live[0].startDatetime)) : liveCard.none,
     },
     {
       ...savesCard,
@@ -187,7 +172,7 @@ export default function EventAnalytics({ organiserEvents }) {
     key: event.eventId,
     lead: <DateTile date={event.startDatetime} />,
     title: event.name,
-    detail: `${event.location} · ${time.format(new Date(event.startDatetime))}`,
+    detail: `${event.location} · ${formatTime(event.startDatetime)}`,
     end: <SaveCount count={savesOf(event.eventId)} />,
   }));
 
@@ -223,7 +208,7 @@ export default function EventAnalytics({ organiserEvents }) {
     key: event.eventId,
     lead: index + 1,
     title: event.name,
-    detail: `${statusLabels[eventState(event, now)]} · ${shortDate.format(new Date(event.startDatetime))}`,
+    detail: `${statusLabel(eventState(event, now), "organiser")} · ${formatDayMonth(event.startDatetime)}`,
     end: <SaveCount count={count} />,
   }));
   const savesCategoryRows = countBy(saves, (save) => eventById.get(save.eventId)?.category);
@@ -254,7 +239,7 @@ export default function EventAnalytics({ organiserEvents }) {
   // My Events' status pills
   const statusRows = countBy(organiserEvents, (event) => eventState(event, now), {
     order: eventStatusOrder,
-    getLabel: (status) => statusLabels[status] ?? status,
+    getLabel: (status) => statusLabel(status, "organiser"),
   });
 
   const weekGrid = getWeekTimeGrid(organiserEvents);
@@ -355,7 +340,7 @@ export default function EventAnalytics({ organiserEvents }) {
                     callout={
                       latestMonth && {
                         key: latestMonth.key,
-                        text: charts.saves.callout(latestMonth.count, monthName.format(latestMonth.key)),
+                        text: charts.saves.callout(latestMonth.count, formatMonthLong(latestMonth.key)),
                       }
                     }
                   />
@@ -390,7 +375,7 @@ export default function EventAnalytics({ organiserEvents }) {
                       {record.latestRejections.map((event) => (
                         <li key={event.eventId}>
                           <q>{event.rejectionReason}</q> · {event.name},{" "}
-                          {shortDate.format(new Date(event.adminUpdatedAt))}
+                          {formatDayMonth(event.adminUpdatedAt)}
                         </li>
                       ))}
                     </ul>

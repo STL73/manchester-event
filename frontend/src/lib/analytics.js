@@ -1,6 +1,7 @@
 // Helpers that turn the app's lists into chart data, replacing the PHP
 // GROUP BY queries and the groupData() function in app.js.
 import { isUpcoming } from "./eventDates";
+import { DAY, formatDayMonth, startOfDay } from "./formatDates";
 
 // Count items per value of `getKey`. With `order`, every listed value appears
 // (zero counts included) in that order; otherwise values are sorted by count.
@@ -21,7 +22,6 @@ export function countBy(items, getKey, { order, getLabel = (key) => key } = {}) 
   return order ? rows : rows.sort((a, b) => b.count - a.count);
 }
 
-const shortDay = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
 const fullDay = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
   month: "long",
@@ -39,16 +39,12 @@ function isoWeek(date) {
   return { year: d.getUTCFullYear(), week: Math.ceil(((d - yearStart) / 86400000 + 1) / 7) };
 }
 
-function startOfDay(date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
-
 // For each period: where a date's bucket starts, the next bucket, and its labels
 const periods = {
   day: {
     start: startOfDay,
     next: (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1),
-    labels: (d) => ({ label: shortDay.format(d), fullLabel: fullDay.format(d) }),
+    labels: (d) => ({ label: formatDayMonth(d), fullLabel: fullDay.format(d) }),
   },
   week: {
     start: (d) => {
@@ -184,7 +180,6 @@ export function getSiteTotals(users, events) {
 // The figures behind the analytics panels. Each takes the lists and `now`.
 
 const HOUR = 3600000;
-const DAY = 24 * HOUR;
 
 // Events that have been public: approved or cancelled (only a public event can be cancelled)
 const WENT_PUBLIC = ["approved", "cancelled"];

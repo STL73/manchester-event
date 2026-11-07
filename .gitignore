@@ -38,3 +38,6 @@ composer.phar
 # Generated / regenerable
 graphify-out/
 memory/
+
+# Playwright MCP browser checks (console logs, check scripts)
+.playwright-mcp/

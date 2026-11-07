@@ -5,6 +5,7 @@ import FieldError from "../UI/FieldError";
 import PasswordInput from "../UI/PasswordInput";
 import StatusMessage from "../UI/StatusMessage";
 import { deleteAccountCopy, passwordForm } from "../../data/profileSettingsData";
+import { fieldErrors } from "../../lib/api";
 
 // Delete account, confirmed in the page rather than a browser dialog: what
 // goes, then the password. An organiser whose events have been public can't
@@ -51,9 +52,9 @@ export default function DeleteAccount({ role, onDelete }) {
       await onDelete(password);
     } catch (deleteError) {
       setDeleting(false);
-      const wrongPassword = deleteError.details?.find(({ path }) => path === "body.password");
+      const wrongPassword = fieldErrors(deleteError).password;
       if (deleteError.status === 409) setBlocked(true);
-      else setError(wrongPassword ? { password: wrongPassword.message } : { form: deleteError.message });
+      else setError(wrongPassword ? { password: wrongPassword } : { form: deleteError.message });
     }
   }
 

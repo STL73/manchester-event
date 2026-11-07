@@ -7,12 +7,7 @@ import PasswordSettings from "../components/dashboard/PasswordSettings";
 import EmailSettings from "../components/dashboard/EmailSettings";
 import DeleteAccount from "../components/dashboard/DeleteAccount";
 import { accountSummary, settingsSections } from "../data/profileSettingsData";
-
-const dateFormatter = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
+import { formatDate } from "../lib/formatDates";
 
 // Four sections, each saving on its own. What a role sees differs in the
 // email wording and in Delete: none for admins, and the server refuses an
@@ -38,7 +33,7 @@ export default function Settings({
             <>
               {accountSummary.memberSince}{" "}
               <time dateTime={account.createdAt}>
-                {dateFormatter.format(new Date(account.createdAt))}
+                {formatDate(account.createdAt)}
               </time>
             </>
           }

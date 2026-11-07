@@ -7,22 +7,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { describeWeather, weatherPlace } from "../../data/weatherData";
-
-function formatDate(date) {
-  return new Intl.DateTimeFormat("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(date);
-}
-
-function formatTime(date) {
-  return new Intl.DateTimeFormat("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-}
+import { formatLongDay, formatTime } from "../../lib/formatDates";
 
 // Manchester's weather now, reloaded every 15 minutes; null until the first reading arrives
 function useWeather() {
@@ -110,7 +95,7 @@ export default function WeatherDateBar({
         )}
         <div className="dashboard-utility-item">
           <CalendarDays className="dashboard-utility-icon" aria-hidden="true" />
-          <span className="dashboard-utility-text">{formatDate(now)}</span>
+          <span className="dashboard-utility-text">{formatLongDay(now)}</span>
         </div>
         <div className="dashboard-utility-item">
           <Clock3 className="dashboard-utility-icon" aria-hidden="true" />

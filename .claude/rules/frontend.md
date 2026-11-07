@@ -96,7 +96,8 @@ frontend/src/
 │   ├── dashboard/     greeting and weather bar
 │   └── home/          public landing sections
 ├── data/              <name>Data.js page copy, config + helpers, one per page/feature
-├── lib/               pure helpers (analytics.js: chart aggregation)
+├── lib/               pure helpers (analytics.js: chart aggregation; formatDates,
+│                      eventStatus, favourites; api.js with fieldErrors())
 └── images/            site photos (event photos are in public/images/events)
 ```
 
@@ -235,8 +236,8 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   approved event that has ended counts as past) and, on the right where Explore has its view
   switcher, a Pick a date pill (any day, past too, `?date=`, with an x to clear) and a sort
   dropdown. All of them apply at once. 12 per page. Organisers see "approved" as
-  "live" (`organiserStatusLabels`, `EventCard`'s `statusLabel`, Event details); admins keep
-  "approved". Card buttons follow `organiserCardActions`: Delete only
+  "Live" (`statusLabel(status, "organiser")` in `lib/eventStatus.js`, through `EventCard`'s
+  `statusLabel` and on Event details); admins keep "Approved". Card buttons follow `organiserCardActions`: Delete only
   before an event has been public (draft, pending, rejected), Edit until it is over, past and
   cancelled are View only and greyed. Delete asks inside the card (`EventCard`, "Keep it" /
   "Delete permanently"), never `window.confirm`; Organiser Home's cards follow the same rules
@@ -399,7 +400,9 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   `DashboardCard`); no bare figures. Inner pages get a one-line summary under the title instead
   (`DashboardPageHeading`'s `summary`, figures in `<strong>`), with its own wording when empty.
   Cards have a 5% white top gradient, never a hue. Decided 2026-10-10
-- Dates use `Intl.DateTimeFormat("en-GB", …)`
+- Dates go through `lib/formatDates.js` (`formatTime`, `formatDayMonth`, `formatShortDay`,
+  `formatLongDay`, `formatTimeRange`…, plus `DAY`, `startOfDay`, `daysSince`), all
+  `Intl.DateTimeFormat("en-GB", …)`. A new format goes there, not into the page (2026-11-07)
 
 ## Naming
 
@@ -416,7 +419,9 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   8px corners). Search and filter bars are the exception the other way: their fields are pills
   too, on Home, Explore Events and My Events, since they read as one control rather than a form.
   `type` defaults to `"button"`, so pass `type="submit"` on form buttons
-- `src/data/eventsData.js`: the categories, statuses and event helpers every page shares
+- `src/data/eventsData.js`: the categories, locations and Event details copy every page
+  shares. The status rules (`eventState`, `isPublicEvent`, `statusLabel`) moved to
+  `lib/eventStatus.js` and the favourite helpers to `lib/favourites.js` (2026-11-07)
 
 ## Commands
 

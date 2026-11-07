@@ -23,11 +23,9 @@ import {
   userSortOptions,
   userViews,
 } from "../data/manageUsersData";
-
-const joinedFormatter = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" });
-const untilFormatter = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
-
-const statusLabels = Object.fromEntries(accountStatuses.map(({ value, label }) => [value, label]));
+import { formatDate, formatDayMonth } from "../lib/formatDates";
+import { statusLabel } from "../lib/eventStatus";
+import { fieldErrors } from "../lib/api";
 
 // Two letters for the hexagon avatar
 function initials(name) {
@@ -50,7 +48,7 @@ function matchesView(user, view) {
 function suspensionText(user) {
   if (user.accStatus !== "suspended") return "";
   return user.suspendedUntil
-    ? userPanel.suspendedUntil(untilFormatter.format(new Date(user.suspendedUntil)))
+    ? userPanel.suspendedUntil(formatDayMonth(user.suspendedUntil))
     : userPanel.suspendedOpen;
 }
 
@@ -65,7 +63,7 @@ function Avatar({ user, large = false }) {
 function StatusBadges({ user }) {
   return (
     <>
-      <span className={`badge status-${user.accStatus}`}>{statusLabels[user.accStatus] ?? user.accStatus}</span>
+      <span className={`badge status-${user.accStatus}`}>{statusLabel(user.accStatus)}</span>
       {!user.emailVerifiedAt && <span className="badge status-unverified">Unverified</span>}
     </>
   );
@@ -232,8 +230,8 @@ export default function ManageUsers({ users: loaded, currentUserId, onUpdateUser
     try {
       await change();
     } catch (error) {
-      const reasonRefused = error.details?.find(({ path }) => path === "body.reason");
-      if (reasonRefused) setReasonError(reasonRefused.message);
+      const reasonRefused = fieldErrors(error).reason;
+      if (reasonRefused) setReasonError(reasonRefused);
       else setPanelError(error.message);
       return;
     } finally {
@@ -409,7 +407,7 @@ export default function ManageUsers({ users: loaded, currentUserId, onUpdateUser
                         <StatusBadges user={user} />
                       </span>
                       <span className="admin-row-cell admin-row-meta">
-                        {joinedFormatter.format(new Date(user.createdAt))}
+                        {formatDate(user.createdAt)}
                         <span className="admin-row-sub">
                           {suspensionText(user) || (user.role === "organiser" ? manageUsersPage.eventsCount(user.eventCount) : "")}
                         </span>
@@ -464,7 +462,7 @@ export default function ManageUsers({ users: loaded, currentUserId, onUpdateUser
                   <Shield aria-hidden="true" />
                   <p>
                     <strong>{roleLabels[openUser.role] ?? openUser.role}</strong>
-                    {manageUsersPage.joined} {joinedFormatter.format(new Date(openUser.createdAt))}
+                    {manageUsersPage.joined} {formatDate(openUser.createdAt)}
                   </p>
                 </li>
                 <li className="event-details-fact">

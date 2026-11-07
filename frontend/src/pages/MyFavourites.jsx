@@ -5,19 +5,9 @@ import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import { eventDetailsPath } from "../data/eventsData";
 import { downloadEventIcs } from "../lib/calendar";
 import EmptyState from "../components/UI/EmptyState";
-import {
-  endedFavourites,
-  favouritesEmpty,
-  favouritesSummary,
-  getNextFavourite,
-  splitFavourites,
-} from "../data/myFavouritesData";
-
-const nextDateFormatter = new Intl.DateTimeFormat("en-GB", {
-  weekday: "short",
-  day: "numeric",
-  month: "short",
-});
+import { endedFavourites, favouritesEmpty, favouritesSummary } from "../data/myFavouritesData";
+import { getNextFavourite, splitFavourites } from "../lib/favourites";
+import { formatShortDay } from "../lib/formatDates";
 
 // "3 saved · next one Sun 18 Oct"; the date only when one is still to come
 function FavouritesSummary({ events, favouriteIds, count }) {
@@ -33,7 +23,7 @@ function FavouritesSummary({ events, favouriteIds, count }) {
         <>
           <span aria-hidden="true"> · </span>
           {favouritesSummary.nextOne}{" "}
-          {nextDateFormatter.format(new Date(next.startDatetime))}
+          {formatShortDay(next.startDatetime)}
         </>
       )}
     </>

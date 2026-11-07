@@ -3,7 +3,7 @@ import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from "
 import Button from "../components/UI/Button";
 import FormField from "../components/UI/FormField";
 import StatusMessage from "../components/UI/StatusMessage";
-import { api } from "../lib/api";
+import { api, fieldErrors } from "../lib/api";
 import {
   PASSWORD_MIN_LENGTH,
   authErrors,
@@ -69,11 +69,6 @@ function showErrors(form, errors, setErrors) {
   return true;
 }
 
-// The API names a field "body.email"; the form calls it "email"
-function fieldErrors(details = []) {
-  return Object.fromEntries(details.map(({ path, message }) => [path.replace("body.", ""), message]));
-}
-
 function AuthForm({ page, token, onAccountChange }) {
   const { title, subtitle, image, caption, fields, forgotLink, submit, switchPrompt, endpoint } = page;
   const navigate = useNavigate();
@@ -114,7 +109,7 @@ function AuthForm({ page, token, onAccountChange }) {
       }
     } catch (error) {
       setSending(false);
-      if (!showErrors(form, fieldErrors(error.details), setErrors)) setFormError(error.message);
+      if (!showErrors(form, fieldErrors(error), setErrors)) setFormError(error.message);
     }
   }
 

@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { systemLogsPage } from "../../data/systemLogsData";
-
-const timeFormatter = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit" });
+import { formatTime } from "../../lib/formatDates";
 
 function Target({ target }) {
   if (!target) return null;
@@ -41,7 +40,7 @@ export default function LogEntry({ log, description, time }) {
         {sub && <span className="log-entry-sub">{sub}</span>}
       </p>
       <time className="log-entry-time" dateTime={log.createdAt}>
-        {time ?? timeFormatter.format(new Date(log.createdAt))}
+        {time ?? formatTime(log.createdAt)}
       </time>
     </li>
   );

@@ -9,7 +9,8 @@ import SearchBar from "../components/events/SearchBar";
 import StatusMessage from "../components/UI/StatusMessage";
 import Pagination from "../components/UI/Pagination";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
-import { eventCategories, eventLocations, eventState } from "../data/eventsData";
+import { eventCategories, eventLocations } from "../data/eventsData";
+import { eventState, statusLabel } from "../lib/eventStatus";
 import EmptyState from "../components/UI/EmptyState";
 import {
   myEventsActions,
@@ -27,8 +28,8 @@ import {
   organiserCardActions,
   organiserEventActions,
   organiserEventMessages,
-  organiserStatusLabels,
 } from "../data/organiserEventsData";
+import { formatShortDay } from "../lib/formatDates";
 
 // The search bar's fields, the same bar as Explore Events: they apply on
 // Search, like the PHP GET form. Status and sort sit in the row under it
@@ -47,12 +48,6 @@ function readFilters(searchParams) {
     ]),
   );
 }
-
-const chipDate = new Intl.DateTimeFormat("en-GB", {
-  weekday: "short",
-  day: "numeric",
-  month: "short",
-});
 
 // Matches the ORDER BY options in get_organiser_events()
 const sorters = {
@@ -282,7 +277,7 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
                     onClick={openDatePicker}
                   >
                     <CalendarDays aria-hidden="true" />
-                    {date ? chipDate.format(new Date(`${date}T00:00:00`)) : myEventsDate.pick}
+                    {date ? formatShortDay(`${date}T00:00:00`) : myEventsDate.pick}
                   </button>
                   <input
                     ref={dateInputRef}
@@ -341,7 +336,7 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
                   key={event.eventId}
                   event={event}
                   status={state}
-                  statusLabel={organiserStatusLabels[state]}
+                  statusLabel={statusLabel(state, "organiser")}
                   muted={state === "past" || state === "cancelled"}
                   editTo={canEdit ? editEventPath(event.eventId) : undefined}
                   onDelete={canDelete ? handleDelete : undefined}

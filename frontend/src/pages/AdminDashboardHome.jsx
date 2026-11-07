@@ -7,19 +7,14 @@ import {
   recentAdminActionsText,
   viewAllLogsAction,
 } from "../data/adminDashboardData";
-import { isPublicEvent } from "../data/eventsData";
+import { isPublicEvent } from "../lib/eventStatus";
 import { countTrend, getRangeBounds } from "../lib/analytics";
 import { isUpcoming, matchesWhen } from "../lib/eventDates";
 import EmptyState from "../components/UI/EmptyState";
 import LogEntry from "../components/dashboard/LogEntry";
 import { describeLog, logLookup } from "../lib/systemLogs";
 import { useApi } from "../lib/useApi";
-
-const DAY = 24 * 60 * 60 * 1000;
-
-function daysSince(date, now) {
-  return Math.floor((now - new Date(date)) / DAY);
-}
+import { daysSince, formatDateTime } from "../lib/formatDates";
 
 // The four Quick Insights cards, from the shared users, events and messages
 function getAdminInsights({ users, events, contactMessages }) {
@@ -96,14 +91,6 @@ function getAdminInsights({ users, events, contactMessages }) {
   ];
 }
 
-const dateFormatter = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
 // `events` is the Manage Events list from the API (Phase 7) and `users` the
 // Manage Users one (Phase 8). Recent Admin Actions are the newest log rows by
 // admins (Phase 10), asked for as the page opens
@@ -155,7 +142,7 @@ export default function AdminDashboardHome({ users, events, contactMessages }) {
                   key={log.logId}
                   log={log}
                   description={describeLog(log, logLookup(log))}
-                  time={dateFormatter.format(new Date(log.createdAt))}
+                  time={formatDateTime(log.createdAt)}
                 />
               ))}
             </ul>

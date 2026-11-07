@@ -52,9 +52,9 @@ import {
 import PageLoading from "../components/UI/PageLoading";
 import StatusMessage from "../components/UI/StatusMessage";
 import { useApi } from "../lib/useApi";
-import { eventCategories, eventState } from "../data/eventsData";
-import { eventStatuses } from "../data/manageEventsData";
+import { eventCategories } from "../data/eventsData";
 import { accountStatuses } from "../data/manageUsersData";
+import { eventState, statusLabel } from "../lib/eventStatus";
 import {
   daysAgo,
   defaultSiteRange,
@@ -69,19 +69,13 @@ import {
   siteRangeOptions,
 } from "../data/siteAnalyticsData";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
+import { DAY, formatDayMonth, formatMonthLong } from "../lib/formatDates";
 
-const eventStatusLabels = Object.fromEntries(
-  eventStatuses.map(({ value, label }) => [value, label]),
-);
 // Unverified isn't in accountStatuses (it can't be set), hence the extra entry
 const accountStatusLabels = {
   ...Object.fromEntries(accountStatuses.map(({ value, label }) => [value, label])),
   unverified: "Unverified",
 };
-
-const DAY = 86400000;
-const shortDate = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
-const monthName = new Intl.DateTimeFormat("en-GB", { month: "long" });
 
 function withLabels(rows, labels) {
   return rows.map((row) => ({ ...row, label: labels[row.key] ?? row.key }));
@@ -232,7 +226,7 @@ export default function SiteAnalytics({ users, events, contactMessages }) {
       detail:
         lastMonth?.averageHours == null
           ? timeFacts.noDecisions
-          : timeFacts.was(lastMonth.averageHours, monthName.format(lastMonth.key)),
+          : timeFacts.was(lastMonth.averageHours, formatMonthLong(lastMonth.key)),
     },
     {
       label: timeFacts.waiting,
@@ -251,7 +245,7 @@ export default function SiteAnalytics({ users, events, contactMessages }) {
   // eventState, so an approved event that has ended counts as past
   const eventStatusRows = countBy(events, (event) => eventState(event, now), {
     order: eventStatusOrder,
-    getLabel: (status) => eventStatusLabels[status] ?? status,
+    getLabel: (status) => statusLabel(status),
   });
   const waitingItems = getWaitingLongest(events, now).map(({ event, wait }) => ({
     key: event.eventId,
@@ -259,7 +253,7 @@ export default function SiteAnalytics({ users, events, contactMessages }) {
     title: event.name,
     detail: charts.waiting.detail(
       event.organiser,
-      shortDate.format(new Date(event.orgUpdatedAt ?? event.createdAt)),
+      formatDayMonth(event.orgUpdatedAt ?? event.createdAt),
     ),
     end: <span className={`badge tone-${waitTone(wait)}`}>{formatWait(wait)}</span>,
   }));
@@ -277,7 +271,7 @@ export default function SiteAnalytics({ users, events, contactMessages }) {
     key: event.eventId,
     lead: index + 1,
     title: event.name,
-    detail: `${event.category} · ${shortDate.format(new Date(event.startDatetime))}`,
+    detail: `${event.category} · ${formatDayMonth(event.startDatetime)}`,
     end: (
       <>
         <Heart aria-hidden="true" />
@@ -312,7 +306,7 @@ export default function SiteAnalytics({ users, events, contactMessages }) {
       title: user.username,
       detail: charts.suspensions.detail(
         user.suspensionReason,
-        shortDate.format(new Date(user.suspendedUntil)),
+        formatDayMonth(user.suspendedUntil),
       ),
       // Ending within 3 days: the account is back soon, worth a look
       end: (

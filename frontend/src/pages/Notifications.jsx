@@ -20,22 +20,7 @@ import {
   notificationsSummary,
   notificationsView,
 } from "../data/notificationsData";
-
-const timeFormatter = new Intl.DateTimeFormat("en-GB", {
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
-const dayFormatter = new Intl.DateTimeFormat("en-GB", {
-  weekday: "short",
-  day: "numeric",
-  month: "short",
-});
-
-const summaryDateFormatter = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "short",
-});
+import { formatDayMonth, formatShortDay, formatTime } from "../lib/formatDates";
 
 // One row: collapsed to icon, subject and time; opening it shows the full
 // message and, only when it is about an event, View event. Cancelled events
@@ -74,7 +59,7 @@ function NotificationRow({ notification, group, isOpen, onToggle, onMarkRead }) 
                 </span>
               </span>
               <time className="notification-row-time" dateTime={notification.createdAt}>
-                {group === "today" ? timeFormatter.format(created) : dayFormatter.format(created)}
+                {group === "today" ? formatTime(created) : formatShortDay(created)}
               </time>
             </span>
             <ChevronDown className="notification-row-chevron" aria-hidden="true" />
@@ -227,7 +212,7 @@ export default function Notifications({ notifications: loaded, onLoad, onMarkRea
                   {unreadCount} {notificationsSummary.unread}
                 </strong>
                 <span aria-hidden="true"> · </span>
-                {notificationsSummary.newest} {summaryDateFormatter.format(newest)}
+                {notificationsSummary.newest} {formatDayMonth(newest)}
               </>
             )
           }

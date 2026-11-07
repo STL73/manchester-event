@@ -16,8 +16,7 @@ import {
   systemLogsPage,
   systemLogsSection,
 } from "../data/systemLogsData";
-
-const dayFormatter = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short" });
+import { formatShortDay } from "../lib/formatDates";
 
 function dayKey(value) {
   const date = new Date(value);
@@ -29,7 +28,7 @@ function dayLabel(value, now) {
   const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
   if (dayKey(value) === dayKey(now)) return systemLogsPage.days.today;
   if (dayKey(value) === dayKey(yesterday)) return systemLogsPage.days.yesterday;
-  return dayFormatter.format(new Date(value));
+  return formatShortDay(value);
 }
 
 // Admin page from system_logs.php, as an activity feed by day (decided
@@ -96,7 +95,7 @@ export default function SystemLogs() {
                 {view === "all" && page === 1 && entries.length > 0 && (
                   <>
                     <span aria-hidden="true"> · </span>
-                    {summary.newest} {dayFormatter.format(new Date(entries[0].log.createdAt))}
+                    {summary.newest} {formatShortDay(entries[0].log.createdAt)}
                   </>
                 )}
                 {counts.failed > 0 && (

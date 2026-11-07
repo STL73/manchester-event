@@ -1,3 +1,5 @@
+import { formatDayNumber, formatMonthShort } from "../../lib/formatDates";
+
 // The rows of a list panel (Up next, Most saved, Waiting longest), edge to
 // edge like the admin lists: something at the start (a rank, a date, an
 // icon), a name with one line under it, and a figure or badge at the end
@@ -19,15 +21,12 @@ export default function ChartList({ items }) {
 }
 
 // A date as a small tile at the start of a row: "24" over "Oct"
-const dayFormat = new Intl.DateTimeFormat("en-GB", { day: "numeric" });
-const monthFormat = new Intl.DateTimeFormat("en-GB", { month: "short" });
-
 export function DateTile({ date }) {
   const value = new Date(date);
   return (
     <span className="chart-list-date">
-      <strong>{dayFormat.format(value)}</strong>
-      <small>{monthFormat.format(value)}</small>
+      <strong>{formatDayNumber(value)}</strong>
+      <small>{formatMonthShort(value)}</small>
     </span>
   );
 }

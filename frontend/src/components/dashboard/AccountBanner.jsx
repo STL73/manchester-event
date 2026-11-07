@@ -4,12 +4,7 @@ import { MailWarning, Send, ShieldAlert } from "lucide-react";
 import Button from "../UI/Button";
 import { api } from "../../lib/api";
 import { accountBanners } from "../../data/profileSettingsData";
-
-const dateFormatter = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
+import { formatDate } from "../../lib/formatDates";
 
 // Only when something limits the account: an unverified email or a
 // suspension. Admins never get either. On Settings and on Home, so a new
@@ -32,7 +27,7 @@ export default function AccountBanner({ account, className = "" }) {
 
   if (account.accStatus === "suspended") {
     const { suspended } = accountBanners;
-    const until = account.suspendedUntil && dateFormatter.format(new Date(account.suspendedUntil));
+    const until = account.suspendedUntil && formatDate(account.suspendedUntil);
     return (
       <div className={`callout settings-banner tone-danger ${className}`.trim()} role="status">
         <ShieldAlert aria-hidden="true" />

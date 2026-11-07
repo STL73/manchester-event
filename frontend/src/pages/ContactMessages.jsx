@@ -21,15 +21,8 @@ import {
   messageSortOptions,
   messageViews,
 } from "../data/contactMessagesData";
-
-const shortDateFormatter = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
-const fullDateFormatter = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-});
+import { formatDateTime, formatDayMonth } from "../lib/formatDates";
+import { fieldErrors } from "../lib/api";
 
 function initials(name) {
   return name.replace(/[^a-z]/gi, "").slice(0, 2).toUpperCase();
@@ -59,7 +52,7 @@ function Summary({ messages }) {
         text.allRead
       )}
       <span aria-hidden="true"> · </span>
-      {text.newest} {shortDateFormatter.format(new Date(messages[0].createdAt))}
+      {text.newest} {formatDayMonth(messages[0].createdAt)}
       {replied > 0 && (
         <>
           <span aria-hidden="true"> · </span>
@@ -159,8 +152,8 @@ export default function ContactMessages({ contactMessages, users, currentUserId,
     try {
       await onReply(openMessage.messageId, reply.trim());
     } catch (error) {
-      const replyRefused = error.details?.find(({ path }) => path === "body.reply");
-      if (replyRefused) setReplyError(replyRefused.message);
+      const replyRefused = fieldErrors(error).reply;
+      if (replyRefused) setReplyError(replyRefused);
       else setPanelError(error.message);
       return;
     } finally {
@@ -276,7 +269,7 @@ export default function ContactMessages({ contactMessages, users, currentUserId,
                     <span className="message-meta">
                       {message.repliedAt && <span className="badge tone-success">{contactMessagesPage.replied}</span>}
                       {!message.userId && <span className="badge tone-accent">{contactMessagesPage.guest}</span>}
-                      <time dateTime={message.createdAt}>{shortDateFormatter.format(new Date(message.createdAt))}</time>
+                      <time dateTime={message.createdAt}>{formatDayMonth(message.createdAt)}</time>
                     </span>
                   </li>
                 ))}
@@ -317,7 +310,7 @@ export default function ContactMessages({ contactMessages, users, currentUserId,
                     {" · "}
                     {sender ? (
                       <Link className="log-entry-link" to={`/dashboard/manage-users?open=${sender.userId}`}>
-                        {messagePanel.account(roleLabels[sender.role] ?? sender.role, shortDateFormatter.format(new Date(sender.createdAt)))}
+                        {messagePanel.account(roleLabels[sender.role] ?? sender.role, formatDayMonth(sender.createdAt))}
                       </Link>
                     ) : (
                       messagePanel.guestNote
@@ -326,7 +319,7 @@ export default function ContactMessages({ contactMessages, users, currentUserId,
                 </div>
               </div>
               <p className="admin-hint">
-                {messagePanel.sent} {fullDateFormatter.format(new Date(openMessage.createdAt))}
+                {messagePanel.sent} {formatDateTime(openMessage.createdAt)}
               </p>
               <p className="message-body">{openMessage.message}</p>
 
@@ -338,7 +331,7 @@ export default function ContactMessages({ contactMessages, users, currentUserId,
                   <p className="message-reply-title">
                     <Check aria-hidden="true" />
                     {messagePanel.repliedOn(
-                      shortDateFormatter.format(new Date(openMessage.repliedAt)),
+                      formatDayMonth(openMessage.repliedAt),
                       openMessage.repliedBy === currentUserId,
                       openMessage.repliedByName,
                     )}

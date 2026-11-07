@@ -10,7 +10,6 @@ import {
   SquarePen,
   Ticket,
 } from "lucide-react";
-import { isUpcoming } from "../lib/eventDates";
 
 // Dashboard pages open event details inside the dashboard;
 // the public Events page opens them full screen
@@ -77,17 +76,6 @@ export const eventDetailsPage = {
   },
 };
 
-// What an event is now: an approved event whose time has gone reads as past
-export function eventState(event, now) {
-  if (event.status === "approved" && !isUpcoming(event, now)) return "past";
-  return event.status;
-}
-
-// Once public, an event can only be cancelled, never deleted (the server's answer)
-export function hasBeenPublic(event) {
-  return event.hasBeenPublic;
-}
-
 // The categories table from the PHP project's insert data, in the same order
 export const eventCategories = [
   { id: "music", name: "Music", description: "Live concerts, open mics, gigs, DJ sets and music festivals" },
@@ -122,8 +110,3 @@ export const eventLocations = [
   { id: "salford", name: "Salford" },
   { id: "heaton-park", name: "Heaton Park" },
 ];
-
-// Public pages only show approved events, like get_all_public_events()
-export function isPublicEvent(event) {
-  return event.status === "approved";
-}

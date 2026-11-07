@@ -8,6 +8,7 @@ import StatusMessage from "../components/UI/StatusMessage";
 import { contactMessagesText } from "../data/contactMessagesData";
 import { contactPageData } from "../data/contactPageData";
 import { featuredQuestions } from "../data/faqData";
+import { fieldErrors } from "../lib/api";
 
 // `account` ({ name, email }) is the signed-in person inside the dashboard:
 // those two fields show locked and are sent from the account
@@ -25,7 +26,7 @@ export default function Contact({ onSendMessage, inDashboard = false, account })
   const [status, setStatus] = useState(null);
   // The server's refusal: under its field when it names one, otherwise as
   // the message above the form
-  const [fieldErrors, setFieldErrors] = useState({});
+  const [errors, setErrors] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
   const [sending, setSending] = useState(false);
 
@@ -41,7 +42,7 @@ export default function Contact({ onSendMessage, inDashboard = false, account })
     const message = String(data.get("message") ?? "").trim();
     const website = String(data.get("website") ?? "");
 
-    setFieldErrors({});
+    setErrors({});
     if (!name || !email || !message) {
       setErrorMessage(contactMessagesText.error);
       setStatus("error");
@@ -52,11 +53,8 @@ export default function Contact({ onSendMessage, inDashboard = false, account })
     try {
       await onSendMessage(account ? { message, website } : { name, email, message, website });
     } catch (error) {
-      // "body.email" names the field "email"
-      const refused = Object.fromEntries(
-        (error.details ?? []).map(({ path, message: text }) => [path.split(".").at(-1), text]),
-      );
-      setFieldErrors(refused);
+      const refused = fieldErrors(error);
+      setErrors(refused);
       setErrorMessage(Object.keys(refused).length > 0 ? contactMessagesText.error : error.message);
       setStatus("error");
       const firstField = form.fields.find((field) => refused[field.id]);
@@ -143,8 +141,8 @@ export default function Contact({ onSendMessage, inDashboard = false, account })
                       name={field.id}
                       rows="4"
                       placeholder={field.placeholder}
-                      aria-invalid={Boolean(fieldErrors[field.id])}
-                      aria-describedby={fieldErrors[field.id] ? `${field.id}-error` : undefined}
+                      aria-invalid={Boolean(errors[field.id])}
+                      aria-describedby={errors[field.id] ? `${field.id}-error` : undefined}
                       required
                     />
                   ) : (
@@ -154,12 +152,12 @@ export default function Contact({ onSendMessage, inDashboard = false, account })
                       type={field.type}
                       placeholder={field.placeholder}
                       autoComplete={field.autoComplete}
-                      aria-invalid={Boolean(fieldErrors[field.id])}
-                      aria-describedby={fieldErrors[field.id] ? `${field.id}-error` : undefined}
+                      aria-invalid={Boolean(errors[field.id])}
+                      aria-describedby={errors[field.id] ? `${field.id}-error` : undefined}
                       required
                     />
                   )}
-                  {fieldErrors[field.id] && <FieldError id={`${field.id}-error`}>{fieldErrors[field.id]}</FieldError>}
+                  {errors[field.id] && <FieldError id={`${field.id}-error`}>{errors[field.id]}</FieldError>}
                 </div>
               ),
             )}
@@ -182,7 +180,7 @@ export default function Contact({ onSendMessage, inDashboard = false, account })
                 size="md"
                 onClick={() => {
                   setStatus(null);
-                  setFieldErrors({});
+                  setErrors({});
                 }}
               >
                 <actions.reset.icon aria-hidden="true" />

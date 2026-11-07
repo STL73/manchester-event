@@ -6,14 +6,7 @@ import Tooltip from "../UI/Tooltip";
 import { eventDetailsPath } from "../../data/eventsData";
 import { organiserEventActions } from "../../data/organiserEventsData";
 import { addToCalendar } from "../../data/myFavouritesData";
-
-const dateFormatter = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-});
+import { formatDateTime } from "../../lib/formatDates";
 
 export default function EventCard({
   event,
@@ -98,7 +91,7 @@ export default function EventCard({
         {event.startDatetime && (
           <p className="event-card-detail">
             <CalendarDays className="event-card-icon" aria-hidden="true" />
-            {dateFormatter.format(new Date(event.startDatetime))}
+            {formatDateTime(event.startDatetime)}
           </p>
         )}
         {note && (

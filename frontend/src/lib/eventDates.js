@@ -1,4 +1,5 @@
 // Date rules for public event lists, shared by Explore Events and Home.
+import { startOfDay } from "./formatDates";
 
 // An event is over once COALESCE(end_datetime, start_datetime) has gone by:
 // the same rule the database uses instead of storing a "past" status
@@ -8,10 +9,6 @@ export function isUpcoming(event, now) {
 
 export function bySoonest(a, b) {
   return new Date(a.startDatetime) - new Date(b.startDatetime);
-}
-
-function startOfDay(date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
 function addDays(date, days) {

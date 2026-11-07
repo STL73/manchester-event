@@ -1,5 +1,4 @@
 import { CalendarArrowUp, CalendarPlus, Pencil, Trash2 } from "lucide-react";
-import { hasBeenPublic } from "./eventsData";
 
 // Buttons shared by the organiser dashboard, My Events and My Drafts
 export const organiserEventActions = {
@@ -24,17 +23,13 @@ export const organiserEventMessages = {
 // Which buttons an organiser's event card shows, by eventState(). An event
 // can be deleted only before it has ever been public (a pending edit of a
 // live event has been); once live it can be edited (cancelling is on the
-// edit page); past and cancelled are view only
+// edit page); past and cancelled are view only. hasBeenPublic is the server's
 export function organiserCardActions(state, event) {
   return {
     canEdit: ["draft", "pending", "rejected", "approved"].includes(state),
-    canDelete: ["draft", "pending", "rejected"].includes(state) && !(event && hasBeenPublic(event)),
+    canDelete: ["draft", "pending", "rejected"].includes(state) && !event?.hasBeenPublic,
   };
 }
-
-// Organisers read "approved" as "live": it says the event is public. Admins
-// keep the stored status, the word they approve with
-export const organiserStatusLabels = { approved: "live" };
 
 // Future route for edit_event.php
 export function editEventPath(eventId) {

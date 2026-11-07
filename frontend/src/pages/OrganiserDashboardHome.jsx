@@ -4,31 +4,20 @@ import Button from "../components/UI/Button";
 import DashboardCard from "../components/UI/DashboardCard";
 import EventCard from "../components/events/EventCard";
 import StatusMessage from "../components/UI/StatusMessage";
-import { eventDetailsPath, eventState } from "../data/eventsData";
+import { eventDetailsPath } from "../data/eventsData";
+import { eventState, statusLabel } from "../lib/eventStatus";
 import { organiserInsights } from "../data/organiserDashboardData";
 import {
   editEventPath,
   organiserCardActions,
   organiserEventActions,
   organiserEventMessages,
-  organiserStatusLabels,
 } from "../data/organiserEventsData";
 import { bySoonest, isUpcoming } from "../lib/eventDates";
 import EmptyState from "../components/UI/EmptyState";
 import { countBy } from "../lib/analytics";
 import { useApi } from "../lib/useApi";
-
-const DAY = 24 * 60 * 60 * 1000;
-
-const shortDate = new Intl.DateTimeFormat("en-GB", {
-  weekday: "short",
-  day: "numeric",
-  month: "short",
-});
-
-function daysSince(date, now) {
-  return Math.floor((now - new Date(date)) / DAY);
-}
+import { daysSince, formatShortDay } from "../lib/formatDates";
 
 // The oldest of a list by a date field, or undefined when it's empty
 function oldest(events, getDate) {
@@ -67,7 +56,7 @@ function getOrganiserInsights(events, saveRows, savesFailed) {
       ...text.live,
       count: live.length,
       action: nextLive && {
-        label: `${text.live.next} ${shortDate.format(new Date(nextLive.startDatetime))}`,
+        label: `${text.live.next} ${formatShortDay(nextLive.startDatetime)}`,
         to: eventDetailsPath(nextLive.eventId, true),
       },
       detail: live.length === 0 ? text.live.none : undefined,
@@ -183,7 +172,7 @@ export default function OrganiserDashboardHome({ organiserEvents: events, onDele
                   key={event.eventId}
                   event={event}
                   status={state}
-                  statusLabel={organiserStatusLabels[state]}
+                  statusLabel={statusLabel(state, "organiser")}
                   editTo={canEdit ? editEventPath(event.eventId) : undefined}
                   onDelete={canDelete ? handleDelete : undefined}
                 />

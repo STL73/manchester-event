@@ -1,44 +1,16 @@
 import { CalendarArrowDown, CalendarDays, Heart, MapPin, Tag, UserRound } from "lucide-react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Button from "../components/UI/Button";
-import { eventDetailsPage, eventDetailsPath, eventState } from "../data/eventsData";
+import { eventDetailsPage, eventDetailsPath } from "../data/eventsData";
 import { addToCalendar } from "../data/myFavouritesData";
-import { organiserStatusLabels } from "../data/organiserEventsData";
+import { eventState, statusLabel } from "../lib/eventStatus";
 import { downloadEventIcs } from "../lib/calendar";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import EmptyState from "../components/UI/EmptyState";
 import PageLoading from "../components/UI/PageLoading";
 import { toEvent } from "../lib/publicEvents";
 import { useApi } from "../lib/useApi";
-
-const dayFormatter = new Intl.DateTimeFormat("en-GB", {
-  weekday: "long",
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-});
-
-const timeFormatter = new Intl.DateTimeFormat("en-GB", {
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
-const endDayFormatter = new Intl.DateTimeFormat("en-GB", {
-  weekday: "short",
-  day: "numeric",
-  month: "short",
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
-// "19:30 – 23:00", or the end's day too when it finishes on another one
-function timeRange(event) {
-  const start = new Date(event.startDatetime);
-  if (!event.endDatetime) return timeFormatter.format(start);
-  const end = new Date(event.endDatetime);
-  const sameDay = start.toDateString() === end.toDateString();
-  return `${timeFormatter.format(start)} – ${(sameDay ? timeFormatter : endDayFormatter).format(end)}`;
-}
+import { formatLongDay, formatTimeRange } from "../lib/formatDates";
 
 function mapsUrl(event) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.address ?? event.location)}`;
@@ -52,7 +24,7 @@ function StateBanner({ event, state, role }) {
   if (!banner) return null;
   const text =
     state === "past"
-      ? `${banner.text} ${dayFormatter.format(new Date(event.startDatetime))}.`
+      ? `${banner.text} ${formatLongDay(event.startDatetime)}.`
       : (banner[role] ?? banner.text);
 
   return (
@@ -170,7 +142,7 @@ function EventDetailsBody({ event, TitleTag, titleId, role, favouriteIds, onTogg
             </p>
             {isStaff && (
               <span className={`badge status-${state}`}>
-                {(role === "organiser" && organiserStatusLabels[state]) || state}
+                {statusLabel(state, role)}
               </span>
             )}
           </div>
@@ -184,8 +156,8 @@ function EventDetailsBody({ event, TitleTag, titleId, role, favouriteIds, onTogg
             <li className="event-details-fact">
               <CalendarDays aria-hidden="true" />
               <p>
-                <strong>{dayFormatter.format(new Date(event.startDatetime))}</strong>
-                {timeRange(event)}
+                <strong>{formatLongDay(event.startDatetime)}</strong>
+                {formatTimeRange(event)}
               </p>
             </li>
             <li className="event-details-fact">

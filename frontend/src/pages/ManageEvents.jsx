@@ -13,43 +13,18 @@ import SearchBar from "../components/events/SearchBar";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import EmptyState from "../components/UI/EmptyState";
 import PageLoading from "../components/UI/PageLoading";
-import {
-  eventCategories,
-  eventDetailsPath,
-  eventLocations,
-  eventState,
-} from "../data/eventsData";
+import { eventCategories, eventDetailsPath, eventLocations } from "../data/eventsData";
+import { eventState, statusLabel } from "../lib/eventStatus";
 import {
   eventPanel,
   eventSortOptions,
-  eventStatuses,
   eventViews,
   manageEventsDecisions,
   manageEventsMessages,
   manageEventsPage,
 } from "../data/manageEventsData";
-
-const DAY = 24 * 60 * 60 * 1000;
-
-const whenFormatter = new Intl.DateTimeFormat("en-GB", {
-  weekday: "short",
-  day: "numeric",
-  month: "short",
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
-const longDayFormatter = new Intl.DateTimeFormat("en-GB", {
-  weekday: "long",
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-});
-
-const timeFormatter = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit" });
-const shortDateFormatter = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
-
-const statusLabels = Object.fromEntries(eventStatuses.map(({ value, label }) => [value, label]));
+import { daysSince, formatDayMonth, formatLongDay, formatShortDayTime, formatTimeRange } from "../lib/formatDates";
+import { fieldErrors } from "../lib/api";
 
 // The search bar's fields; view, sort, page and the open panel live in the
 // URL too, so a link (or Back) brings the same list back
@@ -66,10 +41,6 @@ function submittedAt(event) {
   return event.orgUpdatedAt ?? event.createdAt;
 }
 
-function daysSince(value, now) {
-  return Math.max(0, Math.floor((now - new Date(value)) / DAY));
-}
-
 // The line under an event's name: what happened to it last
 function contextLine(event, state, now, currentUserId) {
   const { context } = manageEventsPage;
@@ -79,14 +50,14 @@ function contextLine(event, state, now, currentUserId) {
     return event.approvedSnapshot ? context.pendingEdit(days) : context.pending(days);
   }
   if (state === "approved" && event.adminUpdatedAt) {
-    return context.approved(shortDateFormatter.format(new Date(event.adminUpdatedAt)), byYou);
+    return context.approved(formatDayMonth(event.adminUpdatedAt), byYou);
   }
   if (state === "rejected" && event.adminUpdatedAt) {
-    return context.rejected(shortDateFormatter.format(new Date(event.adminUpdatedAt)), byYou);
+    return context.rejected(formatDayMonth(event.adminUpdatedAt), byYou);
   }
   // A reason on a cancelled event means an admin took it down
   if (state === "cancelled" && event.rejectionReason && event.adminUpdatedAt) {
-    return context.takenDown(shortDateFormatter.format(new Date(event.adminUpdatedAt)), byYou);
+    return context.takenDown(formatDayMonth(event.adminUpdatedAt), byYou);
   }
   return context[state] ?? "";
 }
@@ -104,14 +75,6 @@ const sorters = {
   az: (a, b) => a.event.name.localeCompare(b.event.name),
 };
 
-// "19:30 – 23:00", or the end's day too when it is on another one
-function timeRange(event) {
-  const start = new Date(event.startDatetime);
-  if (!event.endDatetime) return timeFormatter.format(start);
-  const end = new Date(event.endDatetime);
-  return `${timeFormatter.format(start)} – ${(start.toDateString() === end.toDateString() ? timeFormatter : whenFormatter).format(end)}`;
-}
-
 // What differs between the approved snapshot and the edit waiting
 function changedFields(event) {
   const { fields, updated } = eventPanel.changes;
@@ -120,7 +83,7 @@ function changedFields(event) {
   const show = (key, value) =>
     key === "startDatetime" || key === "endDatetime"
       ? value
-        ? whenFormatter.format(new Date(value))
+        ? formatShortDayTime(value)
         : "—"
       : value;
 
@@ -148,7 +111,7 @@ function EventReview({ event, state, events, decision, onDecision, reason, onRea
       <img className="admin-review-photo" src={event.image} alt="" />
       <div className="flex flex-col gap-2">
         <div className="admin-review-badges">
-          <span className={`badge status-${state}`}>{statusLabels[state] ?? state}</span>
+          <span className={`badge status-${state}`}>{statusLabel(state)}</span>
           {event.approvedSnapshot && pending && <span className="badge tone-accent">{manageEventsPage.editOfLive}</span>}
         </div>
         <h3 className="admin-review-name">{event.name}</h3>
@@ -180,8 +143,8 @@ function EventReview({ event, state, events, decision, onDecision, reason, onRea
         <li className="event-details-fact">
           <CalendarDays aria-hidden="true" />
           <p>
-            <strong>{longDayFormatter.format(new Date(event.startDatetime))}</strong>
-            {timeRange(event)}
+            <strong>{formatLongDay(event.startDatetime)}</strong>
+            {formatTimeRange(event)}
           </p>
         </li>
         <li className="event-details-fact">
@@ -364,8 +327,8 @@ export default function ManageEvents({ events, currentUserId, onDecide }) {
       if (decision === "approve") await onDecide(event.eventId, "approve");
       else await onDecide(event.eventId, decision === "takeDown" ? "take-down" : "reject", reason.trim());
     } catch (error) {
-      const reasonRefused = error.details?.find(({ path }) => path === "body.reason");
-      if (reasonRefused) setReasonError(reasonRefused.message);
+      const reasonRefused = fieldErrors(error).reason;
+      if (reasonRefused) setReasonError(reasonRefused);
       else setPanelError(error.message);
       return;
     } finally {
@@ -504,9 +467,9 @@ export default function ManageEvents({ events, currentUserId, onDecide }) {
                       </div>
                     </div>
                     <span className="admin-row-cell admin-row-hide">{event.organiser}</span>
-                    <span className="admin-row-cell admin-row-meta">{whenFormatter.format(new Date(event.startDatetime))}</span>
+                    <span className="admin-row-cell admin-row-meta">{formatShortDayTime(event.startDatetime)}</span>
                     <span className="admin-row-status">
-                      <span className={`badge status-${state}`}>{statusLabels[state] ?? state}</span>
+                      <span className={`badge status-${state}`}>{statusLabel(state)}</span>
                     </span>
                     <span className="admin-row-action" aria-hidden="true">
                       <span className={`admin-row-cue ${state === "pending" ? "is-primary" : ""}`}>

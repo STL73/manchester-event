@@ -13,9 +13,7 @@ import {
   preferencesSummary,
   yourPicks,
 } from "../data/preferencesData";
-
-const dayFormatter = new Intl.DateTimeFormat("en-GB", { day: "numeric" });
-const monthFormatter = new Intl.DateTimeFormat("en-GB", { month: "short" });
+import { formatDayNumber, formatMonthShort } from "../lib/formatDates";
 
 // An event has one category, so the events matching several are the sum of
 // each one's count
@@ -187,8 +185,8 @@ export default function Preferences({ interestIds, onSaveInterests }) {
                       <li key={event.eventId}>
                         <Link className="preferences-coming-item" to={`/dashboard/events/${event.eventId}`}>
                           <span className="preferences-coming-date">
-                            <span className="preferences-coming-day">{dayFormatter.format(start)}</span>
-                            <span className="preferences-coming-month">{monthFormatter.format(start)}</span>
+                            <span className="preferences-coming-day">{formatDayNumber(start)}</span>
+                            <span className="preferences-coming-month">{formatMonthShort(start)}</span>
                           </span>
                           <span className="flex min-w-0 flex-col">
                             <span className="preferences-coming-name">{event.name}</span>

@@ -5,6 +5,7 @@ import FieldError from "../UI/FieldError";
 import PasswordInput from "../UI/PasswordInput";
 import StatusMessage from "../UI/StatusMessage";
 import { passwordForm } from "../../data/profileSettingsData";
+import { fieldErrors } from "../../lib/api";
 
 const emptyPasswords = { current: "", next: "", confirm: "" };
 
@@ -57,8 +58,8 @@ export default function PasswordSettings({ email, onChange }) {
       setRound((currentRound) => currentRound + 1);
       setSaved(true);
     } catch (saveError) {
-      const wrongCurrent = saveError.details?.find(({ path }) => path === "body.currentPassword");
-      setError(wrongCurrent ? { current: wrongCurrent.message } : { form: saveError.message });
+      const wrongCurrent = fieldErrors(saveError).currentPassword;
+      setError(wrongCurrent ? { current: wrongCurrent } : { form: saveError.message });
     } finally {
       setSaving(false);
     }

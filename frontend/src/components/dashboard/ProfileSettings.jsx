@@ -10,6 +10,7 @@ import {
   profileForm,
   profileMessages,
 } from "../../data/profileSettingsData";
+import { fieldErrors } from "../../lib/api";
 
 // Picture and display name, saved together (the picture on Cloudinary through
 // the server, Phase 6); the email is shown locked.
@@ -82,8 +83,8 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
       setSaved(true);
     } catch (saveError) {
       // A refused picture says why under it (type, or a file that isn't an image)
-      const pictureError = saveError.details?.find(({ path }) => path === "body.avatar");
-      if (pictureError) setAvatarError(pictureError.message);
+      const pictureError = fieldErrors(saveError).avatar;
+      if (pictureError) setAvatarError(pictureError);
       else setError(saveError.message);
     } finally {
       setSaving(false);

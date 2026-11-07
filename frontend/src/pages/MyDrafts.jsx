@@ -15,11 +15,7 @@ import {
   myDraftsTitle,
 } from "../data/myDraftsData";
 import { editEventPath, organiserEventActions } from "../data/organiserEventsData";
-
-const editedFormatter = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "short",
-});
+import { formatDayMonth } from "../lib/formatDates";
 
 // The same cards as My Events (decided 2026-10-12; the PHP had a table), so
 // a draft looks the way it will once live. Submit is each card's labelled
@@ -88,7 +84,7 @@ export default function MyDrafts({
                 <strong>{drafts.length}</strong>{" "}
                 {drafts.length === 1 ? myDraftsSummary.one : myDraftsSummary.many}
                 <span aria-hidden="true"> · </span>
-                {myDraftsSummary.lastEdited} {editedFormatter.format(lastEdited)}
+                {myDraftsSummary.lastEdited} {formatDayMonth(lastEdited)}
               </>
             )
           }
@@ -123,7 +119,7 @@ export default function MyDrafts({
                   status="draft"
                   note={{
                     icon: lastEditedNote.icon,
-                    text: `${lastEditedNote.text} ${editedFormatter.format(new Date(draft.updatedAt))}`,
+                    text: `${lastEditedNote.text} ${formatDayMonth(draft.updatedAt)}`,
                   }}
                   primaryAction={
                     canSubmit

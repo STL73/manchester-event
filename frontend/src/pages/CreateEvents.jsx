@@ -9,7 +9,8 @@ import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import EmptyState from "../components/UI/EmptyState";
 import PageLoading from "../components/UI/PageLoading";
 import VenueSearch from "../components/events/VenueSearch";
-import { eventCategories, eventDetailsPage, eventState, hasBeenPublic } from "../data/eventsData";
+import { eventCategories, eventDetailsPage } from "../data/eventsData";
+import { eventState } from "../lib/eventStatus";
 import {
   afterSave,
   allowedImageTypes,
@@ -23,8 +24,10 @@ import {
   maxImageSize,
   submitChecklist,
 } from "../data/createEventsData";
+import { fieldErrors } from "../lib/api";
 import { toLondonInput } from "../lib/organiserEvents";
 import { defaultEventImage as placeholder } from "../lib/publicEvents";
+import { formatDayMonth } from "../lib/formatDates";
 
 const emptyForm = {
   eventName: "",
@@ -38,8 +41,6 @@ const emptyForm = {
 };
 
 const requiredFields = Object.keys(emptyForm).filter((field) => field !== "endDatetime");
-
-const editedFormatter = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
 
 // Fill the form from an existing event (edit mode). Times as a Manchester
 // clock shows them, which is what the datetime-local inputs hold
@@ -106,13 +107,10 @@ function bodyFromForm(form, submit) {
 // The API names some fields differently from the form
 const formFieldFor = { category: "categoryId", ticketUrl: "externalLink" };
 
-// The server's refusal as field errors ("body.ticketUrl" -> externalLink)
-function errorsFromServer(details = []) {
+// The server's refusal under the form's own names (ticketUrl -> externalLink)
+function errorsFromServer(error) {
   return Object.fromEntries(
-    details.map(({ path, message }) => {
-      const field = path.replace(/^body\./, "");
-      return [formFieldFor[field] ?? field, message];
-    }),
+    Object.entries(fieldErrors(error)).map(([field, message]) => [formFieldFor[field] ?? field, message]),
   );
 }
 
@@ -330,10 +328,10 @@ function EventForm({ isEdit, events, onCreateEvent, onUpdateEvent, onCancelEvent
         : await onCreateEvent(body, imageFile);
     } catch (error) {
       // Under its field when the server names one, otherwise over the form
-      const fieldErrors = errorsFromServer(error.details);
-      setErrors(fieldErrors);
+      const refused = errorsFromServer(error);
+      setErrors(refused);
       // The first in the form's order, not the server's; the photo comes last
-      const firstField = [...Object.keys(emptyForm), "image"].find((field) => fieldErrors[field]);
+      const firstField = [...Object.keys(emptyForm), "image"].find((field) => refused[field]);
       if (firstField) document.getElementById(firstField)?.focus();
       else setMessage({ text: error.message, variant: "error" });
       setSaving(false);
@@ -495,9 +493,9 @@ function EventForm({ isEdit, events, onCreateEvent, onUpdateEvent, onCancelEvent
   const banner = event
     ? editBanners[event.status === "pending" && event.editPending ? "pendingEdit" : event.status]
     : null;
-  const danger = event ? dangerZone[hasBeenPublic(event) ? "cancel" : "delete"] : null;
+  const danger = event ? dangerZone[event.hasBeenPublic ? "cancel" : "delete"] : null;
   const summaryText = event
-    ? `${editEventForm.summary[event.status] ?? event.status} · ${editEventForm.summary.lastEdited} ${editedFormatter.format(new Date(event.updatedAt))}`
+    ? `${editEventForm.summary[event.status] ?? event.status} · ${editEventForm.summary.lastEdited} ${formatDayMonth(event.updatedAt)}`
     : createEventForm.summary;
 
   return (
@@ -591,7 +589,7 @@ function EventForm({ isEdit, events, onCreateEvent, onUpdateEvent, onCancelEvent
                             variant="destructive"
                             size="md"
                             disabled={saving}
-                            onClick={() => handleDangerConfirm(hasBeenPublic(event) ? "cancel" : "delete")}
+                            onClick={() => handleDangerConfirm(event.hasBeenPublic ? "cancel" : "delete")}
                           >
                             <danger.icon aria-hidden="true" />
                             {danger.confirm}

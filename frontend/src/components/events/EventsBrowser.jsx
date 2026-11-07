@@ -9,18 +9,13 @@ import { eventCategories, eventLocations } from "../../data/eventsData";
 import { resultsText, whenOptions } from "../../data/exploreEventsData";
 import { eventsPath, toEvent } from "../../lib/publicEvents";
 import { useApi } from "../../lib/useApi";
+import { formatShortDay } from "../../lib/formatDates";
 
 const defaultFilters = { q: "", when: "", date: "", category: "", location: "" };
 const validViews = ["three", "two", "one"];
 // 12 fills whole rows in the three-, two- and one-column views
 const PAGE_SIZE = 12;
 const validWhens = whenOptions.map((option) => option.id);
-
-const chipDate = new Intl.DateTimeFormat("en-GB", {
-  weekday: "short",
-  day: "numeric",
-  month: "short",
-});
 
 // Values the API would refuse (a hand-typed area, a malformed date) are
 // dropped here, so the address can't turn the list into an error
@@ -55,7 +50,7 @@ function filterChips(filters) {
   const labels = {
     q: () => `"${filters.q.trim()}"`,
     when: () => whenOptions.find((option) => option.id === filters.when).label,
-    date: () => chipDate.format(new Date(`${filters.date}T00:00:00`)),
+    date: () => formatShortDay(`${filters.date}T00:00:00`),
     category: () => nameOf(eventCategories, filters.category),
     location: () => nameOf(eventLocations, filters.location),
   };
@@ -211,7 +206,7 @@ export default function EventsBrowser({
           <span className="events-when-date">
             <button className={`pill events-when-option ${filters.date ? "is-active" : ""}`} type="button" aria-pressed={Boolean(filters.date)} onClick={openDatePicker}>
               <CalendarDays aria-hidden="true" />
-              {filters.date ? chipDate.format(new Date(`${filters.date}T00:00:00`)) : resultsText.pickDate}
+              {filters.date ? formatShortDay(`${filters.date}T00:00:00`) : resultsText.pickDate}
             </button>
             <input ref={dateInputRef} className="events-when-date-input" type="date" min={localDate(now)} value={filters.date} onChange={handleDatePick} tabIndex={-1} aria-hidden="true" />
           </span>

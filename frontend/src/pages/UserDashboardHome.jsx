@@ -3,25 +3,14 @@ import Button from "../components/UI/Button";
 import DashboardCard from "../components/UI/DashboardCard";
 import EventCard from "../components/events/EventCard";
 import { userInsights } from "../data/userDashboardData";
-import { getFavouriteEvents, getNextFavourite } from "../data/myFavouritesData";
-import { eventCategories, eventDetailsPath, isPublicEvent } from "../data/eventsData";
+import { getFavouriteEvents, getNextFavourite } from "../lib/favourites";
+import { eventCategories, eventDetailsPath } from "../data/eventsData";
+import { isPublicEvent } from "../lib/eventStatus";
 import { isUpcoming } from "../lib/eventDates";
 import { eventsPath } from "../lib/publicEvents";
 import { useApi } from "../lib/useApi";
 import EmptyState from "../components/UI/EmptyState";
-
-const DAY = 24 * 60 * 60 * 1000;
-
-const shortDate = new Intl.DateTimeFormat("en-GB", {
-  weekday: "short",
-  day: "numeric",
-  month: "short",
-});
-
-const dayMonth = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "short",
-});
+import { DAY, formatDayMonth, formatShortDay } from "../lib/formatDates";
 
 // The four Quick Insights cards: what's coming for this user, each with
 // one line of context (see DashboardCard). Saved events are the user's real
@@ -63,7 +52,7 @@ function getUserInsights({ favouriteEvents, favouriteIds, interestIds, thisWeekC
       ...text.saved,
       count: saved.length,
       action: next && {
-        label: `${text.saved.next} ${shortDate.format(new Date(next.startDatetime))}`,
+        label: `${text.saved.next} ${formatShortDay(next.startDatetime)}`,
         to: eventDetailsPath(next.eventId, true),
       },
       // An event already under way is saved but has no "next" date
@@ -86,7 +75,7 @@ function getUserInsights({ favouriteEvents, favouriteIds, interestIds, thisWeekC
       count: unread.length,
       // App keeps notifications newest first
       action: unread[0] && {
-        label: `${text.unread.newest} ${dayMonth.format(new Date(unread[0].createdAt))}`,
+        label: `${text.unread.newest} ${formatDayMonth(unread[0].createdAt)}`,
         to: text.unread.to,
       },
       detail: text.unread.none,

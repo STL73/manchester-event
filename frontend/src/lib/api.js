@@ -11,6 +11,14 @@ export class ApiError extends Error {
   }
 }
 
+// The server's refusals by field, { email: "Email already in use" }: its paths
+// name the part of the request too ("body.email"), which a form doesn't need
+export function fieldErrors(error) {
+  return Object.fromEntries(
+    (error?.details ?? []).map(({ path, message }) => [path.replace(/^(body|query|params)\./, ""), message]),
+  );
+}
+
 // A form with a photo (Phase 6): the file under its field's name and the rest
 // of the form as JSON in `data`, which the server reads back as the usual body
 export function formWithFile(field, file, fields) {

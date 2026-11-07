@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import { Link } from "react-router-dom";
 import { dashboardGreeting } from "../../data/dashboardGreetingData";
 import { eventDetailsPath } from "../../data/eventsData";
-import { getNextFavourite } from "../../data/myFavouritesData";
+import { getNextFavourite } from "../../lib/favourites";
 import { getSiteTotals } from "../../lib/analytics";
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
