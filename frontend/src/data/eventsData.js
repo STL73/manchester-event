@@ -77,19 +77,15 @@ export const eventDetailsPage = {
   },
 };
 
-// What an event is now. Past is worked out from the dates, as the database
-// will (the mock data also stores "past"), so an approved event whose time
-// has gone reads as past everywhere
+// What an event is now: an approved event whose time has gone reads as past
 export function eventState(event, now) {
   if (event.status === "approved" && !isUpcoming(event, now)) return "past";
   return event.status;
 }
 
-// Once public, an event can only be cancelled, never deleted. An organiser's
-// events from the API carry the server's answer; the mock ones work it out
+// Once public, an event can only be cancelled, never deleted (the server's answer)
 export function hasBeenPublic(event) {
-  if (typeof event.hasBeenPublic === "boolean") return event.hasBeenPublic;
-  return Boolean(event.approvedSnapshot) || ["approved", "past", "cancelled"].includes(event.status);
+  return event.hasBeenPublic;
 }
 
 // The categories table from the PHP project's insert data, in the same order

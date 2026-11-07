@@ -454,9 +454,9 @@ export default function ManageEvents({ events, currentUserId, onDecide }) {
               locations={eventLocations}
               onChange={handleFilterChange}
               onSubmit={handleSearch}
-              showDate={false}
+             
               placeholder={manageEventsPage.searchPlaceholder}
-              className="events-search-no-date"
+             
             />
             <div className="events-when-row">
               <FilterPills

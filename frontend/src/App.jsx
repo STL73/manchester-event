@@ -18,7 +18,6 @@ import { api, formWithFile } from "./lib/api";
 import { toEvent } from "./lib/publicEvents";
 import { toOrganiserEvent } from "./lib/organiserEvents";
 import { toManagedEvent } from "./lib/managedEvents";
-import { toContactMessage } from "./lib/contactMessages";
 import { privacyPage, termsPage } from "./data/legalPagesData";
 
 import PageLoading from "./components/UI/PageLoading";
@@ -189,7 +188,7 @@ function App() {
           userId: adminUserId,
           events: managed.data.map(toManagedEvent),
           users: accounts.data,
-          messages: messages.data.map(toContactMessage),
+          messages: messages.data,
         }),
       (error) => {
         if (!current) return;
@@ -276,7 +275,7 @@ function App() {
     );
     api(`/contact-messages/${messageId}/read`, { method: "PUT", body: { read: isRead } }).catch(() =>
       api("/contact-messages").then(
-        ({ data }) => updateContactMessages(adminId, () => data.map(toContactMessage)),
+        ({ data }) => updateContactMessages(adminId, () => data),
         () => {},
       ),
     );
@@ -288,7 +287,7 @@ function App() {
     const adminId = adminUserId;
     const { data } = await api(`/contact-messages/${messageId}/reply`, { method: "PUT", body: { reply } });
     updateContactMessages(adminId, (list) =>
-      list.map((item) => (item.messageId === messageId ? toContactMessage(data) : item)),
+      list.map((item) => (item.messageId === messageId ? data : item)),
     );
   }
 

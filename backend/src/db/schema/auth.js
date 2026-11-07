@@ -14,7 +14,7 @@ export const sessions = pgTable('sessions', {
     expiresAt: timestamptz('expires_at').notNull(),
     createdAt,
 }, (table) => [
-    // Signing a user out everywhere (password change, suspension)
+    // Signing a user out everywhere (password change or reset)
     index('sessions_user_id_idx').on(table.userId),
 ]);
 

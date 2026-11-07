@@ -347,10 +347,9 @@ export default function ManageUsers({ users: loaded, currentUserId, onUpdateUser
                 submitEvent.preventDefault();
                 setParams({ q: query.trim(), page: null });
               }}
-              showDate={false}
+             
               showFilters={false}
               placeholder={manageUsersPage.searchPlaceholder}
-              className="events-search-keywords-only"
             />
             <div className="events-when-row">
               <FilterPills

@@ -54,8 +54,6 @@ export default function EventCard({
   // Cards on dashboard pages open the details inside the dashboard
   const { pathname } = useLocation();
   const inDashboard = pathname.startsWith("/dashboard");
-  // Past events can be viewed but not edited or deleted, as in the PHP
-  const isPast = status === "past";
   const detailsPath = eventDetailsPath(event.eventId, inDashboard);
 
   // The whole card opens the event: the title link is stretched over the
@@ -178,24 +176,18 @@ export default function EventCard({
               </Tooltip>
             )}
             {/* Organiser actions, shown when the page passes editTo/onDelete */}
-            {editTo &&
-              (isPast ? (
-                <Button type="button" variant="secondary" size="sm" disabled>
-                  <edit.icon aria-hidden="true" />
-                  {edit.label}
-                </Button>
-              ) : (
-                <Button
-                  to={editTo}
-                  state={{ from: pathname }}
-                  variant="secondary"
-                  size="sm"
-                  aria-label={`${edit.label} ${event.name}`}
-                >
-                  <edit.icon aria-hidden="true" />
-                  {edit.label}
-                </Button>
-              ))}
+            {editTo && (
+              <Button
+                to={editTo}
+                state={{ from: pathname }}
+                variant="secondary"
+                size="sm"
+                aria-label={`${edit.label} ${event.name}`}
+              >
+                <edit.icon aria-hidden="true" />
+                {edit.label}
+              </Button>
+            )}
             {onDelete && (
               <Button
                 ref={deleteRef}
@@ -203,7 +195,6 @@ export default function EventCard({
                 variant="danger"
                 size="sm"
                 aria-label={`${remove.label} ${event.name}`}
-                disabled={isPast}
                 onClick={() => setIsConfirming(true)}
               >
                 <remove.icon aria-hidden="true" />

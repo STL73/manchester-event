@@ -194,7 +194,7 @@ export default function EventsBrowser({
   // dashboard layout around them
   return (
     <>
-      <SearchBar filters={filters} categories={eventCategories} locations={eventLocations} onChange={handleFilterChange} onSubmit={handleSearchSubmit} showDate={false} className="events-search-no-date" />
+      <SearchBar filters={filters} categories={eventCategories} locations={eventLocations} onChange={handleFilterChange} onSubmit={handleSearchSubmit} />
 
       {/* Date pills and the layout switch share one row */}
       <div className="events-when-row">

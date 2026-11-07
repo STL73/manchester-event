@@ -1,9 +1,6 @@
-// Demo locations and events for npm run db:seed, ported from the mock events in
-// frontend/src/data/eventsData.js (same order, so mock event N is the Nth here).
-// Dates are { days, time } from the day the seed runs, or { weekend, time } for this
-// weekend, in Europe/London, so Tonight and This weekend always have something in
-// them. The place ids are made up and the coordinates approximate: Phase 5 replaces
-// both with real Google places. Never seeded in production
+// Demo venues and events for npm run db:seed. Dates are { days, time } or { weekend, time }
+// from the day the seed runs (Europe/London); place ids are made up, coordinates
+// approximate. Never seeded in production
 export const demoLocations = [
     { placeId: 'seed-albert-square-manchester-m2-5db', locationName: 'Albert Square', address: 'Albert Square, Manchester M2 5DB', latitude: 53.4794, longitude: -2.2453, area: 'city-centre' },
     { placeId: 'seed-stevenson-square-manchester-m1-1fb', locationName: 'Stevenson Square', address: 'Stevenson Square, Manchester M1 1FB', latitude: 53.483, longitude: -2.2357, area: 'northern-quarter' },

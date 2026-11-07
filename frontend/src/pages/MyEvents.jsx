@@ -259,8 +259,8 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
               locations={eventLocations}
               onChange={handleFilterChange}
               onSubmit={handleFilterSubmit}
-              showDate={false}
-              className="events-search-no-date"
+             
+             
             />
 
             {/* Where Explore has its date pills and view switcher */}

@@ -34,8 +34,6 @@ const navigationData = [
     role: [
       {
         type: "user",
-        user: "userName",
-        email: "user@email.com",
         avatar: CircleUserRound,
         mainNav: [
           { title: "Home", url: "/dashboard/home", icon: Home },
@@ -62,8 +60,6 @@ const navigationData = [
       },
       {
         type: "organiser",
-        user: "organiserName",
-        email: "organiser@email.com",
         avatar: CircleUserRound,
         mainNav: [
           { title: "Home", url: "/dashboard/home", icon: Home },
@@ -105,8 +101,6 @@ const navigationData = [
       },
       {
         type: "admin",
-        user: "adminName",
-        email: "admin@email.com",
         avatar: CircleUserRound,
         mainNav: [
           { title: "Home", url: "/dashboard/home", icon: Home },

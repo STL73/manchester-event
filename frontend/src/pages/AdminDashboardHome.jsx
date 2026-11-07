@@ -38,7 +38,7 @@ function getAdminInsights({ users, events, contactMessages }) {
 
   const unread = contactMessages
     .filter((message) => !message.readAt)
-    .sort((a, b) => a.sentAt.localeCompare(b.sentAt));
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 
   // Sign-ups in the last 30 days against the 30 days before
   const signUps = countTrend(
@@ -74,7 +74,7 @@ function getAdminInsights({ users, events, contactMessages }) {
       ...text.messages,
       count: unread.length,
       action: unread[0] && {
-        label: text.messages.oldest(daysSince(unread[0].sentAt, now)),
+        label: text.messages.oldest(daysSince(unread[0].createdAt, now)),
         to: text.messages.to,
       },
       detail: text.messages.none,

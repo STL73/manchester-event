@@ -15,9 +15,7 @@ export const siteAnalyticsTabs = [
   { value: "safety", label: "Safety and support" },
 ];
 
-// Stat cards (decided 2026-10-20): how the site grows, how much is saved and
-// how fast events are reviewed. Admin Home keeps its own cards
-// (siteTotalsCards), which are about what needs doing. Counted on the page
+// Stat cards: how the site grows, how much is saved and how fast events are reviewed
 export const siteAnalyticsCards = {
   users: { title: "Users", icon: Users },
   events: { title: "Events", icon: Calendars },

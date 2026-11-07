@@ -18,18 +18,6 @@ export default function DashboardHome({ selectedUser, account, onLoadNotificatio
     onLoadNotifications?.();
   }, [onLoadNotifications]);
 
-  if (!DashboardComponent) {
-    return (
-      <section className="dashboard-section" {...props}>
-        <h1 className="dashboard-title">Dashboard unavailable</h1>
-        <p className="content-p">
-          The {selectedUser?.type ?? "selected"} dashboard has not been created
-          yet.
-        </p>
-      </section>
-    );
-  }
-
   // Greeting on the home page only (the PHP repeated it on every dashboard page)
   return (
     <>

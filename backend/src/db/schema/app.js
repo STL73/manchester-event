@@ -87,7 +87,7 @@ export const events = pgTable('events', {
     // the seed's photos, which are files in the frontend
     imagePublicId: varchar('image_public_id', { length: 255 }),
     status: eventStatusEnum('status').notNull().default('draft'),
-    // Required by the app when an admin rejects
+    // An admin's reason for rejecting or taking down the event
     rejectionReason: text('rejection_reason'),
     // Copy of the last approved version: stays public while an edit is pending review,
     // and gives the admin a before/after view
