@@ -9,7 +9,7 @@ import ChartList from "../components/charts/ChartList";
 import DecisionChart from "../components/charts/DecisionChart";
 import FunnelSteps from "../components/charts/FunnelSteps";
 import FollowersHoneycomb from "../components/charts/FollowersHoneycomb";
-import PeriodSwitcher from "../components/charts/PeriodSwitcher";
+import PeriodSwitcher from "../components/UI/PeriodSwitcher";
 import ShareBar from "../components/charts/ShareBar";
 import StatusDonut from "../components/charts/StatusDonut";
 import TrendChart from "../components/charts/TrendChart";

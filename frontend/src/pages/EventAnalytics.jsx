@@ -7,7 +7,7 @@ import ChartCard from "../components/charts/ChartCard";
 import ChartFacts from "../components/charts/ChartFacts";
 import ChartList, { DateTile } from "../components/charts/ChartList";
 import CountBarChart from "../components/charts/CountBarChart";
-import PeriodSwitcher from "../components/charts/PeriodSwitcher";
+import PeriodSwitcher from "../components/UI/PeriodSwitcher";
 import ReachHoneycomb from "../components/charts/ReachHoneycomb";
 import StatusDonut from "../components/charts/StatusDonut";
 import TimelineChart from "../components/charts/TimelineChart";

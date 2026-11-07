@@ -89,11 +89,12 @@ frontend/src/
 │                      public, dashboard, admin
 ├── pages/             one file per route
 ├── components/
-│   ├── UI/            shared primitives: Button, DashboardCard, Tooltip
+│   ├── UI/            shared primitives: Button, DashboardCard, Tooltip, FilterPills,
+│   │                  DatePill (Pick a date), PeriodSwitcher, Avatar (initials), PageFrame
 │   ├── layout/        Navbar, Sidebar, MainNav, SecondaryNav, UserNav, Footer
 │   ├── events/        EventCard, EventsBrowser, SearchBar
 │   ├── charts/        Recharts wrappers
-│   ├── dashboard/     greeting and weather bar
+│   ├── dashboard/     greeting, weather bar, page heading, Quick Insights
 │   └── home/          public landing sections
 ├── data/              <name>Data.js page copy, config + helpers, one per page/feature
 ├── lib/               pure helpers (analytics.js: chart aggregation; formatDates,
@@ -236,7 +237,7 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
   bar is Explore's (keywords, category, location, Search), and the row under it holds status
   pills with counts in Explore's date-pill style (`?status=`, values are `eventState()`, so an
   approved event that has ended counts as past) and, on the right where Explore has its view
-  switcher, a Pick a date pill (any day, past too, `?date=`, with an x to clear) and a sort
+  switcher, a Pick a date pill (`UI/DatePill`: any day, past too, `?date=`, with an x to clear) and a sort
   dropdown. All of them apply at once. 12 per page. Organisers see "approved" as
   "Live" (`statusLabel(status, "organiser")` in `lib/eventStatus.js`, through `EventCard`'s
   `statusLabel` and on Event details); admins keep "Approved". Card buttons follow `organiserCardActions`: Delete only
@@ -379,8 +380,9 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
 - **Public pages inside the dashboard** (decided 2026-10-26): FAQs, Contact, About, Privacy and
   Terms also open beside the sidebar at `/dashboard/<page>` (About, Privacy, Terms for every role;
   FAQs and Contact for user and organiser, as the Help menu). Each page takes `inDashboard`, and
-  `UI/PageFrame` swaps the public hero for `DashboardPageHeading` (hero intro as the summary);
-  section headings become `.dashboard-title`. About drops its photo hero and closing pitch. Contact
+  `UI/PageFrame` swaps the public hero for `DashboardPageHeading` (hero intro as the summary,
+  or its `summary`: Explore Events uses it too, with none); section headings become
+  `.dashboard-title`. About drops its photo hero and closing pitch. Contact
   shows the account's name and email locked. Links between them, and from the sidebar and
   Settings, use the `/dashboard/` addresses (`dashboardTo` in the data); the public navbar and
   footer keep the public ones. Their layouts use container variants (`@2xl:`, `@3xl:`, `@5xl:`)

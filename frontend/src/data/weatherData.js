@@ -16,6 +16,9 @@ export const weatherPlace = {
   label: "Manchester, UK",
   url: "https://api.open-meteo.com/v1/forecast?latitude=53.4808&longitude=-2.2426&current=temperature_2m,weather_code,is_day&timezone=Europe%2FLondon",
   refreshMs: 15 * 60 * 1000,
+  // Shown until the first reading, and kept if the service is down, so the
+  // bar holds its place and the date and time never move
+  noReading: { temperature: "–", condition: "", icon: Cloud },
 };
 
 // WMO weather codes as Open-Meteo sends them, grouped: [highest code, words, day icon, night icon]

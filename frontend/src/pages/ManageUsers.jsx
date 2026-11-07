@@ -7,7 +7,7 @@ import Pagination from "../components/UI/Pagination";
 import SidePanel from "../components/UI/SidePanel";
 import SortSelect from "../components/UI/SortSelect";
 import StatusMessage from "../components/UI/StatusMessage";
-import PeriodSwitcher from "../components/charts/PeriodSwitcher";
+import PeriodSwitcher from "../components/UI/PeriodSwitcher";
 import SearchBar from "../components/events/SearchBar";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import EmptyState from "../components/UI/EmptyState";
@@ -26,11 +26,7 @@ import { formatDate, formatDayMonth } from "../lib/formatDates";
 import { statusLabel } from "../lib/eventStatus";
 import { fieldErrors } from "../lib/api";
 import { readPage, useUrlParams } from "../hooks/useUrlParams";
-
-// Two letters for the hexagon avatar
-function initials(name) {
-  return name.replace(/[^a-z]/gi, "").slice(0, 2).toUpperCase();
-}
+import Avatar from "../components/UI/Avatar";
 
 const sorters = {
   newest: (a, b) => b.createdAt.localeCompare(a.createdAt),
@@ -50,14 +46,6 @@ function suspensionText(user) {
   return user.suspendedUntil
     ? userPanel.suspendedUntil(formatDayMonth(user.suspendedUntil))
     : userPanel.suspendedOpen;
-}
-
-function Avatar({ user, large = false }) {
-  return (
-    <span className={`hex-fill tone-accent admin-avatar ${large ? "is-large" : ""}`} aria-hidden="true">
-      {initials(user.username)}
-    </span>
-  );
 }
 
 function StatusBadges({ user }) {
@@ -384,7 +372,7 @@ export default function ManageUsers({ users: loaded, currentUserId, onUpdateUser
                   return (
                     <li className={`list-row admin-row ${openId === user.userId ? "is-open" : ""}`} key={user.userId}>
                       <div className="admin-row-main">
-                        <Avatar user={user} />
+                        <Avatar name={user.username} />
                         <div className="admin-row-text">
                           <button className="admin-row-open" type="button" onClick={() => openPanel(user.userId)}>
                             {user.username}
@@ -435,7 +423,7 @@ export default function ManageUsers({ users: loaded, currentUserId, onUpdateUser
           {openUser && (
             <div className="admin-review">
               <div className="admin-account-head">
-                <Avatar user={openUser} large />
+                <Avatar name={openUser.username} large />
                 <div>
                   <h3 className="admin-review-name">
                     {openUser.username}

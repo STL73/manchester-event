@@ -7,7 +7,7 @@ import Pagination from "../components/UI/Pagination";
 import SidePanel from "../components/UI/SidePanel";
 import SortSelect from "../components/UI/SortSelect";
 import StatusMessage from "../components/UI/StatusMessage";
-import PeriodSwitcher from "../components/charts/PeriodSwitcher";
+import PeriodSwitcher from "../components/UI/PeriodSwitcher";
 import SearchBar from "../components/events/SearchBar";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import EmptyState from "../components/UI/EmptyState";

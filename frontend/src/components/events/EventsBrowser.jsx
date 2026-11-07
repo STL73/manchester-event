@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { CalendarDays, Grid2X2, Grid3X3, Square, X } from "lucide-react";
+import { Grid2X2, Grid3X3, Square, X } from "lucide-react";
 import Button from "../UI/Button";
+import DatePill from "../UI/DatePill";
+import FilterPills from "../UI/FilterPills";
 import Pagination from "../UI/Pagination";
 import EventCard from "./EventCard";
 import SearchBar from "./SearchBar";
@@ -99,7 +101,6 @@ export default function EventsBrowser({
   const firstIndex = (page - 1) * PAGE_SIZE;
 
   const chips = filterChips(filters);
-  const dateInputRef = useRef(null);
   const resultsRef = useRef(null);
 
   // A page number past the end (typed, or the list shrank) goes to the last page
@@ -150,18 +151,8 @@ export default function EventsBrowser({
     applyFilters({ ...filters, when, date: "" });
   }
 
-  // "Pick a date" opens the browser's own calendar from a hidden date input
-  function openDatePicker() {
-    const input = dateInputRef.current;
-    try {
-      input.showPicker();
-    } catch {
-      input.focus();
-    }
-  }
-
-  function handleDatePick(event) {
-    applyFilters({ ...filters, date: event.target.value, when: "" });
+  function handleDatePick(date) {
+    applyFilters({ ...filters, date, when: "" });
   }
 
   function handlePageChange(nextPage) {
@@ -191,24 +182,15 @@ export default function EventsBrowser({
 
       {/* Date pills and the layout switch share one row */}
       <div className="events-when-row">
-        <div className="events-when" role="group" aria-label="When">
-          {whenOptions.map(({ id, label }) => {
-            // "Any date" is only selected when no date has been picked either
-            const isActive = filters.when === id && !(id === "" && filters.date);
-            return (
-              <button className={`pill events-when-option ${isActive ? "is-active" : ""}`} type="button" aria-pressed={isActive} onClick={() => handleWhenChange(id)} key={id || "any"}>
-                {label}
-              </button>
-            );
-          })}
-          <span className="events-when-date">
-            <button className={`pill events-when-option ${filters.date ? "is-active" : ""}`} type="button" aria-pressed={Boolean(filters.date)} onClick={openDatePicker}>
-              <CalendarDays aria-hidden="true" />
-              {filters.date ? formatShortDay(`${filters.date}T00:00:00`) : resultsText.pickDate}
-            </button>
-            <input ref={dateInputRef} className="events-when-date-input" type="date" min={localDate(now)} value={filters.date} onChange={handleDatePick} tabIndex={-1} aria-hidden="true" />
-          </span>
-        </div>
+        {/* A picked date selects none of the pills, "Any date" included */}
+        <FilterPills
+          label="When"
+          options={whenOptions.map(({ id, label }) => ({ value: id, label }))}
+          value={filters.date ? null : filters.when}
+          onChange={handleWhenChange}
+        >
+          <DatePill value={filters.date} onChange={handleDatePick} label={resultsText.pickDate} min={localDate(now)} />
+        </FilterPills>
         <div className="events-view-switcher" role="group" aria-label="Event layout view">
           {[
             ["three", Grid3X3, "3-column grid"],

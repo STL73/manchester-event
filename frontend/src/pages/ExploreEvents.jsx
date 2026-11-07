@@ -1,59 +1,36 @@
-import PageHero from "../components/UI/PageHero";
+import PageFrame from "../components/UI/PageFrame";
 import EventsBrowser from "../components/events/EventsBrowser";
-import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import {
   exploreEventsSection,
   publicIntro,
 } from "../data/exploreEventsData";
 
 // One page, two layouts: the public /events page and the dashboard
-// Explore Events page share the search, layout switcher and cards.
+// Explore Events page share the search, layout switcher and cards. The
+// dashboard's has no summary: the intro speaks to guests, and the results
+// line under the filters already gives the count
 export default function ExploreEvents({
   inDashboard = false,
   selectedUser,
   favouriteIds,
   onToggleFavourite,
 }) {
-  const browser = (
-    <EventsBrowser
-      canFavourite={inDashboard && selectedUser?.type === "user"}
-      favouriteIds={favouriteIds}
-      onToggleFavourite={onToggleFavourite}
-    />
-  );
-
-  if (!inDashboard) {
-    return (
-      <div className="page">
-        <PageHero
-          compact
-          eyebrow={publicIntro.eyebrow}
-          title={publicIntro.title}
-          titleId="events-title"
-          intro={publicIntro.text}
-          image={publicIntro.image}
-        />
-        {browser}
-      </div>
-    );
-  }
-
-  const SectionIcon = exploreEventsSection.icon;
-
   return (
-    <div className="dashboard-page">
-      <section
-        className="dashboard-section"
-        aria-labelledby="explore-events-title"
-      >
-        <DashboardPageHeading
-          id="explore-events-title"
-          icon={SectionIcon}
-          title={exploreEventsSection.title}
-        />
-        {/* Search, layout switcher and cards inside the dashboard Explore Events section */}
-        <div className="w-full flex flex-col items-center gap-6">{browser}</div>
-      </section>
-    </div>
+    <PageFrame
+      inDashboard={inDashboard}
+      hero={publicIntro}
+      heading={exploreEventsSection}
+      summary={null}
+      titleId={inDashboard ? "explore-events-title" : "events-title"}
+      image={publicIntro.image}
+      compact
+      bodyClassName="flex flex-col items-center gap-6"
+    >
+      <EventsBrowser
+        canFavourite={inDashboard && selectedUser?.type === "user"}
+        favouriteIds={favouriteIds}
+        onToggleFavourite={onToggleFavourite}
+      />
+    </PageFrame>
   );
 }

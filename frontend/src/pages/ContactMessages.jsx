@@ -24,10 +24,7 @@ import {
 import { formatDateTime, formatDayMonth } from "../lib/formatDates";
 import { fieldErrors } from "../lib/api";
 import { readPage, useUrlParams } from "../hooks/useUrlParams";
-
-function initials(name) {
-  return name.replace(/[^a-z]/gi, "").slice(0, 2).toUpperCase();
-}
+import Avatar from "../components/UI/Avatar";
 
 function matchesView(message, view) {
   if (view === "unread") return !message.readAt;
@@ -290,9 +287,7 @@ export default function ContactMessages({ contactMessages, users, currentUserId,
           {openMessage && (
             <div className="admin-review">
               <div className="admin-account-head">
-                <span className="hex-fill tone-accent admin-avatar" aria-hidden="true">
-                  {initials(openMessage.name)}
-                </span>
+                <Avatar name={openMessage.name} />
                 <div>
                   <h3 className="admin-review-name">{openMessage.name}</h3>
                   <p className="admin-hint">

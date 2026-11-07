@@ -48,7 +48,7 @@ export default function WeatherDateBar({
   toggleRef,
 }) {
   const [now, setNow] = useState(() => new Date());
-  const weather = useWeather();
+  const weather = useWeather() ?? weatherPlace.noReading;
   let ToggleIcon = isSidebarOpen ? PanelLeftClose : PanelLeftOpen;
   let toggleLabel = isSidebarOpen ? "Collapse sidebar" : "Expand sidebar";
   if (isNarrow) {
@@ -80,19 +80,15 @@ export default function WeatherDateBar({
       <div className="dashboard-utility-items">
         {/* Each item: icon + one text block, so on narrow screens the text
             wraps inside its block and the icon stays beside it */}
-        {weather && (
-          <>
-            <div className="dashboard-utility-item">
-              <weather.icon className="dashboard-utility-icon" aria-hidden="true" />
-              <span className="dashboard-utility-text">
-                <span>{weatherPlace.label}</span>
-                <strong>{weather.temperature}°C</strong>
-                <span>{weather.condition}</span>
-              </span>
-            </div>
-            <div className="dashboard-utility-divider" aria-hidden="true" />
-          </>
-        )}
+        <div className="dashboard-utility-item">
+          <weather.icon className="dashboard-utility-icon" aria-hidden="true" />
+          <span className="dashboard-utility-text">
+            <span>{weatherPlace.label}</span>
+            <strong>{weather.temperature}°C</strong>
+            {weather.condition && <span>{weather.condition}</span>}
+          </span>
+        </div>
+        <div className="dashboard-utility-divider" aria-hidden="true" />
         <div className="dashboard-utility-item">
           <CalendarDays className="dashboard-utility-icon" aria-hidden="true" />
           <span className="dashboard-utility-text">{formatLongDay(now)}</span>

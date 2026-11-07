@@ -2,8 +2,9 @@
 // style (My Events, the admin lists). One is selected at a time; `attention`
 // marks the one that needs doing (Needs review, Unread) and `tone: "danger"`
 // one that is bad news (System Logs' Failed sign-ins). Without a `count` an
-// option is a plain pill, which is how the analytics pages switch sections
-export default function FilterPills({ label, options, value, onChange }) {
+// option is a plain pill, which is how the analytics pages switch sections.
+// `children` go after the pills in the same group (Explore's Pick a date)
+export default function FilterPills({ label, options, value, onChange, children }) {
   return (
     <div className="events-when" role="group" aria-label={label}>
       {options.map((option) => (
@@ -23,6 +24,7 @@ export default function FilterPills({ label, options, value, onChange }) {
           )}
         </button>
       ))}
+      {children}
     </div>
   );
 }

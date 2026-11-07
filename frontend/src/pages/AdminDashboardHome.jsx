@@ -1,6 +1,6 @@
-import { ChartNoAxesColumn, Logs } from "lucide-react";
+import { Logs } from "lucide-react";
 import Button from "../components/UI/Button";
-import DashboardCard from "../components/UI/DashboardCard";
+import QuickInsights from "../components/dashboard/QuickInsights";
 import {
   adminInsights,
   recentAdminActionsPath,
@@ -102,23 +102,7 @@ export default function AdminDashboardHome({ users, events, contactMessages }) {
 
   return (
     <div className="dashboard-page">
-      <section
-        className="dashboard-section"
-        aria-labelledby="quick-insights-title"
-      >
-        <h2 className="dashboard-title" id="quick-insights-title">
-          <ChartNoAxesColumn
-            className="dashboard-title-icon"
-            aria-hidden="true"
-          />
-          Quick Insights
-        </h2>
-        <div className="dashboard-grid">
-          {insights.map((item) => (
-            <DashboardCard key={item.title} item={item} />
-          ))}
-        </div>
-      </section>
+      <QuickInsights insights={insights} />
 
       <section
         className="dashboard-section"

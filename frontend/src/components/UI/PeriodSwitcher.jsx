@@ -1,6 +1,7 @@
-// Segmented button group for a chart header: the time range, or which metric
-// the chart shows. Notifications uses it too, for All / Unread. It imports
-// nothing from Recharts, so that doesn't pull charts into the main bundle.
+// Segmented button group: a chart's time range or metric, Notifications'
+// All / Unread, and the admin panels' choices (Approve / Reject, Active /
+// Suspended). It imports nothing from Recharts, so the pages outside
+// analytics don't pull charts into the main bundle.
 // `options` come from the page's data file; `label` names the group for
 // screen readers (the buttons' own text says enough on screen).
 export default function PeriodSwitcher({ label, options, value, onChange, className = "" }) {

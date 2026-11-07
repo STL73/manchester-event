@@ -3,7 +3,7 @@ import { Bell, ChevronDown } from "lucide-react";
 import Button from "../components/UI/Button";
 import Pagination from "../components/UI/Pagination";
 import Tooltip from "../components/UI/Tooltip";
-import PeriodSwitcher from "../components/charts/PeriodSwitcher";
+import PeriodSwitcher from "../components/UI/PeriodSwitcher";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import { eventDetailsPath } from "../data/eventsData";
 import EmptyState from "../components/UI/EmptyState";

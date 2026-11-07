@@ -1,6 +1,7 @@
 import { Fragment, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { CalendarCheck, CalendarDays, X } from "lucide-react";
+import { CalendarCheck } from "lucide-react";
+import DatePill from "../components/UI/DatePill";
 import FilterPills from "../components/UI/FilterPills";
 import SortSelect from "../components/UI/SortSelect";
 import Button from "../components/UI/Button";
@@ -29,7 +30,6 @@ import {
   organiserEventActions,
   organiserEventMessages,
 } from "../data/organiserEventsData";
-import { formatShortDay } from "../lib/formatDates";
 import { readPage, useUrlParams } from "../hooks/useUrlParams";
 import { useDeleteEvent } from "../hooks/useDeleteEvent";
 
@@ -92,7 +92,6 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
   const [filters, setFilters] = useState(() => readFilters(searchParams));
   const { message, deleteEvent } = useDeleteEvent(onDeleteEvent, organiserEventMessages.eventDeleted);
   const gridRef = useRef(null);
-  const dateInputRef = useRef(null);
   const { createFirst } = organiserEventActions;
 
   // Drafts live on My Drafts; everything here has been submitted. Each
@@ -171,15 +170,6 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
     setSearchParams(nextParams);
   }
 
-  function openDatePicker() {
-    const input = dateInputRef.current;
-    try {
-      input.showPicker();
-    } catch {
-      input.focus();
-    }
-  }
-
   function handleDateChange(nextDate) {
     setParams({ date: nextDate, page: null });
   }
@@ -240,36 +230,7 @@ export default function MyEvents({ organiserEvents, onDeleteEvent }) {
               {/* A second filter beside the sort, apart from the status pills
                   so it reads as "and", not one more status */}
               <div className="events-when-tools">
-                <span className="events-when-date">
-                  <button
-                    className={`pill events-when-option ${date ? "is-active" : ""}`}
-                    type="button"
-                    aria-pressed={Boolean(date)}
-                    onClick={openDatePicker}
-                  >
-                    <CalendarDays aria-hidden="true" />
-                    {date ? formatShortDay(`${date}T00:00:00`) : myEventsDate.pick}
-                  </button>
-                  <input
-                    ref={dateInputRef}
-                    className="events-when-date-input"
-                    type="date"
-                    value={date}
-                    onChange={(event) => handleDateChange(event.target.value)}
-                    tabIndex={-1}
-                    aria-hidden="true"
-                  />
-                </span>
-                {date && (
-                  <button
-                    className="icon-button events-when-clear"
-                    type="button"
-                    aria-label={myEventsDate.clear}
-                    onClick={() => handleDateChange("")}
-                  >
-                    <X aria-hidden="true" />
-                  </button>
-                )}
+                <DatePill value={date} onChange={handleDateChange} label={myEventsDate.pick} clearLabel={myEventsDate.clear} />
                 <SortSelect label={sortLabel} options={sortOptions} value={sort} onChange={handleSortChange} />
               </div>
             </div>
