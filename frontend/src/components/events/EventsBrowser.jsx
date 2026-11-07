@@ -68,12 +68,17 @@ export default function EventsBrowser({
   const { searchParams, setParams, setPage, setSearchParams } = useUrlParams();
   const [filters, setFilters] = useState(() => readFilters(searchParams));
   // A link can change the address while this page is open (the footer's
-  // "Tonight", the navbar's Explore Events). When the address no longer
-  // matches what the filters last wrote or read, read it again
-  const [syncedSearch, setSyncedSearch] = useState(() => searchParams.toString());
-  if (searchParams.toString() !== syncedSearch) {
-    setSyncedSearch(searchParams.toString());
-    setFilters(readFilters(searchParams));
+  // "Tonight", the navbar's Explore Events), so a new address this page didn't
+  // write is read again. React Router changes the address in a transition, so
+  // a render can fall between writing it and seeing it: compare with the
+  // address last seen, or that render would read the old one over the filters
+  const search = searchParams.toString();
+  const [seenSearch, setSeenSearch] = useState(search);
+  const [writtenSearch, setWrittenSearch] = useState(null);
+  if (search !== seenSearch) {
+    setSeenSearch(search);
+    setWrittenSearch(null);
+    if (search !== writtenSearch) setFilters(readFilters(searchParams));
   }
   // The earliest day the date picker offers
   const [now] = useState(() => new Date());
@@ -121,7 +126,7 @@ export default function EventsBrowser({
     });
     nextParams.set("view", view);
     setFilters(nextFilters);
-    setSyncedSearch(nextParams.toString());
+    setWrittenSearch(nextParams.toString());
     setSearchParams(nextParams);
   }
 
@@ -160,14 +165,14 @@ export default function EventsBrowser({
   }
 
   function handlePageChange(nextPage) {
-    setSyncedSearch(setPage(nextPage).toString());
+    setWrittenSearch(setPage(nextPage).toString());
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     resultsRef.current?.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
   }
 
   function handleViewChange(nextView) {
     // Only the layout changed: keep any filters typed but not yet searched
-    setSyncedSearch(setParams({ view: nextView }).toString());
+    setWrittenSearch(setParams({ view: nextView }).toString());
   }
 
   function removeFilter(key) {
