@@ -1,6 +1,6 @@
 import { AppError } from '../lib/errors.js';
 import { SESSION_COOKIE, findSession, renewSessionIfDue, clearSessionCookie } from '../lib/sessions.js';
-import { liftExpiredSuspension } from '../lib/users.js';
+import { liftExpiredSuspension } from '../lib/accounts.js';
 
 // Loads the signed-in user from the session cookie onto req.user. A suspended
 // account gets through, since it can still read with a banner; routes that

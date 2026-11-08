@@ -228,6 +228,18 @@ describe('suspending', () => {
         expect((await readUser(ids.user)).accStatus).toBe('active');
     });
 
+    it('treats a suspension whose end has passed as over, so there is no end to keep', async () => {
+        await db
+            .update(users)
+            .set({ accStatus: 'suspended', suspendedUntil: new Date(Date.now() - MINUTE), suspensionReason: 'Old' })
+            .where(eq(users.userId, ids.user));
+
+        const keep = await setStatus(ids.user, { status: 'suspended', reason: 'New' });
+        expect(keep.status).toBe(400);
+        expect(keep.body.error.details.map((detail) => detail.path)).toContain('body.days');
+        expect(await readUser(ids.user)).toMatchObject({ accStatus: 'active', suspendedUntil: null, suspensionReason: null });
+    });
+
     it('takes a suspended organiser\'s events out of the lists, and reactivating brings them back', async () => {
         const listed = async () =>
             (await request(app).get('/api/v1/events').query({ q: `${PREFIX}Live` })).body.data.map((event) => event.name);

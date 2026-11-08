@@ -85,9 +85,9 @@ effect on the next request, and a JWT can't be cancelled before it expires.
   (`requireAuth` + `requireRole`) or `...writeAs('organiser')` (with `requireActive` between).
   The few writes a suspended account may still make use `requireAuth` alone
 - Same error for an unknown email and a wrong password ("Email or password is incorrect"), and
-  an unknown email is still compared against a dummy hash so the timing matches. Failed logins go
-  to `system_logs` (`User Login Failed`): linked to the account when the email has one, otherwise
-  only the IP; the typed email is never stored
+  an unknown email is still compared against a dummy hash so the timing matches
+  (`lib/passwords.js`). Failed logins go to `system_logs` (`User Login Failed`): linked to
+  the account when the email has one, otherwise only the IP; the typed email is never stored
 - Limits (decided 2026-10-26): login 10 per 15 minutes per IP; sign-up 5 per hour per IP with
   Arcjet `protectSignup` (also refuses disposable, invalid and no-MX emails); resend verification
   3 per hour per user
@@ -342,7 +342,7 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
   last 15 days (the chart shows 14 in London days). `GET /analytics/organiser` (organisers):
   saves on their own events, followers of the categories they post in, and `audience`, each
   person once. Both read while suspended
-- Followers are counted by `notifyFollowers()`'s rule (`reachableUser`, `lib/users.js`):
+- Followers are counted by `notifyFollowers()`'s rule (`reachableUser`, `lib/accounts.js`):
   active `user` accounts, the people a new event would reach. Users, events and messages come
   from the admin's lists App already holds; events there leave out drafts, which stay their
   organiser's

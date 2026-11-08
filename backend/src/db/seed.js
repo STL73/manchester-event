@@ -1,11 +1,11 @@
 import 'dotenv/config';
 import { randomBytes } from 'node:crypto';
-import bcrypt from 'bcryptjs';
 import { eq, inArray } from 'drizzle-orm';
 import { db } from './index.js';
 import { categories, events, locations, users } from './schema/index.js';
 import { demoEvents, demoLocations } from './demoData.js';
 import { daysToFriday, londonDay } from '../lib/londonTime.js';
+import { hashPassword } from '../lib/passwords.js';
 
 // Same names, descriptions and order as the PHP project's insert data. Slugs match the
 // category ids in frontend/src/data/eventsData.js (eventCategories)
@@ -54,7 +54,7 @@ const addedAdmins = await db
     .values({
         username: SEED_ADMIN_USERNAME,
         email: SEED_ADMIN_EMAIL.toLowerCase(),
-        password: await bcrypt.hash(SEED_ADMIN_PASSWORD, 12),
+        password: await hashPassword(SEED_ADMIN_PASSWORD),
         role: 'admin',
         emailVerifiedAt: new Date(),
     })
@@ -69,7 +69,7 @@ const seedDemos = Boolean(SEED_USER_EMAIL && SEED_ORGANISER_EMAIL && SEED_DEMO_P
 let addedDemos = [];
 
 if (seedDemos) {
-    const password = await bcrypt.hash(SEED_DEMO_PASSWORD, 12);
+    const password = await hashPassword(SEED_DEMO_PASSWORD);
     addedDemos = await db
         .insert(users)
         .values([
@@ -88,7 +88,7 @@ let addedEvents = [];
 let deletedEvents = [];
 
 if (seedDemos) {
-    const unusable = await bcrypt.hash(randomBytes(32).toString('hex'), 12);
+    const unusable = await hashPassword(randomBytes(32).toString('hex'));
     await db
         .insert(users)
         .values(extraOrganisers.map((username) => ({

@@ -1,21 +1,28 @@
 import { Router } from "express";
-import bcrypt from 'bcryptjs';
-import { and, asc, eq, inArray, notInArray } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 import { db } from '../db/index.js';
-import { users, favourites, categories, categoryFollows } from '../db/schema/index.js';
+import { users, favourites } from '../db/schema/index.js';
 import { LOG } from '../constants/logActions.js';
-import { deleteAccount, listManagedUsers } from '../lib/accounts.js';
+import {
+    deleteAccount,
+    findManagedAccount,
+    listManagedUsers,
+    publicUser,
+    reactivateAccount,
+    suspendAccount,
+} from '../lib/accounts.js';
 import { AppError, fieldError } from '../lib/errors.js';
 import { deleteImage } from '../lib/images.js';
-import { DAY, formatUntil } from '../lib/londonTime.js';
+import { listFollows, replaceFollows } from '../lib/follows.js';
+import { formatUntil } from '../lib/londonTime.js';
 import { listNotifications, markRead, messages, notifyUser } from '../lib/notifications.js';
 import { listOrganiserEvents } from '../lib/organiserEvents.js';
 import { canSaveEvent, listFavouriteEvents } from '../lib/publicEvents.js';
+import { checkPassword } from '../lib/passwords.js';
 import { clearSessionCookie } from '../lib/sessions.js';
 import { logAction } from '../lib/systemLogs.js';
 import { withUpload } from '../lib/uploads.js';
-import { liftExpiredSuspension, publicUser } from '../lib/users.js';
 import { validate } from '../middleware/validate.js';
 import { requireAuth, requireActive, readAs, writeAs } from '../middleware/auth.js';
 import { acceptImage } from '../middleware/upload.js';
@@ -85,7 +92,7 @@ userRouter.delete(
     validate({ body: deleteAccountSchema }),
     async (req, res) => {
         const { userId, username, role, password } = req.user;
-        if (!(await bcrypt.compare(req.valid.body.password, password))) {
+        if (!(await checkPassword(req.valid.body.password, password))) {
             throw fieldError(400, 'password', 'Your password is incorrect.');
         }
 
@@ -130,47 +137,12 @@ userRouter.delete('/me/favourites/:id', ...writeAs('user'), validate({ params: e
     res.status(204).end();
 });
 
-// Archived categories are hidden from Preferences, so they're left out here too
 userRouter.get('/me/follows', ...readAs('user'), async (req, res) => {
-    const rows = await db
-        .select({ slug: categories.slug })
-        .from(categoryFollows)
-        .innerJoin(categories, eq(categories.categoryId, categoryFollows.categoryId))
-        .where(and(eq(categoryFollows.userId, req.user.userId), eq(categories.isActive, true)))
-        .orderBy(asc(categories.slug));
-    res.json({ data: rows.map((row) => row.slug) });
+    res.json({ data: await listFollows(req.user.userId) });
 });
 
-// The picks replace the active categories followed. Follows of an archived
-// category stay: the honeycomb doesn't show it, so leaving it out isn't a choice
 userRouter.put('/me/follows', ...writeAs('user'), validate({ body: followsSchema }), async (req, res) => {
-    const { userId } = req.user;
-    const slugs = req.valid.body.categories;
-    const picked = slugs.length
-        ? await db
-            .select({ categoryId: categories.categoryId, slug: categories.slug })
-            .from(categories)
-            .where(and(inArray(categories.slug, slugs), eq(categories.isActive, true)))
-        : [];
-    if (picked.length !== slugs.length) {
-        throw fieldError(400, 'categories', 'Choose categories from the list.');
-    }
-
-    const pickedIds = picked.map((category) => category.categoryId);
-    const active = db.select({ categoryId: categories.categoryId }).from(categories).where(eq(categories.isActive, true));
-    const dropped = and(
-        eq(categoryFollows.userId, userId),
-        inArray(categoryFollows.categoryId, active),
-        ...(pickedIds.length ? [notInArray(categoryFollows.categoryId, pickedIds)] : []),
-    );
-    // One batch, one transaction: the follows never sit half replaced
-    await db.batch([
-        db.delete(categoryFollows).where(dropped),
-        ...(pickedIds.length
-            ? [db.insert(categoryFollows).values(pickedIds.map((categoryId) => ({ userId, categoryId }))).onConflictDoNothing()]
-            : []),
-    ]);
-    res.json({ data: picked.map((category) => category.slug).sort() });
+    res.json({ data: await replaceFollows(req.user.userId, req.valid.body.categories) });
 });
 
 // My Events, My Drafts and Organiser Home: every one of the organiser's events,
@@ -193,15 +165,6 @@ userRouter.put('/me/notifications/read', requireAuth, validate({ body: markReadS
 // Manage Users (Phase 8). Accounts are made by sign-up and admins by the seed,
 // so there's no create; the list carries everything the panel shows. Admin
 // accounts aren't changed here, nor your own (decided 2026-11-03)
-async function findManagedAccount(req) {
-    const { id } = req.valid.params;
-    if (id === req.user.userId) throw new AppError(400, 'This is your account. Change it on Settings.');
-    const [account] = await db.select().from(users).where(eq(users.userId, id));
-    if (!account) throw new AppError(404, 'Account not found.');
-    if (account.role === 'admin') throw new AppError(403, 'Admin accounts can\'t be changed here.');
-    // A suspension whose end has passed is over, whatever the row still says
-    return liftExpiredSuspension(account);
-}
 
 userRouter.get('/', ...readAs('admin'), async (req, res) => {
     res.json({ data: await listManagedUsers() });
@@ -215,35 +178,18 @@ userRouter.put(
     ...writeAs('admin'),
     validate({ params: userIdParams, body: accountStatusSchema }),
     async (req, res) => {
-        const account = await findManagedAccount(req);
+        const account = await findManagedAccount(req.user.userId, req.valid.params.id);
         const body = req.valid.body;
 
         if (body.status === 'active') {
-            // Already active: nothing to change, log or tell
-            if (account.accStatus === 'active') return res.json({ data: (await listManagedUsers(account.userId))[0] });
-            await db
-                .update(users)
-                .set({ accStatus: 'active', suspendedUntil: null, suspensionReason: null })
-                .where(eq(users.userId, account.userId));
-            await logAction(LOG.USER_STATUS_CHANGED, req.user, { userId: account.userId, username: account.username, status: 'active' });
-            await notifyUser(account.userId, messages.reactivated());
+            if (await reactivateAccount(account)) {
+                await logAction(LOG.USER_STATUS_CHANGED, req.user, { userId: account.userId, username: account.username, status: 'active' });
+                await notifyUser(account.userId, messages.reactivated());
+            }
             return res.json({ data: (await listManagedUsers(account.userId))[0] });
         }
 
-        let until;
-        if (body.days === undefined) {
-            if (account.accStatus !== 'suspended') {
-                throw fieldError(400, 'days', 'Choose how long.');
-            }
-            until = account.suspendedUntil;
-        } else {
-            until = body.days ? new Date(Date.now() + body.days * DAY) : null;
-        }
-
-        await db
-            .update(users)
-            .set({ accStatus: 'suspended', suspendedUntil: until, suspensionReason: body.reason })
-            .where(eq(users.userId, account.userId));
+        const until = await suspendAccount(account, body);
         await logAction(LOG.USER_STATUS_CHANGED, req.user, {
             userId: account.userId,
             username: account.username,
@@ -258,7 +204,7 @@ userRouter.put(
 );
 
 userRouter.delete('/:id', ...writeAs('admin'), validate({ params: userIdParams }), async (req, res) => {
-    const account = await findManagedAccount(req);
+    const account = await findManagedAccount(req.user.userId, req.valid.params.id);
     const eventsDeleted = await deleteAccount(account, 'This account has events that have been public, so it can only be suspended.');
     await logAction(LOG.USER_DELETED, req.user, {
         userId: account.userId,

@@ -1,5 +1,4 @@
 import { Router } from "express";
-import bcrypt from 'bcryptjs';
 import { and, eq, isNull } from 'drizzle-orm';
 import { protectSignup, slidingWindow } from '@arcjet/node';
 
@@ -15,7 +14,8 @@ import { consumeAuthToken } from '../lib/authTokens.js';
 import { sendVerificationEmail, sendPasswordResetEmail, sendPasswordChangedEmail } from '../lib/authEmails.js';
 import { messages, notifyAdmins, notifyUser } from '../lib/notifications.js';
 import { logAction } from '../lib/systemLogs.js';
-import { publicUser, liftExpiredSuspension } from '../lib/users.js';
+import { liftExpiredSuspension, publicUser } from '../lib/accounts.js';
+import { checkPassword, hashPassword } from '../lib/passwords.js';
 import { validate } from '../middleware/validate.js';
 import { arcjetProtect } from '../middleware/security.js';
 import { requireAuth } from '../middleware/auth.js';
@@ -24,8 +24,6 @@ import {
 } from '../validation/auth.js';
 
 const authRouter = Router();
-
-const BCRYPT_COST = 12;
 
 // Stricter Arcjet rules for these routes, made once here (null in tests).
 // Limits decided 2026-10-26
@@ -44,10 +42,6 @@ const forgotGuard = aj
 // The same limit as login: the current password can't be guessed from a stolen session
 const passwordGuard = aj?.withRule(slidingWindow({ mode: 'LIVE', characteristics: ['userId'], interval: '15m', max: 10 }));
 
-// Compared against when an email has no account, so a wrong email takes as long
-// as a wrong password and the response time can't reveal which emails exist
-const DUMMY_HASH = bcrypt.hashSync('no-account-has-this-password', BCRYPT_COST);
-
 authRouter.post(
     '/sign-up',
     validate({ body: signUpSchema }),
@@ -58,7 +52,7 @@ authRouter.post(
         // The unique email decides, so two sign-ups at the same moment can't both get in
         const [user] = await db
             .insert(users)
-            .values({ username, email, password: await bcrypt.hash(password, BCRYPT_COST), role })
+            .values({ username, email, password: await hashPassword(password), role })
             .onConflictDoNothing({ target: users.email })
             .returning();
         // Said plainly (decided 2026-10-26): the rate limit stops anyone testing emails in bulk
@@ -79,7 +73,8 @@ authRouter.post(
 authRouter.post('/login', arcjetProtect(loginGuard), validate({ body: loginSchema }), async (req, res) => {
     const { email, password } = req.valid.body;
     const [found] = await db.select().from(users).where(eq(users.email, email));
-    const matches = await bcrypt.compare(password, found?.password ?? DUMMY_HASH);
+    // Compared even with no account, so the timing can't tell which emails exist
+    const matches = await checkPassword(password, found?.password);
 
     if (!found || !matches) {
         // Linked to the account when the email has one. An email with no
@@ -164,7 +159,7 @@ authRouter.post('/reset-password', validate({ body: resetPasswordSchema }), asyn
     const [user] = await db
         .update(users)
         // The link reached the inbox, which is what verifying the email proves
-        .set({ password: await bcrypt.hash(password, BCRYPT_COST), emailVerifiedAt: current.emailVerifiedAt ?? new Date() })
+        .set({ password: await hashPassword(password), emailVerifiedAt: current.emailVerifiedAt ?? new Date() })
         .where(eq(users.userId, used.userId))
         .returning();
 
@@ -187,13 +182,13 @@ authRouter.put(
     async (req, res) => {
         const { currentPassword, newPassword } = req.valid.body;
         // 400, not 401: the session is fine, and a 401 would read as being logged out
-        if (!(await bcrypt.compare(currentPassword, req.user.password))) {
+        if (!(await checkPassword(currentPassword, req.user.password))) {
             throw fieldError(400, 'currentPassword', 'Your current password is incorrect.');
         }
 
         const [user] = await db
             .update(users)
-            .set({ password: await bcrypt.hash(newPassword, BCRYPT_COST) })
+            .set({ password: await hashPassword(newPassword) })
             .where(eq(users.userId, req.user.userId))
             .returning();
 

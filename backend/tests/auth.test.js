@@ -1,11 +1,13 @@
 import { describe, it, expect, vi, beforeAll, beforeEach, afterAll } from 'vitest';
 import request from 'supertest';
+import bcrypt from 'bcryptjs';
 import { eq, gt, inArray, like, max } from 'drizzle-orm';
 
 import app from '../src/app.js';
 import { db } from '../src/db/index.js';
 import { users, sessions, authTokens, systemLogs, events, categories, locations, notifications } from '../src/db/schema/index.js';
 import { newToken, hashToken } from '../src/lib/tokens.js';
+import { checkPassword, hashPassword } from '../src/lib/passwords.js';
 import { sendEmail } from '../src/lib/email.js';
 
 // No real email in tests: each call is recorded, and the link is read from it
@@ -489,5 +491,16 @@ describe('delete account', () => {
         const suspended = await signUp();
         await suspend(suspended.res.body.data.userId);
         expect((await suspended.agent.delete('/api/v1/users/me').send({ password: PASSWORD })).status).toBe(403);
+    });
+});
+
+describe('checking a password', () => {
+    it('matches only the right password, and never without an account', async () => {
+        const hash = await hashPassword(PASSWORD);
+        expect(bcrypt.getRounds(hash)).toBe(12);
+        expect(await checkPassword(PASSWORD, hash)).toBe(true);
+        expect(await checkPassword('wrong-horse-battery', hash)).toBe(false);
+        // Even the dummy hash's own password: no account means no match
+        expect(await checkPassword('no-account-has-this-password', undefined)).toBe(false);
     });
 });

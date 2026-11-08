@@ -34,14 +34,14 @@ backend/
 │   │                       ids, areaFor() boxes, Greater Manchester's bounds; osm.js: OSM_ID)
 │   ├── lib/                errors (AppError, fieldError), search (containsText),
 │   │                       tokens, sessions, authTokens, email + authEmails,
-│   │                       systemLogs (logAction, listLogs), users (publicUser, reachableUser),
+│   │                       systemLogs (logAction, listLogs), passwords (hash, check), follows,
 │   │                       publicEvents (every public read, hasBeenPublic, wasPublic),
 │   │                       londonTime (DAY, date windows, formatters),
 │   │                       organiserEvents (own events, snapshot, venue rows), osm (Photon, Nominatim),
 │   │                       images (Cloudinary), uploads (withUpload),
 │   │                       managedEvents (the admin's list), notifications (notify*, inbox),
-│   │                       accounts (Manage Users' list, deleteAccount),
-│   │                       contactEmails (the admin's reply),
+│   │                       accounts (publicUser, reachableUser, Manage Users' list and changes,
+│   │                       deleteAccount), contactEmails (the admin's reply),
 │   │                       analytics (the analytics pages' saves, followers, failed sign-ins),
 │   │                       jobs (reminders, email outbox, clean-up), scheduler (node-cron),
 │   │                       notificationEmails (a row as an email), html (escapeHtml)
@@ -83,8 +83,8 @@ backend/
 `npm run db:seed` inserts the 19 categories (slugs = frontend `eventCategories` ids) and the demo
 admin from `SEED_ADMIN_USERNAME`, `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` in `.env`, plus a
 verified Demo User and Demo Organiser when `SEED_USER_EMAIL`, `SEED_ORGANISER_EMAIL` and
-`SEED_DEMO_PASSWORD` are set (skipped otherwise). Passwords
-are hashed with `bcryptjs` (cost 12). It skips rows that already exist, so it's safe to re-run.
+`SEED_DEMO_PASSWORD` are set (skipped otherwise). Passwords are hashed with `bcryptjs` (cost 12,
+`lib/passwords.js`). It skips rows that already exist, so it's safe to re-run.
 
 With the demo accounts it also adds (decided 2026-10-27) five more organisers (`mcrgigs`,
 `northernfood`, `quaysevents`, `salfordarts`, `leoevents` at `@example.test`, a random password
