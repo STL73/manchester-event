@@ -111,10 +111,6 @@ export function droppedPhotos(before, after) {
     return [...new Set(photosOf(before))].filter((publicId) => !kept.has(publicId));
 }
 
-export function wasPublic(row) {
-    return ['approved', 'cancelled'].includes(row.status) || Boolean(row.approvedSnapshot);
-}
-
 // The category's id from its slug; archived categories take no new events
 export async function categoryIdFor(slug) {
     const [category] = await db

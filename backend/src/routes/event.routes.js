@@ -18,9 +18,8 @@ import {
     isOver,
     locationIdFor,
     snapshotOf,
-    wasPublic,
 } from '../lib/organiserEvents.js';
-import { findPublicEvent, hasBeenPublic, listPublicEvents, summarisePublicEvents } from '../lib/publicEvents.js';
+import { findPublicEvent, hasBeenPublic, listPublicEvents, summarisePublicEvents, wasPublic } from '../lib/publicEvents.js';
 import { logAction } from '../lib/systemLogs.js';
 import { withUpload } from '../lib/uploads.js';
 import { readAs, writeAs } from '../middleware/auth.js';

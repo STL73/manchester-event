@@ -5,6 +5,7 @@ import { categoryFollows, events, favourites, notifications, users } from '../db
 import { NOTIFY } from '../constants/notificationTypes.js';
 import { isForeignKeyViolation } from './errors.js';
 import { isListed } from './publicEvents.js';
+import { reachableUser } from './users.js';
 
 // The in-app inbox (Phase 7, decided 2026-10-05 and 2026-11-03). The rows are
 // also the outbox: Phase 11's email job (jobs.js) mails them later, so a
@@ -65,7 +66,7 @@ export function notifyFollowers(categoryId, message) {
             .select({ userId: categoryFollows.userId })
             .from(categoryFollows)
             .innerJoin(users, eq(users.userId, categoryFollows.userId))
-            .where(and(eq(categoryFollows.categoryId, categoryId), eq(users.role, 'user'), eq(users.accStatus, 'active'))),
+            .where(and(eq(categoryFollows.categoryId, categoryId), reachableUser)),
         message,
     );
 }

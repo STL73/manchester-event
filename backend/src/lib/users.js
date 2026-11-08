@@ -1,6 +1,10 @@
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { users } from '../db/schema/index.js';
+
+// Who a new event in a followed category reaches: active user accounts.
+// notifyFollowers() sends to them and the analytics pages count them
+export const reachableUser = and(eq(users.role, 'user'), eq(users.accStatus, 'active'));
 
 // What the frontend may see of an account: everything but the password hash
 export function publicUser(user) {

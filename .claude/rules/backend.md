@@ -34,8 +34,9 @@ backend/
 │   │                       ids, areaFor() boxes, Greater Manchester's bounds; osm.js: OSM_ID)
 │   ├── lib/                errors (AppError, fieldError), search (containsText),
 │   │                       tokens, sessions, authTokens, email + authEmails,
-│   │                       systemLogs (logAction, listLogs), users (publicUser),
-│   │                       publicEvents (every public read), londonTime (DAY, date windows, formatters),
+│   │                       systemLogs (logAction, listLogs), users (publicUser, reachableUser),
+│   │                       publicEvents (every public read, hasBeenPublic, wasPublic),
+│   │                       londonTime (DAY, date windows, formatters),
 │   │                       organiserEvents (own events, snapshot, venue rows), osm (Photon, Nominatim),
 │   │                       images (Cloudinary), uploads (withUpload),
 │   │                       managedEvents (the admin's list), notifications (notify*, inbox),

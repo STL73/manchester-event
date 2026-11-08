@@ -4,6 +4,7 @@ import { db } from '../db/index.js';
 import { categories, categoryFollows, events, favourites, systemLogs, users } from '../db/schema/index.js';
 import { LOG } from '../constants/logActions.js';
 import { DAY } from './londonTime.js';
+import { reachableUser } from './users.js';
 
 // The rows Site Analytics and Event Analytics read that no other page loads
 // (Phase 10, decided 2026-11-04). The figures are still worked out in the
@@ -13,17 +14,13 @@ import { DAY } from './londonTime.js';
 // A save is when and which event: the favourites row without its user
 const saveColumns = { eventId: favourites.eventId, createdAt: favourites.createdAt };
 
-// The people a new event in the category would reach: the same rule as
-// notifyFollowers(), active user accounts
-const reachable = and(eq(users.role, 'user'), eq(users.accStatus, 'active'));
-
 function followCounts(categoryCondition) {
     return db
         .select({ categoryId: categories.slug, count: count() })
         .from(categoryFollows)
         .innerJoin(users, eq(users.userId, categoryFollows.userId))
         .innerJoin(categories, eq(categories.categoryId, categoryFollows.categoryId))
-        .where(and(reachable, categoryCondition))
+        .where(and(reachableUser, categoryCondition))
         .groupBy(categories.slug)
         .orderBy(asc(categories.slug));
 }
@@ -62,7 +59,7 @@ export async function organiserAnalytics(organiserId) {
             .select({ audience: countDistinct(categoryFollows.userId) })
             .from(categoryFollows)
             .innerJoin(users, eq(users.userId, categoryFollows.userId))
-            .where(and(reachable, ownCategories)),
+            .where(and(reachableUser, ownCategories)),
     ]);
     return { saves, follows, audience };
 }

@@ -400,8 +400,11 @@ describe('cancelling an event', () => {
         const draft = await insertEvent();
         const cancelled = await insertEvent({ status: 'cancelled' });
         const ended = await insertEvent({ status: 'approved', startDatetime: inDays(-3) });
-        for (const event of [draft, cancelled, ended]) {
-            expect((await agents.organiser.put(`/api/v1/events/${event.eventId}/cancel`)).status).toBe(400);
+        // Each answers why, so a cancelled event isn't mistaken for one never public
+        for (const [event, reason] of [[draft, /never been public/], [cancelled, /already cancelled/], [ended, /has ended/]]) {
+            const res = await agents.organiser.put(`/api/v1/events/${event.eventId}/cancel`);
+            expect(res.status).toBe(400);
+            expect(res.body.error.message).toMatch(reason);
         }
     });
 });

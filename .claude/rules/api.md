@@ -342,9 +342,10 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
   last 15 days (the chart shows 14 in London days). `GET /analytics/organiser` (organisers):
   saves on their own events, followers of the categories they post in, and `audience`, each
   person once. Both read while suspended
-- Followers are counted by `notifyFollowers()`'s rule: active `user` accounts, the people a
-  new event would reach. Users, events and messages come from the admin's lists App already
-  holds; events there leave out drafts, which stay their organiser's
+- Followers are counted by `notifyFollowers()`'s rule (`reachableUser`, `lib/users.js`):
+  active `user` accounts, the people a new event would reach. Users, events and messages come
+  from the admin's lists App already holds; events there leave out drafts, which stay their
+  organiser's
 - Approval rate and review time use each event's latest `organiser_updated_at` /
   `admin_updated_at`: only the last round counts, since Event Updated doesn't record whether
   an edit went for review
