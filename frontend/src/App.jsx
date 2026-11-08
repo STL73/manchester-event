@@ -1,5 +1,5 @@
 import { Fragment, lazy, Suspense, useCallback, useEffect, useState } from "react";
-import { Navigate, Outlet, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes, useLocation, useParams } from "react-router-dom";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import VerifyEmail from "./pages/VerifyEmail";
@@ -16,6 +16,8 @@ import NotFound from "./pages/NotFound";
 import { getUserData, secondaryNav } from "./data/navigationData";
 import { api, formWithFile } from "./lib/api";
 import { replaceById } from "./lib/replaceById";
+import { useAccount } from "./hooks/useAccount";
+import { useNotifications } from "./hooks/useNotifications";
 import { toEvent } from "./lib/publicEvents";
 import { toOrganiserEvent } from "./lib/organiserEvents";
 import { toManagedEvent } from "./lib/managedEvents";
@@ -75,13 +77,9 @@ function App() {
   const showFooter = !["/dashboard", "/auth"].some((path) =>
     pathname.startsWith(path)
   );
-  const navigate = useNavigate();
-  // The logged-in account from /auth/me (publicUser on the backend), or null.
   // Roles are real: each dashboard is tried by logging in as its demo account
-  const [account, setAccount] = useState(null);
-  // Nothing is shown until /auth/me answers, so a refresh on a dashboard page
-  // doesn't send a logged-in person to the home page first
-  const [accountLoaded, setAccountLoaded] = useState(false);
+  const { account, accountLoaded, setAccount, refreshAccount, saveAccount, saveProfile, deleteAccount, logout } =
+    useAccount();
   const isUser = Boolean(account);
   const userType = account?.role;
   // An organiser's own events from the API (Phase 5), kept with the account
@@ -115,22 +113,7 @@ function App() {
   const interestIds = listsLoaded ? userLists.interestIds : [];
   // Why a heart couldn't change, shown over the page for a moment
   const [favouriteError, setFavouriteError] = useState(null);
-  // Each account's inbox from the API (Phase 7), by account id, so a late
-  // answer for an account that has logged out never shows under the next.
-  // null until it arrives. Read again whenever the Notifications page or a
-  // Home opens, as nothing pushes new ones
-  const [inboxes, setInboxes] = useState({});
-  const accountId = account?.userId ?? null;
-  const notifications = accountId === null ? null : (inboxes[accountId] ?? null);
-
-  // A 401 means nobody is logged in. Any other failure (the API is down)
-  // also shows the public site, rather than a page that can't load
-  useEffect(() => {
-    api("/auth/me")
-      .then(({ data }) => setAccount(data))
-      .catch(() => setAccount(null))
-      .finally(() => setAccountLoaded(true));
-  }, []);
+  const { notifications, loadNotifications, markNotificationsRead } = useNotifications(account?.userId ?? null);
 
   // If either list can't be read the user starts with none, rather than a
   // dashboard that never loads; the error says so
@@ -202,18 +185,6 @@ function App() {
     };
   }, [adminUserId]);
 
-  // If the inbox can't be read the pages keep what they had (none the first time)
-  const loadNotifications = useCallback(() => {
-    if (accountId === null) return;
-    api("/users/me/notifications")
-      .then(({ data }) => setInboxes((current) => ({ ...current, [accountId]: data })))
-      .catch(() => setInboxes((current) => ({ ...current, [accountId]: current[accountId] ?? [] })));
-  }, [accountId]);
-
-  useEffect(() => {
-    loadNotifications();
-  }, [loadNotifications]);
-
   // Changes the organiser's list only while it still belongs to the same account
   const updateOrganiserEvents = useCallback(
     (userId, change) =>
@@ -227,32 +198,6 @@ function App() {
       setUserLists((current) => (current.userId === userId ? { ...current, ...change(current) } : current)),
     [],
   );
-
-  // After the email is verified, so the banners go without a reload
-  const refreshAccount = useCallback(() => {
-    api("/auth/me")
-      .then(({ data }) => setAccount(data))
-      .catch(() => setAccount(null));
-  }, []);
-
-  // Sets read_at on the ones not read yet; a read notification keeps its time.
-  // The envelope changes at once; if the server refuses, the inbox is read
-  // again so it shows what is stored
-  function markNotificationsRead(notificationIds) {
-    const userId = accountId;
-    const unread = (notifications ?? [])
-      .filter((notification) => notificationIds.includes(notification.notificationId) && !notification.readAt)
-      .map((notification) => notification.notificationId);
-    if (unread.length === 0) return;
-    const readAt = new Date().toISOString();
-    setInboxes((current) => ({
-      ...current,
-      [userId]: current[userId].map((notification) =>
-        unread.includes(notification.notificationId) ? { ...notification, readAt } : notification,
-      ),
-    }));
-    api("/users/me/notifications/read", { method: "PUT", body: { ids: unread } }).catch(loadNotifications);
-  }
 
   // Matches save_contact_message() (Phase 9). Signed in, the server takes the
   // name and email from the account and ignores the form's. Awaits the server
@@ -345,51 +290,12 @@ function App() {
     toReview: (managedEvents ?? []).filter((event) => event.status === "pending").length,
     unreadMessages: (contactMessages ?? []).filter((message) => !message.readAt).length,
   };
-  // Settings' handlers. Each throws the ApiError for its section to show, and
-  // the account the server sends back updates the sidebar and greeting
-  async function saveAccount(changes) {
-    const { data } = await api("/users/me", { method: "PUT", body: changes });
-    setAccount(data);
-    return data;
-  }
-
-  // The name, then the picture (Cloudinary, Phase 6), each saved on its own:
-  // if the picture fails, the name has still been saved and Save sends only the
-  // picture again. Answers the picture's address for the form to show
-  async function saveProfile({ user, avatarFile, removeAvatar }) {
-    let latest = account;
-    if (user !== account.username) latest = await saveAccount({ username: user });
-    if (avatarFile || removeAvatar) {
-      latest = (
-        await api("/users/me/avatar", avatarFile
-          ? { method: "PUT", body: formWithFile("avatar", avatarFile) }
-          : { method: "DELETE" })
-      ).data;
-      setAccount(latest);
-    }
-    return latest.avatar ?? null;
-  }
-
   // The server logs out every other device, gives this one a new session and
-  // adds a password_changed notification, which the inbox then shows
+  // adds a password_changed notification, which the inbox then shows. Here
+  // rather than in useAccount, since it needs the inbox too
   async function changePassword(passwords) {
     await api("/auth/password", { method: "PUT", body: passwords });
     loadNotifications();
-  }
-
-  // The server checks the password and the deletion rule, and ends the session
-  async function deleteAccount(password) {
-    await api("/users/me", { method: "DELETE", body: { password } });
-    setAccount(null);
-    navigate("/");
-  }
-
-  // If the request fails the server session may live on until it expires,
-  // but this tab is logged out either way
-  async function logout() {
-    await api("/auth/logout", { method: "POST" }).catch(() => {});
-    setAccount(null);
-    navigate("/");
   }
 
   // Manage Users (Phase 8). Each awaits the server and throws its ApiError for
