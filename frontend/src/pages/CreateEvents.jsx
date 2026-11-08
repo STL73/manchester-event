@@ -9,6 +9,7 @@ import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import EmptyState from "../components/UI/EmptyState";
 import PageLoading from "../components/UI/PageLoading";
 import VenueSearch from "../components/events/VenueSearch";
+import ImageDrop from "../components/events/ImageDrop";
 import { eventCategories, eventDetailsPage } from "../data/eventsData";
 import { eventState } from "../lib/eventStatus";
 import {
@@ -20,99 +21,13 @@ import {
   editBanners,
   editEventForm,
   eventFormGroups,
-  imageDrop,
   maxImageSize,
   submitChecklist,
 } from "../data/createEventsData";
-import { fieldErrors } from "../lib/api";
+import { bodyFromForm, emptyForm, errorsFromServer, formFromEvent, validateEvent } from "../lib/eventForm";
 import { toLondonInput } from "../lib/organiserEvents";
 import { defaultEventImage as placeholder } from "../lib/publicEvents";
 import { formatDayMonth } from "../lib/formatDates";
-
-const emptyForm = {
-  eventName: "",
-  categoryId: "",
-  description: "",
-  startDatetime: "",
-  endDatetime: "",
-  // The OpenStreetMap id of the venue picked in VenueSearch
-  placeId: "",
-  externalLink: "",
-};
-
-const requiredFields = Object.keys(emptyForm).filter((field) => field !== "endDatetime");
-
-// Fill the form from an existing event (edit mode). Times as a Manchester
-// clock shows them, which is what the datetime-local inputs hold
-function formFromEvent(event) {
-  return {
-    eventName: event.name ?? "",
-    categoryId: event.categoryId ?? "",
-    description: event.description ?? "",
-    startDatetime: toLondonInput(event.startDatetime),
-    endDatetime: toLondonInput(event.endDatetime),
-    placeId: event.venue?.placeId ?? "",
-    externalLink: event.externalLink ?? "",
-  };
-}
-
-function isValidUrl(value) {
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
-// validate_event_input()'s checks (every field but the end is required, the
-// link must be a URL) plus the schema's date rules: the end comes after the
-// start, and an event can't be submitted with a start that has passed
-// (a draft may keep one; checked when the start is new or changed)
-function validateEvent(form, { submitting, originalStart }) {
-  const errors = {};
-
-  requiredFields.forEach((field) => {
-    if (!form[field].trim()) errors[field] = createEventMessages[field];
-  });
-  if (form.externalLink.trim() && !isValidUrl(form.externalLink.trim())) {
-    errors.externalLink = createEventMessages.invalidUrl;
-  }
-  if (form.startDatetime && form.endDatetime && form.endDatetime <= form.startDatetime) {
-    errors.endDatetime = createEventMessages.endBeforeStart;
-  }
-  const startIsNew = !originalStart || form.startDatetime !== originalStart;
-  if (submitting && form.startDatetime && startIsNew && new Date(form.startDatetime) < new Date()) {
-    errors.startDatetime = createEventMessages.startInPast;
-  }
-
-  return errors;
-}
-
-// The form as the API takes it (POST /events, PUT /events/:id). There is no
-// status: `submit` says which button was pressed and the server decides
-function bodyFromForm(form, submit) {
-  return {
-    eventName: form.eventName.trim(),
-    category: form.categoryId,
-    description: form.description.trim(),
-    startDatetime: form.startDatetime,
-    endDatetime: form.endDatetime || null,
-    placeId: form.placeId,
-    ticketUrl: form.externalLink.trim(),
-    submit,
-  };
-}
-
-// The API names some fields differently from the form
-const formFieldFor = { category: "categoryId", ticketUrl: "externalLink" };
-
-// The server's refusal under the form's own names (ticketUrl -> externalLink)
-function errorsFromServer(error) {
-  return Object.fromEntries(
-    Object.entries(fieldErrors(error)).map(([field, message]) => [formFieldFor[field] ?? field, message]),
-  );
-}
 
 // One page, two modes: Create Event (create_events.php) and, on
 // /dashboard/my-events/:eventId/edit, Edit Event (edit_event.php).
@@ -120,72 +35,6 @@ function errorsFromServer(error) {
 export default function CreateEvents(props) {
   const { eventId } = useParams();
   return <EventFormPage key={eventId ?? "new"} {...props} />;
-}
-
-// The photo box: drop or click to choose; once chosen the photo fills it,
-// with Replace and Remove. The file goes with Save or Submit (Phase 6)
-function ImageDrop({ image, error, inputRef, onFile, onRemove }) {
-  const [isDragging, setIsDragging] = useState(false);
-  const errorId = "image-error";
-
-  function handleDrop(dropEvent) {
-    dropEvent.preventDefault();
-    setIsDragging(false);
-    const [file] = dropEvent.dataTransfer.files;
-    if (file) onFile(file);
-  }
-
-  return (
-    <div
-      className={`event-image-drop ${image ? "has-image" : ""} ${isDragging ? "is-dragging" : ""}`}
-      onDragOver={(dragEvent) => {
-        dragEvent.preventDefault();
-        setIsDragging(true);
-      }}
-      onDragLeave={() => setIsDragging(false)}
-      onDrop={handleDrop}
-    >
-      {image ? (
-        <img className="event-image-drop-photo" src={image} alt="" />
-      ) : (
-        <div className="event-image-drop-empty" aria-hidden="true">
-          <imageDrop.icon />
-          <strong>{imageDrop.title}</strong>
-          {imageDrop.types}
-        </div>
-      )}
-      {/* Covers the empty box, so a click anywhere opens the file picker */}
-      <input
-        ref={inputRef}
-        id="image"
-        className="event-image-drop-input"
-        type="file"
-        accept={allowedImageTypes.join(",")}
-        aria-label={`${imageDrop.title}. ${imageDrop.types}`}
-        aria-invalid={Boolean(error)}
-        aria-describedby={error ? errorId : undefined}
-        tabIndex={image ? -1 : 0}
-        onChange={(changeEvent) => {
-          const [file] = changeEvent.target.files;
-          if (file) onFile(file);
-          changeEvent.target.value = "";
-        }}
-      />
-      {image && (
-        <div className="event-image-drop-tools">
-          <Button type="button" variant="secondary" size="sm" onClick={() => inputRef.current?.click()}>
-            <imageDrop.replace.icon aria-hidden="true" />
-            {imageDrop.replace.label}
-          </Button>
-          <Button type="button" variant="secondary" size="sm" onClick={onRemove}>
-            <imageDrop.remove.icon aria-hidden="true" />
-            {imageDrop.remove.label}
-          </Button>
-        </div>
-      )}
-      {error && <FieldError id={errorId}>{error}</FieldError>}
-    </div>
-  );
 }
 
 function EventFormPage({

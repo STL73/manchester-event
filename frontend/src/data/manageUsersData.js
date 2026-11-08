@@ -1,4 +1,5 @@
 import { Save, Trash2, Users } from "lucide-react";
+import { formatDayMonth } from "../lib/formatDates";
 
 // Manage Users (decided 2026-10-12, layout A): the accounts as a list, each
 // opening in a side panel. The schema's acc_status is active | suspended;
@@ -102,3 +103,12 @@ export const manageUsersMessages = {
   clear: "Clear search and filters",
   statusUpdated: "Account updated.",
 };
+
+// "Suspended until 14 Nov" or "Suspended until lifted"; "" for an active account.
+// Manage Users' rows and panel, and the form's Keep option
+export function suspensionText(user) {
+  if (user.accStatus !== "suspended") return "";
+  return user.suspendedUntil
+    ? userPanel.suspendedUntil(formatDayMonth(user.suspendedUntil))
+    : userPanel.suspendedOpen;
+}

@@ -1,32 +1,30 @@
 import { useMemo, useRef, useState } from "react";
 import { CalendarCheck, MailCheck, MailWarning, Shield } from "lucide-react";
 import Button from "../components/UI/Button";
-import FieldError from "../components/UI/FieldError";
 import FilterPills from "../components/UI/FilterPills";
 import Pagination from "../components/UI/Pagination";
 import SidePanel from "../components/UI/SidePanel";
 import SortSelect from "../components/UI/SortSelect";
 import StatusMessage from "../components/UI/StatusMessage";
-import PeriodSwitcher from "../components/UI/PeriodSwitcher";
 import SearchBar from "../components/events/SearchBar";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import EmptyState from "../components/UI/EmptyState";
 import PageLoading from "../components/UI/PageLoading";
 import {
-  accountStatuses,
   manageUsersMessages,
   manageUsersPage,
   roleLabels,
   suspensionLengths,
+  suspensionText,
   userPanel,
   userSortOptions,
   userViews,
 } from "../data/manageUsersData";
-import { formatDate, formatDayMonth } from "../lib/formatDates";
-import { statusLabel } from "../lib/eventStatus";
+import { formatDate } from "../lib/formatDates";
 import { fieldErrors } from "../lib/api";
 import { readPage, useUrlParams } from "../hooks/useUrlParams";
 import Avatar from "../components/UI/Avatar";
+import AccountForm, { StatusBadges } from "../components/admin/AccountForm";
 
 const sorters = {
   newest: (a, b) => b.createdAt.localeCompare(a.createdAt),
@@ -39,85 +37,6 @@ function matchesView(user, view) {
   if (view === "suspended") return user.accStatus === "suspended";
   if (view === "unverified") return !user.emailVerifiedAt;
   return user.role === view;
-}
-
-function suspensionText(user) {
-  if (user.accStatus !== "suspended") return "";
-  return user.suspendedUntil
-    ? userPanel.suspendedUntil(formatDayMonth(user.suspendedUntil))
-    : userPanel.suspendedOpen;
-}
-
-function StatusBadges({ user }) {
-  return (
-    <>
-      <span className={`badge status-${user.accStatus}`}>{statusLabel(user.accStatus)}</span>
-      {!user.emailVerifiedAt && <span className="badge status-unverified">Unverified</span>}
-    </>
-  );
-}
-
-// The panel's form: status, and for a suspension how long and why. Your own
-// account and other admins' aren't changed here (decided 2026-11-03)
-function AccountForm({ user, isSelf, form, onChange, reasonError }) {
-  if (isSelf) return <p className="callout callout-compact admin-note">{userPanel.self}</p>;
-  if (user.role === "admin") return <p className="callout callout-compact admin-note">{userPanel.adminTarget}</p>;
-  const suspended = form.accStatus === "suspended";
-  const lengthOptions = [
-    // An existing suspension can be kept as it is
-    ...(user.accStatus === "suspended" ? [{ value: "keep", label: `Keep: ${suspensionText(user).toLowerCase()}` }] : []),
-    ...suspensionLengths,
-  ];
-
-  return (
-    <div className="admin-decision">
-      <div className="field">
-        <span className="field-label" id="account-status-label">
-          {userPanel.statusLabel}
-        </span>
-        <PeriodSwitcher
-          label={userPanel.statusLabel}
-          options={accountStatuses}
-          value={form.accStatus}
-          onChange={(accStatus) => onChange({ accStatus })}
-        />
-      </div>
-      {suspended && (
-        <>
-          <div className="field">
-            <label htmlFor="suspend-length">{userPanel.lengthLabel}</label>
-            <select
-              id="suspend-length"
-              value={form.length}
-              onChange={(changeEvent) => onChange({ length: changeEvent.target.value })}
-            >
-              {lengthOptions.map((option) => (
-                <option value={option.value} key={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="field">
-            <label htmlFor="suspend-reason">
-              {userPanel.reasonLabel} <span className="field-hint">({userPanel.reasonHint})</span>
-            </label>
-            <textarea
-              id="suspend-reason"
-              rows="3"
-              placeholder={userPanel.reasonPlaceholder}
-              value={form.reason}
-              aria-invalid={Boolean(reasonError)}
-              aria-describedby={reasonError ? "suspend-reason-error" : undefined}
-              onChange={(changeEvent) => onChange({ reason: changeEvent.target.value })}
-            />
-            {reasonError && <FieldError id="suspend-reason-error">{reasonError}</FieldError>}
-          </div>
-          <p className="callout callout-compact admin-note">{userPanel.suspendedNote[user.role === "organiser" ? "organiser" : "user"]}</p>
-        </>
-      )}
-    </div>
-  );
 }
 
 function formFor(user) {

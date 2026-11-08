@@ -92,13 +92,15 @@ frontend/src/
 │   ├── UI/            shared primitives: Button, DashboardCard, Tooltip, FilterPills,
 │   │                  DatePill (Pick a date), PeriodSwitcher, Avatar (initials), PageFrame
 │   ├── layout/        Navbar, Sidebar, MainNav, SecondaryNav, UserNav, Footer
-│   ├── events/        EventCard, EventsBrowser, SearchBar
+│   ├── events/        EventCard, EventsBrowser, SearchBar, VenueSearch, ImageDrop
+│   ├── admin/         EventReview (Manage Events), AccountForm (Manage Users)
 │   ├── charts/        Recharts wrappers
 │   ├── dashboard/     greeting, weather bar, page heading, Quick Insights
 │   └── home/          public landing sections
 ├── data/              <name>Data.js page copy, config + helpers, one per page/feature
 ├── lib/               pure helpers (analytics.js: chart aggregation; formatDates,
-│                      eventStatus, favourites; api.js with fieldErrors())
+│                      eventStatus, favourites, eventForm (Create Event's checks and body);
+│                      api.js with fieldErrors())
 ├── hooks/             useUrlParams (setParams, setPage, readPage: page state in the
 │                      address), useDeleteEvent (an organiser card's delete and message)
 └── images/            site photos (event photos are in public/images/events)
