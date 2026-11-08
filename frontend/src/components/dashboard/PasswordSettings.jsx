@@ -65,13 +65,15 @@ export default function PasswordSettings({ email, onChange }) {
     }
   }
 
-  const shared = { showLabel: passwordForm.show, hideLabel: passwordForm.hide, onChange: update };
+  const shared = { onChange: update };
 
   return (
     <form className="settings-form" onSubmit={handleSubmit} noValidate key={round}>
       {/* Lets a password manager tell which account the new password is for */}
       <input type="email" name="username" autoComplete="username" value={email} readOnly hidden />
 
+      {/* By hand rather than FormField: the new and confirm fields show live
+          rules under them, and the three should read alike */}
       <div className="field">
         <label htmlFor="current-password">{passwordForm.current}</label>
         <PasswordInput

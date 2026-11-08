@@ -134,6 +134,7 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
         </div>
       </div>
 
+      {/* By hand rather than FormField: the 12/40 counter sits under the input */}
       <div className="field">
         <label htmlFor="display-name">{profileForm.nameLabel}</label>
         <input
@@ -158,6 +159,7 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
         )}
       </div>
 
+      {/* Locked: shown, not typed, so not a FormField */}
       <div className="field">
         <span className="field-label">{profileForm.emailLabel}</span>
         <p className="settings-locked">

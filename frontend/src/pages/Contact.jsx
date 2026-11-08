@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ArrowRight, Clock, Lock } from "lucide-react";
 import Button from "../components/UI/Button";
-import FieldError from "../components/UI/FieldError";
+import FormField from "../components/UI/FormField";
 import FaqList from "../components/UI/FaqList";
 import PageFrame from "../components/UI/PageFrame";
 import StatusMessage from "../components/UI/StatusMessage";
@@ -122,6 +122,7 @@ export default function Contact({ onSendMessage, inDashboard = false, account })
 
             {form.fields.map((field) =>
               account && form.accountFields.includes(field.id) ? (
+                // Locked: the account's own value, no input, so not a FormField
                 <div className="field" key={field.id}>
                   <span className="field-label">{field.label}</span>
                   <p className="settings-locked">
@@ -133,32 +134,17 @@ export default function Contact({ onSendMessage, inDashboard = false, account })
                   )}
                 </div>
               ) : (
-                <div className="field" key={field.id}>
-                  <label htmlFor={field.id}>{field.label}: *</label>
-                  {field.type === "textarea" ? (
-                    <textarea
-                      id={field.id}
-                      name={field.id}
-                      rows="4"
-                      placeholder={field.placeholder}
-                      aria-invalid={Boolean(errors[field.id])}
-                      aria-describedby={errors[field.id] ? `${field.id}-error` : undefined}
-                      required
-                    />
-                  ) : (
-                    <input
-                      id={field.id}
-                      name={field.id}
-                      type={field.type}
-                      placeholder={field.placeholder}
-                      autoComplete={field.autoComplete}
-                      aria-invalid={Boolean(errors[field.id])}
-                      aria-describedby={errors[field.id] ? `${field.id}-error` : undefined}
-                      required
-                    />
-                  )}
-                  {errors[field.id] && <FieldError id={`${field.id}-error`}>{errors[field.id]}</FieldError>}
-                </div>
+                <FormField
+                  key={field.id}
+                  id={field.id}
+                  type={field.type}
+                  label={`${field.label}: *`}
+                  placeholder={field.placeholder}
+                  autoComplete={field.autoComplete}
+                  rows={field.type === "textarea" ? "4" : undefined}
+                  error={errors[field.id]}
+                  required
+                />
               ),
             )}
 

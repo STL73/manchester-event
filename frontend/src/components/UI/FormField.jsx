@@ -1,13 +1,17 @@
 import { CircleCheck } from "lucide-react";
 import FieldError from "./FieldError";
+import PasswordInput from "./PasswordInput";
 
 // One labelled form control with an optional hint and error, styled by
 // .field. The hint and error are linked to the control with
 // aria-describedby so screen readers announce them with the field.
-// The hint sits on the label row so it costs no extra height.
+// The hint sits on the label row so it costs no extra height. `action` sits
+// there too but isn't read as the field's description (Log in's "Forgot
+// password?"). type="password" gets the show/hide eye
 export default function FormField({
   id,
   label,
+  action,
   type = "text",
   options = [],
   placeholder,
@@ -71,14 +75,17 @@ export default function FormField({
 
   return (
     <div className="field">
-      {/* Label on the left, short hint on the right: the hint costs no height */}
+      {/* Label on the left, short hint or action on the right: they cost no height */}
       <div className="w-full flex items-baseline justify-between gap-3">
         <label htmlFor={id}>{label}</label>
         {hintText}
+        {action}
       </div>
 
       {type === "select" ? (
-        <select defaultValue="" {...controlProps}>
+        // An uncontrolled select starts on its placeholder; a controlled one
+        // (a `value` passed) can't also take a defaultValue
+        <select {...("value" in props ? {} : { defaultValue: "" })} {...controlProps}>
           {placeholder && (
             <option value="" disabled>
               {placeholder}
@@ -90,6 +97,8 @@ export default function FormField({
             </option>
           ))}
         </select>
+      ) : type === "password" ? (
+        <PasswordInput placeholder={placeholder} {...controlProps} />
       ) : type === "textarea" ? (
         <textarea rows="5" placeholder={placeholder} {...controlProps} />
       ) : (

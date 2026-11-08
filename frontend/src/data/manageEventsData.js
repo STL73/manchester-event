@@ -96,7 +96,7 @@ export const eventPanel = {
   approveNote: "It goes live on Explore straight away.",
   approveEditNote: "The changes replace the live version straight away.",
   reasonLabel: "Reason for the organiser",
-  reasonHint: "required",
+  reasonHint: "Required",
   reasonPlaceholder: "e.g. The ticket link doesn't work. Fix it and send it again.",
   reasonRequired: "Tell the organiser what to change.",
   // Taking a live event down cancels it (decided 2026-11-03): once public, an

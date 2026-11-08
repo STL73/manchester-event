@@ -1,5 +1,5 @@
 import { CalendarDays, MapPin, Ticket, UserRound } from "lucide-react";
-import FieldError from "../UI/FieldError";
+import FormField from "../UI/FormField";
 import PeriodSwitcher from "../UI/PeriodSwitcher";
 import { statusLabel } from "../../lib/eventStatus";
 import { eventPanel, manageEventsPage } from "../../data/manageEventsData";
@@ -130,21 +130,17 @@ export default function EventReview({ event, state, events, decision, onDecision
             />
           )}
           {decision !== "approve" ? (
-            <div className="field">
-              <label htmlFor="reject-reason">
-                {eventPanel.reasonLabel} <span className="field-hint">({eventPanel.reasonHint})</span>
-              </label>
-              <textarea
-                id="reject-reason"
-                rows="3"
-                placeholder={decision === "takeDown" ? eventPanel.takeDown.reasonPlaceholder : eventPanel.reasonPlaceholder}
-                value={reason}
-                aria-invalid={Boolean(reasonError)}
-                aria-describedby={reasonError ? "reject-reason-error" : undefined}
-                onChange={(changeEvent) => onReason(changeEvent.target.value)}
-              />
-              {reasonError && <FieldError id="reject-reason-error">{reasonError}</FieldError>}
-            </div>
+            <FormField
+              id="reject-reason"
+              type="textarea"
+              rows="3"
+              label={eventPanel.reasonLabel}
+              hint={eventPanel.reasonHint}
+              placeholder={decision === "takeDown" ? eventPanel.takeDown.reasonPlaceholder : eventPanel.reasonPlaceholder}
+              value={reason}
+              onChange={(changeEvent) => onReason(changeEvent.target.value)}
+              error={reasonError}
+            />
           ) : (
             <p className="callout callout-compact admin-note">{event.approvedSnapshot ? eventPanel.approveEditNote : eventPanel.approveNote}</p>
           )}

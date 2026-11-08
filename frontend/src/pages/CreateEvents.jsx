@@ -276,6 +276,8 @@ function EventForm({ isEdit, events, onCreateEvent, onUpdateEvent, onCancelEvent
     );
   }
 
+  // Its own renderer rather than FormField: numbered groups, character
+  // counters, VenueSearch and the photo box
   function renderField(field) {
     if (field.type === "image") {
       return (

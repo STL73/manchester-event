@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Button from "../UI/Button";
-import FieldError from "../UI/FieldError";
-import PasswordInput from "../UI/PasswordInput";
+import FormField from "../UI/FormField";
 import StatusMessage from "../UI/StatusMessage";
-import { deleteAccountCopy, passwordForm } from "../../data/profileSettingsData";
+import { deleteAccountCopy } from "../../data/profileSettingsData";
 import { fieldErrors } from "../../lib/api";
 
 // Delete account, confirmed in the page rather than a browser dialog: what
@@ -73,24 +72,19 @@ export default function DeleteAccount({ role, onDelete }) {
         ))}
         <li>{deleteAccountCopy.permanent}</li>
       </ul>
-      <div className="field">
-        <label htmlFor="delete-password">{deleteAccountCopy.passwordLabel}</label>
-        <PasswordInput
-          id="delete-password"
-          autoComplete="current-password"
-          value={password}
-          onChange={(event) => {
-            setPassword(event.target.value);
-            setError({});
-          }}
-          showLabel={passwordForm.show}
-          hideLabel={passwordForm.hide}
-          aria-invalid={error.password ? true : undefined}
-          aria-describedby={error.password ? "delete-password-error" : undefined}
-          autoFocus
-        />
-        {error.password && <FieldError id="delete-password-error">{error.password}</FieldError>}
-      </div>
+      <FormField
+        id="delete-password"
+        type="password"
+        label={deleteAccountCopy.passwordLabel}
+        autoComplete="current-password"
+        value={password}
+        onChange={(event) => {
+          setPassword(event.target.value);
+          setError({});
+        }}
+        error={error.password}
+        autoFocus
+      />
       {error.form && (
         <StatusMessage variant="error" className="callout-compact">
           {error.form}

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Check } from "lucide-react";
 import Button from "../components/UI/Button";
-import FieldError from "../components/UI/FieldError";
+import FormField from "../components/UI/FormField";
 import FilterPills from "../components/UI/FilterPills";
 import Pagination from "../components/UI/Pagination";
 import SidePanel from "../components/UI/SidePanel";
@@ -326,22 +326,18 @@ export default function ContactMessages({ contactMessages, users, currentUserId,
                   <p className="message-body-plain">{openMessage.replyBody}</p>
                 </div>
               ) : (
-                <div className="field">
-                  <label htmlFor="message-reply">{messagePanel.replyLabel(openMessage.name)}</label>
-                  <textarea
-                    id="message-reply"
-                    rows="5"
-                    placeholder={messagePanel.replyPlaceholder(openMessage.email)}
-                    value={reply}
-                    aria-invalid={Boolean(replyError)}
-                    aria-describedby={replyError ? "message-reply-error" : undefined}
-                    onChange={(changeEvent) => {
-                      setReply(changeEvent.target.value);
-                      setReplyError("");
-                    }}
-                  />
-                  {replyError && <FieldError id="message-reply-error">{replyError}</FieldError>}
-                </div>
+                <FormField
+                  id="message-reply"
+                  type="textarea"
+                  label={messagePanel.replyLabel(openMessage.name)}
+                  placeholder={messagePanel.replyPlaceholder(openMessage.email)}
+                  value={reply}
+                  onChange={(changeEvent) => {
+                    setReply(changeEvent.target.value);
+                    setReplyError("");
+                  }}
+                  error={replyError}
+                />
               )}
             </div>
           )}

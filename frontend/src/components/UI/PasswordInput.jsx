@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { passwordForm } from "../../data/profileSettingsData";
 
 // A password field with a show/hide eye inside it. Pass the input's own
-// props (id, value, onChange, autoComplete, aria-*); `showLabel` and
-// `hideLabel` name the eye for screen readers. Sign-up and login can use it
-// when they are rebuilt
-export default function PasswordInput({ showLabel, hideLabel, ...inputProps }) {
+// props (id, value, onChange, autoComplete, aria-*). The eye is named for
+// screen readers ("Show password"); FormField draws one for type="password"
+export default function PasswordInput({ showLabel = passwordForm.show, hideLabel = passwordForm.hide, ...inputProps }) {
   const [visible, setVisible] = useState(false);
   const Icon = visible ? EyeOff : Eye;
 

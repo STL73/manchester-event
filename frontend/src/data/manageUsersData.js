@@ -70,7 +70,7 @@ export const userPanel = {
   statusLabel: "Account status",
   lengthLabel: "For how long",
   reasonLabel: "Reason",
-  reasonHint: "shown to them",
+  reasonHint: "Shown to them",
   reasonPlaceholder: "e.g. Listings with misleading dates",
   reasonRequired: "Say why, so they know what to change.",
   suspendedNote: {

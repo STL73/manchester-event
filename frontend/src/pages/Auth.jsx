@@ -113,16 +113,15 @@ function AuthForm({ page, token, onAccountChange }) {
     }
   }
 
+  // "Forgot password?" sits on the label row as an action, not the field's
+  // description, so screen readers don't read it out with the password
   function renderField({ id, ...field }) {
-    const hint =
-      forgotLink && id === "password" ? (
-        <Button to={forgotLink.to} variant="link" size="sm">
-          {forgotLink.label}
-        </Button>
-      ) : (
-        field.hint
-      );
-    return <FormField key={id} id={id} error={errors[id]} {...field} hint={hint} />;
+    const action = forgotLink && id === "password" && (
+      <Button to={forgotLink.to} variant="link" size="sm">
+        {forgotLink.label}
+      </Button>
+    );
+    return <FormField key={id} id={id} error={errors[id]} {...field} action={action} />;
   }
 
   return (
