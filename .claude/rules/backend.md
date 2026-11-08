@@ -41,7 +41,8 @@ backend/
 │   │                       images (Cloudinary), uploads (withUpload),
 │   │                       managedEvents (the admin's list), notifications (notify*, inbox),
 │   │                       accounts (publicUser, reachableUser, Manage Users' list and changes,
-│   │                       deleteAccount), contactEmails (the admin's reply),
+│   │                       deleteAccount), contactMessages (save, list, read, reply),
+│   │                       contactEmails (the reply's email),
 │   │                       analytics (the analytics pages' saves, followers, failed sign-ins),
 │   │                       jobs (reminders, email outbox, clean-up), scheduler (node-cron),
 │   │                       notificationEmails (a row as an email), html (escapeHtml)
