@@ -1,4 +1,4 @@
-import { Fragment, lazy, Suspense, useCallback, useEffect, useState } from "react";
+import { Fragment, lazy, Suspense, useCallback, useState } from "react";
 import { Navigate, Outlet, Route, Routes, useLocation, useParams } from "react-router-dom";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
@@ -14,17 +14,16 @@ import Footer from "./components/layout/Footer";
 import ScrollToTop from "./components/layout/ScrollToTop";
 import NotFound from "./pages/NotFound";
 import { getUserData, secondaryNav } from "./data/navigationData";
-import { api, formWithFile } from "./lib/api";
-import { replaceById } from "./lib/replaceById";
+import { api } from "./lib/api";
 import { useAccount } from "./hooks/useAccount";
 import { useNotifications } from "./hooks/useNotifications";
-import { toEvent } from "./lib/publicEvents";
-import { toOrganiserEvent } from "./lib/organiserEvents";
-import { toManagedEvent } from "./lib/managedEvents";
+import { useUserLists } from "./hooks/useUserLists";
+import { useOrganiserEvents } from "./hooks/useOrganiserEvents";
+import { useAdminLists } from "./hooks/useAdminLists";
 import { privacyPage, termsPage } from "./data/legalPagesData";
 
 import PageLoading from "./components/UI/PageLoading";
-import FavouriteError from "./components/events/FavouriteError";
+import ListError from "./components/UI/ListError";
 import "./App.css";
 
 // The dashboard and its pages download only when someone signs in, so a
@@ -82,122 +81,35 @@ function App() {
     useAccount();
   const isUser = Boolean(account);
   const userType = account?.role;
-  // An organiser's own events from the API (Phase 5), kept with the account
-  // they belong to like the user's lists below. null until they arrive, so
-  // Event details can wait rather than say "not found"
-  const organiserUserId = userType === "organiser" ? account.userId : null;
-  const [organiserLists, setOrganiserLists] = useState({ userId: null, events: null });
-  const organiserEventsLoaded = organiserUserId !== null && organiserLists.userId === organiserUserId;
-  const organiserEvents = organiserEventsLoaded ? organiserLists.events : [];
-  // The admin's events from the API (Phase 7): every one but drafts, kept with
-  // the account like the organiser's. null until they arrive
-  const adminUserId = userType === "admin" ? account.userId : null;
-  const [adminLists, setAdminLists] = useState({ userId: null, events: null, users: null, messages: null });
-  const adminListsLoaded = adminUserId !== null && adminLists.userId === adminUserId;
-  const managedEvents = adminListsLoaded ? adminLists.events : null;
-  // Every account, for Manage Users and Admin Home's New users card (Phase 8)
-  const managedUsers = adminListsLoaded ? adminLists.users : null;
-  // Every Contact form message, for Contact Messages, Admin Home and the
-  // sidebar's unread count (Phase 9)
-  const contactMessages = adminListsLoaded ? adminLists.messages : null;
-  // The user role's favourites and interests (category_follows), loaded from
-  // the API after login and kept with the account they belong to, so the next
-  // account to log in never sees them. favouriteIds is what the hearts show:
-  // it changes at once, and favouriteEvents (each as the public sees it)
-  // catches up when the server has answered
-  const listsUserId = userType === "user" ? account.userId : null;
-  const [userLists, setUserLists] = useState({ userId: null });
-  const listsLoaded = listsUserId !== null && userLists.userId === listsUserId;
-  const favouriteIds = listsLoaded ? userLists.favouriteIds : [];
-  const favouriteEvents = listsLoaded ? userLists.favouriteEvents : [];
-  const interestIds = listsLoaded ? userLists.interestIds : [];
-  // Why a heart couldn't change, shown over the page for a moment
-  const [favouriteError, setFavouriteError] = useState(null);
+  // Why a list couldn't load or a heart couldn't change, shown over the page
+  // for a moment. The dismiss keeps one identity, so the popup's timer isn't
+  // restarted each time App renders
+  const [listError, setListError] = useState(null);
+  const dismissListError = useCallback(() => setListError(null), []);
   const { notifications, loadNotifications, markNotificationsRead } = useNotifications(account?.userId ?? null);
-
-  // If either list can't be read the user starts with none, rather than a
-  // dashboard that never loads; the error says so
-  useEffect(() => {
-    if (listsUserId === null) return undefined;
-    let current = true;
-    Promise.all([api("/users/me/favourites"), api("/users/me/follows")]).then(
-      ([favourites, follows]) =>
-        current &&
-        setUserLists({
-          userId: listsUserId,
-          favouriteIds: favourites.data.map((event) => event.eventId),
-          favouriteEvents: favourites.data.map(toEvent),
-          interestIds: follows.data,
-        }),
-      (error) => {
-        if (!current) return;
-        setUserLists({ userId: listsUserId, favouriteIds: [], favouriteEvents: [], interestIds: [] });
-        setFavouriteError(error.message);
-      },
-    );
-    return () => {
-      current = false;
-    };
-  }, [listsUserId]);
-
-  // If the list can't be read the pages show none, with the reason over the page
-  useEffect(() => {
-    if (organiserUserId === null) return undefined;
-    let current = true;
-    api("/users/me/events").then(
-      ({ data }) =>
-        current &&
-        setOrganiserLists({ userId: organiserUserId, events: data.map((event) => toOrganiserEvent(event, account)) }),
-      (error) => {
-        if (!current) return;
-        setOrganiserLists({ userId: organiserUserId, events: [] });
-        setFavouriteError(error.message);
-      },
-    );
-    return () => {
-      current = false;
-    };
-    // account is read for the name only; the list follows the account's id
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [organiserUserId]);
-
-  // If a list can't be read the pages show none, with the reason over the page
-  useEffect(() => {
-    if (adminUserId === null) return undefined;
-    let current = true;
-    Promise.all([api("/events/manage"), api("/users"), api("/contact-messages")]).then(
-      ([managed, accounts, messages]) =>
-        current &&
-        setAdminLists({
-          userId: adminUserId,
-          events: managed.data.map(toManagedEvent),
-          users: accounts.data,
-          messages: messages.data,
-        }),
-      (error) => {
-        if (!current) return;
-        setAdminLists({ userId: adminUserId, events: [], users: [], messages: [] });
-        setFavouriteError(error.message);
-      },
-    );
-    return () => {
-      current = false;
-    };
-  }, [adminUserId]);
-
-  // Changes the organiser's list only while it still belongs to the same account
-  const updateOrganiserEvents = useCallback(
-    (userId, change) =>
-      setOrganiserLists((current) => (current.userId === userId ? { ...current, events: change(current.events) } : current)),
-    [],
+  const { listsLoaded, favouriteIds, favouriteEvents, interestIds, toggleFavourite, saveInterests } = useUserLists(
+    account,
+    setListError,
   );
-
-  // Changes the lists only while they still belong to the same account
-  const updateUserLists = useCallback(
-    (userId, change) =>
-      setUserLists((current) => (current.userId === userId ? { ...current, ...change(current) } : current)),
-    [],
-  );
+  const {
+    organiserEvents,
+    organiserEventsLoaded,
+    createOrganiserEvent,
+    updateOrganiserEvent,
+    deleteOrganiserEvent,
+    cancelOrganiserEvent,
+    submitDraft,
+  } = useOrganiserEvents(account, setListError);
+  const {
+    managedEvents,
+    managedUsers,
+    contactMessages,
+    decideEvent,
+    deleteUser,
+    updateUserStatus,
+    setContactMessageRead,
+    replyToContactMessage,
+  } = useAdminLists(account, setListError);
 
   // Matches save_contact_message() (Phase 9). Signed in, the server takes the
   // name and email from the account and ignores the form's. Awaits the server
@@ -206,71 +118,6 @@ function App() {
     await api("/contact-messages", { method: "POST", body: fields });
   }
 
-  // Changes the messages only while they still belong to the same admin
-  function updateContactMessages(adminId, change) {
-    setAdminLists((current) => (current.userId === adminId ? { ...current, messages: change(current.messages) } : current));
-  }
-
-  // Contact Messages: opening one reads it (read_at); Mark as unread clears
-  // it. Changes at once, and reloads the list if the server refuses
-  function setContactMessageRead(messageId, isRead) {
-    const adminId = adminUserId;
-    const readAt = isRead ? new Date().toISOString() : null;
-    updateContactMessages(adminId, (list) =>
-      list.map((item) => (item.messageId === messageId && Boolean(item.readAt) !== isRead ? { ...item, readAt } : item)),
-    );
-    api(`/contact-messages/${messageId}/read`, { method: "PUT", body: { read: isRead } }).catch(() =>
-      api("/contact-messages").then(
-        ({ data }) => updateContactMessages(adminId, () => data),
-        () => {},
-      ),
-    );
-  }
-
-  // The server emails the reply and stores it (reply_body, replied_at,
-  // replied_by). Awaits it and throws its ApiError for the panel to show
-  async function replyToContactMessage(messageId, reply) {
-    const adminId = adminUserId;
-    const { data } = await api(`/contact-messages/${messageId}/reply`, { method: "PUT", body: { reply } });
-    updateContactMessages(adminId, (list) => replaceById(list, "messageId", data));
-  }
-
-  // Matches add_favourite / remove_favourites in the PHP. The heart changes
-  // at once and changes back with the server's reason if the request fails
-  // (an event that has ended or been cancelled since the page loaded)
-  async function toggleFavourite(eventId) {
-    const userId = listsUserId;
-    const saving = !favouriteIds.includes(eventId);
-    const setSaved = (saved) =>
-      updateUserLists(userId, ({ favouriteIds: ids }) => ({
-        favouriteIds: saved ? [...ids.filter((id) => id !== eventId), eventId] : ids.filter((id) => id !== eventId),
-      }));
-
-    setFavouriteError(null);
-    setSaved(saving);
-    try {
-      await api(`/users/me/favourites/${eventId}`, { method: saving ? "PUT" : "DELETE" });
-    } catch (error) {
-      setSaved(!saving);
-      setFavouriteError(error.message);
-      return;
-    }
-    // A new save needs the event as the public sees it, for My Favourites and
-    // Home. If this read fails the heart is still right; the list catches up
-    // on the next login
-    if (saving) {
-      api("/users/me/favourites")
-        .then(({ data }) => updateUserLists(userId, () => ({ favouriteEvents: data.map(toEvent) })))
-        .catch(() => {});
-    }
-  }
-
-  // Preferences awaits this and shows the server's refusal
-  async function saveInterests(categoryIds) {
-    const userId = listsUserId;
-    const { data } = await api("/users/me/follows", { method: "PUT", body: { categories: categoryIds } });
-    updateUserLists(userId, () => ({ interestIds: data }));
-  }
   // The role's sidebar links and default icon from navigationData, with the
   // account's own name, email and picture
   const selectedUser = {
@@ -296,95 +143,6 @@ function App() {
   async function changePassword(passwords) {
     await api("/auth/password", { method: "PUT", body: passwords });
     loadNotifications();
-  }
-
-  // Manage Users (Phase 8). Each awaits the server and throws its ApiError for
-  // the panel to show; the list changes only once it agrees
-  // The admin's lists are kept with the admin's id, so a reply that lands after
-  // a log-out changes nothing
-  function updateManagedUsers(adminId, change) {
-    setAdminLists((current) => (current.userId === adminId ? { ...current, users: change(current.users) } : current));
-  }
-
-  async function deleteUser(accountId) {
-    const userId = adminUserId;
-    await api(`/users/${accountId}`, { method: "DELETE" });
-    updateManagedUsers(userId, (list) => list.filter((user) => user.userId !== accountId));
-  }
-
-  // { status: "active" } or { status: "suspended", reason, days }: 7, 30 or
-  // null (until lifted), left out to keep the current end. The server works
-  // out suspended_until and tells the person
-  async function updateUserStatus(accountId, body) {
-    const userId = adminUserId;
-    const { data } = await api(`/users/${accountId}/status`, { method: "PUT", body });
-    updateManagedUsers(userId, (list) => replaceById(list, "userId", data));
-  }
-
-  // Manage Events' decisions (Phase 7): "approve", "reject" or "take-down",
-  // the last two with the reason the organiser reads. Awaits the server and
-  // throws its ApiError for the panel to show; the list changes only once it
-  // agrees. The server records who decided and tells everyone concerned
-  async function decideEvent(eventId, decision, reason) {
-    const userId = adminUserId;
-    const { data } = await api(`/events/${eventId}/${decision}`, {
-      method: "PUT",
-      body: reason === undefined ? undefined : { reason },
-    });
-    const decided = toManagedEvent(data);
-    setAdminLists((current) =>
-      current.userId === userId
-        ? { ...current, events: replaceById(current.events, "eventId", decided) }
-        : current,
-    );
-  }
-
-  // The organiser's events (Phase 5). Each awaits the server and throws its
-  // ApiError for the page to show; the list changes only once the server has
-  // agreed. The server decides the status from the event and `submit`, as
-  // insert_event() and update_event() did in the PHP
-  // A new photo (a File) goes with the form in the same request (Phase 6)
-  async function createOrganiserEvent(body, photo) {
-    const userId = organiserUserId;
-    const { data } = await api("/events", { method: "POST", body: photo ? formWithFile("image", photo, body) : body });
-    const created = toOrganiserEvent(data, account);
-    updateOrganiserEvents(userId, (list) => [...list, created]);
-    return created;
-  }
-
-  // A live event keeps its last approved version public, with its favourites,
-  // until the edit is approved (schema option b, agreed 2026-10-05)
-  async function updateOrganiserEvent(eventId, body, photo) {
-    const userId = organiserUserId;
-    const { data } = await api(`/events/${eventId}`, {
-      method: "PUT",
-      body: photo ? formWithFile("image", photo, body) : body,
-    });
-    const updated = toOrganiserEvent(data, account);
-    updateOrganiserEvents(userId, (list) => replaceById(list, "eventId", updated));
-    return updated;
-  }
-
-  async function deleteOrganiserEvent(eventId) {
-    const userId = organiserUserId;
-    await api(`/events/${eventId}`, { method: "DELETE" });
-    updateOrganiserEvents(userId, (list) => list.filter((event) => event.eventId !== eventId));
-  }
-
-  // An edit still waiting is dropped: the approved version is the one cancelled
-  async function cancelOrganiserEvent(eventId) {
-    const userId = organiserUserId;
-    const { data } = await api(`/events/${eventId}/cancel`, { method: "PUT" });
-    const cancelled = toOrganiserEvent(data, account);
-    updateOrganiserEvents(userId, (list) => replaceById(list, "eventId", cancelled));
-  }
-
-  // Matches submit_draft.inc.php: the draft becomes pending
-  async function submitDraft(eventId) {
-    const userId = organiserUserId;
-    const { data } = await api(`/events/${eventId}/submit`, { method: "PUT" });
-    const submitted = toOrganiserEvent(data, account);
-    updateOrganiserEvents(userId, (list) => replaceById(list, "eventId", submitted));
   }
 
   if (!accountLoaded) return <PageLoading />;
@@ -437,7 +195,7 @@ function App() {
             <Route element={<RoleOnly allow="user" userType={userType} />}>
               <Route path="explore-events" element={<ExploreEvents inDashboard selectedUser={selectedUser} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
               <Route path="my-favourites" element={<MyFavourites events={favouriteEvents} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
-              <Route path="preferences" element={listsLoaded ? <Preferences key={listsUserId} interestIds={interestIds} onSaveInterests={saveInterests} /> : <PageLoading />} />
+              <Route path="preferences" element={listsLoaded ? <Preferences key={account?.userId}interestIds={interestIds} onSaveInterests={saveInterests} /> : <PageLoading />} />
             </Route>
             <Route path="events/:eventId" element={<EventDetails inDashboard ownEvents={userType === "admin" ? managedEvents : organiserEventsLoaded ? organiserEvents : null} role={userType} favouriteIds={favouriteIds} onToggleFavourite={toggleFavourite} />} />
             <Route path="notifications" element={<Notifications notifications={notifications} onLoad={loadNotifications} onMarkRead={markNotificationsRead} />} />
@@ -474,13 +232,13 @@ function App() {
               <Route path="event-analytics" element={<EventAnalytics organiserEvents={organiserEventsLoaded ? organiserEvents : null} />} />
             </Route>
             <Route element={<RoleOnly allow="admin" userType={userType} />}>
-              <Route path="manage-users" element={<ManageUsers users={managedUsers} currentUserId={adminUserId} onUpdateUser={updateUserStatus} onDeleteUser={deleteUser} />} />
+              <Route path="manage-users" element={<ManageUsers users={managedUsers} currentUserId={account?.userId} onUpdateUser={updateUserStatus} onDeleteUser={deleteUser} />} />
               <Route path="manage-users/:userId/edit" element={<OpenInPanel param="userId" to="/dashboard/manage-users" />} />
-              <Route path="manage-events" element={<ManageEvents events={managedEvents} currentUserId={adminUserId} onDecide={decideEvent} />} />
+              <Route path="manage-events" element={<ManageEvents events={managedEvents} currentUserId={account?.userId} onDecide={decideEvent} />} />
               <Route path="manage-events/:eventId/edit" element={<OpenInPanel param="eventId" to="/dashboard/manage-events" />} />
               <Route path="site-analytics" element={<SiteAnalytics users={managedUsers} events={managedEvents} contactMessages={contactMessages} />} />
               <Route path="system-logs" element={<SystemLogs />} />
-              <Route path="contact-messages" element={<ContactMessages contactMessages={contactMessages} users={managedUsers ?? []} currentUserId={adminUserId} onSetRead={setContactMessageRead} onReply={replyToContactMessage} />} />
+              <Route path="contact-messages" element={<ContactMessages contactMessages={contactMessages} users={managedUsers ?? []} currentUserId={account?.userId} onSetRead={setContactMessageRead} onReply={replyToContactMessage} />} />
             </Route>
             <Route path="*" element={<NotFound inDashboard />} />
           </Route>
@@ -490,7 +248,7 @@ function App() {
         </Routes>
       </main>
       {showFooter && <Footer />}
-      <FavouriteError message={favouriteError} onDismiss={() => setFavouriteError(null)} />
+      <ListError message={listError} onDismiss={dismissListError} />
     </div>
   );
 }

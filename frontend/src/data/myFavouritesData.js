@@ -21,10 +21,3 @@ export const endedFavourites = {
 };
 
 export const addToCalendar = { label: "Add to calendar" };
-
-// The message when a heart couldn't change (the server's reason), and how
-// long it stays before it goes by itself
-export const favouriteError = {
-  dismiss: "Dismiss",
-  shownFor: 8000,
-};

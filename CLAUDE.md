@@ -57,11 +57,11 @@ from inside the package folder.
 
 ### Frontend state lives in `App.jsx`
 
-`App.jsx` is effectively the app's data layer. It holds all cross-page state in `useState` (events,
-users, favourites, contact messages), derives views from it, and passes data and handler functions
-(`createOrganiserEvent`, `updateEventStatus`, `toggleFavourite` …) down as props. Those handlers
-reproduce what the PHP backend did, and they are the clearest spec for what the real API endpoints
-will need to do.
+`App.jsx` is effectively the app's data layer. It calls one hook per kind of cross-page state
+(`hooks/useAccount`, `useNotifications`, `useUserLists`, `useOrganiserEvents`, `useAdminLists`;
+batch 3, 2026-11-08), derives views from them, and passes data and handler functions
+(`createOrganiserEvent`, `decideEvent`, `toggleFavourite` …) down as props. Those handlers
+reproduce what the PHP backend did, and they are the clearest spec for what the API endpoints do.
 
 - **Events come from the API** wherever a page has been wired: `organiserEvents`
   (`/users/me/events`) and `managedEvents` (`/events/manage`, Phase 7) are loaded per account.
@@ -69,7 +69,7 @@ will need to do.
   array back
 - **`src/data/*Data.js`** files hold page config (copy, form fields, nav) and helpers; the mock
   records went in Phase 10
-- **Roles are real** (Phase 1, 2026-10-27). `App.jsx` asks `/auth/me` once at startup and keeps
+- **Roles are real** (Phase 1, 2026-10-27). `useAccount` asks `/auth/me` once at startup and keeps
   the answer as `account` (shows `PageLoading` until it arrives); `isUser` and `userType` are
   derived from it. Test each role's dashboard by logging in as it: the seed's admin and its Demo
   User and Demo Organiser. The role's sidebar links still come from `navigationData.js`. The

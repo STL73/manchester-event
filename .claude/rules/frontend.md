@@ -21,23 +21,25 @@ functions record behaviour being matched on purpose: keep that parity unless tol
   `UI/PageLoading`. A new dashboard page is lazy too. Explore Events and Event details stay eager:
   the public site uses them
 - Data fetching: through `lib/api.js` (`api(path, { method, body })`, throws `ApiError`), with the
-  Vite proxy sending `/api` to the backend. Used so far by auth (Phases 1 and 2): `App.jsx` (`/auth/me`,
-  logout, and Settings' handlers), `Auth.jsx` (log in, sign up, forgot and reset password, one
+  Vite proxy sending `/api` to the backend. The lists and handlers several pages share are
+  hooks App calls once (batch 3, 2026-11-08): `useAccount`, `useNotifications`,
+  `useUserLists`, `useOrganiserEvents`, `useAdminLists`. Used so far by auth (Phases 1 and 2):
+  `hooks/useAccount.js` (`/auth/me`, logout, and Settings' handlers), `Auth.jsx` (log in, sign up, forgot and reset password, one
   `AuthForm` driven by `authPageData`), `VerifyEmail.jsx` and `AccountBanner`'s Resend. Public
   events (Phase 3): reads go through `hooks/useApi.js` (`useApi(path)`: `payload`, `error`,
   `loading`, `retry`; the last answer stays while the next loads) and `lib/publicEvents.js`
   (`toEvent()` turns an API event into the shape `EventCard` and Event details read;
   `eventsPath()` builds the query). `EventsBrowser` (Explore, public and dashboard), Home
   (`/events/summary` + What's on), About's figure, Preferences (`/categories` + next 3) and
-  Event details for guests and users. Favourites and interests (Phase 4): `App.jsx` loads
+  Event details for guests and users. Favourites and interests (Phase 4): `useUserLists` loads
   `/users/me/favourites` and `/users/me/follows` when a user-role account logs in and keeps them
   with that account's id, so the next account never sees them. A heart changes at once
   (`favouriteIds`) and changes back if the server refuses, with the reason in
-  `events/FavouriteError` floating over the page; `favouriteEvents` (each as the public sees
+  `UI/ListError` floating over the page (any list that fails to load says why there too); `favouriteEvents` (each as the public sees
   it) feed My Favourites, Home's cards and the greeting. Preferences awaits the save and shows
   a refusal. Event details has no Save for an event the lists don't show (`listed`), unless it
   is already saved. Organiser
-  events (Phase 5): `App.jsx` loads `/users/me/events` when an organiser logs
+  events (Phase 5): `useOrganiserEvents` loads `/users/me/events` when an organiser logs
   in, kept with that account's id (`organiserEvents`; `null` to pages that must wait), mapped by
   `lib/organiserEvents.js` (`toOrganiserEvent()`: the organiser's latest version, with the
   server's `hasBeenPublic` and `editPending`; `toLondonInput()` for datetime-local inputs). Its
@@ -46,15 +48,16 @@ functions record behaviour being matched on purpose: keep that parity unless tol
   its save, `formWithFile(field, file, fields)` in `lib/api.js` making the multipart body and
   `api()` sending `FormData` as it is; `createOrganiserEvent` / `updateOrganiserEvent` take it
   as a last argument, `saveProfile` sends the picture to `/users/me/avatar`. Moderation and
-  notifications (Phase 7): for an admin `App.jsx` loads `/events/manage` once (`managedEvents`,
+  notifications (Phase 7): for an admin `useAdminLists` loads `/events/manage` once (`managedEvents`,
   mapped by `lib/managedEvents.js` `toManagedEvent()`, the snapshot in the same shape), and
   Manage Events filters it in the browser; `decideEvent()` awaits approve, reject or take-down
-  and swaps in the server's answer. Every role's inbox is `/users/me/notifications`, kept with
+  and swaps in the server's answer (`lib/replaceById.js`). Every role's inbox is
+  `/users/me/notifications` (`useNotifications`), kept with
   the account's id (`notifications`, `null` until loaded), reloaded when Notifications or a
   Home opens and after a password change; `markNotificationsRead()` changes at once, sends the
   ids and reloads if the server refuses. User Home's "New in your interests" counts the
   `category_new_event` notifications of the last 7 days whose event is still `listed` (View
-  opens Explore). Manage users (Phase 8): the admin's effect also loads `/users`
+  opens Explore). Manage users (Phase 8): `useAdminLists` also loads `/users`
   (`managedUsers`, `null` until loaded), which Manage Users and Admin Home's New users card
   read; `updateUserStatus()` and `deleteUser()` await the API and swap in or drop the server's
   row. Contact messages (Phase 9): the same effect loads `/contact-messages`
@@ -80,7 +83,7 @@ functions record behaviour being matched on purpose: keep that parity unless tol
 
 ```text
 frontend/src/
-├── App.jsx            routes + all shared app state (events, users, favourites, messages)
+├── App.jsx            routes; calls the shared-state hooks and passes their lists and handlers down
 ├── App.css            font and Tailwind imports, @theme tokens, then imports styles/
 ├── styles/            component classes via @apply, by where they are used:
 │                      base (utilities: hex-cell, focus-ring, selected, tone-*;
@@ -90,7 +93,8 @@ frontend/src/
 ├── pages/             one file per route
 ├── components/
 │   ├── UI/            shared primitives: Button, DashboardCard, Tooltip, FilterPills,
-│   │                  DatePill (Pick a date), DateTile, PeriodSwitcher, Avatar (initials), PageFrame
+│   │                  DatePill (Pick a date), DateTile, PeriodSwitcher, Avatar (initials), PageFrame,
+│   │                  ListError (the popup when a list or heart fails)
 │   ├── layout/        Navbar, Sidebar, MainNav, SecondaryNav, UserNav, Footer
 │   ├── events/        EventCard, EventsBrowser, SearchBar, VenueSearch, ImageDrop
 │   ├── admin/         EventReview (Manage Events), AccountForm (Manage Users)
@@ -100,9 +104,11 @@ frontend/src/
 ├── data/              <name>Data.js page copy, config + helpers, one per page/feature
 ├── lib/               pure helpers (analytics.js: chart aggregation; formatDates,
 │                      eventStatus, favourites, eventForm (Create Event's checks and body);
-│                      api.js with fieldErrors())
-├── hooks/             useUrlParams (setParams, setPage, readPage: page state in the
-│                      address), useDeleteEvent (an organiser card's delete and message)
+│                      api.js with fieldErrors(); replaceById)
+├── hooks/             useApi (one GET path), useUrlParams (setParams, setPage, readPage:
+│                      page state in the address), useDeleteEvent (an organiser card's
+│                      delete and message); App's shared state: useAccount,
+│                      useNotifications, useUserLists, useOrganiserEvents, useAdminLists
 └── images/            site photos (event photos are in public/images/events)
 ```
 
@@ -197,8 +203,11 @@ The utilities in `styles/base.css` are `hex-cell` (the logo's cell as a mask), t
 - **One events list.** Every page reads the API (`organiserEvents`, `managedEvents`, the
   public reads); the mock events, accounts, messages, saves and follows were removed in
   Phase 10 (2026-11-04). Never add a mock event array back
-- **State that crosses pages lives in `App.jsx`** and goes down as props (users, favourites,
-  contact messages). There is no context or store yet, so don't add one without discussing it
+- **State that crosses pages lives in `App.jsx`'s hooks** (`hooks/use*.js`, called once in App)
+  and goes down as props (users, favourites, contact messages). Each list is kept with the
+  account id it was loaded for, so an answer after a log-out changes nothing; a new shared list
+  gets its own hook the same way. There is no context or store yet, so don't add one without
+  discussing it
 - **Page copy and config live in `data/`**, not inline in the page: titles, nav, form fields,
   action labels. The `navigationData.js` role model (`user`, `organiser`, `admin`) drives the sidebar
 - **Extend shared components, don't wrap or copy them.** Need a variant of `EventCard`,
