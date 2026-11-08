@@ -35,7 +35,7 @@ backend/
 │   ├── lib/                errors (AppError, fieldError), search (containsText),
 │   │                       tokens, sessions, authTokens, email + authEmails,
 │   │                       systemLogs (logAction, listLogs), users (publicUser),
-│   │                       publicEvents (every public read), londonTime (date windows),
+│   │                       publicEvents (every public read), londonTime (DAY, date windows, formatters),
 │   │                       organiserEvents (own events, snapshot, venue rows), osm (Photon, Nominatim),
 │   │                       images (Cloudinary), uploads (withUpload),
 │   │                       managedEvents (the admin's list), notifications (notify*, inbox),

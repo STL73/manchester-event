@@ -1,5 +1,6 @@
 import { sendEmail } from './email.js';
 import { escapeHtml } from './html.js';
+import { formatLongDate } from './londonTime.js';
 
 // Everything here was typed by the sender or the admin, so it's escaped
 // before going into HTML, and line breaks are kept
@@ -8,7 +9,7 @@ const paragraphs = (value) => escapeHtml(value).replace(/\n/g, '<br>');
 // The admin's reply to a Contact form message, with the message quoted under
 // it. Always sent: it's the answer they asked for, not a notification
 export async function sendContactReply(message, reply) {
-    const sent = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', dateStyle: 'long' }).format(message.createdAt);
+    const sent = formatLongDate(message.createdAt);
     await sendEmail({
         to: message.email,
         subject: 'Re: your message to Manchester Event Portal',

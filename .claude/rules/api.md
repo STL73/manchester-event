@@ -272,8 +272,8 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
 
 ## Manage users (decided 2026-11-03)
 
-- **Admins only** (`requireActive` admins), under `/users`. Accounts are made by sign-up and
-  admins by the seed, so there's no create. **Admin accounts aren't changed here** (403), nor
+- **Admins only**, under `/users`: writes are `requireActive`, the list reads while suspended
+  (2026-11-08). Accounts are made by sign-up and admins by the seed, so there's no create. **Admin accounts aren't changed here** (403), nor
   your own (400, "Change it on Settings"); an unknown id is 404 (Slav, 2026-11-03)
 - `GET /users`: every account, newest first, as `publicUser()` plus `updatedAt`, `eventCount`
   (every event but drafts) and `hasBeenPublic` (`lib/accounts.js` `listManagedUsers()`), so the

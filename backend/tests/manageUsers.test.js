@@ -125,11 +125,11 @@ const reset = (userId) =>
     db.update(users).set({ accStatus: 'active', suspendedUntil: null, suspensionReason: null }).where(eq(users.userId, userId));
 
 describe('the accounts list', () => {
-    it('is for active admins only', async () => {
+    it('is for admins, suspended ones included, since it only reads', async () => {
         expect((await request(app).get('/api/v1/users')).status).toBe(401);
         expect((await agents.user.get('/api/v1/users')).status).toBe(403);
         expect((await agents.organiser.get('/api/v1/users')).status).toBe(403);
-        expect((await agents.suspendedadmin.get('/api/v1/users')).status).toBe(403);
+        expect((await agents.suspendedadmin.get('/api/v1/users')).status).toBe(200);
     });
 
     it('shows every account, newest first, with what an organiser has sent and never a password', async () => {

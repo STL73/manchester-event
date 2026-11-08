@@ -209,6 +209,7 @@ describe('PUT /api/v1/contact-messages/:id/reply', () => {
         expect(email.subject).toBe('Re: your message to Manchester Event Portal');
         expect(email.text).toContain('Opens on the 14th.');
         expect(email.text).toContain('> Hello\n> there');
+        expect(email.text).toMatch(/On \d{1,2} \w+ \d{4} you wrote:/);
 
         const row = await readMessage(message.messageId);
         expect(row).toMatchObject({ replyBody: 'Opens on the 14th.', repliedBy: ids.admin });

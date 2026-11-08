@@ -5,7 +5,7 @@ import { authTokens, contactMessages, events, favourites, notifications, session
 import { ALWAYS_EMAILED_TYPES, EMAILED_TYPES } from '../constants/notificationTypes.js';
 import { LOG } from '../constants/logActions.js';
 import { sendEmail } from './email.js';
-import { londonDay, londonInstant, londonParts } from './londonTime.js';
+import { DAY, formatDateTime, formatTime, londonDay, londonInstant, londonParts } from './londonTime.js';
 import { messages } from './notifications.js';
 import { notificationEmail } from './notificationEmails.js';
 import { isListed, pub } from './publicEvents.js';
@@ -16,13 +16,6 @@ import { logAction } from './systemLogs.js';
 // scheduler.js only decides when. None of them waits for its exact moment:
 // each does whatever is due and not yet done, so a server that was asleep at
 // 09:00 catches up on its next run, and running twice changes nothing
-
-const DAY = 24 * 60 * 60 * 1000;
-
-const dateTime = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Europe/London', weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
-});
-const time = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', hour: '2-digit', minute: '2-digit' });
 
 // Reminders for saved events (decided 2026-10-11): 09:00 London a week before
 // the day it starts, and 09:00 the day before. Only events the lists show
@@ -55,9 +48,9 @@ export async function sendReminders(now = new Date()) {
         const weekDue = londonInstant(year, month, day - 7, 9);
         const startDay = londonInstant(year, month, day);
         if (now >= dayDue) {
-            if (now < startDay && row.savedAt < dayDue) reminders.push({ userId: row.userId, ...messages.reminderDay(row, time.format(row.startDatetime)) });
+            if (now < startDay && row.savedAt < dayDue) reminders.push({ userId: row.userId, ...messages.reminderDay(row, formatTime(row.startDatetime)) });
         } else if (now >= weekDue && now < londonInstant(year, month, day - 6) && row.savedAt < weekDue) {
-            reminders.push({ userId: row.userId, ...messages.reminderWeek(row, dateTime.format(row.startDatetime)) });
+            reminders.push({ userId: row.userId, ...messages.reminderWeek(row, formatDateTime(row.startDatetime)) });
         }
     }
     if (reminders.length === 0) return { reminders: 0 };

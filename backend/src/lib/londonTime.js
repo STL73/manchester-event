@@ -1,6 +1,8 @@
 // Dates as people in Manchester read them. "Tonight" or "this weekend" means
 // Europe/London whatever the server's time zone, and GMT or BST as the date needs
 
+export const DAY = 24 * 60 * 60 * 1000;
+
 const parts = new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Europe/London',
     year: 'numeric',
@@ -59,3 +61,19 @@ export function dayRange(date) {
     const [year, month, day] = date.split('-').map(Number);
     return [londonInstant(year, month, day), londonInstant(year, month, day + 1)];
 }
+
+// Dates written into notifications and emails, on a London clock
+const london = (options) => new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', ...options });
+const dateTime = london({ weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+const time = london({ hour: '2-digit', minute: '2-digit' });
+const longDate = london({ dateStyle: 'long' });
+const until = london({ day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+// "Saturday 14 November at 19:30"
+export const formatDateTime = (date) => dateTime.format(date);
+// "19:30"
+export const formatTime = (date) => time.format(date);
+// "14 November 2026"
+export const formatLongDate = (date) => longDate.format(date);
+// "14 November 2026 at 19:30"
+export const formatUntil = (date) => until.format(date);

@@ -3,10 +3,10 @@ import { db } from '../db/index.js';
 import { sessions, users } from '../db/schema/index.js';
 import { NODE_ENV } from '../config/env.js';
 import { newToken, hashToken } from './tokens.js';
+import { DAY } from './londonTime.js';
 
 export const SESSION_COOKIE = 'sid';
 
-const DAY = 24 * 60 * 60 * 1000;
 const SESSION_LENGTH = 30 * DAY;
 // A session used with fewer days than this left is moved forward, so someone
 // who visits at least every two weeks stays signed in (decided 2026-10-26)

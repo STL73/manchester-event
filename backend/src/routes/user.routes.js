@@ -8,6 +8,7 @@ import { LOG } from '../constants/logActions.js';
 import { deleteAccount, listManagedUsers } from '../lib/accounts.js';
 import { AppError, fieldError } from '../lib/errors.js';
 import { deleteImage } from '../lib/images.js';
+import { DAY, formatUntil } from '../lib/londonTime.js';
 import { listNotifications, markRead, messages, notifyUser } from '../lib/notifications.js';
 import { listOrganiserEvents } from '../lib/organiserEvents.js';
 import { canSaveEvent, listFavouriteEvents } from '../lib/publicEvents.js';
@@ -192,16 +193,6 @@ userRouter.put('/me/notifications/read', requireAuth, validate({ body: markReadS
 // Manage Users (Phase 8). Accounts are made by sign-up and admins by the seed,
 // so there's no create; the list carries everything the panel shows. Admin
 // accounts aren't changed here, nor your own (decided 2026-11-03)
-const DAY = 24 * 60 * 60 * 1000;
-const untilFormatter = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Europe/London',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-});
-
 async function findManagedAccount(req) {
     const { id } = req.valid.params;
     if (id === req.user.userId) throw new AppError(400, 'This is your account. Change it on Settings.');
@@ -212,7 +203,7 @@ async function findManagedAccount(req) {
     return liftExpiredSuspension(account);
 }
 
-userRouter.get('/', ...writeAs('admin'), async (req, res) => {
+userRouter.get('/', ...readAs('admin'), async (req, res) => {
     res.json({ data: await listManagedUsers() });
 });
 
@@ -261,7 +252,7 @@ userRouter.put(
             until: until?.toISOString() ?? null,
         });
         // A changed length or reason is told again, with the new terms
-        await notifyUser(account.userId, messages.suspended(until && untilFormatter.format(until), body.reason));
+        await notifyUser(account.userId, messages.suspended(until && formatUntil(until), body.reason));
         res.json({ data: (await listManagedUsers(account.userId))[0] });
     },
 );

@@ -3,13 +3,12 @@ import { and, asc, count, countDistinct, eq, gte, inArray } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { categories, categoryFollows, events, favourites, systemLogs, users } from '../db/schema/index.js';
 import { LOG } from '../constants/logActions.js';
+import { DAY } from './londonTime.js';
 
 // The rows Site Analytics and Event Analytics read that no other page loads
 // (Phase 10, decided 2026-11-04). The figures are still worked out in the
 // browser (frontend lib/analytics.js); this only sends what they're made from,
 // and never who saved or followed
-
-const DAY = 86400000;
 
 // A save is when and which event: the favourites row without its user
 const saveColumns = { eventId: favourites.eventId, createdAt: favourites.createdAt };
