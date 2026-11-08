@@ -9,6 +9,8 @@ import { contactMessagesText } from "../data/contactMessagesData";
 import { contactPageData } from "../data/contactPageData";
 import { featuredQuestions } from "../data/faqData";
 import { fieldErrors } from "../lib/api";
+import { isEmail } from "../lib/validation";
+import { authErrors } from "../data/authPageData";
 
 // `account` ({ name, email }) is the signed-in person inside the dashboard:
 // those two fields show locked and are sent from the account
@@ -42,10 +44,18 @@ export default function Contact({ onSendMessage, inDashboard = false, account })
     const message = String(data.get("message") ?? "").trim();
     const website = String(data.get("website") ?? "");
 
-    setErrors({});
-    if (!name || !email || !message) {
-      setErrorMessage(contactMessagesText.error);
-      setStatus("error");
+    // Each problem under its field, the first one focused, as on Log in
+    const found = {};
+    if (!name) found.name = form.errors.name;
+    if (!email) found.email = authErrors.emailRequired;
+    else if (!isEmail(email)) found.email = authErrors.emailInvalid;
+    if (!message) found.message = form.errors.message;
+    setErrors(found);
+    const firstProblem = form.fields.find((field) => found[field.id]);
+    if (firstProblem) {
+      // Nothing was sent, so no "error sending" box: the fields say what's missing
+      setStatus(null);
+      document.getElementById(firstProblem.id)?.focus();
       return;
     }
 
@@ -111,7 +121,7 @@ export default function Contact({ onSendMessage, inDashboard = false, account })
         </section>
 
         <div className="panel contact-form-container">
-          <form className="contact-form" onSubmit={handleSubmit}>
+          <form className="contact-form" onSubmit={handleSubmit} noValidate>
             <h2 className="heading-panel contact-form-title">{form.title}</h2>
 
             {status && (

@@ -553,8 +553,8 @@ function App() {
               element={
                 <Settings
                   key={account?.userId}
-                  selectedUser={selectedUser}
                   account={account}
+                  defaultAvatar={selectedUser.avatar}
                   onSaveProfile={saveProfile}
                   onChangePassword={changePassword}
                   onEmailNotificationsChange={(emailNotifications) => saveAccount({ emailNotifications })}

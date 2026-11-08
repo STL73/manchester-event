@@ -15,9 +15,10 @@ import { fieldErrors } from "../../lib/api";
 // Picture and display name, saved together (the picture on Cloudinary through
 // the server, Phase 6); the email is shown locked.
 // Save stays off until something differs from what is saved
-export default function ProfileSettings({ selectedUser, emailVerified, onSave }) {
-  const savedAvatar = selectedUser.avatarUrl ?? null;
-  const [name, setName] = useState(selectedUser.user);
+export default function ProfileSettings({ account, defaultAvatar: DefaultAvatar, onSave }) {
+  const savedAvatar = account.avatar ?? null;
+  const emailVerified = Boolean(account.emailVerifiedAt);
+  const [name, setName] = useState(account.username);
   // What the circle shows: the saved picture, a new pick (an object URL) or none
   const [avatarUrl, setAvatarUrl] = useState(savedAvatar);
   // The picked file, sent on Save
@@ -28,12 +29,11 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
   // The server's refusal: no connection, or a suspended account
   const [error, setError] = useState("");
   const fileRef = useRef(null);
-  const DefaultAvatar = selectedUser.avatar;
   const SubmitIcon = profileForm.submit.icon;
 
   const trimmedName = name.trim();
   const removeSaved = Boolean(savedAvatar) && !avatarUrl;
-  const changed = trimmedName !== selectedUser.user || Boolean(avatarFile) || removeSaved;
+  const changed = trimmedName !== account.username || Boolean(avatarFile) || removeSaved;
 
   // An unsaved preview is only ours, so it can be freed when replaced
   function dropDraftAvatar() {
@@ -164,7 +164,7 @@ export default function ProfileSettings({ selectedUser, emailVerified, onSave })
         <span className="field-label">{profileForm.emailLabel}</span>
         <p className="settings-locked">
           <Lock aria-hidden="true" />
-          <span className="settings-locked-value">{selectedUser.email}</span>
+          <span className="settings-locked-value">{account.email}</span>
           {emailVerified ? (
             <span className="badge tone-success">
               <BadgeCheck aria-hidden="true" />

@@ -1,4 +1,3 @@
-import { formatDayNumber, formatMonthShort } from "../../lib/formatDates";
 
 // The rows of a list panel (Up next, Most saved, Waiting longest), edge to
 // edge like the admin lists: something at the start (a rank, a date, an
@@ -17,16 +16,5 @@ export default function ChartList({ items }) {
         </li>
       ))}
     </ol>
-  );
-}
-
-// A date as a small tile at the start of a row: "24" over "Oct"
-export function DateTile({ date }) {
-  const value = new Date(date);
-  return (
-    <span className="chart-list-date">
-      <strong>{formatDayNumber(value)}</strong>
-      <small>{formatMonthShort(value)}</small>
-    </span>
   );
 }

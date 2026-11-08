@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { dashboardGreeting } from "../../data/dashboardGreetingData";
 import { eventDetailsPath } from "../../data/eventsData";
 import { getNextFavourite } from "../../lib/favourites";
-import { getSiteTotals } from "../../lib/analytics";
 
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   weekday: "long",
@@ -42,13 +41,13 @@ function NextFavouriteLine({ events, favouriteIds }) {
 }
 
 // Counted live from the shared state, so the line changes as soon as an
-// event is approved. No unverified users here: only they can verify
-function PendingLine({ role, users, events, organiserEvents }) {
-  const { pendingEvents } = getSiteTotals(users, events);
+// event is approved. Pending is status "pending", as the sidebar badge and
+// the admin Home count it, so the three agree
+function PendingLine({ role, events, organiserEvents }) {
+  const isPending = (event) => event.status === "pending";
   const counts = {
-    pendingOwnEvents: organiserEvents.filter((event) => event.status === "pending")
-      .length,
-    pendingEvents,
+    pendingOwnEvents: organiserEvents.filter(isPending).length,
+    pendingEvents: events.filter(isPending).length,
   };
   const items = (role?.items ?? []).filter((item) => counts[item.id] > 0);
 

@@ -11,16 +11,17 @@ import { formatDate } from "../lib/formatDates";
 
 // Four sections, each saving on its own. What a role sees differs in the
 // email wording and in Delete: none for admins, and the server refuses an
-// organiser whose events have been public
+// organiser whose events have been public. Everything comes from `account`,
+// the server's; `defaultAvatar` is the role's icon for an account with no picture
 export default function Settings({
-  selectedUser,
   account,
+  defaultAvatar,
   onSaveProfile,
   onChangePassword,
   onEmailNotificationsChange,
   onDeleteAccount,
 }) {
-  const role = selectedUser.type;
+  const role = account.role;
 
   return (
     <div className="dashboard-page">
@@ -43,21 +44,17 @@ export default function Settings({
           <AccountBanner account={account} />
 
           <SettingsSection id="settings-profile" section={settingsSections.profile}>
-            <ProfileSettings
-              selectedUser={selectedUser}
-              emailVerified={Boolean(account.emailVerifiedAt)}
-              onSave={onSaveProfile}
-            />
+            <ProfileSettings account={account} defaultAvatar={defaultAvatar} onSave={onSaveProfile} />
           </SettingsSection>
 
           <SettingsSection id="settings-password" section={settingsSections.password}>
-            <PasswordSettings email={selectedUser.email} onChange={onChangePassword} />
+            <PasswordSettings email={account.email} onChange={onChangePassword} />
           </SettingsSection>
 
           <SettingsSection id="settings-emails" section={settingsSections.emails}>
             <EmailSettings
               role={role}
-              enabled={selectedUser.emailNotifications ?? true}
+              enabled={account.emailNotifications ?? true}
               onChange={onEmailNotificationsChange}
             />
           </SettingsSection>

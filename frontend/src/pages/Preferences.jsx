@@ -13,7 +13,8 @@ import {
   preferencesSummary,
   yourPicks,
 } from "../data/preferencesData";
-import { formatDayNumber, formatMonthShort } from "../lib/formatDates";
+import DateTile from "../components/UI/DateTile";
+import { eventDetailsPath } from "../data/eventsData";
 
 // An event has one category, so the events matching several are the sum of
 // each one's count
@@ -179,23 +180,17 @@ export default function Preferences({ interestIds, onSaveInterests }) {
                 </p>
               ) : (
                 <ul className="preferences-coming-list">
-                  {matchingEvents.map((event) => {
-                    const start = new Date(event.startDatetime);
-                    return (
-                      <li key={event.eventId}>
-                        <Link className="preferences-coming-item" to={`/dashboard/events/${event.eventId}`}>
-                          <span className="preferences-coming-date">
-                            <span className="preferences-coming-day">{formatDayNumber(start)}</span>
-                            <span className="preferences-coming-month">{formatMonthShort(start)}</span>
-                          </span>
-                          <span className="flex min-w-0 flex-col">
-                            <span className="preferences-coming-name">{event.name}</span>
-                            <span className="preferences-coming-location">{event.location}</span>
-                          </span>
-                        </Link>
-                      </li>
-                    );
-                  })}
+                  {matchingEvents.map((event) => (
+                    <li key={event.eventId}>
+                      <Link className="preferences-coming-item" to={eventDetailsPath(event.eventId, true)}>
+                        <DateTile date={event.startDatetime} />
+                        <span className="flex min-w-0 flex-col">
+                          <span className="preferences-coming-name">{event.name}</span>
+                          <span className="preferences-coming-location">{event.location}</span>
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
                 </ul>
               )}
             </div>

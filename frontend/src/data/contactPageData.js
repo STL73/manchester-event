@@ -40,6 +40,11 @@ export const contactPageData = {
       { id: "email", label: "Email", type: "email", placeholder: "you@example.com", autoComplete: "email" },
       { id: "message", label: "Message", type: "textarea", placeholder: "How can we help?" },
     ],
+    // Under each field, in the page's style (the email ones are Log in's)
+    errors: {
+      name: "Enter your name.",
+      message: "Write your message.",
+    },
     // Signed in, the name and email come from the account (the schema's
     // contact_messages takes them from it server-side), so they're locked
     accountFields: ["name", "email"],

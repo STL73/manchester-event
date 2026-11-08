@@ -698,18 +698,6 @@
     @apply -mx-2 grid grid-cols-[2.75rem_minmax(0,1fr)] items-center gap-3 rounded-xl p-2 transition-colors hover:bg-foreground/5 focus-ring-flush motion-reduce:transition-none;
   }
 
-  .preferences-coming-date {
-    @apply flex flex-col items-center rounded-lg border border-border py-1 leading-tight;
-  }
-
-  .preferences-coming-day {
-    @apply text-base font-semibold text-foreground;
-  }
-
-  .preferences-coming-month {
-    @apply text-[10px] uppercase text-muted;
-  }
-
   .preferences-coming-name {
     @apply truncate text-sm font-medium text-foreground;
   }
@@ -1150,16 +1138,18 @@
     @apply size-3.5 text-favourite;
   }
 
-  .chart-list-date {
-    @apply flex w-11 flex-col items-center rounded-[10px] border border-border py-1 leading-tight;
+  /* A date as a small tile at the start of a row (UI/DateTile): Preferences'
+     next events, Event Analytics' coming-up list */
+  .date-tile {
+    @apply flex w-11 flex-col items-center rounded-lg border border-border py-1 leading-tight;
   }
 
-  .chart-list-date strong {
-    @apply text-base text-foreground;
+  .date-tile-day {
+    @apply text-base font-semibold text-foreground;
   }
 
-  .chart-list-date small {
-    @apply text-[10px] uppercase;
+  .date-tile-month {
+    @apply text-[10px] uppercase text-muted;
   }
 
   /* Shares of a whole (ShareBar): parts read their tone's colour */

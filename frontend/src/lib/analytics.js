@@ -162,20 +162,6 @@ export function getCardTrend(items, getDate, config, now = new Date()) {
   return { ...trend, label: config.label(trend.current), note: config.note(trend.previous) };
 }
 
-// The four site-wide totals (get_total_events(), get_pending_events(),
-// get_total_users() and get_pending_users()), shared by the admin home,
-// Site Analytics and the dashboard greeting so they always agree
-export function getSiteTotals(users, events) {
-  return {
-    events: events.length,
-    pendingEvents: events.filter((event) => event.status === "pending").length,
-    users: users.length,
-    // Not get_pending_users(): the schema has no pending account status;
-    // an unverified email is something only the user can fix
-    unverifiedUsers: users.filter((user) => !user.emailVerifiedAt).length,
-  };
-}
-
 // ---------------------------------------------------------------------------
 // The figures behind the analytics panels. Each takes the lists and `now`.
 

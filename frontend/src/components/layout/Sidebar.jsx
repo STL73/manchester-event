@@ -77,7 +77,7 @@ export default function Sidebar({
         activePath={activePath}
         pathname={pathname}
       />
-      <UserNav items={selectedUser} onLogout={onLogout} />
+      <UserNav user={selectedUser} onLogout={onLogout} />
     </aside>
   );
 }

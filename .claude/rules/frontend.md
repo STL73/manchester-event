@@ -90,7 +90,7 @@ frontend/src/
 ├── pages/             one file per route
 ├── components/
 │   ├── UI/            shared primitives: Button, DashboardCard, Tooltip, FilterPills,
-│   │                  DatePill (Pick a date), PeriodSwitcher, Avatar (initials), PageFrame
+│   │                  DatePill (Pick a date), DateTile, PeriodSwitcher, Avatar (initials), PageFrame
 │   ├── layout/        Navbar, Sidebar, MainNav, SecondaryNav, UserNav, Footer
 │   ├── events/        EventCard, EventsBrowser, SearchBar, VenueSearch, ImageDrop
 │   ├── admin/         EventReview (Manage Events), AccountForm (Manage Users)

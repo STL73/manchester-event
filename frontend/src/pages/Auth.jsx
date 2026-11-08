@@ -4,6 +4,7 @@ import Button from "../components/UI/Button";
 import FormField from "../components/UI/FormField";
 import StatusMessage from "../components/UI/StatusMessage";
 import { api, fieldErrors } from "../lib/api";
+import { isEmail } from "../lib/validation";
 import {
   PASSWORD_MIN_LENGTH,
   authErrors,
@@ -11,7 +12,6 @@ import {
   signUpRoles,
 } from "../data/authPageData";
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Errors in the order the fields appear, so the first one gets focus. Each
 // field is checked only on the pages that have it. Login only checks that
@@ -28,7 +28,7 @@ function validate(values) {
 
   if ("email" in values) {
     if (!values.email) errors.email = authErrors.emailRequired;
-    else if (!EMAIL_PATTERN.test(values.email)) errors.email = authErrors.emailInvalid;
+    else if (!isEmail(values.email)) errors.email = authErrors.emailInvalid;
   }
 
   if ("password" in values) {

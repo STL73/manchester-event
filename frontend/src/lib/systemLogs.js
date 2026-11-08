@@ -22,13 +22,14 @@ import {
   UserPlus,
   X,
 } from "lucide-react";
+import { eventDetailsPath } from "../data/eventsData";
 
 // Turns one system_logs row into a sentence for the feed: who did what to
 // which event or account, with links (System Logs and Admin Home's Recent
 // Admin Actions share it). `kind` drives the filter pills; `tone` colours
 // the icon. The action names are the fixed ones from log_system_action()
 
-const eventPath = (eventId) => `/dashboard/events/${eventId}`;
+const eventPath = (eventId) => eventDetailsPath(eventId, true);
 const userPath = (userId) => `/dashboard/manage-users?open=${userId}`;
 const messagePath = (messageId) => `/dashboard/contact-messages?open=${messageId}`;
 
