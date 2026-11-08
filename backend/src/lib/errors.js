@@ -9,5 +9,10 @@ export class AppError extends Error {
     }
 }
 
+// An error shown under one form field, `field` being the body's name for it
+export function fieldError(status, field, message) {
+    return new AppError(status, message, [{ path: `body.${field}`, message }]);
+}
+
 // A row pointing at one that no longer exists. Drizzle keeps Postgres's own error on `cause`
 export const isForeignKeyViolation = (error) => (error.code ?? error.cause?.code) === '23503';

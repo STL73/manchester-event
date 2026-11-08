@@ -15,9 +15,6 @@ const USER_AGENT = 'manchester-event-portal/1.0';
 const TIMEOUT_MS = 5000;
 const { south, north, west, east } = GREATER_MANCHESTER;
 
-// OSM's own ids: N, W or R (node, way, relation) and a number
-export const OSM_ID = /^[NWR]\d{1,20}$/;
-
 const inGreaterManchester = (latitude, longitude) =>
     latitude >= south && latitude <= north && longitude >= west && longitude <= east;
 

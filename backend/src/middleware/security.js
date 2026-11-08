@@ -1,5 +1,5 @@
 import { aj } from '../config/arcjet.js';
-import { AppError } from '../lib/errors.js';
+import { AppError, fieldError } from '../lib/errors.js';
 
 // Runs an Arcjet client against the request. securityMiddleware uses the base
 // client on every request; a route passes its stricter one from aj.withRule().
@@ -22,8 +22,7 @@ export function arcjetProtect(client, props = () => ({})) {
             if (decision.reason.isBot()) throw new AppError(403, 'Automated requests are not allowed');
             // Disposable, invalid, or a domain that can't receive email. Shown under the field
             if (decision.reason.isEmail()) {
-                const message = "This email address can't be used. Please use another one.";
-                throw new AppError(400, message, [{ path: 'body.email', message }]);
+                throw fieldError(400, 'email', "This email address can't be used. Please use another one.");
             }
             throw new AppError(403, 'Request blocked');
         }

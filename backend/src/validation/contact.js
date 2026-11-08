@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { email } from './auth.js';
+import { idParams } from './common.js';
 
 const message = z
     .string({ error: 'Write your message.' })
@@ -22,7 +23,7 @@ export const guestMessageSchema = z.object({
     website,
 });
 
-export const messageIdParams = z.object({ id: z.coerce.number({ error: 'Message not found.' }).int().positive() });
+export const messageIdParams = idParams('Message not found.');
 
 export const readSchema = z.object({ read: z.boolean({ error: 'Choose read or unread.' }) });
 

@@ -1,9 +1,8 @@
 import { z } from 'zod';
 import { AREAS } from '../constants/areas.js';
 import { londonInstant } from '../lib/londonTime.js';
-import { OSM_ID } from '../lib/osm.js';
-
-const slug = /^[a-z0-9-]+$/;
+import { OSM_ID } from '../constants/osm.js';
+import { SLUG, idParams, limit, page } from './common.js';
 
 // Explore Events' filters, the same names as its URL. The frontend leaves out
 // filters that aren't in use
@@ -13,19 +12,17 @@ export const listEventsQuery = z.object({
     category: z
         .string()
         .transform((value) => value.split(',').filter(Boolean))
-        .pipe(z.array(z.string().regex(slug, 'Choose a category from the list.')).max(50))
+        .pipe(z.array(z.string().regex(SLUG, 'Choose a category from the list.')).max(50))
         .optional(),
     location: z.enum(AREAS, { error: 'Choose an area from the list.' }).optional(),
     when: z.enum(['tonight', 'weekend', 'week'], { error: 'Choose tonight, this weekend or the next 7 days.' }).optional(),
     date: z.iso.date({ error: 'Pick a date as YYYY-MM-DD.' }).optional(),
-    page: z.coerce.number().int().min(1).default(1),
+    page,
     // 12 fills whole rows in every Explore view; Home and Preferences ask for 3
-    limit: z.coerce.number().int().min(1).max(12).default(12),
+    limit: limit(12),
 });
 
-export const eventIdParams = z.object({
-    id: z.coerce.number({ error: 'Event not found.' }).int().positive(),
-});
+export const eventIdParams = idParams('Event not found.');
 
 // A time as a Manchester clock shows it, what the form's datetime-local input
 // gives ('2026-11-14T19:30'), so the browser's own time zone never matters
@@ -54,7 +51,7 @@ const londonDateTime = (message) => z
 export const eventBodySchema = z
     .object({
         eventName: z.string({ error: 'Enter the event\'s name.' }).trim().min(1, 'Enter the event\'s name.').max(255, 'Keep the name under 255 characters.'),
-        category: z.string({ error: 'Choose a category.' }).regex(slug, 'Choose a category.'),
+        category: z.string({ error: 'Choose a category.' }).regex(SLUG, 'Choose a category.'),
         description: z.string({ error: 'Describe the event.' }).trim().min(1, 'Describe the event.').max(5000, 'Keep the description under 5,000 characters.'),
         startDatetime: londonDateTime('Pick the start date and time.'),
         endDatetime: londonDateTime('Pick the end date and time, or leave it empty.').nullable().default(null),

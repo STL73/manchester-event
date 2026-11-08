@@ -46,13 +46,17 @@ after a router never runs for that router's routes, so `express.json()` must sta
 
 - **No try/catch in routes.** Express 5 passes errors from async routes to `errorHandler`
   (`middleware/errorHandler.js`). Throw `new AppError(status, message, details?)`
-  (`lib/errors.js`) for anything the client should see; anything else becomes a 500 with a generic
+  (`lib/errors.js`) for anything the client should see, or `fieldError(status, field, message)`
+  for one shown under a form field (`body.<field>`); anything else becomes a 500 with a generic
   message, and the real error goes only to the server log
 - **Validation:** Zod through `validate({ body, query, params })` (`middleware/validate.js`). It
   answers 400 `Invalid input` with one `{ path, message }` per problem, from every part at once.
   Routes read **`req.valid` only**, never `req.body`: fields a schema doesn't list (an organiser's
   `status`) never reach the database. (`req.valid` because Express 5 doesn't let `req.query` be
-  replaced)
+  replaced). Ids, page, limit and the slug pattern come from `validation/common.js`
+  (`idParams('Event not found.')`, `limit(12)`)
+- **Search:** `containsText(text, q)` (`lib/search.js`) is every `ILIKE` search, `%` and `_`
+  taken literally
 - **Security:** `config/arcjet.js` makes one Arcjet client (shield, bot detection allowing search
   engines and link previews). Stricter rules for a route use `aj.withRule()` at module level, never
   per request, run by `arcjetProtect(client, props)` from `middleware/security.js`. Rate limit =
@@ -77,7 +81,9 @@ effect on the next request, and a JWT can't be cancelled before it expires.
   (it can still log in and read, with a banner); routes that change something add
   `requireActive`, which answers 403. A suspension whose `suspended_until` has passed is lifted
   the next time the account is seen. `requireRole(...)` checks the role on the server, never only
-  in the frontend
+  in the frontend. Routes spread one of two guards (2026-11-08): `...readAs('admin')`
+  (`requireAuth` + `requireRole`) or `...writeAs('organiser')` (with `requireActive` between).
+  The few writes a suspended account may still make use `requireAuth` alone
 - Same error for an unknown email and a wrong password ("Email or password is incorrect"), and
   an unknown email is still compared against a dummy hash so the timing matches. Failed logins go
   to `system_logs` (`User Login Failed`): linked to the account when the email has one, otherwise

@@ -7,7 +7,7 @@ import { db } from '../db/index.js';
 import { users } from '../db/schema/index.js';
 import { aj } from '../config/arcjet.js';
 import { LOG } from '../constants/logActions.js';
-import { AppError } from '../lib/errors.js';
+import { AppError, fieldError } from '../lib/errors.js';
 import {
     SESSION_COOKIE, startSession, findSession, endSession, endAllSessions, clearSessionCookie,
 } from '../lib/sessions.js';
@@ -63,8 +63,7 @@ authRouter.post(
             .returning();
         // Said plainly (decided 2026-10-26): the rate limit stops anyone testing emails in bulk
         if (!user) {
-            const message = 'An account with this email already exists. Log in instead?';
-            throw new AppError(409, message, [{ path: 'body.email', message }]);
+            throw fieldError(409, 'email', 'An account with this email already exists. Log in instead?');
         }
 
         await logAction(LOG.USER_REGISTERED, user, { role, email });
@@ -189,8 +188,7 @@ authRouter.put(
         const { currentPassword, newPassword } = req.valid.body;
         // 400, not 401: the session is fine, and a 401 would read as being logged out
         if (!(await bcrypt.compare(currentPassword, req.user.password))) {
-            const message = 'Your current password is incorrect.';
-            throw new AppError(400, message, [{ path: 'body.currentPassword', message }]);
+            throw fieldError(400, 'currentPassword', 'Your current password is incorrect.');
         }
 
         const [user] = await db

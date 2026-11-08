@@ -3,7 +3,7 @@ import { slidingWindow } from '@arcjet/node';
 
 import { aj } from '../config/arcjet.js';
 import { searchPlaces } from '../lib/osm.js';
-import { requireAuth, requireActive, requireRole } from '../middleware/auth.js';
+import { writeAs } from '../middleware/auth.js';
 import { arcjetProtect } from '../middleware/security.js';
 import { validate } from '../middleware/validate.js';
 import { locationSearchQuery } from '../validation/events.js';
@@ -18,9 +18,7 @@ const searchGuard = aj?.withRule(slidingWindow({ mode: 'LIVE', characteristics: 
 // Create and Edit Event's venue box. Only organisers pick venues
 locationRouter.get(
     '/search',
-    requireAuth,
-    requireActive,
-    requireRole('organiser'),
+    ...writeAs('organiser'),
     arcjetProtect(searchGuard, (req) => ({ userId: String(req.user.userId) })),
     validate({ query: locationSearchQuery }),
     async (req, res) => {

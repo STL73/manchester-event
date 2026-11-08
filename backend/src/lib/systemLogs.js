@@ -1,7 +1,8 @@
-import { and, desc, eq, getTableColumns, ilike, inArray, notInArray, sql } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns, inArray, notInArray, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 
 import { db } from '../db/index.js';
+import { containsText } from './search.js';
 import { events, systemLogs, users } from '../db/schema/index.js';
 import { LOG, LOG_EVENT_ACTIONS, LOG_SIGN_IN_ACTIONS, LOG_VIEWS } from '../constants/logActions.js';
 
@@ -48,10 +49,8 @@ const viewConditions = {
 // (as copied and as it is now) and the email or reason under the sentence
 function searchCondition(q) {
     if (!q) return undefined;
-    // ILIKE's own wildcards are searched for as typed
-    const pattern = `%${q.replace(/[\\%_]/g, '\\$&')}%`;
     const text = sql`concat_ws(' ', ${systemLogs.username}, ${systemLogs.action}, ${detail('name')}, ${detail('username')}, ${detail('email')}, ${detail('reason')}, ${events.eventName}, ${targets.username})`;
-    return ilike(text, pattern);
+    return containsText(text, q);
 }
 
 // System Logs (Phase 10, decided 2026-11-04): newest first, one page of one

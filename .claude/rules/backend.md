@@ -31,8 +31,9 @@ backend/
 │   │   └── arcjet.js       the one Arcjet client
 │   ├── constants/          fixed names (logActions.js: system_logs actions and System Logs' views;
 │   │                       notificationTypes.js: notifications.type; areas.js: area
-│   │                       ids, areaFor() boxes, Greater Manchester's bounds)
-│   ├── lib/                AppError, tokens, sessions, authTokens, email + authEmails,
+│   │                       ids, areaFor() boxes, Greater Manchester's bounds; osm.js: OSM_ID)
+│   ├── lib/                errors (AppError, fieldError), search (containsText),
+│   │                       tokens, sessions, authTokens, email + authEmails,
 │   │                       systemLogs (logAction, listLogs), users (publicUser),
 │   │                       publicEvents (every public read), londonTime (date windows),
 │   │                       organiserEvents (own events, snapshot, venue rows), osm (Photon, Nominatim),
@@ -44,8 +45,10 @@ backend/
 │   │                       jobs (reminders, email outbox, clean-up), scheduler (node-cron),
 │   │                       notificationEmails (a row as an email), html (escapeHtml)
 │   ├── middleware/         errorHandler (+ notFound), validate, security,
-│   │                       auth (requireAuth, optionalAuth, requireRole, requireActive), upload (multer)
-│   ├── validation/         Zod schemas per resource (auth.js, users.js, events.js, contact.js, logs.js)
+│   │                       auth (requireAuth, optionalAuth, requireRole, requireActive,
+│   │                       readAs, writeAs), upload (multer)
+│   ├── validation/         Zod schemas per resource (auth.js, users.js, events.js, contact.js, logs.js;
+│   │                       common.js: idParams, page, limit, SLUG)
 │   ├── db/
 │   │   ├── index.js        exports `db` (Drizzle client)
 │   │   ├── seed.js         npm run db:seed

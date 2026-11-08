@@ -10,7 +10,7 @@ import { LOG } from '../constants/logActions.js';
 import { sendContactReply } from '../lib/contactEmails.js';
 import { AppError } from '../lib/errors.js';
 import { logAction } from '../lib/systemLogs.js';
-import { optionalAuth, requireAuth, requireActive, requireRole } from '../middleware/auth.js';
+import { optionalAuth, readAs, writeAs } from '../middleware/auth.js';
 import { arcjetProtect } from '../middleware/security.js';
 import { validate } from '../middleware/validate.js';
 import { guestMessageSchema, memberMessageSchema, messageIdParams, readSchema, replySchema } from '../validation/contact.js';
@@ -74,9 +74,7 @@ async function findMessage(messageId) {
     return row;
 }
 
-const asAdmin = [requireAuth, requireRole('admin')];
-
-contactRouter.get('/', ...asAdmin, async (req, res) => {
+contactRouter.get('/', ...readAs('admin'), async (req, res) => {
     res.json({ data: await listMessages() });
 });
 
@@ -84,8 +82,7 @@ contactRouter.get('/', ...asAdmin, async (req, res) => {
 // was read is kept
 contactRouter.put(
     '/:id/read',
-    ...asAdmin,
-    requireActive,
+    ...writeAs('admin'),
     validate({ params: messageIdParams, body: readSchema }),
     async (req, res) => {
         const message = await findMessage(req.valid.params.id);
@@ -102,8 +99,7 @@ contactRouter.put(
 // fails the claim is undone, so Replied never shows for a reply nobody got
 contactRouter.put(
     '/:id/reply',
-    ...asAdmin,
-    requireActive,
+    ...writeAs('admin'),
     validate({ params: messageIdParams, body: replySchema }),
     async (req, res) => {
         const message = await findMessage(req.valid.params.id);

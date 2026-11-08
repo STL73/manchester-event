@@ -5,7 +5,7 @@ import { and, eq, not } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { categories, events } from '../db/schema/index.js';
 import { LOG } from '../constants/logActions.js';
-import { AppError } from '../lib/errors.js';
+import { AppError, fieldError } from '../lib/errors.js';
 import { deleteImage } from '../lib/images.js';
 import { findManagedEvent, listManagedEvents } from '../lib/managedEvents.js';
 import { messages, notifyAdmins, notifyFavouriters, notifyFollowers, notifyUser } from '../lib/notifications.js';
@@ -23,7 +23,7 @@ import {
 import { findPublicEvent, hasBeenPublic, listPublicEvents, summarisePublicEvents } from '../lib/publicEvents.js';
 import { logAction } from '../lib/systemLogs.js';
 import { withUpload } from '../lib/uploads.js';
-import { requireAuth, requireActive, requireRole } from '../middleware/auth.js';
+import { readAs, writeAs } from '../middleware/auth.js';
 import { acceptImage } from '../middleware/upload.js';
 import { validate } from '../middleware/validate.js';
 import { decisionReasonSchema, eventBodySchema, eventIdParams, listEventsQuery } from '../validation/events.js';
@@ -42,7 +42,7 @@ eventRouter.get('/summary', async (req, res) => {
 
 // Manage Events and Admin Home (Phase 7): every event but drafts, for admins.
 // Before /:id too
-eventRouter.get('/manage', requireAuth, requireRole('admin'), async (req, res) => {
+eventRouter.get('/manage', ...readAs('admin'), async (req, res) => {
     res.json({ data: await listManagedEvents() });
 });
 
@@ -56,7 +56,6 @@ eventRouter.get('/:id', validate({ params: eventIdParams }), async (req, res) =>
 
 // Organisers' own events (Phase 5, decided 2026-10-05 and 2026-11-02). Every
 // write is the owner's only, and a suspended organiser can only read
-const asOrganiser = [requireAuth, requireActive, requireRole('organiser')];
 
 // Sending an event for approval: the email must be verified (the one thing an
 // unverified account can't do), and the start still to come. The start is
@@ -67,8 +66,7 @@ function checkSubmittable(user, startDatetime, startIsNew, now) {
         throw new AppError(403, 'Verify your email address before sending an event for approval.');
     }
     if (startIsNew && startDatetime < now) {
-        const message = 'The start has passed. Pick a time still to come.';
-        throw new AppError(400, message, [{ path: 'body.startDatetime', message }]);
+        throw fieldError(400, 'startDatetime', 'The start has passed. Pick a time still to come.');
     }
 }
 
@@ -87,7 +85,7 @@ function imageColumns(uploaded, removeImage) {
 // Create Event: Save draft, or Submit for approval. Create and Edit take the
 // form as JSON, or with a photo as multipart (Phase 6); the photo is uploaded
 // only once every check has passed
-eventRouter.post('/', ...asOrganiser, ...acceptImage('image'), validate({ body: eventBodySchema }), async (req, res) => {
+eventRouter.post('/', ...writeAs('organiser'), ...acceptImage('image'), validate({ body: eventBodySchema }), async (req, res) => {
     const now = new Date();
     const { submit } = req.valid.body;
     if (submit) checkSubmittable(req.user, req.valid.body.startDatetime, true, now);
@@ -118,7 +116,7 @@ eventRouter.post('/', ...asOrganiser, ...acceptImage('image'), validate({ body: 
 // 2026-10-05): the first edit copies it into approved_snapshot, later edits
 // before the review leave that copy alone, photo included. Cancelled and ended
 // events are final
-eventRouter.put('/:id', ...asOrganiser, ...acceptImage('image'), validate({ params: eventIdParams, body: eventBodySchema }), async (req, res) => {
+eventRouter.put('/:id', ...writeAs('organiser'), ...acceptImage('image'), validate({ params: eventIdParams, body: eventBodySchema }), async (req, res) => {
     const now = new Date();
     const row = await findOwnEvent(req.valid.params.id, req.user.userId);
     if (row.status === 'cancelled') throw new AppError(400, 'A cancelled event can\'t be edited.');
@@ -156,7 +154,7 @@ eventRouter.put('/:id', ...asOrganiser, ...acceptImage('image'), validate({ para
 });
 
 // My Drafts' Submit for approval, without opening the form
-eventRouter.put('/:id/submit', ...asOrganiser, validate({ params: eventIdParams }), async (req, res) => {
+eventRouter.put('/:id/submit', ...writeAs('organiser'), validate({ params: eventIdParams }), async (req, res) => {
     const now = new Date();
     const row = await findOwnEvent(req.valid.params.id, req.user.userId);
     if (row.status !== 'draft') throw new AppError(400, 'Only a draft can be sent for approval.');
@@ -175,7 +173,7 @@ eventRouter.put('/:id/submit', ...asOrganiser, validate({ params: eventIdParams 
 // Cancel, for an event that has been public: people may have saved it, so it
 // stays, marked cancelled. An edit still waiting is dropped and the approved
 // version is the one cancelled, since that's what people saw
-eventRouter.put('/:id/cancel', ...asOrganiser, validate({ params: eventIdParams }), async (req, res) => {
+eventRouter.put('/:id/cancel', ...writeAs('organiser'), validate({ params: eventIdParams }), async (req, res) => {
     const row = await findOwnEvent(req.valid.params.id, req.user.userId);
     if (!wasPublic(row)) throw new AppError(400, 'This event has never been public, so delete it instead.');
     if (row.status === 'cancelled') throw new AppError(400, 'This event is already cancelled.');
@@ -199,7 +197,7 @@ eventRouter.put('/:id/cancel', ...asOrganiser, validate({ params: eventIdParams 
 // Delete, only for an event that has never been public (draft, pending or
 // rejected without an approved version). The condition is in the delete itself,
 // so an event approved since it was read is left alone
-eventRouter.delete('/:id', ...asOrganiser, validate({ params: eventIdParams }), async (req, res) => {
+eventRouter.delete('/:id', ...writeAs('organiser'), validate({ params: eventIdParams }), async (req, res) => {
     const row = await findOwnEvent(req.valid.params.id, req.user.userId);
     const [deleted] = await db
         .delete(events)
@@ -216,7 +214,6 @@ eventRouter.delete('/:id', ...asOrganiser, validate({ params: eventIdParams }), 
 // checked against the row as it is now, and the status is part of the UPDATE,
 // so a second admin deciding at the same moment gets 409 rather than a
 // second decision
-const asAdmin = [requireAuth, requireActive, requireRole('admin')];
 
 // Only an event waiting for review is decided. One that never went public and
 // whose start has passed is Expired: nobody can go any more. An edit of a live
@@ -246,7 +243,7 @@ async function categoryName(categoryId) {
 // copy goes, and with it the copy's photo if the edit brought its own. The
 // first approval is when it is new to the public: its category's followers
 // hear. Later ones are changes: the people who saved it hear
-eventRouter.put('/:id/approve', ...asAdmin, validate({ params: eventIdParams }), async (req, res) => {
+eventRouter.put('/:id/approve', ...writeAs('admin'), validate({ params: eventIdParams }), async (req, res) => {
     const now = new Date();
     const row = await findManagedEvent(req.valid.params.id);
     checkDecidable(row, now);
@@ -271,7 +268,7 @@ eventRouter.put('/:id/approve', ...asAdmin, validate({ params: eventIdParams }),
 
 // Reject, with the reason the organiser reads. A rejected edit of a live
 // event keeps its approved copy, so the public still sees that version
-eventRouter.put('/:id/reject', ...asAdmin, validate({ params: eventIdParams, body: decisionReasonSchema }), async (req, res) => {
+eventRouter.put('/:id/reject', ...writeAs('admin'), validate({ params: eventIdParams, body: decisionReasonSchema }), async (req, res) => {
     const now = new Date();
     const row = await findManagedEvent(req.valid.params.id);
     checkDecidable(row, now);
@@ -288,7 +285,7 @@ eventRouter.put('/:id/reject', ...asAdmin, validate({ params: eventIdParams, bod
 // Take a live event down (decided 2026-11-03): it is cancelled, as if its
 // organiser had, because once public an event is never hidden as though it
 // hadn't been. Saves stay and their owners hear; the organiser gets the reason
-eventRouter.put('/:id/take-down', ...asAdmin, validate({ params: eventIdParams, body: decisionReasonSchema }), async (req, res) => {
+eventRouter.put('/:id/take-down', ...writeAs('admin'), validate({ params: eventIdParams, body: decisionReasonSchema }), async (req, res) => {
     const now = new Date();
     const row = await findManagedEvent(req.valid.params.id);
     if (row.status !== 'approved') throw new AppError(400, 'Only a live event can be taken down.');

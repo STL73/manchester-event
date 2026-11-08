@@ -1,6 +1,7 @@
-import { and, asc, count, eq, gte, ilike, inArray, isNotNull, lt, lte, or, sql } from 'drizzle-orm';
+import { and, asc, count, eq, gte, inArray, isNotNull, lt, lte, or, sql } from 'drizzle-orm';
 
 import { db } from '../db/index.js';
+import { containsText } from './search.js';
 import { categories, events, favourites, locations, users } from '../db/schema/index.js';
 import { dayRange, whenRange } from './londonTime.js';
 
@@ -84,9 +85,7 @@ export async function listPublicEvents({ q, category, location, when, date, page
     const conditions = [isListed(now)];
 
     if (q) {
-        // ILIKE's own wildcards are searched for as typed
-        const pattern = `%${q.replace(/[\\%_]/g, '\\$&')}%`;
-        conditions.push(ilike(sql`concat_ws(' ', ${pub.name}, ${categories.name}, ${locations.locationName}, ${locations.address})`, pattern));
+        conditions.push(containsText(sql`concat_ws(' ', ${pub.name}, ${categories.name}, ${locations.locationName}, ${locations.address})`, q));
     }
     if (category?.length) conditions.push(inArray(categories.slug, category));
     if (location) conditions.push(eq(locations.area, location));

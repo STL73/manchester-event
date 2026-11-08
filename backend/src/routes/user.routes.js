@@ -6,7 +6,7 @@ import { db } from '../db/index.js';
 import { users, favourites, categories, categoryFollows } from '../db/schema/index.js';
 import { LOG } from '../constants/logActions.js';
 import { deleteAccount, listManagedUsers } from '../lib/accounts.js';
-import { AppError } from '../lib/errors.js';
+import { AppError, fieldError } from '../lib/errors.js';
 import { deleteImage } from '../lib/images.js';
 import { listNotifications, markRead, messages, notifyUser } from '../lib/notifications.js';
 import { listOrganiserEvents } from '../lib/organiserEvents.js';
@@ -16,7 +16,7 @@ import { logAction } from '../lib/systemLogs.js';
 import { withUpload } from '../lib/uploads.js';
 import { liftExpiredSuspension, publicUser } from '../lib/users.js';
 import { validate } from '../middleware/validate.js';
-import { requireAuth, requireActive, requireRole } from '../middleware/auth.js';
+import { requireAuth, requireActive, readAs, writeAs } from '../middleware/auth.js';
 import { acceptImage } from '../middleware/upload.js';
 import { eventIdParams } from '../validation/events.js';
 import {
@@ -61,8 +61,7 @@ async function afterAvatarChange(previous, user) {
 
 userRouter.put('/me/avatar', requireAuth, requireActive, ...acceptImage('avatar'), async (req, res) => {
     if (!req.file) {
-        const message = 'Choose a picture.';
-        throw new AppError(400, message, [{ path: 'body.avatar', message }]);
+        throw fieldError(400, 'avatar', 'Choose a picture.');
     }
     const user = await withUpload(req.file, 'avatar', (uploaded) => setAvatar(req.user.userId, uploaded));
     await afterAvatarChange(req.user, user);
@@ -81,15 +80,12 @@ userRouter.delete('/me/avatar', requireAuth, requireActive, async (req, res) => 
 // suspension can't be escaped by deleting the account
 userRouter.delete(
     '/me',
-    requireAuth,
-    requireActive,
-    requireRole('user', 'organiser'),
+    ...writeAs('user', 'organiser'),
     validate({ body: deleteAccountSchema }),
     async (req, res) => {
         const { userId, username, role, password } = req.user;
         if (!(await bcrypt.compare(req.valid.body.password, password))) {
-            const message = 'Your password is incorrect.';
-            throw new AppError(400, message, [{ path: 'body.password', message }]);
+            throw fieldError(400, 'password', 'Your password is incorrect.');
         }
 
         const eventsDeleted = await deleteAccount(
@@ -107,17 +103,15 @@ userRouter.delete(
 // Favourites and follows are the user role's (My Favourites, Preferences).
 // Saving and following change something, so a suspended account can only read
 // them (decided 2026-10-05: suspended = read-only)
-const asUser = [requireAuth, requireRole('user')];
-const asActiveUser = [requireAuth, requireActive, requireRole('user')];
 
-userRouter.get('/me/favourites', ...asUser, async (req, res) => {
+userRouter.get('/me/favourites', ...readAs('user'), async (req, res) => {
     res.json({ data: await listFavouriteEvents(req.user.userId) });
 });
 
 // PUT, not POST: saving twice leaves one save. Only what the lists show can be
 // saved: an event that has ended, been cancelled or whose organiser is suspended
 // can't (decided 2026-10-05 and 2026-10-27), though saves made before are kept
-userRouter.put('/me/favourites/:id', ...asActiveUser, validate({ params: eventIdParams }), async (req, res) => {
+userRouter.put('/me/favourites/:id', ...writeAs('user'), validate({ params: eventIdParams }), async (req, res) => {
     const eventId = req.valid.params.id;
     const saveable = await canSaveEvent(eventId);
     if (saveable === null) throw new AppError(404, 'Event not found.');
@@ -128,7 +122,7 @@ userRouter.put('/me/favourites/:id', ...asActiveUser, validate({ params: eventId
 });
 
 // Removing always works, so an ended or cancelled favourite can be cleared
-userRouter.delete('/me/favourites/:id', ...asActiveUser, validate({ params: eventIdParams }), async (req, res) => {
+userRouter.delete('/me/favourites/:id', ...writeAs('user'), validate({ params: eventIdParams }), async (req, res) => {
     await db
         .delete(favourites)
         .where(and(eq(favourites.userId, req.user.userId), eq(favourites.eventId, req.valid.params.id)));
@@ -136,7 +130,7 @@ userRouter.delete('/me/favourites/:id', ...asActiveUser, validate({ params: even
 });
 
 // Archived categories are hidden from Preferences, so they're left out here too
-userRouter.get('/me/follows', ...asUser, async (req, res) => {
+userRouter.get('/me/follows', ...readAs('user'), async (req, res) => {
     const rows = await db
         .select({ slug: categories.slug })
         .from(categoryFollows)
@@ -148,7 +142,7 @@ userRouter.get('/me/follows', ...asUser, async (req, res) => {
 
 // The picks replace the active categories followed. Follows of an archived
 // category stay: the honeycomb doesn't show it, so leaving it out isn't a choice
-userRouter.put('/me/follows', ...asActiveUser, validate({ body: followsSchema }), async (req, res) => {
+userRouter.put('/me/follows', ...writeAs('user'), validate({ body: followsSchema }), async (req, res) => {
     const { userId } = req.user;
     const slugs = req.valid.body.categories;
     const picked = slugs.length
@@ -158,8 +152,7 @@ userRouter.put('/me/follows', ...asActiveUser, validate({ body: followsSchema })
             .where(and(inArray(categories.slug, slugs), eq(categories.isActive, true)))
         : [];
     if (picked.length !== slugs.length) {
-        const message = 'Choose categories from the list.';
-        throw new AppError(400, message, [{ path: 'body.categories', message }]);
+        throw fieldError(400, 'categories', 'Choose categories from the list.');
     }
 
     const pickedIds = picked.map((category) => category.categoryId);
@@ -181,7 +174,7 @@ userRouter.put('/me/follows', ...asActiveUser, validate({ body: followsSchema })
 
 // My Events, My Drafts and Organiser Home: every one of the organiser's events,
 // drafts and past ones included. Reading works while suspended
-userRouter.get('/me/events', requireAuth, requireRole('organiser'), async (req, res) => {
+userRouter.get('/me/events', ...readAs('organiser'), async (req, res) => {
     res.json({ data: await listOrganiserEvents(req.user.userId) });
 });
 
@@ -199,7 +192,6 @@ userRouter.put('/me/notifications/read', requireAuth, validate({ body: markReadS
 // Manage Users (Phase 8). Accounts are made by sign-up and admins by the seed,
 // so there's no create; the list carries everything the panel shows. Admin
 // accounts aren't changed here, nor your own (decided 2026-11-03)
-const asAdmin = [requireAuth, requireActive, requireRole('admin')];
 const DAY = 24 * 60 * 60 * 1000;
 const untilFormatter = new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Europe/London',
@@ -220,7 +212,7 @@ async function findManagedAccount(req) {
     return liftExpiredSuspension(account);
 }
 
-userRouter.get('/', ...asAdmin, async (req, res) => {
+userRouter.get('/', ...writeAs('admin'), async (req, res) => {
     res.json({ data: await listManagedUsers() });
 });
 
@@ -229,7 +221,7 @@ userRouter.get('/', ...asAdmin, async (req, res) => {
 // and read, with the banner (decided 2026-11-03)
 userRouter.put(
     '/:id/status',
-    ...asAdmin,
+    ...writeAs('admin'),
     validate({ params: userIdParams, body: accountStatusSchema }),
     async (req, res) => {
         const account = await findManagedAccount(req);
@@ -250,8 +242,7 @@ userRouter.put(
         let until;
         if (body.days === undefined) {
             if (account.accStatus !== 'suspended') {
-                const message = 'Choose how long.';
-                throw new AppError(400, message, [{ path: 'body.days', message }]);
+                throw fieldError(400, 'days', 'Choose how long.');
             }
             until = account.suspendedUntil;
         } else {
@@ -275,7 +266,7 @@ userRouter.put(
     },
 );
 
-userRouter.delete('/:id', ...asAdmin, validate({ params: userIdParams }), async (req, res) => {
+userRouter.delete('/:id', ...writeAs('admin'), validate({ params: userIdParams }), async (req, res) => {
     const account = await findManagedAccount(req);
     const eventsDeleted = await deleteAccount(account, 'This account has events that have been public, so it can only be suspended.');
     await logAction(LOG.USER_DELETED, req.user, {

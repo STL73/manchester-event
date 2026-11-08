@@ -2,7 +2,7 @@ import { and, asc, eq, sql } from 'drizzle-orm';
 
 import { db } from '../db/index.js';
 import { categories, events, locations } from '../db/schema/index.js';
-import { AppError } from './errors.js';
+import { AppError, fieldError } from './errors.js';
 import { lookupPlace } from './osm.js';
 import { hasBeenPublic } from './publicEvents.js';
 
@@ -122,8 +122,7 @@ export async function categoryIdFor(slug) {
         .from(categories)
         .where(and(eq(categories.slug, slug), eq(categories.isActive, true)));
     if (!category) {
-        const message = 'Choose a category from the list.';
-        throw new AppError(400, message, [{ path: 'body.category', message }]);
+        throw fieldError(400, 'category', 'Choose a category from the list.');
     }
     return category.categoryId;
 }
@@ -136,8 +135,7 @@ export async function locationIdFor(placeId) {
 
     const place = await lookupPlace(placeId);
     if (!place) {
-        const message = 'Choose a venue in Greater Manchester from the list.';
-        throw new AppError(400, message, [{ path: 'body.placeId', message }]);
+        throw fieldError(400, 'placeId', 'Choose a venue in Greater Manchester from the list.');
     }
     // Two organisers adding the same new venue at once: the unique place_id
     // keeps one row, and the second reads it back

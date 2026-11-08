@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { username, currentPassword } from './auth.js';
+import { SLUG, idParams } from './common.js';
 
 // Each Settings section saves on its own, so either field may come alone
 export const updateProfileSchema = z
@@ -16,14 +17,12 @@ export const deleteAccountSchema = z.object({
 // Preferences saves every pick at once: the whole list replaces what was followed
 export const followsSchema = z.object({
     categories: z
-        .array(z.string().regex(/^[a-z0-9-]+$/, 'Choose categories from the list.'), { error: 'Choose categories from the list.' })
+        .array(z.string().regex(SLUG, 'Choose categories from the list.'), { error: 'Choose categories from the list.' })
         .max(50)
         .transform((slugs) => [...new Set(slugs)]),
 });
 
-export const userIdParams = z.object({
-    id: z.coerce.number({ error: 'Account not found.' }).int().positive(),
-});
+export const userIdParams = idParams('Account not found.');
 
 // Manage Users (Phase 8): Active, or Suspended for 7 or 30 days or until lifted
 // (null), with a reason the person reads. Leaving days out keeps the current end
