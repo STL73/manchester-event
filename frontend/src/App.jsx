@@ -13,8 +13,9 @@ import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import ScrollToTop from "./components/layout/ScrollToTop";
 import NotFound from "./pages/NotFound";
-import { getData, getUserData } from "./data/navigationData";
+import { getUserData, secondaryNav } from "./data/navigationData";
 import { api, formWithFile } from "./lib/api";
+import { replaceById } from "./lib/replaceById";
 import { toEvent } from "./lib/publicEvents";
 import { toOrganiserEvent } from "./lib/organiserEvents";
 import { toManagedEvent } from "./lib/managedEvents";
@@ -286,9 +287,7 @@ function App() {
   async function replyToContactMessage(messageId, reply) {
     const adminId = adminUserId;
     const { data } = await api(`/contact-messages/${messageId}/reply`, { method: "PUT", body: { reply } });
-    updateContactMessages(adminId, (list) =>
-      list.map((item) => (item.messageId === messageId ? data : item)),
-    );
+    updateContactMessages(adminId, (list) => replaceById(list, "messageId", data));
   }
 
   // Matches add_favourite / remove_favourites in the PHP. The heart changes
@@ -327,7 +326,6 @@ function App() {
     const { data } = await api("/users/me/follows", { method: "PUT", body: { categories: categoryIds } });
     updateUserLists(userId, () => ({ interestIds: data }));
   }
-  const data = getData();
   // The role's sidebar links and default icon from navigationData, with the
   // account's own name, email and picture
   const selectedUser = {
@@ -414,7 +412,7 @@ function App() {
   async function updateUserStatus(accountId, body) {
     const userId = adminUserId;
     const { data } = await api(`/users/${accountId}/status`, { method: "PUT", body });
-    updateManagedUsers(userId, (list) => list.map((user) => (user.userId === accountId ? data : user)));
+    updateManagedUsers(userId, (list) => replaceById(list, "userId", data));
   }
 
   // Manage Events' decisions (Phase 7): "approve", "reject" or "take-down",
@@ -430,7 +428,7 @@ function App() {
     const decided = toManagedEvent(data);
     setAdminLists((current) =>
       current.userId === userId
-        ? { ...current, events: current.events.map((event) => (event.eventId === eventId ? decided : event)) }
+        ? { ...current, events: replaceById(current.events, "eventId", decided) }
         : current,
     );
   }
@@ -457,7 +455,7 @@ function App() {
       body: photo ? formWithFile("image", photo, body) : body,
     });
     const updated = toOrganiserEvent(data, account);
-    updateOrganiserEvents(userId, (list) => list.map((event) => (event.eventId === eventId ? updated : event)));
+    updateOrganiserEvents(userId, (list) => replaceById(list, "eventId", updated));
     return updated;
   }
 
@@ -472,7 +470,7 @@ function App() {
     const userId = organiserUserId;
     const { data } = await api(`/events/${eventId}/cancel`, { method: "PUT" });
     const cancelled = toOrganiserEvent(data, account);
-    updateOrganiserEvents(userId, (list) => list.map((event) => (event.eventId === eventId ? cancelled : event)));
+    updateOrganiserEvents(userId, (list) => replaceById(list, "eventId", cancelled));
   }
 
   // Matches submit_draft.inc.php: the draft becomes pending
@@ -480,7 +478,7 @@ function App() {
     const userId = organiserUserId;
     const { data } = await api(`/events/${eventId}/submit`, { method: "PUT" });
     const submitted = toOrganiserEvent(data, account);
-    updateOrganiserEvents(userId, (list) => list.map((event) => (event.eventId === eventId ? submitted : event)));
+    updateOrganiserEvents(userId, (list) => replaceById(list, "eventId", submitted));
   }
 
   if (!accountLoaded) return <PageLoading />;
@@ -518,7 +516,7 @@ function App() {
                 <Suspense fallback={<PageLoading />}>
                   <Dashboard
                     selectedUser={selectedUser}
-                    secondaryNav={data[1].secondaryNav}
+                    secondaryNav={secondaryNav}
                     navCounts={navCounts}
                     onLogout={logout}
                   />

@@ -6,7 +6,7 @@ import StatusMessage from "../components/UI/StatusMessage";
 import CategoryHoneycomb from "../components/dashboard/CategoryHoneycomb";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import { eventsPath, toEvent } from "../lib/publicEvents";
-import { useApi } from "../lib/useApi";
+import { useApi } from "../hooks/useApi";
 import {
   preferenceCategories,
   preferencesForm,

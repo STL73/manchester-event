@@ -5,7 +5,7 @@ import EventCard from "../events/EventCard";
 import { homePageData } from "../../data/homePageData";
 import { whenOptions } from "../../data/exploreEventsData";
 import { eventsPath, toEvent } from "../../lib/publicEvents";
-import { useApi } from "../../lib/useApi";
+import { useApi } from "../../hooks/useApi";
 
 function explorePath(when) {
   return when ? `/events?when=${when}` : "/events";

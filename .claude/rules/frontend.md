@@ -24,7 +24,7 @@ functions record behaviour being matched on purpose: keep that parity unless tol
   Vite proxy sending `/api` to the backend. Used so far by auth (Phases 1 and 2): `App.jsx` (`/auth/me`,
   logout, and Settings' handlers), `Auth.jsx` (log in, sign up, forgot and reset password, one
   `AuthForm` driven by `authPageData`), `VerifyEmail.jsx` and `AccountBanner`'s Resend. Public
-  events (Phase 3): reads go through `lib/useApi.js` (`useApi(path)`: `payload`, `error`,
+  events (Phase 3): reads go through `hooks/useApi.js` (`useApi(path)`: `payload`, `error`,
   `loading`, `retry`; the last answer stays while the next loads) and `lib/publicEvents.js`
   (`toEvent()` turns an API event into the shape `EventCard` and Event details read;
   `eventsPath()` builds the query). `EventsBrowser` (Explore, public and dashboard), Home

@@ -217,9 +217,8 @@ export const footerText = {
   backToTop: "Back to top",
 };
 
-export function getData() {
-  return navigationData;
-}
+// Notifications and Settings, under every role's own links
+export const secondaryNav = navigationData[1].secondaryNav;
 
 // The role's sidebar and default icon; the first role when nobody is logged in
 export function getUserData(userType) {

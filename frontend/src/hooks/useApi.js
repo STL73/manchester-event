@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { api } from "./api";
+import { api } from "../lib/api";
 
 // Reads one GET path and follows it as it changes. While a new path loads, the
 // last answer stays on screen (`loading` is true), so a list doesn't flash empty

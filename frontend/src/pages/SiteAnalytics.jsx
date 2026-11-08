@@ -50,7 +50,7 @@ import {
 } from "../data/analyticsData";
 import PageLoading from "../components/UI/PageLoading";
 import StatusMessage from "../components/UI/StatusMessage";
-import { useApi } from "../lib/useApi";
+import { useApi } from "../hooks/useApi";
 import { useUrlParams } from "../hooks/useUrlParams";
 import { eventCategories } from "../data/eventsData";
 import { accountStatuses } from "../data/manageUsersData";

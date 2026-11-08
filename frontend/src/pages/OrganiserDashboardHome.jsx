@@ -15,7 +15,7 @@ import {
 import { bySoonest, isUpcoming } from "../lib/eventDates";
 import EmptyState from "../components/UI/EmptyState";
 import { countBy } from "../lib/analytics";
-import { useApi } from "../lib/useApi";
+import { useApi } from "../hooks/useApi";
 import { daysSince, formatShortDay } from "../lib/formatDates";
 import { useDeleteEvent } from "../hooks/useDeleteEvent";
 

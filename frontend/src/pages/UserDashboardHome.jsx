@@ -8,7 +8,7 @@ import { eventCategories, eventDetailsPath } from "../data/eventsData";
 import { isPublicEvent } from "../lib/eventStatus";
 import { isUpcoming } from "../lib/eventDates";
 import { eventsPath } from "../lib/publicEvents";
-import { useApi } from "../lib/useApi";
+import { useApi } from "../hooks/useApi";
 import EmptyState from "../components/UI/EmptyState";
 import { DAY, formatDayMonth, formatShortDay } from "../lib/formatDates";
 

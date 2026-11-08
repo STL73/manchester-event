@@ -4,7 +4,7 @@ import LogoMark from "../components/UI/LogoMark";
 import PageFrame from "../components/UI/PageFrame";
 import { aboutPageData } from "../data/aboutPageData";
 import { eventCategories, eventLocations } from "../data/eventsData";
-import { useApi } from "../lib/useApi";
+import { useApi } from "../hooks/useApi";
 
 export default function About({ isUser, inDashboard = false }) {
   // Upcoming events, what Explore Events lists. A dash until it arrives

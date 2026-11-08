@@ -9,7 +9,7 @@ import SearchBar from "./SearchBar";
 import { eventCategories, eventLocations } from "../../data/eventsData";
 import { resultsText, whenOptions } from "../../data/exploreEventsData";
 import { eventsPath, toEvent } from "../../lib/publicEvents";
-import { useApi } from "../../lib/useApi";
+import { useApi } from "../../hooks/useApi";
 import { readPage, useUrlParams } from "../../hooks/useUrlParams";
 import { formatShortDay } from "../../lib/formatDates";
 

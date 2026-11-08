@@ -13,7 +13,7 @@ import { isUpcoming, matchesWhen } from "../lib/eventDates";
 import EmptyState from "../components/UI/EmptyState";
 import LogEntry from "../components/dashboard/LogEntry";
 import { describeLog, logLookup } from "../lib/systemLogs";
-import { useApi } from "../lib/useApi";
+import { useApi } from "../hooks/useApi";
 import { daysSince, formatDateTime } from "../lib/formatDates";
 
 // The four Quick Insights cards, from the shared users, events and messages

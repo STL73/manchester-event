@@ -51,7 +51,7 @@ import { eventState, statusLabel } from "../lib/eventStatus";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import PageLoading from "../components/UI/PageLoading";
 import StatusMessage from "../components/UI/StatusMessage";
-import { useApi } from "../lib/useApi";
+import { useApi } from "../hooks/useApi";
 import { useUrlParams } from "../hooks/useUrlParams";
 import { formatDayMonth, formatMonthLong, formatTime } from "../lib/formatDates";
 

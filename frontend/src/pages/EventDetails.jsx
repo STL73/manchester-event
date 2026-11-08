@@ -9,7 +9,7 @@ import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import EmptyState from "../components/UI/EmptyState";
 import PageLoading from "../components/UI/PageLoading";
 import { toEvent } from "../lib/publicEvents";
-import { useApi } from "../lib/useApi";
+import { useApi } from "../hooks/useApi";
 import { formatLongDay, formatTimeRange } from "../lib/formatDates";
 
 function mapsUrl(event) {

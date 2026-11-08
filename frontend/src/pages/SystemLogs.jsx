@@ -8,7 +8,7 @@ import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import EmptyState from "../components/UI/EmptyState";
 import StatusMessage from "../components/UI/StatusMessage";
 import { describeLog, logLookup } from "../lib/systemLogs";
-import { useApi } from "../lib/useApi";
+import { useApi } from "../hooks/useApi";
 import {
   logViews,
   systemLogsMessages,

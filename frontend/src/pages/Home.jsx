@@ -4,7 +4,7 @@ import WhatsOnSection from "../components/home/WhatsOnSection";
 import Button from "../components/UI/Button";
 import { homePageData } from "../data/homePageData";
 import { eventCategories, eventLocations } from "../data/eventsData";
-import { useApi } from "../lib/useApi";
+import { useApi } from "../hooks/useApi";
 
 // Counts to fall back on if the summary can't be loaded: the sections still
 // show, with their links into Explore Events
