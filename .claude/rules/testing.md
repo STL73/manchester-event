@@ -24,6 +24,16 @@
 - Two guards for one rule hide each other: breaking either alone changes nothing, so the pass
   reads MISSED twice. Phase 9's reply had a check before its `UPDATE … WHERE replied_at IS
   NULL`; the check went, leaving the one guard that holds under a race, and a test catches it
+- **The moderation list test sometimes times out in full runs** ("Test timed out in 15000ms",
+  `moderation.test.js` "shows every event but drafts…"), never when run alone. 2026-11-08: 2
+  failures in 15 runs at the default, none in 3 at 2 workers (+50% time) or 3 one file at a time
+  (3x). The test branch is small (52 events) and answers in about 50 ms, so the likely cause is
+  one Neon request stalling, not proven. Parallelism stays at the default. When it fails, save the
+  output and read it before changing anything; timing each step needs `console.error`, which
+  Vitest shows only for a failing test
+- `notifyAdmins()` writes to every admin, including the ones other test files are deleting, so
+  `deliver()` reads its recipients again after a foreign-key failure (2026-11-08). Without that,
+  "tells every admin about a new account" failed now and then in full runs
 - Read rows back in an order (`orderBy`) before taking `.at(-1)` or `[0]`: Postgres promises
   none, and with every test file running at once a Phase 8 test failed now and then
 - **A race test must force the interleaving.** Phase 11's first overlap test ran two email

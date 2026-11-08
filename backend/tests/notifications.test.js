@@ -7,6 +7,7 @@ import app from '../src/app.js';
 import { db } from '../src/db/index.js';
 import { users, systemLogs, notifications } from '../src/db/schema/index.js';
 import { createAuthToken } from '../src/lib/authTokens.js';
+import { deliver } from '../src/lib/notifications.js';
 
 // No email leaves the tests: the password-changed email is only recorded
 vi.mock('../src/lib/email.js', () => ({ sendEmail: vi.fn() }));
@@ -168,5 +169,28 @@ describe('what accounts send', () => {
         expect(rows.map((row) => row.userId)).toContain(ids.admin);
         expect(rows.every((row) => row.role === 'admin')).toBe(true);
         expect(rows[0].body).toBe(`A new user has registered: ${PREFIX}new (${email}).`);
+    });
+});
+
+describe('writing notifications', () => {
+    // The race forced: the first read names an account deleted before the
+    // INSERT, the second (the retry) no longer does
+    it('reads the recipients again when one was deleted in between, so the rest still get theirs', async () => {
+        const [gone] = await db.insert(users).values({ username: `${PREFIX}gone`, email: `${PREFIX}gone@example.test`, password: '-', role: 'user' }).returning();
+        await db.delete(users).where(eq(users.userId, gone.userId));
+        let reads = 0;
+        const recipients = {
+            then(resolve, reject) {
+                reads += 1;
+                const rows = reads === 1 ? [{ userId: ids.user }, { userId: gone.userId }] : [{ userId: ids.user }];
+                return Promise.resolve(rows).then(resolve, reject);
+            },
+        };
+
+        await deliver(recipients, { type: 'event_status', subject: `${PREFIX}race`, body: 'A test.' });
+
+        expect(reads).toBe(2);
+        const written = await db.select().from(notifications).where(eq(notifications.subject, `${PREFIX}race`));
+        expect(written.map((row) => row.userId)).toEqual([ids.user]);
     });
 });

@@ -2,7 +2,7 @@ import { and, count, desc, eq, getTableColumns, ne, not, sql } from 'drizzle-orm
 
 import { db } from '../db/index.js';
 import { events, users } from '../db/schema/index.js';
-import { AppError } from './errors.js';
+import { AppError, isForeignKeyViolation } from './errors.js';
 import { deleteImage } from './images.js';
 import { hasBeenPublic } from './publicEvents.js';
 import { publicUser } from './users.js';
@@ -40,9 +40,6 @@ export async function listManagedUsers(userId = null) {
         hasBeenPublic: row.publicCount > 0,
     }));
 }
-
-// A drizzle error keeps Postgres's own on `cause`
-const isForeignKeyViolation = (error) => (error.code ?? error.cause?.code) === '23503';
 
 // The schema's deletion rule, for Settings' Delete and Manage Users alike: an
 // organiser whose events have been public can only be suspended, since people

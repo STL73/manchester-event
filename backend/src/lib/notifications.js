@@ -3,6 +3,7 @@ import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { db } from '../db/index.js';
 import { categoryFollows, events, favourites, notifications, users } from '../db/schema/index.js';
 import { NOTIFY } from '../constants/notificationTypes.js';
+import { isForeignKeyViolation } from './errors.js';
 import { isListed } from './publicEvents.js';
 
 // The in-app inbox (Phase 7, decided 2026-10-05 and 2026-11-03). The rows are
@@ -12,13 +13,20 @@ import { isListed } from './publicEvents.js';
 // rather than thrown: the decision or the cancel has happened either way
 
 // Who gets it is a query of user ids; each gets their own row, written in one
-// INSERT however many there are
-async function deliver(recipients, message) {
-    try {
+// INSERT however many there are. An account deleted between the read and the
+// INSERT fails it for everyone, so the recipients are read again, once
+export async function deliver(recipients, message) {
+    const write = async () => {
         const rows = await recipients;
         if (rows.length === 0) return;
         const { type, eventId = null, subject, body } = message;
         await db.insert(notifications).values(rows.map(({ userId }) => ({ userId, eventId, type, subject, body })));
+    };
+    try {
+        await write().catch((error) => {
+            if (!isForeignKeyViolation(error)) throw error;
+            return write();
+        });
     } catch (error) {
         console.error(`Notification ${message.type} not written:`, error);
     }

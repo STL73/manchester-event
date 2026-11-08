@@ -8,6 +8,7 @@
     "dev": "nodemon src/server.js",
     "db:seed": "node src/db/seed.js",
     "jobs": "node src/runJobs.js",
+    "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest"
   },

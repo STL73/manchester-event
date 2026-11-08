@@ -125,7 +125,7 @@ npm run preview
 # backend/
 npm run dev                # nodemon src/server.js
 npm start
-npx eslint .               # no lint script defined
+npm run lint               # ESLint
 npx drizzle-kit generate   # schema -> SQL in drizzle/
 npx drizzle-kit migrate    # apply to DB_URL
 npm run db:seed            # 19 categories + demo admin, user and organiser (SEED_* in .env), demo events

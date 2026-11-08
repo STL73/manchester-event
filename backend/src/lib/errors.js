@@ -8,3 +8,6 @@ export class AppError extends Error {
         this.details = details;
     }
 }
+
+// A row pointing at one that no longer exists. Drizzle keeps Postgres's own error on `cause`
+export const isForeignKeyViolation = (error) => (error.code ?? error.cause?.code) === '23503';

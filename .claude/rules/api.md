@@ -237,8 +237,9 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
   type and its wording (plain text); type names are in `constants/notificationTypes.js` and
   match the frontend's `notificationTypes`. Recipients are read, then all their rows go in one
   `INSERT` (Drizzle's `insert().select()` needs every column in the table's order, so it was
-  dropped). Written after the change succeeds; a failure goes to the server log and never fails
-  the request
+  dropped). An account deleted between that read and the `INSERT` fails it for everyone, so
+  `deliver()` reads the recipients again once. Written after the change succeeds; a failure
+  goes to the server log and never fails the request
 
 | Type | To | When |
 | --- | --- | --- |

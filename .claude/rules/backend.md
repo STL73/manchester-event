@@ -110,5 +110,5 @@ Never edit a generated migration that has already been applied. Generate a new o
 
 ## Commands
 
-Run from `backend/`: `npm run dev` (nodemon), `npm start`, `npm test`, `npx eslint .`,
+Run from `backend/`: `npm run dev` (nodemon), `npm start`, `npm test`, `npm run lint`,
 `npm run jobs` (every scheduled job once).
