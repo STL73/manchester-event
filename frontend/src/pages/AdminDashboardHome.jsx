@@ -91,9 +91,8 @@ function getAdminInsights({ users, events, contactMessages }) {
   ];
 }
 
-// `events` is the Manage Events list from the API (Phase 7) and `users` the
-// Manage Users one (Phase 8). Recent Admin Actions are the newest log rows by
-// admins (Phase 10), asked for as the page opens
+// The admin's Home: what waits for review, new users, unread messages and
+// Recent Admin Actions, from App's lists and the logs
 export default function AdminDashboardHome({ users, events, contactMessages }) {
   const ViewAllIcon = viewAllLogsAction.icon;
   const insights = getAdminInsights({ users, events, contactMessages });

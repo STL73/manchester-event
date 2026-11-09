@@ -1,9 +1,7 @@
 import { KeyRound, Mail, Save, Trash2, TriangleAlert, UserRound } from "lucide-react";
 
-// Settings is four sections, each with its own Save (decided 2026-10-11):
-// a title and line of explanation beside each panel on wide screens, above
-// it on narrow ones. Admins have no Delete section: the schema doesn't let an
-// admin delete their own account (admins come from the seed)
+// Settings' four sections, each with its own Save. Admins have no Delete: their
+// accounts come from the seed
 export const settingsSections = {
   profile: {
     title: "Profile",
@@ -57,10 +55,8 @@ export const passwordForm = {
   saved: "Password changed",
 };
 
-// The schema has one email_notifications switch per account; what it
-// covers depends on the role (organisers and admins have no favourites).
-// Each line names what the backend's email job sends that role
-// (EMAILED_TYPES, Phase 11): new sign-ups stay in the admin's inbox
+// The one email switch, worded per role for what the email job sends it; new
+// sign-ups stay in the admin's inbox
 export const emailSettings = {
   byRole: {
     user: {
@@ -119,7 +115,7 @@ export const accountBanners = {
   },
 };
 
-// Matches the file types allowed by handle_avatar_upload(); 5 MB like event images
+// The picture types allowed, 5 MB like event photos
 export const allowedAvatarTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 export const maxAvatarBytes = 5 * 1024 * 1024;
 

@@ -1,7 +1,6 @@
 import { Logs } from "lucide-react";
 
-// System Logs (decided 2026-10-12, layout A): an activity feed grouped by
-// day, each entry a sentence (lib/systemLogs.js) with links to what it names
+// System Logs: an activity feed by day, each entry a sentence (lib/systemLogs.js)
 export const systemLogsSection = { title: "System Logs", icon: Logs };
 
 export const systemLogsPage = {

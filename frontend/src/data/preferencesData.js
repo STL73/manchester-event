@@ -87,7 +87,7 @@ export function categoryIcon(categoryId) {
   return categoryIcons[categoryId] ?? Tag;
 }
 
-// Matches get_all_categories(): ordered by name
+// The categories, ordered by name
 export const preferenceCategories = [...eventCategories].sort((a, b) =>
   a.name.localeCompare(b.name),
 );

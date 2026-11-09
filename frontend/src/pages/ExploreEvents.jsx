@@ -5,10 +5,8 @@ import {
   publicIntro,
 } from "../data/exploreEventsData";
 
-// One page, two layouts: the public /events page and the dashboard
-// Explore Events page share the search, layout switcher and cards. The
-// dashboard's has no summary: the intro speaks to guests, and the results
-// line under the filters already gives the count
+// Explore Events, public and in the dashboard. The dashboard's has no summary:
+// the intro speaks to guests, and the results line gives the count
 export default function ExploreEvents({
   inDashboard = false,
   selectedUser,

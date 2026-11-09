@@ -47,10 +47,8 @@ function formFor(user) {
   };
 }
 
-// Manage Users (decided 2026-10-12, layout A): the accounts as a list; a row
-// opens the account in a side panel to suspend or reactivate it (with how
-// long and why) or, where the schema allows, delete it. `users` is App's list
-// from GET /users (Phase 8), null while it loads; each change awaits the server
+// Manage Users: a row's side panel suspends, reactivates or, where allowed,
+// deletes the account. `users` is null while it loads
 export default function ManageUsers({ users: loaded, currentUserId, onUpdateUser, onDeleteUser }) {
   const { searchParams, setParams, setPage } = useUrlParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");

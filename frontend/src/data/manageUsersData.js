@@ -1,10 +1,8 @@
 import { Save, Trash2, Users } from "lucide-react";
 import { formatDayMonth } from "../lib/formatDates";
 
-// Manage Users (decided 2026-10-12, layout A): the accounts as a list, each
-// opening in a side panel. The schema's acc_status is active | suspended;
-// an unverified email (email_verified_at NULL) is a label, not a status,
-// because only the user can verify it
+// Manage Users: the accounts as a list, each in a side panel. Unverified is a
+// label, not a status, since only the user can verify
 export const manageUsersPage = {
   title: "Manage Users",
   icon: Users,
@@ -43,7 +41,7 @@ export const userSortOptions = [
 
 export const roleLabels = { user: "User", organiser: "Organiser", admin: "Admin" };
 
-// Matches the options in render_edit_user_form(), less "pending"
+// The statuses an admin can set
 export const accountStatuses = [
   { value: "active", label: "Active" },
   { value: "suspended", label: "Suspended" },
@@ -81,7 +79,6 @@ export const userPanel = {
   suspendedOpen: "Suspended until lifted",
   self: "This is your account. Change it on Settings.",
   // Admin accounts come from the seed and aren't suspended or deleted here
-  // (decided 2026-11-03)
   adminTarget: "Admin accounts can't be changed here.",
   save: { label: "Save", icon: Save },
   delete: {
@@ -95,7 +92,7 @@ export const userPanel = {
   noDelete: "Has public events, so it can only be suspended.",
 };
 
-// Messages from manage_users_view, delete_user and edit_user PHP files
+// The page's messages
 export const manageUsersMessages = {
   userDeleted: "Account deleted.",
   noUsers: "No users found.",

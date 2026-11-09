@@ -9,10 +9,8 @@ import DeleteAccount from "../components/dashboard/DeleteAccount";
 import { accountSummary, settingsSections } from "../data/profileSettingsData";
 import { formatDate } from "../lib/formatDates";
 
-// Four sections, each saving on its own. What a role sees differs in the
-// email wording and in Delete: none for admins, and the server refuses an
-// organiser whose events have been public. Everything comes from `account`,
-// the server's; `defaultAvatar` is the role's icon for an account with no picture
+// Settings' four sections, each saving on its own, from the server's `account`.
+// `defaultAvatar` is the role's icon for an account with no picture
 export default function Settings({
   account,
   defaultAvatar,

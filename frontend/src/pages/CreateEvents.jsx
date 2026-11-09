@@ -29,14 +29,14 @@ import { toLondonInput } from "../lib/organiserEvents";
 import { defaultEventImage as placeholder } from "../lib/publicEvents";
 import { formatDayMonth } from "../lib/formatDates";
 
-// One page, two modes: Create Event (create_events.php) and, on
-// /dashboard/my-events/:eventId/edit, Edit Event (edit_event.php).
-// A new key per event resets the form when moving between edit pages.
+// Create Event, and Edit Event on /dashboard/my-events/:eventId/edit. A new key
+// per event resets the form when moving between edit pages
 export default function CreateEvents(props) {
   const { eventId } = useParams();
   return <EventFormPage key={eventId ?? "new"} {...props} />;
 }
 
+// Waits for the organiser's events before an edit form can open
 function EventFormPage({
   mode = "create",
   events = [],
@@ -56,6 +56,7 @@ function EventFormPage({
   );
 }
 
+// The form, the live card beside it and its buttons
 function EventForm({ isEdit, events, onCreateEvent, onUpdateEvent, onCancelEvent, onDeleteEvent }) {
   const { eventId } = useParams();
   const navigate = useNavigate();
@@ -124,7 +125,7 @@ function EventForm({ isEdit, events, onCreateEvent, onUpdateEvent, onCancelEvent
     if (!place) requestAnimationFrame(() => document.getElementById("placeId")?.focus());
   }
 
-  // Mirrors the type and size checks in handle_event_image()
+  // The photo's type and size, checked before it is kept
   function handleImageFile(file) {
     setMessage(null);
     const imageError = !allowedImageTypes.includes(file.type)
@@ -151,8 +152,8 @@ function EventForm({ isEdit, events, onCreateEvent, onUpdateEvent, onCancelEvent
   async function handleSubmit(submitEvent) {
     submitEvent.preventDefault();
     if (saving) return;
-    // The button that was pressed decides, as in the PHP: Save draft keeps a
-    // draft; anything else is sent for approval
+    // The button pressed decides: Save draft keeps a draft; anything else is
+    // sent for approval
     const submit = submitEvent.nativeEvent.submitter?.name !== "saveDraft";
     const nextErrors = validateEvent(form, {
       submitting: submit,
@@ -205,7 +206,7 @@ function EventForm({ isEdit, events, onCreateEvent, onUpdateEvent, onCancelEvent
     });
   }
 
-  // Matches the Cancel Event button in edit_event.php, asked in the page
+  // Cancel or Delete, asked in the page
   async function handleDangerConfirm(kind) {
     if (saving) return;
     setSaving(true);

@@ -35,6 +35,7 @@ function saveCollapsed(isCollapsed) {
   }
 }
 
+// The dashboard frame: sidebar, weather bar and the open page
 export default function Dashboard({
   selectedUser,
   secondaryNav,

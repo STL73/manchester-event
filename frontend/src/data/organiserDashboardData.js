@@ -6,9 +6,7 @@ import {
   SquarePen,
 } from "lucide-react";
 
-// Quick Insights: what needs the organiser and how their events are doing.
-// Counted live on the page from their events; this is the copy. Waiting and
-// rejected keep the PHP status colours
+// Quick Insights' copy: what needs the organiser and how their events are doing
 export const organiserInsights = {
   live: {
     title: "Live events",

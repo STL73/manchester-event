@@ -6,9 +6,8 @@ export const myEventsActions = [
   { label: "Create event", to: "/dashboard/create-events", icon: CalendarPlus },
 ];
 
-// The status switch above the grid, with counts (decided 2026-10-12; the PHP
-// had a dropdown). Values are eventState()s, so an approved event that has
-// ended counts as past. Drafts aren't here: they live on My Drafts
+// The status pills above the grid, by eventState(), so an ended event counts as
+// past. Drafts live on My Drafts
 export const statusViews = {
   label: "Show events by status",
   options: [
@@ -43,7 +42,7 @@ export const sortLabel = "Sort events";
 
 export const myEventsDate = { pick: "Pick a date", clear: "Clear date" };
 
-// Matches get_organiser_events(): newest/oldest sort by start date
+// Sorts: newest and oldest by start date
 export const sortOptions = [
   { value: "newest", label: "Newest First" },
   { value: "oldest", label: "Oldest First" },

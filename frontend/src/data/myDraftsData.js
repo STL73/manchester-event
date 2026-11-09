@@ -27,7 +27,7 @@ export const datePassedNotice = {
   text: "The date has passed. Edit it to submit.",
 };
 
-// Messages from my_drafts_view.inc.php, plus the new draft delete
+// The page's messages
 export const myDraftsMessages = {
   noDrafts: "No draft events found.",
   draftDeleted: "Draft deleted successfully!",

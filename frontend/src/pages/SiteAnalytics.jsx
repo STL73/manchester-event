@@ -87,11 +87,8 @@ function waitTone(ms) {
   return ms >= DAY ? "warning" : "muted";
 }
 
-// Admin analytics (admin_stats.php), counted in the browser from App's
-// accounts, events and contact messages (the admin's lists from the API, so it
-// follows Manage Users, Manage Events and Contact Messages changes) and the
-// saves, followers and failed sign-ins the server sends as it opens (Phase 10).
-// Events are every one sent for approval: drafts stay their organiser's
+// The admin's analytics, counted in the browser from App's lists and the saves,
+// followers and failed sign-ins the server sends as it opens
 export default function SiteAnalytics({ users, events, contactMessages }) {
   const { searchParams, setParams } = useUrlParams();
   const tabParam = searchParams.get("tab");
@@ -163,8 +160,7 @@ export default function SiteAnalytics({ users, events, contactMessages }) {
     },
   ];
 
-  // Growth: matches get_user_trend_data() and get_events_trend_data(), by
-  // created date; saves by the date they were saved
+  // Growth: accounts and events by created date, saves by the date they were saved
   const growthRows = countOverTime(
     lists[metric.value],
     (item) => item.createdAt,

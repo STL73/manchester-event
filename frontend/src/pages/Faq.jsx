@@ -4,6 +4,7 @@ import FaqList from "../components/UI/FaqList";
 import PageFrame from "../components/UI/PageFrame";
 import { faqGroups, faqPage } from "../data/faqData";
 
+// The FAQs, grouped, public or in the dashboard
 export default function Faq({ inDashboard = false }) {
   const { hero, dashboardHeading, contactLink } = faqPage;
   // Inside the dashboard, section headings look like every other dashboard page's

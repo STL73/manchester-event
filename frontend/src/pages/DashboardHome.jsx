@@ -11,6 +11,7 @@ const dashboardByRole = {
   admin: AdminDashboardHome,
 };
 
+// Home for whichever role is signed in
 export default function DashboardHome({ selectedUser, account, onLoadNotifications, ...props }) {
   const DashboardComponent = dashboardByRole[selectedUser?.type];
   // Every Home counts unread notifications, and nothing pushes new ones
@@ -18,7 +19,7 @@ export default function DashboardHome({ selectedUser, account, onLoadNotificatio
     onLoadNotifications?.();
   }, [onLoadNotifications]);
 
-  // Greeting on the home page only (the PHP repeated it on every dashboard page)
+  // The greeting is on Home only
   return (
     <>
       <DashboardGreeting

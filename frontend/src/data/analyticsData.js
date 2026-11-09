@@ -1,14 +1,8 @@
 import { Moon, Sun, Sunrise, Sunset } from "lucide-react";
 import { themeColour } from "../lib/themeColour";
 
-// Shared chart settings and copy for Event Analytics and Site Analytics. Each
-// page's own copy is in eventAnalyticsData.js / siteAnalyticsData.js and its
-// figures come from lib/analytics.js.
-// Recharts colours come from the theme tokens when a chart draws (see
-// themeColour), so the charts always match the badges. Faint fills are these
-// colours at a lower opacity (`chartOpacity`), not mixed hex values. The CSS
-// charts (donut, share bars, honeycomb, grid) read a tone class instead, so
-// the tables below map a key to a tone name, never to a colour.
+// Chart settings and copy both analytics pages share. Colours are theme tokens,
+// read as a chart draws, and the tables map keys to tone names, never colours
 export const chartColours = {
   get accent() {
     return themeColour("accent");
@@ -47,10 +41,8 @@ export const statusTones = {
   suspended: "danger",
 };
 
-// Status order on the Events by Status donut, chosen with the dataviz palette
-// validator (dark mode, card surface) so that neighbouring parts never have
-// colours that are hard to tell apart: all neighbours pass the colour-blind
-// and normal-vision checks.
+// Status order on the donut, chosen so no two neighbours are hard to tell apart,
+// colour-blind or not (checked with a palette validator)
 export const eventStatusOrder = [
   "approved",
   "past",
@@ -89,7 +81,7 @@ export const savesTrend = {
     `${current} saves in the last 30 days, ${previous} in the 30 days before`,
 };
 
-// Roles on the Accounts panel (decided 2026-10-20): users the accent,
+// Roles on the Accounts panel: users the accent,
 // organisers teal, admins white, kept apart from the status colours
 export const roleTones = {
   user: "accent",

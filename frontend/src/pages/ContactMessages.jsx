@@ -61,10 +61,8 @@ function Summary({ messages }) {
   );
 }
 
-// Admin page from contact_messages.php (decided 2026-10-12, layout A): the
-// messages as a list; one opens in the side panel, which marks it read, as
-// opening an email does, and holds the reply, which the server emails to the
-// sender (Phase 9). `contactMessages` is null until the list arrives
+// Contact messages as a list; one opens in the side panel, which reads it and
+// holds the reply the server emails. `contactMessages` is null until it arrives
 export default function ContactMessages({ contactMessages, users, currentUserId, onSetRead, onReply }) {
   const { searchParams, setParams, setPage } = useUrlParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
@@ -76,7 +74,7 @@ export default function ContactMessages({ contactMessages, users, currentUserId,
   const listRef = useRef(null);
   const PageIcon = contactMessagesPage.icon;
 
-  // Matches get_all_contact_messages(): newest first
+  // Newest first
   const messages = useMemo(
     () => [...(contactMessages ?? [])].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
     [contactMessages],

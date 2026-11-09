@@ -3,6 +3,7 @@ import { notFoundPage } from "../data/notFoundData";
 import DashboardPageHeading from "../components/dashboard/DashboardPageHeading";
 import EmptyState from "../components/UI/EmptyState";
 
+// The page for an address nothing answers
 export default function NotFound({ isUser = false, inDashboard = false }) {
   const { title, titleIcon: TitleIcon, message } = notFoundPage;
   const action = inDashboard

@@ -1,8 +1,5 @@
-// Dashboard home greeting. Replaces the role paragraphs of dashboard_greeting.php
-// with one live status line. Users see their next favourite event (the Quick
-// Insights card below already shows how many favourites they have); organisers
-// and admins see what is waiting: "You have 2 users and 1 event waiting for
-// your review." Items with a count of 0 are left out.
+// Home's greeting and status line: a user's next favourite, or what is waiting
+// for an organiser or admin ("2 users and 1 event"), leaving out counts of 0
 export const dashboardGreeting = {
   title: "Welcome back,",
   intro: "You have",

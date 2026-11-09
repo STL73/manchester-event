@@ -31,10 +31,8 @@ function dayLabel(value, now) {
   return formatShortDay(value);
 }
 
-// Admin page from system_logs.php, as an activity feed by day (decided
-// 2026-10-12, layout A): each entry a sentence with links to the event or
-// account it names. The view, search and page are the server's (Phase 10,
-// decided 2026-11-04), so every row is reachable, not only the newest 100
+// System Logs as an activity feed by day. The view, search and page are the
+// server's, so every row is reachable
 export default function SystemLogs() {
   const { searchParams, setParams, setPage } = useUrlParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");

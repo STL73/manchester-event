@@ -103,10 +103,8 @@ function NotificationRow({ notification, group, isOpen, onToggle, onMarkRead }) 
   );
 }
 
-// Read state lives in App (read_at), so Home's unread card agrees with
-// this page and marking one read survives leaving the page. The inbox is the
-// account's own from the API (Phase 7), null until it arrives, and is read
-// again each time the page opens, as nothing pushes new ones
+// The inbox, null until it arrives and read again as the page opens. Read state
+// lives in App, so Home's unread card agrees
 export default function Notifications({ notifications: loaded, onLoad, onMarkRead }) {
   const { searchParams, setParams, setPage } = useUrlParams();
   const [openId, setOpenId] = useState(null);

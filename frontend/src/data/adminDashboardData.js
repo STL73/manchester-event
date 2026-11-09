@@ -47,10 +47,8 @@ export const viewAllLogsAction = {
   icon: Logs,
 };
 
-// get_recent_admin_actions(): the newest 5 logs by admins, found by the role
-// copied into each row (system_logs.role in the schema), but without their
-// sign-ins and sign-outs, which pushed every decision off the card (Slav,
-// 2026-11-04, Phase 10)
+// Recent Admin Actions: the newest 5 rows by admins, without sign-ins and
+// sign-outs, which pushed every decision off the card
 export const recentAdminActionsPath = "/logs?view=admin-actions&limit=5";
 export const recentAdminActionsText = {
   empty: "No recent admin actions.",

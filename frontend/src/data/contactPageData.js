@@ -4,10 +4,8 @@ import { Mail, MapPin, RefreshCw, Send } from "lucide-react";
 const manchesterOutdoorDiningLights = "/images/events/manchester-outdoor-dining-lights.jpg";
 
 
-// A task page: the most common questions sit beside the form, so many are
-// answered before a message is sent. They come from data/faqData.js (the
-// ones marked `featured`); the FAQs page has the rest. Social links live in
-// the footer only
+// The Contact page, with the `featured` FAQs beside the form so many questions
+// are answered before a message is sent
 export const contactPageData = {
   hero: {
     eyebrow: "Contact Us",

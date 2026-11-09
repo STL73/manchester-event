@@ -6,6 +6,7 @@ import { aboutPageData } from "../data/aboutPageData";
 import { eventCategories, eventLocations } from "../data/eventsData";
 import { useApi } from "../hooks/useApi";
 
+// The About page, public or in the dashboard
 export default function About({ isUser, inDashboard = false }) {
   // Upcoming events, what Explore Events lists. A dash until it arrives
   const summary = useApi("/events/summary");

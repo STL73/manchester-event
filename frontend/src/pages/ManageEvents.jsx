@@ -73,11 +73,8 @@ const sorters = {
   az: (a, b) => a.event.name.localeCompare(b.event.name),
 };
 
-// Manage Events (decided 2026-10-12, layout A): opens on the review queue;
-// a row opens the event in a side panel, where a pending one is approved or
-// rejected with a reason, and a live one can be taken down (cancelled, with a
-// reason; decided 2026-11-03). `events` is App's list from GET /events/manage
-// (no drafts), null while it loads. Each decision awaits the server (Phase 7)
+// Manage Events: opens on the review queue; a row's side panel approves or rejects
+// a pending event, or takes a live one down. `events` is null while it loads
 export default function ManageEvents({ events, currentUserId, onDecide }) {
   const { searchParams, setParams, setPage } = useUrlParams();
   const [filters, setFilters] = useState(() => readFilters(searchParams));

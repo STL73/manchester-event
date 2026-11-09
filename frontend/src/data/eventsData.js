@@ -76,7 +76,7 @@ export const eventDetailsPage = {
   },
 };
 
-// The categories table from the PHP project's insert data, in the same order
+// The categories, in the seed's order; ids are the backend's slugs
 export const eventCategories = [
   { id: "music", name: "Music", description: "Live concerts, open mics, gigs, DJ sets and music festivals" },
   { id: "theatre-performance", name: "Theatre & Performance", description: "Plays, stand-up comedy, and live shows" },

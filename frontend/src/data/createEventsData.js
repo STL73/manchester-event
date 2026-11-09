@@ -20,8 +20,7 @@ import {
   X,
 } from "lucide-react";
 
-// Create Event (create_events.php) and Edit Event (edit_event.php): one form
-// in five groups, the live card beside it (layout A, decided 2026-10-12)
+// Create and Edit Event: one form in five groups, the live card beside it
 export const createEventForm = {
   heading: "Create Event",
   headingIcon: CalendarPlus,
@@ -85,8 +84,8 @@ export const eventFormGroups = [
     title: "Where",
     icon: MapPin,
     fields: [
-      // Picked from OpenStreetMap, never typed in (decided 2026-11-02). The
-      // area Explore filters by is worked out from where the venue is
+      // Picked from OpenStreetMap, never typed in. The area Explore filters by is
+      // worked out from where the venue is
       { id: "placeId", label: "Venue", type: "venue", placeholder: "Search for the venue or its address" },
     ],
   },
@@ -126,7 +125,7 @@ export const venueSearch = {
   credit: { text: "© OpenStreetMap contributors", href: "https://www.openstreetmap.org/copyright" },
 };
 
-// handle_event_image() allowed JPG, PNG and GIF; WebP is added, as on Settings
+// The photo types an event takes, the same as the server's
 export const allowedImageTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 export const maxImageSize = 5 * 1024 * 1024;
 
@@ -191,8 +190,7 @@ export const afterSave = {
   eventsPath: "/dashboard/my-events",
 };
 
-// Messages from validate_event_input(), handle_event_image() and the views,
-// plus the new date checks
+// The form's messages
 export const createEventMessages = {
   eventName: "Give the event a name.",
   description: "Add a description.",

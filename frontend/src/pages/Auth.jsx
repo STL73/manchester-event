@@ -13,10 +13,8 @@ import {
 } from "../data/authPageData";
 
 
-// Errors in the order the fields appear, so the first one gets focus. Each
-// field is checked only on the pages that have it. Login only checks that
-// the password is filled in: telling someone the password rules on a login
-// form would hint at what a valid password looks like.
+// The form's errors in field order, so the first gets focus. Login checks only
+// that a password is there: its rules would hint at what a valid one looks like
 function validate(values) {
   // Sign-up and reset choose a password; they have a confirmation field
   const isNewPassword = "confirmPassword" in values;
@@ -69,6 +67,7 @@ function showErrors(form, errors, setErrors) {
   return true;
 }
 
+// One auth form, driven by its page's data, and what happens after it is sent
 function AuthForm({ page, token, onAccountChange }) {
   const { title, subtitle, image, caption, fields, forgotLink, submit, switchPrompt, endpoint } = page;
   const navigate = useNavigate();
@@ -182,6 +181,7 @@ function AuthForm({ page, token, onAccountChange }) {
   );
 }
 
+// Log in, sign up, forgot and reset password, by the address
 export default function Auth({ isUser, onAccountChange }) {
   const { pathname } = useParams();
   const [searchParams] = useSearchParams();

@@ -58,9 +58,8 @@ import { formatDayMonth, formatMonthLong, formatTime } from "../lib/formatDates"
 const categoryNames = new Map(eventCategories.map((category) => [category.id, category.name]));
 const UP_NEXT = 5;
 
-// Organiser analytics (event_stats.php), counted in the browser from the
-// organiser's events (App's, from the API) and the saves and followers the
-// server sends as the page opens (Phase 10)
+// The organiser's analytics, counted in the browser from their events and the
+// saves and followers the server sends as the page opens
 export default function EventAnalytics({ organiserEvents }) {
   const { searchParams, setParams } = useUrlParams();
   const tabParam = searchParams.get("tab");
@@ -73,8 +72,8 @@ export default function EventAnalytics({ organiserEvents }) {
   const charts = eventAnalyticsCharts;
   const SectionIcon = eventAnalyticsSection.icon;
   const now = new Date();
-  // Saves on these events and their categories' followers (Phase 10); the
-  // events themselves are App's, null until they arrive
+  // Saves on these events and their categories' followers; the events are
+  // App's, null until they arrive
   const { payload, error, retry } = useApi("/analytics/organiser");
 
   if (error) {
@@ -154,8 +153,7 @@ export default function EventAnalytics({ organiserEvents }) {
     },
   ];
 
-  // Replaces get_events_over_time(): events that did or will take place, by
-  // start date, split into held (started before now) and scheduled
+  // Events by start date, split into held (started before now) and scheduled
   const timelineRows = countOverTime(
     organiserEvents.filter((event) => timelineStatuses.includes(event.status)),
     (event) => event.startDatetime,
@@ -422,6 +420,7 @@ export default function EventAnalytics({ organiserEvents }) {
   );
 }
 
+// A heart and a save count
 function SaveCount({ count }) {
   return (
     <>

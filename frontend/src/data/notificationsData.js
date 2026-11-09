@@ -41,7 +41,7 @@ export const notificationsView = {
 };
 
 // Rows are collapsed to the subject, so 10 fit a desktop or tablet screen
-// without scrolling (measured 2026-10-11); a laptop scrolls about 3 rows
+// without scrolling; a laptop scrolls about 3 rows
 export const notificationsPageSize = 10;
 
 export const notificationsPaging = {
@@ -55,10 +55,8 @@ export const notificationGroups = {
   earlier: "Earlier",
 };
 
-// Label and icon for each notifications.type: the fixed names agreed for
-// the backend (system errors go to the server log instead, so there's no
-// type). Cancellations take the cancelled badge's orange. CalendarPlus
-// already means "create event", so it isn't used here
+// Label and icon for each notifications.type, the backend's fixed names.
+// CalendarPlus already means "create event", so it isn't used here
 export const notificationTypes = {
   category_new_event: { label: "New event", icon: Sparkles },
   event_update: { label: "Event update", icon: RefreshCw },

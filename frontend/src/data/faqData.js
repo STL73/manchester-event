@@ -1,9 +1,7 @@
 import { CircleHelp } from "lucide-react";
 
-// Every question in one place. The FAQs page shows them all, grouped; Contact
-// shows the ones marked `featured` beside the form, with a link here. The
-// answers follow the agreed rules (schema-decisions): approval before going
-// public, delete only before an event has been public, cancel after that.
+// Every question: the FAQs page shows them all, Contact the `featured` ones.
+// The answers follow the app's rules, so change both together
 export const faqPage = {
   hero: {
     eyebrow: "FAQs",

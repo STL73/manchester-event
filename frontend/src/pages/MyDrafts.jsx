@@ -17,9 +17,8 @@ import { editEventPath, organiserEventActions } from "../data/organiserEventsDat
 import { formatDayMonth } from "../lib/formatDates";
 import { useDeleteEvent } from "../hooks/useDeleteEvent";
 
-// The same cards as My Events (decided 2026-10-12; the PHP had a table), so
-// a draft looks the way it will once live. Submit is each card's labelled
-// main action; Edit and Delete sit under it, and Delete asks in the card
+// The organiser's drafts as cards, so each looks as it will once live, with
+// Submit as the main action
 export default function MyDrafts({
   organiserEvents,
   onSubmitDraft,
@@ -30,7 +29,7 @@ export default function MyDrafts({
   const { submitDraft } = organiserEventActions;
   const now = new Date();
 
-  // Matches get_draft_events(): drafts only, most recently edited first
+  // Drafts only, most recently edited first
   const drafts = organiserEvents
     .filter((event) => event.status === "draft")
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));

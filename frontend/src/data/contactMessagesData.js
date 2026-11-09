@@ -1,8 +1,6 @@
 import { Mail, MessageSquareText, Send } from "lucide-react";
 
-// Contact Messages (decided 2026-10-12, layout A): the same list and side
-// panel as Manage Events and Users. Opening a message reads it (read_at);
-// the panel replies in the page (reply_body, replied_at, replied_by)
+// Contact Messages: the same list and side panel as Manage Events and Users
 export const contactMessagesPage = {
   title: "Contact Messages",
   icon: MessageSquareText,
@@ -54,7 +52,7 @@ export const messagePanel = {
   markUnread: { label: "Mark as unread", icon: Mail },
 };
 
-// Messages from contact_messages_view and contact_view PHP files
+// The page's messages
 export const contactMessagesText = {
   noMessages: "No contact messages yet.",
   noMatches: "No messages match.",

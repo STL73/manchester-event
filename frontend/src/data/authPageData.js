@@ -65,7 +65,7 @@ export const authPageData = {
     switchPrompt: { text: "Remembered it?", label: "Log In", to: "/auth/login" },
     endpoint: "/auth/forgot-password",
     onSuccess: "sent",
-    // The same words whether or not the email has an account (decided 2026-10-27)
+    // The same words whether or not the email has an account
     sent: (email) => [
       `If an account uses ${email}, we've sent it a link. The link works for 1 hour.`,
       "Nothing there? Check your spam folder, or send another.",

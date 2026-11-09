@@ -12,10 +12,8 @@ import { useApi } from "../hooks/useApi";
 import EmptyState from "../components/UI/EmptyState";
 import { DAY, formatDayMonth, formatShortDay } from "../lib/formatDates";
 
-// The four Quick Insights cards: what's coming for this user, each with
-// one line of context (see DashboardCard). Saved events are the user's real
-// favourites and "This week" counts real events (Phase 4); "New in your
-// interests" counts the category_new_event notifications (Phase 7)
+// The four Quick Insights cards: what's coming for this user. "New in your
+// interests" counts the category_new_event notifications
 function getUserInsights({ favouriteEvents, favouriteIds, interestIds, thisWeekCount, notifications }) {
   const now = new Date();
   const text = userInsights;
@@ -83,6 +81,7 @@ function getUserInsights({ favouriteEvents, favouriteIds, interestIds, thisWeekC
   ];
 }
 
+// The user's Home: Quick Insights and their recent favourites
 export default function UserDashboardHome({
   favouriteEvents,
   favouriteIds,
@@ -90,7 +89,7 @@ export default function UserDashboardHome({
   notifications,
   onToggleFavourite,
 }) {
-  // Matches get_recent_favourites(): limit 3
+  // The three most recent
   const recentFavourites = getFavouriteEvents(favouriteEvents, favouriteIds).slice(0, 3);
   // Only the total is needed, so one event is asked for. Sorted, so the same
   // interests always ask for the same thing

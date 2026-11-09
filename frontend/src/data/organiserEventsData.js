@@ -4,7 +4,7 @@ import { CalendarArrowUp, CalendarPlus, Pencil, Trash2 } from "lucide-react";
 export const organiserEventActions = {
   edit: { label: "Edit", icon: Pencil },
   delete: { label: "Delete", icon: Trash2 },
-  // The card asks before deleting, in place of the PHP confirm() pop-up
+  // The card asks before deleting
   confirmDelete: { question: "Delete this event?", cancel: "Keep it", confirm: "Delete permanently" },
   submitDraft: { label: "Submit for approval", icon: CalendarArrowUp },
   createFirst: {
@@ -14,16 +14,14 @@ export const organiserEventActions = {
   },
 };
 
-// Messages from delete_event and submit_draft PHP files
+// The cards' messages
 export const organiserEventMessages = {
   noEvents: "You haven't created any events yet.",
   eventDeleted: "Event deleted successfully!",
 };
 
-// Which buttons an organiser's event card shows, by eventState(). An event
-// can be deleted only before it has ever been public (a pending edit of a
-// live event has been); once live it can be edited (cancelling is on the
-// edit page); past and cancelled are view only. hasBeenPublic is the server's
+// The buttons an organiser's card shows, by eventState(): Delete only before an
+// event has been public (the server's hasBeenPublic), past and cancelled View only
 export function organiserCardActions(state, event) {
   return {
     canEdit: ["draft", "pending", "rejected", "approved"].includes(state),
@@ -31,7 +29,7 @@ export function organiserCardActions(state, event) {
   };
 }
 
-// Future route for edit_event.php
+// Edit Event's address for an event
 export function editEventPath(eventId) {
   return `/dashboard/my-events/${eventId}/edit`;
 }

@@ -1,13 +1,13 @@
 import { ChartNoAxesCombined, Heart, Timer, Calendars, Users } from "lucide-react";
 
-// Admin page, from admin_stats.php
+// The admin's analytics page
 export const siteAnalyticsSection = {
   title: "Site Analytics",
   icon: ChartNoAxesCombined,
 };
 
 // Sections, one shown at a time under the stat cards (`?tab=` in the URL);
-// the same layout as Event Analytics (decided 2026-10-20)
+// the same layout as Event Analytics
 export const siteAnalyticsTabs = [
   { value: "growth", label: "Growth" },
   { value: "moderation", label: "Moderation" },
@@ -40,7 +40,7 @@ export const siteRangeOptions = [
 export const defaultSiteRange = "12m";
 
 // The growth chart shows one metric at a time; the switch sits beside the
-// range. Saves live here rather than in a chart of their own (2026-10-20)
+// range. Saves live here rather than in a chart of their own
 export const growthMetrics = [
   {
     value: "users",
@@ -139,10 +139,7 @@ export const siteAnalyticsCharts = {
     detail: (organiser, date) => `${organiser} · submitted ${date}`,
     empty: "Nothing waiting for review.",
   },
-  // Followers and events per category (FollowersHoneycomb, decided
-  // 2026-10-20). Slav turned down: bars per category (too tall), followers
-  // per event as one bar, and a follower line in Most Saved (too easy to
-  // miss); a "needs more events" flag (nobody here creates events)
+  // Followers and events per category (FollowersHoneycomb)
   supply: {
     title: "Followers and Events",
     description: "People following each category and the public events coming up in it.",

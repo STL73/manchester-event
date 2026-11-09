@@ -32,9 +32,8 @@ export default function Contact({ onSendMessage, inDashboard = false, account })
   const [errorMessage, setErrorMessage] = useState("");
   const [sending, setSending] = useState(false);
 
-  // Matches contact_contr.inc.php: all three fields are required. Signed in,
-  // only the message is sent: the server takes the name and email from the
-  // account (Phase 9). `website` is the hidden field only bots fill in
+  // Every field is required; signed in, only the message is sent. `website` is
+  // the hidden field only bots fill in
   async function handleSubmit(event) {
     event.preventDefault();
     const formElement = event.currentTarget;

@@ -26,10 +26,8 @@ import PageLoading from "./components/UI/PageLoading";
 import ListError from "./components/UI/ListError";
 import "./App.css";
 
-// The dashboard and its pages download only when someone signs in, so a
-// visitor to the public site never loads them. Explore Events and Event
-// details stay in the main bundle: the public pages use them too. The
-// analytics pages also keep Recharts out of everything else
+// Dashboard pages download only when someone signs in, so public visitors never
+// load them (or Recharts). Explore Events and Event details stay: the public uses them
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const DashboardHome = lazy(() => import("./pages/DashboardHome"));
 const MyFavourites = lazy(() => import("./pages/MyFavourites"));
@@ -46,33 +44,31 @@ const ContactMessages = lazy(() => import("./pages/ContactMessages"));
 const EventAnalytics = lazy(() => import("./pages/EventAnalytics"));
 const SiteAnalytics = lazy(() => import("./pages/SiteAnalytics"));
 
-// React reuses a page when only a URL parameter changes, so an edit form
-// would keep the previous record's status and message. A new key per ID
-// starts the page fresh
-// A role's own pages: anyone else who types the address goes to their Home,
-// as the API will refuse them. Home, Event details, Notifications and
-// Settings are everyone's
+// A role's own pages: anyone else who types the address goes to their Home, as
+// the API would refuse them
 function RoleOnly({ allow, userType }) {
   return [allow].flat().includes(userType) ? <Outlet /> : <Navigate to="/dashboard/home" replace />;
 }
 
-// The old Edit Status / Edit User addresses open the item's side panel
-// on the list instead (Manage Events and Manage Users, decided 2026-10-12)
+// The old Edit Status / Edit User addresses open the item's side panel on the list
 function OpenInPanel({ param, to }) {
   const params = useParams();
   return <Navigate to={`${to}?open=${params[param]}`} replace />;
 }
 
+// A fresh page per URL id: React would otherwise reuse it, keeping the last
+// record's form and message
 function ResetOnParam({ param, children }) {
   const params = useParams();
   return <Fragment key={params[param]}>{children}</Fragment>;
 }
 
+// The routes, and the shared lists and handlers the pages receive
 function App() {
   const { pathname } = useLocation();
   // The dashboard has its own sidebar and top bar, so the public navbar stays out
   const showNavbar = !pathname.startsWith("/dashboard");
-  // footer.php was only included on public pages, never on the dashboard or login
+  // The footer is for the public pages, not the dashboard or the auth pages
   const showFooter = !["/dashboard", "/auth"].some((path) =>
     pathname.startsWith(path)
   );
@@ -111,9 +107,8 @@ function App() {
     replyToContactMessage,
   } = useAdminLists(account, setListError);
 
-  // Matches save_contact_message() (Phase 9). Signed in, the server takes the
-  // name and email from the account and ignores the form's. Awaits the server
-  // and throws its ApiError for the form to show
+  // Sends a Contact message; signed in, the server takes the name and email from
+  // the account. Throws the ApiError for the form to show
   async function sendContactMessage(fields) {
     await api("/contact-messages", { method: "POST", body: fields });
   }

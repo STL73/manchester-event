@@ -24,9 +24,8 @@ function oldest(events, getDate) {
   return [...events].sort((a, b) => getDate(a).localeCompare(getDate(b)))[0];
 }
 
-// The five Quick Insights cards, from the organiser's own events and the
-// saves on them (GET /analytics/organiser, Phase 10; null until it answers,
-// and `savesFailed` if it couldn't)
+// The five Quick Insights cards, from the organiser's events and the saves on
+// them (null until they arrive, `savesFailed` if they couldn't)
 function getOrganiserInsights(events, saveRows, savesFailed) {
   const now = new Date();
   const text = organiserInsights;
@@ -99,11 +98,12 @@ function newestFirst(a, b) {
   return b.createdAt.localeCompare(a.createdAt);
 }
 
+// The organiser's Home: Quick Insights and their most recent events
 export default function OrganiserDashboardHome({ organiserEvents: events, onDeleteEvent }) {
   const { message, deleteEvent } = useDeleteEvent(onDeleteEvent, organiserEventMessages.eventDeleted);
   const { createFirst } = organiserEventActions;
 
-  // Matches get_recent_events()
+  // The three newest
   const recentEvents = [...events].sort(newestFirst).slice(0, 3);
   const { payload: analytics, error: analyticsError } = useApi("/analytics/organiser");
   const insights = getOrganiserInsights(events, analytics?.data.saves ?? null, Boolean(analyticsError));

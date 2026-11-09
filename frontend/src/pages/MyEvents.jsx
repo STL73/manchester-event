@@ -33,9 +33,8 @@ import {
 import { readPage, useUrlParams } from "../hooks/useUrlParams";
 import { useDeleteEvent } from "../hooks/useDeleteEvent";
 
-// The search bar's fields, the same bar as Explore Events: they apply on
-// Search, like the PHP GET form. Status and sort sit in the row under it
-// and apply at once
+// The search bar's fields, which apply on Search; status and sort under it
+// apply at once
 const defaultFilters = {
   category: "",
   location: "",
@@ -51,7 +50,7 @@ function readFilters(searchParams) {
   );
 }
 
-// Matches the ORDER BY options in get_organiser_events()
+// The sort options
 const sorters = {
   newest: (a, b) => b.startDatetime.localeCompare(a.startDatetime),
   oldest: (a, b) => a.startDatetime.localeCompare(b.startDatetime),
@@ -87,6 +86,7 @@ function Summary({ counts, draftCount }) {
   );
 }
 
+// The organiser's submitted events, searched, filtered and paged
 export default function MyEvents({ organiserEvents, onDeleteEvent }) {
   const { searchParams, setParams, setPage, setSearchParams } = useUrlParams();
   const [filters, setFilters] = useState(() => readFilters(searchParams));

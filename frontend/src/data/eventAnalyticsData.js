@@ -1,13 +1,13 @@
 import { BadgeCheck, CalendarCheck, ChartNoAxesCombined, Heart, UsersRound } from "lucide-react";
 
-// Organiser page, from event_stats.php
+// The organiser's analytics page
 export const eventAnalyticsSection = {
   title: "Event Analytics",
   icon: ChartNoAxesCombined,
 };
 
 // Sections, one shown at a time under the stat cards (`?tab=` in the URL);
-// the same layout as Site Analytics (decided 2026-10-20)
+// the same layout as Site Analytics
 export const eventAnalyticsTabs = [
   { value: "overview", label: "Overview" },
   { value: "audience", label: "Audience" },
@@ -15,9 +15,8 @@ export const eventAnalyticsTabs = [
   { value: "what-where", label: "What and where" },
 ];
 
-// Stat cards (decided 2026-10-20): what is live, how much it is saved, how
-// it gets through review and how many people it can reach. Counted on the
-// page; this is the copy
+// The stat cards' copy: what is live, how much it is saved, how it gets through
+// review and how many people it can reach
 export const eventAnalyticsCards = {
   live: {
     title: "Live Events",

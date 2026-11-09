@@ -16,6 +16,7 @@ function mapsUrl(event) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.address ?? event.location)}`;
 }
 
+// The one banner an event's state calls for, in its status colour
 function StateBanner({ event, state, role }) {
   // An edit of a live event (editPending, from the server) leaves the approved
   // version public, so it says so
@@ -109,9 +110,8 @@ function PanelActions({ event, state, role, isFavourite, onToggleFavourite }) {
   );
 }
 
-// Photo, then the title and description beside a panel with when, where,
-// who and the actions (layout A, decided 2026-10-12). Below 52rem the panel
-// moves up under the title, so the facts come before the description
+// Photo, then the title and description beside a panel with when, where, who
+// and the actions. Below 52rem the panel moves up, so the facts come first
 function EventDetailsBody({ event, TitleTag, titleId, role, favouriteIds, onToggleFavourite }) {
   const { about, organiserLabel, maps, ticketLink } = eventDetailsPage;
   const state = eventState(event, new Date());
@@ -214,13 +214,8 @@ function EventDetailsBody({ event, TitleTag, titleId, role, favouriteIds, onTogg
   );
 }
 
-// Guests and users read the event from the API (GET /events/:id), which only
-// opens what has been public, so a typed-in id of someone's draft reads as not
-// found. An organiser sees their own events as they last saved them
-// (`ownEvents`, from GET /users/me/events, null while it loads) and anyone
-// else's as the public does. Admins read theirs from the same prop, the
-// Manage Events list (GET /events/manage, Phase 7): every event but drafts,
-// so a draft's id reads as not found. `role` is "guest" when signed out
+// One event. Organisers and admins read theirs from `ownEvents` (null while it
+// loads); everyone else, and anyone else's, comes from the public API
 export default function EventDetails({
   ownEvents = null,
   inDashboard = false,

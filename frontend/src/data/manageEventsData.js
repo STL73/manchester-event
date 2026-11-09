@@ -16,9 +16,7 @@ export const manageEventsMessages = {
   noEvents: "No events found.",
 };
 
-// Manage Events (decided 2026-10-12, layout A): the events as a list that
-// opens on the review queue, each opening in a side panel with the whole
-// event and, while pending, Approve or Reject (a reason is required)
+// Manage Events: a list that opens on the review queue, each event in a side panel
 export const manageEventsPage = {
   title: "Manage Events",
   icon: ClipboardList,
@@ -99,8 +97,8 @@ export const eventPanel = {
   reasonHint: "Required",
   reasonPlaceholder: "e.g. The ticket link doesn't work. Fix it and send it again.",
   reasonRequired: "Tell the organiser what to change.",
-  // Taking a live event down cancels it (decided 2026-11-03): once public, an
-  // event is never hidden as though it hadn't been, and its saves stay
+  // Taking a live event down cancels it: once public, an event is never hidden
+  // as though it hadn't been, and its saves stay
   liveNote: "To take it down, cancel it with a reason. People who saved it are told, and it can't be undone.",
   takeDown: {
     label: "Cancel this event",
