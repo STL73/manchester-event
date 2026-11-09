@@ -25,8 +25,7 @@ import {
 
 const authRouter = Router();
 
-// Stricter Arcjet rules for these routes, made once here (null in tests).
-// Limits decided 2026-10-26
+// Stricter Arcjet rules for these routes, made once here (null in tests)
 const signUpGuard = aj?.withRule(protectSignup({
     email: { mode: 'LIVE', deny: ['DISPOSABLE', 'INVALID', 'NO_MX_RECORDS'] },
     bots: { mode: 'LIVE', allow: [] },
@@ -55,7 +54,7 @@ authRouter.post(
             .values({ username, email, password: await hashPassword(password), role })
             .onConflictDoNothing({ target: users.email })
             .returning();
-        // Said plainly (decided 2026-10-26): the rate limit stops anyone testing emails in bulk
+        // Said plainly: the rate limit stops anyone testing emails in bulk
         if (!user) {
             throw fieldError(409, 'email', 'An account with this email already exists. Log in instead?');
         }
@@ -134,9 +133,8 @@ authRouter.post(
     },
 );
 
-// The same reply whether or not the email has an account (decided 2026-10-27).
-// The email is sent without waiting for it, so the reply also takes the same
-// time either way; a failure still goes to System Logs
+// The same reply, after the same time, whether or not the email has an account:
+// the email goes without waiting. A failure still goes to System Logs
 authRouter.post(
     '/forgot-password',
     validate({ body: forgotPasswordSchema }),
@@ -149,7 +147,7 @@ authRouter.post(
 );
 
 // No login needed, like verify-email. Every session ends and the person logs
-// in with the new password (decided 2026-10-27), which also proves it works
+// in with the new password, which also proves it works
 authRouter.post('/reset-password', validate({ body: resetPasswordSchema }), async (req, res) => {
     const { token, password } = req.valid.body;
     const used = await consumeAuthToken(token, 'password_reset');
@@ -171,9 +169,8 @@ authRouter.post('/reset-password', validate({ body: resetPasswordSchema }), asyn
     res.status(204).end();
 });
 
-// Allowed while suspended (decided 2026-10-27): keeping an account safe isn't
-// something a suspension should stop. Every other device is logged out, and
-// this one carries on with a new session
+// Allowed while suspended: keeping an account safe isn't something a suspension
+// should stop. Other devices are logged out; this one gets a new session
 authRouter.put(
     '/password',
     requireAuth,

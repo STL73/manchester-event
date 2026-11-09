@@ -38,13 +38,13 @@ export function requireRole(...roles) {
     };
 }
 
+// Refuses a suspended account (403); runs after requireAuth
 export function requireActive(req, res, next) {
     if (req.user.accStatus === 'suspended') throw new AppError(403, 'Your account is suspended');
     next();
 }
 
-// A suspended account can only read (decided 2026-10-05), so each route reads
-// or writes as its roles. Routes where a suspended account may still change
-// something (its password, marking read, a contact message) use requireAuth alone
+// A route's guards: readAs lets a suspended account through, writeAs doesn't.
+// Where a suspended account may still change something, requireAuth is used alone
 export const readAs = (...roles) => [requireAuth, requireRole(...roles)];
 export const writeAs = (...roles) => [requireAuth, requireActive, requireRole(...roles)];

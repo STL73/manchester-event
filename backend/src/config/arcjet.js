@@ -5,10 +5,8 @@ if (!ARCJET_KEY && NODE_ENV !== 'test') {
     throw new Error('ARCJET_KEY is not defined in the environment variables');
 }
 
-// One client for the whole app, made once when the server starts. Routes that
-// need a stricter rule (login, sign-up, contact) add it with aj.withRule() at
-// module level, never per request. Tests get none: they don't call Arcjet's
-// service, so they run offline and can't be blocked or rate-limited
+// The one Arcjet client, made at start-up; null in tests, which run offline.
+// Routes add stricter rules with aj.withRule() at module level, never per request
 export const aj = NODE_ENV === 'test' ? null : arcjet({
     key: ARCJET_KEY,
     rules: [

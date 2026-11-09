@@ -33,8 +33,8 @@ export const demoLocations = [
     { placeId: 'seed-salford-quays-salford-m50-3az', locationName: 'Salford Quays', address: 'Salford Quays, Salford M50 3AZ', latitude: 53.4705, longitude: -2.2955, area: 'salford' },
 ];
 
-// organiser: the mock username. 'organiserName' is the Demo Organiser; the others are
-// added by the seed. 'past' in the mock is 'approved' here: past is derived
+// organiser: 'organiserName' is the Demo Organiser, the others the seed adds.
+// None is stored as past: past is worked out from the dates
 export const demoEvents = [
     {
         name: 'Manchester Live Sessions',

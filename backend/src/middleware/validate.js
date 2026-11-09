@@ -1,9 +1,7 @@
 import { AppError } from '../lib/errors.js';
 
-// validate({ body: schema, query: schema, params: schema }) checks each part of
-// the request against its Zod schema. The cleaned values go on req.valid, since
-// Express 5 doesn't let req.query be replaced. Routes read req.valid only, so
-// fields a schema doesn't list (an organiser's `status`, say) never reach the database
+// validate({ body, query, params }) checks each part against its Zod schema onto
+// req.valid. Routes read only that, so fields a schema doesn't list never reach the database
 export function validate(schemas) {
     return (req, res, next) => {
         const valid = {};

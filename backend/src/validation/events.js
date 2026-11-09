@@ -44,10 +44,8 @@ const londonDateTime = (message) => z
         return londonInstant(year, month, day, hours, minutes);
     });
 
-// Create and Edit Event. There is no status: the route decides it from the
-// button (submit) and the event's state, so an organiser can never approve
-// their own event. The venue comes as its OSM id only; its details are looked
-// up on the server. A new photo comes as a file beside the form (middleware/upload.js)
+// Create and Edit Event. No status: the route decides it, so an organiser can't
+// approve their own. The venue comes as its OSM id only, looked up on the server
 export const eventBodySchema = z
     .object({
         eventName: z.string({ error: 'Enter the event\'s name.' }).trim().min(1, 'Enter the event\'s name.').max(255, 'Keep the name under 255 characters.'),

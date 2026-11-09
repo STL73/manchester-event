@@ -5,10 +5,8 @@ import { aj } from '../config/arcjet.js';
 import { AppError } from '../lib/errors.js';
 import { arcjetProtect } from './security.js';
 
-// A form that sends a photo comes as multipart/form-data: the file under its
-// field's name and the rest of the form as JSON in a `data` field, so the Zod
-// schemas read the same booleans and nulls as from a JSON request. Requests
-// without a photo stay plain JSON and pass straight through
+// A photo comes as multipart: the file under its field's name and the rest of
+// the form as JSON in `data`, so the Zod schemas read it as they read JSON
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -26,7 +24,7 @@ const fieldError = (field, message) => new AppError(400, message, [{ path: `body
 const uploadGuard = aj?.withRule(slidingWindow({ mode: 'LIVE', characteristics: ['userId'], interval: '1h', max: 20 }));
 const limitUploads = arcjetProtect(uploadGuard, (req) => ({ userId: String(req.user.userId) }));
 
-// After requireAuth: the limit counts per account
+// Accepts one photo under `field`. After requireAuth, since the limit is per account
 export function acceptImage(field) {
     const parse = multer({
         // Kept in memory and streamed to Cloudinary: nothing is written to our disk

@@ -1,7 +1,5 @@
-// The fixed names in notifications.type (decided 2026-10-05). The frontend's
-// data/notificationsData.js gives each one its label and icon, so a new name
-// needs an entry there too. The two reminders came with the scheduled jobs
-// (Phase 11)
+// The fixed names in notifications.type. The frontend's notificationsData.js
+// gives each its label and icon, so a new name needs an entry there too
 export const NOTIFY = {
     EVENT_REMINDER_WEEK: 'event_reminder_week',
     EVENT_REMINDER_DAY: 'event_reminder_day',
@@ -16,9 +14,8 @@ export const NOTIFY = {
     ACCOUNT_STATUS: 'account_status',
 };
 
-// Which rows the email job sends (Slav, 2026-11-05): all but a sign-up alert,
-// which would come with every sign-up, and the password change, which has its
-// own email (authEmails.js). Only to verified addresses
+// The types the email job sends: all but the sign-up alert, which would come
+// with every sign-up, and the password change, which has its own email
 export const EMAILED_TYPES = Object.values(NOTIFY).filter(
     (type) => type !== NOTIFY.USER_REGISTERED && type !== NOTIFY.PASSWORD_CHANGED,
 );

@@ -10,9 +10,8 @@ import { locationSearchQuery } from '../validation/events.js';
 
 const locationRouter = Router();
 
-// Photon is a free public server that throttles heavy users, and all our
-// searches reach it from one address: 30 a minute per organiser is plenty for
-// a form that waits for the typing to pause
+// Photon throttles heavy users, and all our searches come from one address: 30
+// a minute per organiser is plenty for a form that waits for typing to pause
 const searchGuard = aj?.withRule(slidingWindow({ mode: 'LIVE', characteristics: ['userId'], interval: '1m', max: 30 }));
 
 // Create and Edit Event's venue box. Only organisers pick venues

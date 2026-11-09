@@ -54,8 +54,8 @@ export const categories = pgTable('categories', {
     isActive: boolean('is_active').notNull().default(true),
 });
 
-// Shared venues and addresses, always picked from OpenStreetMap, never typed in
-// (lib/osm.js; Google Places until 2026-11-02). place_id is the OSM id, 'W30343319'
+// Shared venues, always picked from OpenStreetMap (lib/osm.js), never typed in.
+// place_id is the OSM id, 'W30343319'
 export const locations = pgTable('locations', {
     locationId: integer('location_id').primaryKey().generatedAlwaysAsIdentity(),
     placeId: varchar('place_id', { length: 255 }).notNull().unique(),
@@ -125,7 +125,7 @@ export const categoryFollows = pgTable('category_follows', {
 ]);
 
 // In-app inbox, and the outbox for notification emails: the email job sends
-// rows with no email_sent_at (Phase 11); failures go to system_logs
+// rows with no email_sent_at; failures go to system_logs
 export const notifications = pgTable('notifications', {
     notificationId: integer('notification_id').primaryKey().generatedAlwaysAsIdentity(),
     userId: integer('user_id').notNull().references(() => users.userId, { onDelete: 'cascade' }),
@@ -142,7 +142,7 @@ export const notifications = pgTable('notifications', {
 }, (table) => [
     index('notifications_user_id_idx').on(table.userId),
     // Each reminder once per user per event, however often the reminder job
-    // runs: a week before and the day before (decided 2026-10-11)
+    // runs: a week before and the day before
     uniqueIndex('notifications_event_reminder_unique')
         .on(table.userId, table.eventId, table.type)
         .where(sql`type IN ('event_reminder_week', 'event_reminder_day')`),

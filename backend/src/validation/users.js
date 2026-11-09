@@ -24,9 +24,8 @@ export const followsSchema = z.object({
 
 export const userIdParams = idParams('Account not found.');
 
-// Manage Users (Phase 8): Active, or Suspended for 7 or 30 days or until lifted
-// (null), with a reason the person reads. Leaving days out keeps the current end
-// of a suspension already in place (the panel's "Keep")
+// Manage Users: Active, or Suspended for 7 or 30 days or until lifted (null),
+// with a reason. Leaving days out keeps a current suspension's end ("Keep")
 export const accountStatusSchema = z.discriminatedUnion(
     'status',
     [

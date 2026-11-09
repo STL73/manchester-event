@@ -7,8 +7,8 @@ import { demoEvents, demoLocations } from './demoData.js';
 import { daysToFriday, londonDay } from '../lib/londonTime.js';
 import { hashPassword } from '../lib/passwords.js';
 
-// Same names, descriptions and order as the PHP project's insert data. Slugs match the
-// category ids in frontend/src/data/eventsData.js (eventCategories)
+// The 19 categories. Slugs match the category ids in
+// frontend/src/data/eventsData.js (eventCategories)
 const seedCategories = [
     { slug: 'music', name: 'Music', description: 'Live concerts, open mics, gigs, DJ sets and music festivals' },
     { slug: 'theatre-performance', name: 'Theatre & Performance', description: 'Plays, stand-up comedy, and live shows' },
@@ -80,8 +80,8 @@ if (seedDemos) {
         .returning({ email: users.email });
 }
 
-// The mock events' other organisers. Nobody logs in as them: the password is random
-// and thrown away. mcrgigs is suspended, as in the mock users, so its events are hidden
+// The other demo organisers. Nobody logs in as them: the password is random and
+// thrown away. mcrgigs is suspended, so its events are hidden
 const extraOrganisers = ['mcrgigs', 'northernfood', 'quaysevents', 'salfordarts', 'leoevents'];
 const resetEvents = process.argv.includes('--reset-events');
 let addedEvents = [];
@@ -199,8 +199,7 @@ function demoEventRow(event, { organiserIds, locationIds, categoryIds, adminId }
     };
 }
 
-// { days, time } or { weekend, time } as the moment it names in Manchester, the
-// same rules as the frontend mock's daysFromToday() and thisWeekend()
+// { days, time } or { weekend, time } as the moment it names in Manchester
 function londonDate(when) {
     if (!when) return null;
     const now = new Date();

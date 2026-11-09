@@ -1,5 +1,6 @@
 import { AppError } from '../lib/errors.js';
 
+// A 404 for any address no router answered
 export function notFound(req, res, next) {
     next(new AppError(404, `Not found: ${req.method} ${req.originalUrl}`));
 }

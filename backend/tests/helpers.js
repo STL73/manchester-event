@@ -24,10 +24,8 @@ export const londonInput = (date) =>
 
 export const testEmail = (prefix, name) => `${prefix}${name}@example.test`;
 
-// Supertest closes the connection after every request by default, and on
-// Windows an answer over 64 KB on a closing local connection sometimes stalls
-// until it is reset about 19 s later (the admin's events list, 2026-11-09).
-// One keep-alive connection per agent avoids it
+// Supertest closes the connection after each request, and on Windows an answer
+// over 64 KB on a closing connection can stall 19 s. Keep-alive avoids it
 const keepAlive = new Agent({ keepAlive: true });
 
 // A Supertest agent: keeps its cookies, like a browser, and its connection

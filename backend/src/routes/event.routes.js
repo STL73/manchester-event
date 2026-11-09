@@ -33,8 +33,7 @@ eventRouter.get('/summary', async (req, res) => {
     res.json({ data: await summarisePublicEvents() });
 });
 
-// Manage Events and Admin Home (Phase 7): every event but drafts, for admins.
-// Before /:id too
+// Manage Events and Admin Home: every event but drafts, for admins. Before /:id too
 eventRouter.get('/manage', ...readAs('admin'), async (req, res) => {
     res.json({ data: await listManagedEvents() });
 });
@@ -47,8 +46,7 @@ eventRouter.get('/:id', validate({ params: eventIdParams }), async (req, res) =>
     res.json({ data: event });
 });
 
-// Create Event. Create and Edit take the form as JSON, or with a photo as
-// multipart (Phase 6)
+// Create Event. Create and Edit take the form as JSON, or as multipart with a photo
 eventRouter.post('/', ...writeAs('organiser'), ...acceptImage('image'), validate({ body: eventBodySchema }), async (req, res) => {
     const event = await createEvent(req.user, req.valid.body, req.file);
 

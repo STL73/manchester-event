@@ -38,8 +38,8 @@ import {
 
 const userRouter = Router();
 
-// /me before /:id, or "me" would be read as an ID.
-// A suspended account can't change its name or switch (decided 2026-10-27)
+// /me before /:id, or "me" would be read as an ID. A suspended account can't
+// change its name or email
 userRouter.put('/me', requireAuth, requireActive, validate({ body: updateProfileSchema }), async (req, res) => {
     const [user] = await db
         .update(users)
@@ -50,7 +50,7 @@ userRouter.put('/me', requireAuth, requireActive, validate({ body: updateProfile
     res.json({ data: publicUser(user) });
 });
 
-// Settings' profile picture (Phase 6), its own route so PUT /me keeps the
+// Settings' profile picture, its own route so PUT /me keeps the
 // email switch's rules to itself. Cloudinary crops it square round the subject
 async function setAvatar(userId, uploaded) {
     const [user] = await db
@@ -82,10 +82,8 @@ userRouter.delete('/me/avatar', requireAuth, requireActive, async (req, res) => 
     res.json({ data: publicUser(user) });
 });
 
-// The schema's deletion rule: an organiser whose events have been public can
-// only be suspended, since people may have saved those events. Their other
-// events go with the account. Admins have no Delete in Settings, and a
-// suspension can't be escaped by deleting the account
+// Delete account: refused for an organiser whose events have been public. Admins
+// have no Delete, and a suspended account can't escape by deleting itself
 userRouter.delete(
     '/me',
     ...writeAs('user', 'organiser'),
@@ -108,17 +106,14 @@ userRouter.delete(
     },
 );
 
-// Favourites and follows are the user role's (My Favourites, Preferences).
-// Saving and following change something, so a suspended account can only read
-// them (decided 2026-10-05: suspended = read-only)
+// Favourites and follows are the user role's; a suspended account can only read them
 
 userRouter.get('/me/favourites', ...readAs('user'), async (req, res) => {
     res.json({ data: await listFavouriteEvents(req.user.userId) });
 });
 
 // PUT, not POST: saving twice leaves one save. Only what the lists show can be
-// saved: an event that has ended, been cancelled or whose organiser is suspended
-// can't (decided 2026-10-05 and 2026-10-27), though saves made before are kept
+// saved, though saves made before are kept
 userRouter.put('/me/favourites/:id', ...writeAs('user'), validate({ params: eventIdParams }), async (req, res) => {
     const eventId = req.valid.params.id;
     const saveable = await canSaveEvent(eventId);
@@ -151,7 +146,7 @@ userRouter.get('/me/events', ...readAs('organiser'), async (req, res) => {
     res.json({ data: await listOrganiserEvents(req.user.userId) });
 });
 
-// The inbox (Phase 7), every role's. Reading and marking read work while
+// The inbox, every role's. Reading and marking read work while
 // suspended: marking read changes nothing anyone else sees
 userRouter.get('/me/notifications', requireAuth, async (req, res) => {
     res.json({ data: await listNotifications(req.user.userId) });
@@ -162,9 +157,8 @@ userRouter.put('/me/notifications/read', requireAuth, validate({ body: markReadS
     res.status(204).end();
 });
 
-// Manage Users (Phase 8). Accounts are made by sign-up and admins by the seed,
-// so there's no create; the list carries everything the panel shows. Admin
-// accounts aren't changed here, nor your own (decided 2026-11-03)
+// Manage Users. There's no create (sign-up and the seed make accounts); admin
+// accounts aren't changed here, nor your own
 
 userRouter.get('/', ...readAs('admin'), async (req, res) => {
     res.json({ data: await listManagedUsers() });
@@ -172,7 +166,7 @@ userRouter.get('/', ...readAs('admin'), async (req, res) => {
 
 // Suspending takes effect on the person's next request (requireActive reads the
 // account each time), so their sessions are left alone: they can still sign in
-// and read, with the banner (decided 2026-11-03)
+// and read, with the banner
 userRouter.put(
     '/:id/status',
     ...writeAs('admin'),

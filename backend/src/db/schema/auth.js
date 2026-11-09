@@ -4,9 +4,8 @@ import { users } from './app.js';
 
 export const tokenPurposeEnum = pgEnum('token_purpose', ['email_verification', 'password_reset']);
 
-// Own auth with database sessions (decided 2026-10-26), so logout and suspension
-// take effect on the next request. Only SHA-256 hashes are stored: a leaked row
-// can't be used to sign in, because the real value lives only in the cookie
+// Own auth with database sessions, so logout and suspension apply on the next
+// request. Only SHA-256 hashes are stored; the real value lives only in the cookie
 export const sessions = pgTable('sessions', {
     sessionId: varchar('session_id', { length: 64 }).primaryKey(),
     userId: integer('user_id').notNull().references(() => users.userId, { onDelete: 'cascade' }),

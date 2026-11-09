@@ -1,8 +1,7 @@
 import { jobs, runJob } from './lib/scheduler.js';
 
-// npm run jobs: every scheduled job once, now, in the order the day needs
-// (reminders written before the email job sends them), then exit. For trying
-// them by hand, or for a host's own scheduler if Phase 12 prefers one
+// npm run jobs: every scheduled job once, reminders before the email job sends
+// them, then exit. For trying them by hand, or for a host's own scheduler
 const order = ['event-reminders', 'notification-emails', 'clean-up'];
 
 let failed = false;

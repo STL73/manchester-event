@@ -14,7 +14,7 @@ import { guestMessageSchema, memberMessageSchema, messageIdParams, readSchema, r
 const contactRouter = Router();
 
 // 5 messages an hour per IP, and the address must be able to receive the
-// reply (decided 2026-11-03). Made once here (null in tests)
+// reply. Made once here (null in tests)
 const sendGuard = aj
     ?.withRule(slidingWindow({ mode: 'LIVE', interval: '1h', max: 5 }))
     .withRule(validateEmail({ mode: 'LIVE', deny: ['DISPOSABLE', 'INVALID', 'NO_MX_RECORDS'] }));
@@ -24,9 +24,8 @@ const sendGuard = aj
 const validateMessage = (req, res, next) =>
     validate({ body: req.user ? memberMessageSchema : guestMessageSchema })(req, res, next);
 
-// Matches save_contact_message(): anyone may write, guests included. A
-// suspended account may too, since this is how they ask about the suspension
-// (decided 2026-11-03)
+// Anyone may write, guests included, and a suspended account too: it is how
+// they ask about the suspension
 contactRouter.post(
     '/',
     optionalAuth,
