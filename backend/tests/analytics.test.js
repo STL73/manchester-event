@@ -1,13 +1,12 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import bcrypt from 'bcryptjs';
 import { inArray, like, or } from 'drizzle-orm';
 
 import app from '../src/app.js';
 import { db } from '../src/db/index.js';
 import { users, events, categories, locations, favourites, categoryFollows, systemLogs } from '../src/db/schema/index.js';
 import { LOG } from '../src/constants/logActions.js';
-import { testAgent } from './helpers.js';
+import { DAY, insertAccounts, logInAll } from './helpers.js';
 
 // Every account, category and venue made here starts with PREFIX, so afterAll
 // can remove them all. The log rows carry TOKEN instead: the test accounts'
@@ -15,9 +14,18 @@ import { testAgent } from './helpers.js';
 // whatever other test files are logging at the same moment
 const PREFIX = 'analytics-test-';
 const TOKEN = 'qzlogtoken';
-const PASSWORD = 'correct-horse-battery';
-const DAY = 24 * 60 * 60 * 1000;
 const MINUTE = 60 * 1000;
+
+// [name, role, extra]; the log rows below copy each one's role
+const ACCOUNTS = [
+    ['admin', 'admin'],
+    ['suspendedadmin', 'admin', { accStatus: 'suspended' }],
+    ['user', 'user'],
+    ['user2', 'user'],
+    ['suspended', 'user', { accStatus: 'suspended', suspensionReason: 'Test' }],
+    ['organiser', 'organiser'],
+    ['other', 'organiser'],
+];
 
 const ids = {};
 const agents = {};
@@ -35,28 +43,7 @@ beforeAll(async () => {
         .values({ placeId: `${PREFIX}venue`, locationName: 'Test Hall', address: '1 Test Street', latitude: 53.48, longitude: -2.24, area: 'city-centre' })
         .returning();
 
-    const password = await bcrypt.hash(PASSWORD, 4);
-    const account = (name, role, extra = {}) => ({
-        username: `${PREFIX}${name}`,
-        email: `${PREFIX}${name}@example.test`,
-        password,
-        role,
-        emailVerifiedAt: new Date(),
-        ...extra,
-    });
-    const accounts = await db
-        .insert(users)
-        .values([
-            account('admin', 'admin'),
-            account('suspendedadmin', 'admin', { accStatus: 'suspended' }),
-            account('user', 'user'),
-            account('user2', 'user'),
-            account('suspended', 'user', { accStatus: 'suspended', suspensionReason: 'Test' }),
-            account('organiser', 'organiser'),
-            account('other', 'organiser'),
-        ])
-        .returning();
-    for (const user of accounts) ids[user.username.slice(PREFIX.length)] = user.userId;
+    Object.assign(ids, await insertAccounts(PREFIX, ACCOUNTS));
 
     const event = (organiser, category, name) => ({
         organiserId: ids[organiser],
@@ -91,12 +78,7 @@ beforeAll(async () => {
         { userId: ids.suspended, categoryId: ids.alpha },
     ]);
 
-    for (const name of ['admin', 'suspendedadmin', 'user', 'organiser']) {
-        const agent = testAgent();
-        const res = await agent.post('/api/v1/auth/login').send({ email: `${PREFIX}${name}@example.test`, password: PASSWORD });
-        expect(res.status, name).toBe(200);
-        agents[name] = agent;
-    }
+    Object.assign(agents, await logInAll(PREFIX, ['admin', 'suspendedadmin', 'user', 'organiser']));
     agents.guest = request(app);
 
     // System Logs: one row of each kind, a minute apart, newest first. The
@@ -106,7 +88,7 @@ beforeAll(async () => {
         action,
         userId: ids[who],
         username: `${TOKEN}-${key}`,
-        role: accounts.find((user) => user.userId === ids[who]).role,
+        role: ACCOUNTS.find(([name]) => name === who)[1],
         details,
         ...extra,
     });

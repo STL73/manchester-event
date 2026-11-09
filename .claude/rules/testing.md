@@ -24,6 +24,13 @@
 - Two guards for one rule hide each other: breaking either alone changes nothing, so the pass
   reads MISSED twice. Phase 9's reply had a check before its `UPDATE … WHERE replied_at IS
   NULL`; the check went, leaving the one guard that holds under a race, and a test catches it
+- **Shared setup is in `tests/helpers.js`** (2026-11-09): `PASSWORD`, `HOUR`, `DAY`,
+  `inDays()`, `londonInput()`, `testEmail()`, `insertAccounts(prefix, [[name, role, extra]…])`
+  (verified, bcrypt cost 4 to keep tests fast, answers `{ name: userId }`), `logIn(email)` and
+  `logInAll(prefix, names)`, `eventInserter(ids, { eventName, status })` for a file's
+  `insertEvent`, and `readEvent(id)`. The constants are written out, not imported from the
+  app, so a wrong value there can't make a test agree with it. Each file keeps its `PREFIX`,
+  categories, venues and the rows its tests need
 - **Log in through `testAgent()`** (`tests/helpers.js`), never `request.agent(app)`: it keeps
   one connection open. Supertest closes the connection after every request by default, and on
   Windows an answer over 64 KB on a closing local connection sometimes stalls until it is reset

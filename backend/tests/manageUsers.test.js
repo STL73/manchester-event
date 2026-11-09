@@ -1,24 +1,20 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import request from 'supertest';
-import bcrypt from 'bcryptjs';
 import { and, eq, inArray, like } from 'drizzle-orm';
 
 import app from '../src/app.js';
 import { db } from '../src/db/index.js';
 import { users, events, categories, locations, systemLogs, notifications } from '../src/db/schema/index.js';
 import { deleteImage } from '../src/lib/images.js';
-import { testAgent } from './helpers.js';
+import { DAY, eventInserter, insertAccounts, logInAll } from './helpers.js';
 
 // Cloudinary is never called; deleteImage only records what it was asked to delete
 vi.mock('../src/lib/images.js', () => ({ uploadImage: vi.fn(), deleteImage: vi.fn() }));
 
 // Every row made here starts with this, so afterAll can remove them all
 const PREFIX = 'manage-users-test-';
-const PASSWORD = 'correct-horse-battery';
 const PLACE = 'N999999000301';
-const DAY = 24 * 60 * 60 * 1000;
 const MINUTE = 60 * 1000;
-const inDays = (days) => new Date(Date.now() + days * DAY);
 
 const ids = {};
 const agents = {};
@@ -32,28 +28,15 @@ beforeAll(async () => {
         .returning();
     ids.venue = venue.locationId;
 
-    const password = await bcrypt.hash(PASSWORD, 4);
-    const account = (name, role, extra = {}) => ({
-        username: `${PREFIX}${name}`,
-        email: `${PREFIX}${name}@example.test`,
-        password,
-        role,
-        emailVerifiedAt: new Date(),
-        ...extra,
-    });
-    const created = await db
-        .insert(users)
-        .values([
-            account('admin', 'admin'),
-            account('otheradmin', 'admin'),
-            account('suspendedadmin', 'admin', { accStatus: 'suspended' }),
-            account('user', 'user'),
-            account('organiser', 'organiser'),
-            account('spare', 'user'),
-            account('draftsonly', 'organiser', { avatar: 'https://example.test/a.png', avatarPublicId: `${PREFIX}avatar` }),
-        ])
-        .returning();
-    for (const user of created) ids[user.username.slice(PREFIX.length)] = user.userId;
+    Object.assign(ids, await insertAccounts(PREFIX, [
+        ['admin', 'admin'],
+        ['otheradmin', 'admin'],
+        ['suspendedadmin', 'admin', { accStatus: 'suspended' }],
+        ['user', 'user'],
+        ['organiser', 'organiser'],
+        ['spare', 'user'],
+        ['draftsonly', 'organiser', { avatar: 'https://example.test/a.png', avatarPublicId: `${PREFIX}avatar` }],
+    ]));
 
     // The organiser: one live event, one waiting, one draft (not counted)
     await insertEvent({ status: 'approved', eventName: `${PREFIX}Live gig` });
@@ -63,12 +46,7 @@ beforeAll(async () => {
     await insertEvent({ organiserId: ids.draftsonly, status: 'draft', imagePublicId: `${PREFIX}draft-photo` });
     await insertEvent({ organiserId: ids.draftsonly, status: 'rejected' });
 
-    for (const name of ['admin', 'suspendedadmin', 'user', 'organiser', 'spare']) {
-        const agent = testAgent();
-        const res = await agent.post('/api/v1/auth/login').send({ email: `${PREFIX}${name}@example.test`, password: PASSWORD });
-        expect(res.status, name).toBe(200);
-        agents[name] = agent;
-    }
+    Object.assign(agents, await logInAll(PREFIX, ['admin', 'suspendedadmin', 'user', 'organiser', 'spare']));
 });
 
 afterAll(async () => {
@@ -87,23 +65,7 @@ beforeEach(() => {
     vi.mocked(deleteImage).mockReset();
 });
 
-async function insertEvent(changes = {}) {
-    const [row] = await db
-        .insert(events)
-        .values({
-            organiserId: ids.organiser,
-            eventName: `${PREFIX}Gig`,
-            eventDescription: 'A test event.',
-            startDatetime: inDays(10),
-            locationId: ids.venue,
-            categoryId: ids.category,
-            ticketUrl: 'https://example.test/tickets',
-            status: 'pending',
-            ...changes,
-        })
-        .returning();
-    return row;
-}
+const insertEvent = eventInserter(ids, { eventName: `${PREFIX}Gig`, status: 'pending' });
 
 const setStatus = (userId, body, agent = agents.admin) => agent.put(`/api/v1/users/${userId}/status`).send(body);
 const removeAccount = (userId, agent = agents.admin) => agent.delete(`/api/v1/users/${userId}`);

@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import request from 'supertest';
-import bcrypt from 'bcryptjs';
 import { and, eq, inArray, like } from 'drizzle-orm';
 
 import app from '../src/app.js';
@@ -8,21 +7,16 @@ import { db } from '../src/db/index.js';
 import { users, events, categories, locations, systemLogs, favourites, categoryFollows, notifications } from '../src/db/schema/index.js';
 import { deleteImage } from '../src/lib/images.js';
 import { snapshotOf } from '../src/lib/organiserEvents.js';
-import { testAgent } from './helpers.js';
+import {
+    eventInserter, inDays, insertAccounts, londonInput, logInAll, readEvent,
+} from './helpers.js';
 
 // Cloudinary is never called; deleteImage only records what it was asked to delete
 vi.mock('../src/lib/images.js', () => ({ uploadImage: vi.fn(), deleteImage: vi.fn() }));
 
 // Every row made here starts with this, so afterAll can remove them all
 const PREFIX = 'moderation-test-';
-const PASSWORD = 'correct-horse-battery';
 const PLACE = 'N999999000201';
-const DAY = 24 * 60 * 60 * 1000;
-const inDays = (days) => new Date(Date.now() + days * DAY);
-const londonInput = (date) =>
-    new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', dateStyle: 'short', timeStyle: 'short' })
-        .format(date)
-        .replace(' ', 'T');
 
 const ids = {};
 const agents = {};
@@ -38,26 +32,13 @@ beforeAll(async () => {
         .returning();
     ids.venue = venue.locationId;
 
-    const password = await bcrypt.hash(PASSWORD, 4);
-    const account = (name, role, extra = {}) => ({
-        username: `${PREFIX}${name}`,
-        email: `${PREFIX}${name}@example.test`,
-        password,
-        role,
-        emailVerifiedAt: new Date(),
-        ...extra,
-    });
-    const created = await db
-        .insert(users)
-        .values([
-            account('admin', 'admin'),
-            account('organiser', 'organiser'),
-            account('follower', 'user'),
-            account('saver', 'user'),
-            account('suspended', 'user', { accStatus: 'suspended' }),
-        ])
-        .returning();
-    for (const user of created) ids[user.username.slice(PREFIX.length)] = user.userId;
+    Object.assign(ids, await insertAccounts(PREFIX, [
+        ['admin', 'admin'],
+        ['organiser', 'organiser'],
+        ['follower', 'user'],
+        ['saver', 'user'],
+        ['suspended', 'user', { accStatus: 'suspended' }],
+    ]));
 
     // follower and the suspended account follow the category; the organiser is
     // given a follow too, though the API never lets one follow, to show only
@@ -68,12 +49,7 @@ beforeAll(async () => {
         { userId: ids.organiser, categoryId: ids.category },
     ]);
 
-    for (const name of ['admin', 'organiser', 'follower']) {
-        const agent = testAgent();
-        const res = await agent.post('/api/v1/auth/login').send({ email: `${PREFIX}${name}@example.test`, password: PASSWORD });
-        expect(res.status, name).toBe(200);
-        agents[name] = agent;
-    }
+    Object.assign(agents, await logInAll(PREFIX, ['admin', 'organiser', 'follower']));
 });
 
 afterAll(async () => {
@@ -90,23 +66,7 @@ beforeEach(() => {
     vi.mocked(deleteImage).mockReset();
 });
 
-async function insertEvent(changes = {}) {
-    const [row] = await db
-        .insert(events)
-        .values({
-            organiserId: ids.organiser,
-            eventName: `${PREFIX}Gig`,
-            eventDescription: 'A test event.',
-            startDatetime: inDays(10),
-            locationId: ids.venue,
-            categoryId: ids.category,
-            ticketUrl: 'https://example.test/tickets',
-            status: 'pending',
-            ...changes,
-        })
-        .returning();
-    return row;
-}
+const insertEvent = eventInserter(ids, { eventName: `${PREFIX}Gig`, status: 'pending' });
 
 // A live event with an edit waiting: the snapshot is the approved version
 async function insertPendingEdit(live = {}, edit = {}) {
@@ -119,7 +79,6 @@ async function insertPendingEdit(live = {}, edit = {}) {
     return saved;
 }
 
-const readRow = async (eventId) => (await db.select().from(events).where(eq(events.eventId, eventId)))[0];
 // What each test account was sent about this event
 async function sentAbout(eventId) {
     const rows = await db
@@ -174,7 +133,7 @@ describe('approving', () => {
         expect((await approve(event.eventId, agents.follower)).status).toBe(403);
         const draft = await insertEvent({ status: 'draft' });
         expect((await approve(draft.eventId)).status).toBe(404);
-        expect((await readRow(event.eventId)).status).toBe('pending');
+        expect((await readEvent(event.eventId)).status).toBe('pending');
     });
 
     it('publishes a new event, records who decided, and tells the organiser and the category\'s active users', async () => {
@@ -184,7 +143,7 @@ describe('approving', () => {
 
         expect(res.status).toBe(200);
         expect(res.body.data).toMatchObject({ eventId: event.eventId, status: 'approved', adminId: ids.admin, adminName: `${PREFIX}admin`, approvedSnapshot: null });
-        const row = await readRow(event.eventId);
+        const row = await readEvent(event.eventId);
         expect(row).toMatchObject({ status: 'approved', rejectionReason: null, adminUpdatedBy: ids.admin });
         expect(row.adminUpdatedAt).not.toBeNull();
 
@@ -231,7 +190,7 @@ describe('approving', () => {
         const res = await approve(event.eventId);
 
         expect(res.status).toBe(200);
-        expect(await readRow(event.eventId)).toMatchObject({ status: 'approved', approvedSnapshot: null, eventName: `${PREFIX}Edited`, imagePublicId: `${PREFIX}new` });
+        expect(await readEvent(event.eventId)).toMatchObject({ status: 'approved', approvedSnapshot: null, eventName: `${PREFIX}Edited`, imagePublicId: `${PREFIX}new` });
         expect(deleted()).toEqual([`${PREFIX}old`]);
 
         const sent = await sentAbout(event.eventId);
@@ -285,7 +244,7 @@ describe('rejecting', () => {
             expect(res.status).toBe(400);
             expect(res.body.error.details[0].path).toBe('body.reason');
         }
-        expect((await readRow(event.eventId)).status).toBe('pending');
+        expect((await readEvent(event.eventId)).status).toBe('pending');
     });
 
     it('stores the reason and tells the organiser, and only the organiser', async () => {
@@ -295,7 +254,7 @@ describe('rejecting', () => {
         const res = await reject(event.eventId, '  The ticket link is broken.  ');
 
         expect(res.status).toBe(200);
-        expect(await readRow(event.eventId)).toMatchObject({ status: 'rejected', rejectionReason: 'The ticket link is broken.', adminUpdatedBy: ids.admin });
+        expect(await readEvent(event.eventId)).toMatchObject({ status: 'rejected', rejectionReason: 'The ticket link is broken.', adminUpdatedBy: ids.admin });
         const sent = await sentAbout(event.eventId);
         expect(sent.map((row) => row.to)).toEqual(['organiser']);
         expect(sent[0]).toMatchObject({ type: 'event_status', subject: `Not approved: ${PREFIX}Gig` });
@@ -307,7 +266,7 @@ describe('rejecting', () => {
 
         expect((await reject(event.eventId, 'Keep the old photo.')).status).toBe(200);
 
-        const row = await readRow(event.eventId);
+        const row = await readEvent(event.eventId);
         expect(row.status).toBe('rejected');
         expect(row.approvedSnapshot.eventName).toBe(`${PREFIX}Approved`);
         expect(deleted()).toEqual([]);
@@ -324,7 +283,7 @@ describe('taking a live event down', () => {
         const res = await takeDown(event.eventId, 'Not a real event.');
 
         expect(res.status).toBe(200);
-        expect(await readRow(event.eventId)).toMatchObject({ status: 'cancelled', rejectionReason: 'Not a real event.', adminUpdatedBy: ids.admin });
+        expect(await readEvent(event.eventId)).toMatchObject({ status: 'cancelled', rejectionReason: 'Not a real event.', adminUpdatedBy: ids.admin });
         expect(await db.select().from(favourites).where(eq(favourites.eventId, event.eventId))).toHaveLength(1);
         const sent = await sentAbout(event.eventId);
         expect(recipients(sent, 'event_status')).toEqual(['organiser']);
@@ -390,7 +349,7 @@ describe('what organisers\' changes send', () => {
 
         expect((await agents.organiser.put(`/api/v1/events/${event.eventId}/cancel`)).status).toBe(200);
 
-        expect((await readRow(event.eventId)).rejectionReason).toBeNull();
+        expect((await readEvent(event.eventId)).rejectionReason).toBeNull();
         const sent = await sentAbout(event.eventId);
         expect(recipients(sent, 'event_cancelled')).toEqual(['saver']);
         expect(sent.find((row) => row.type === 'event_cancelled').subject).toBe(`Cancelled: ${PREFIX}Approved`);

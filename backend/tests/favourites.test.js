@@ -1,28 +1,17 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import bcrypt from 'bcryptjs';
 import { and, eq, inArray, like } from 'drizzle-orm';
 
 import app from '../src/app.js';
 import { db } from '../src/db/index.js';
 import { users, events, categories, locations, favourites, categoryFollows } from '../src/db/schema/index.js';
-import { testAgent } from './helpers.js';
+import { inDays, insertAccounts, logInAll } from './helpers.js';
 
 // Every row made here starts with this, so afterAll can remove them all
 const PREFIX = 'favourites-test-';
-const PASSWORD = 'correct-horse-battery';
-const DAY = 24 * 60 * 60 * 1000;
-const inDays = (days) => new Date(Date.now() + days * DAY);
 
 const ids = {};
 const agents = {};
-
-async function logIn(email) {
-    const agent = testAgent();
-    const res = await agent.post('/api/v1/auth/login').send({ email, password: PASSWORD });
-    expect(res.status, email).toBe(200);
-    return agent;
-}
 
 beforeAll(async () => {
     const [alpha, beta, archived] = await db
@@ -40,26 +29,14 @@ beforeAll(async () => {
         .values({ placeId: `${PREFIX}venue`, locationName: 'Test Hall', address: '1 Test Street', latitude: 53.48, longitude: -2.24, area: 'city-centre' })
         .returning();
 
-    const password = await bcrypt.hash(PASSWORD, 4);
-    const account = (name, extra = {}) => ({
-        username: name,
-        email: `${PREFIX}${name}@example.test`,
-        password,
-        role: 'user',
-        emailVerifiedAt: new Date(),
-        ...extra,
-    });
-    const created = await db
-        .insert(users)
-        .values([
-            account('user'),
-            account('unverified', { emailVerifiedAt: null }),
-            account('suspended', { accStatus: 'suspended' }),
-            account('organiser', { role: 'organiser' }),
-            account('suspended-organiser', { role: 'organiser', accStatus: 'suspended' }),
-        ])
-        .returning();
-    const byName = Object.fromEntries(created.map((user) => [user.username, user.userId]));
+    // Kept apart from ids, where `suspended` is an event
+    const byName = await insertAccounts(PREFIX, [
+        ['user', 'user'],
+        ['unverified', 'user', { emailVerifiedAt: null }],
+        ['suspended', 'user', { accStatus: 'suspended' }],
+        ['organiser', 'organiser'],
+        ['suspended-organiser', 'organiser', { accStatus: 'suspended' }],
+    ]);
     Object.assign(ids, { user: byName.user });
 
     const base = {
@@ -101,9 +78,7 @@ beforeAll(async () => {
         ids[key] = inserted[index].eventId;
     });
 
-    for (const name of ['user', 'unverified', 'suspended', 'organiser']) {
-        agents[name] = await logIn(`${PREFIX}${name}@example.test`);
-    }
+    Object.assign(agents, await logInAll(PREFIX, ['user', 'unverified', 'suspended', 'organiser']));
 });
 
 afterAll(async () => {
@@ -201,7 +176,7 @@ describe('favourites', () => {
         const suspended = await request(app).get(`/api/v1/events/${ids.suspended}`);
         expect(live.body.data.listed).toBe(true);
         expect(suspended.body.data.listed).toBe(false);
-        expect(suspended.body.data.organiser).toEqual({ userId: expect.any(Number), username: 'suspended-organiser' });
+        expect(suspended.body.data.organiser).toEqual({ userId: expect.any(Number), username: `${PREFIX}suspended-organiser` });
     });
 });
 

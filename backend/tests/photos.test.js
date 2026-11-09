@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import request from 'supertest';
-import bcrypt from 'bcryptjs';
 import { and, eq, inArray, like } from 'drizzle-orm';
 
 import app from '../src/app.js';
@@ -9,21 +8,14 @@ import { users, events, categories, locations, systemLogs } from '../src/db/sche
 import { AppError } from '../src/lib/errors.js';
 import { deleteImage, uploadImage } from '../src/lib/images.js';
 import { withUpload } from '../src/lib/uploads.js';
-import { testAgent } from './helpers.js';
+import { PASSWORD, eventInserter, inDays, insertAccounts, londonInput, logInAll, readEvent } from './helpers.js';
 
 // Cloudinary is never called: every upload gets the next made-up id here
 vi.mock('../src/lib/images.js', () => ({ uploadImage: vi.fn(), deleteImage: vi.fn() }));
 
 // Every row made here starts with this, so afterAll can remove them all
 const PREFIX = 'photos-test-';
-const PASSWORD = 'correct-horse-battery';
 const PLACE = 'N999999000101';
-const DAY = 24 * 60 * 60 * 1000;
-const inDays = (days) => new Date(Date.now() + days * DAY);
-const londonInput = (date) =>
-    new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', dateStyle: 'short', timeStyle: 'short' })
-        .format(date)
-        .replace(' ', 'T');
 
 const PHOTO = Buffer.from('a photo');
 const ids = {};
@@ -39,33 +31,15 @@ beforeAll(async () => {
         .returning();
     ids.venue = venue.locationId;
 
-    const password = await bcrypt.hash(PASSWORD, 4);
-    const account = (name, role, extra = {}) => ({
-        username: `${PREFIX}${name}`,
-        email: `${PREFIX}${name}@example.test`,
-        password,
-        role,
-        emailVerifiedAt: new Date(),
-        ...extra,
-    });
-    const created = await db
-        .insert(users)
-        .values([
-            account('organiser', 'organiser'),
-            account('other', 'organiser'),
-            account('leaving', 'organiser'),
-            account('user', 'user'),
-            account('suspended', 'user', { accStatus: 'suspended' }),
-        ])
-        .returning();
-    for (const user of created) ids[user.username.slice(PREFIX.length)] = user.userId;
+    Object.assign(ids, await insertAccounts(PREFIX, [
+        ['organiser', 'organiser'],
+        ['other', 'organiser'],
+        ['leaving', 'organiser'],
+        ['user', 'user'],
+        ['suspended', 'user', { accStatus: 'suspended' }],
+    ]));
 
-    for (const name of ['organiser', 'other', 'leaving', 'user', 'suspended']) {
-        const agent = testAgent();
-        const res = await agent.post('/api/v1/auth/login').send({ email: `${PREFIX}${name}@example.test`, password: PASSWORD });
-        expect(res.status, name).toBe(200);
-        agents[name] = agent;
-    }
+    Object.assign(agents, await logInAll(PREFIX, ['organiser', 'other', 'leaving', 'user', 'suspended']));
 });
 
 afterAll(async () => {
@@ -101,25 +75,8 @@ function withPhoto(req, body, { field = 'image', file = PHOTO, type = 'image/png
     return req.field('data', JSON.stringify(body)).attach(field, file, { filename: 'photo.png', contentType: type });
 }
 
-async function insertEvent(changes = {}) {
-    const [row] = await db
-        .insert(events)
-        .values({
-            organiserId: ids.organiser,
-            eventName: `${PREFIX}Row`,
-            eventDescription: 'A test event.',
-            startDatetime: inDays(10),
-            locationId: ids.venue,
-            categoryId: ids.category,
-            ticketUrl: 'https://example.test/tickets',
-            status: 'draft',
-            ...changes,
-        })
-        .returning();
-    return row;
-}
+const insertEvent = eventInserter(ids, { eventName: `${PREFIX}Row`, status: 'draft' });
 
-const readRow = async (eventId) => (await db.select().from(events).where(eq(events.eventId, eventId)))[0];
 const readUser = async (userId) => (await db.select().from(users).where(eq(users.userId, userId)))[0];
 const deleted = () => vi.mocked(deleteImage).mock.calls.map(([publicId]) => publicId).filter(Boolean);
 
@@ -131,7 +88,7 @@ describe('the photo on Create and Edit Event', () => {
         expect(uploadImage).toHaveBeenCalledWith(PHOTO, 'image');
         const { url, publicId } = await vi.mocked(uploadImage).mock.results[0].value;
         expect(res.body.data.imageUrl).toBe(url);
-        expect((await readRow(res.body.data.eventId)).imagePublicId).toBe(publicId);
+        expect((await readEvent(res.body.data.eventId)).imagePublicId).toBe(publicId);
     });
 
     it('still takes the form as JSON, with no photo', async () => {
@@ -194,7 +151,7 @@ describe('the photo on Create and Edit Event', () => {
         const res = await withPhoto(agents.organiser.put(`/api/v1/events/${draft.eventId}`), form());
 
         expect(res.status).toBe(200);
-        const row = await readRow(draft.eventId);
+        const row = await readEvent(draft.eventId);
         expect(row.imagePublicId).not.toBe(`${PREFIX}old`);
         expect(deleted()).toEqual([`${PREFIX}old`]);
     });
@@ -203,7 +160,7 @@ describe('the photo on Create and Edit Event', () => {
         const draft = await insertEvent({ imageUrl: 'https://res.example.test/kept', imagePublicId: `${PREFIX}kept` });
         const res = await agents.organiser.put(`/api/v1/events/${draft.eventId}`).send(form());
         expect(res.status).toBe(200);
-        expect((await readRow(draft.eventId)).imagePublicId).toBe(`${PREFIX}kept`);
+        expect((await readEvent(draft.eventId)).imagePublicId).toBe(`${PREFIX}kept`);
         expect(deleted()).toEqual([]);
     });
 
@@ -212,7 +169,7 @@ describe('the photo on Create and Edit Event', () => {
         const res = await agents.organiser.put(`/api/v1/events/${draft.eventId}`).send(form({ removeImage: true }));
         expect(res.status).toBe(200);
         expect(res.body.data.imageUrl).toBeNull();
-        expect((await readRow(draft.eventId)).imagePublicId).toBeNull();
+        expect((await readEvent(draft.eventId)).imagePublicId).toBeNull();
         expect(deleted()).toEqual([`${PREFIX}gone`]);
     });
 
@@ -229,7 +186,7 @@ describe('the photo of a live event', () => {
 
         const first = await withPhoto(agents.organiser.put(`/api/v1/events/${live.eventId}`), form());
         expect(first.status).toBe(200);
-        let row = await readRow(live.eventId);
+        let row = await readEvent(live.eventId);
         expect(row.approvedSnapshot).toMatchObject({ imageUrl: 'https://res.example.test/approved', imagePublicId: `${PREFIX}approved` });
         expect(deleted()).toEqual([]);
 
@@ -240,7 +197,7 @@ describe('the photo of a live event', () => {
         // A second edit replaces the waiting photo, never the approved one
         const waiting = row.imagePublicId;
         await withPhoto(agents.organiser.put(`/api/v1/events/${live.eventId}`), form());
-        row = await readRow(live.eventId);
+        row = await readEvent(live.eventId);
         expect(row.approvedSnapshot.imagePublicId).toBe(`${PREFIX}approved`);
         expect(deleted()).toEqual([waiting]);
     });
@@ -248,12 +205,12 @@ describe('the photo of a live event', () => {
     it('drops the waiting edit\'s photo on Cancel and keeps the approved one', async () => {
         const live = await insertEvent({ status: 'approved', imageUrl: 'https://res.example.test/kept-live', imagePublicId: `${PREFIX}kept-live` });
         await withPhoto(agents.organiser.put(`/api/v1/events/${live.eventId}`), form());
-        const waiting = (await readRow(live.eventId)).imagePublicId;
+        const waiting = (await readEvent(live.eventId)).imagePublicId;
 
         const res = await agents.organiser.put(`/api/v1/events/${live.eventId}/cancel`);
 
         expect(res.status).toBe(200);
-        const row = await readRow(live.eventId);
+        const row = await readEvent(live.eventId);
         expect(row.imagePublicId).toBe(`${PREFIX}kept-live`);
         expect(deleted()).toEqual([waiting]);
     });

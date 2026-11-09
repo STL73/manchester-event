@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
-import bcrypt from 'bcryptjs';
 import { and, asc, eq, inArray, like } from 'drizzle-orm';
 
 import { db } from '../src/db/index.js';
@@ -11,6 +10,7 @@ import { londonDay } from '../src/lib/londonTime.js';
 import { sendEmail } from '../src/lib/email.js';
 import { cleanUp, sendNotificationEmails, sendReminders } from '../src/lib/jobs.js';
 import { runJob } from '../src/lib/scheduler.js';
+import { DAY, HOUR, insertAccounts, testEmail } from './helpers.js';
 
 // No email leaves the tests: the email job's sends land here
 vi.mock('../src/lib/email.js', () => ({ sendEmail: vi.fn() }));
@@ -20,12 +20,10 @@ vi.mock('../src/lib/email.js', () => ({ sendEmail: vi.fn() }));
 // accounts (PREFIX). "Now" is today at 12:00 in London, so the 09:00
 // reminders are due whatever time the suite runs
 const PREFIX = 'jobs-test-';
-const DAY = 24 * 60 * 60 * 1000;
-const HOUR = 60 * 60 * 1000;
 const NOW = londonDay(new Date(), 0, 12);
 
 const ids = {};
-const email = (name) => `${PREFIX}${name}@example.test`;
+const email = (name) => testEmail(PREFIX, name);
 
 beforeAll(async () => {
     const [category] = await db.insert(categories).values({ slug: `${PREFIX}cat`, name: `${PREFIX}cat` }).returning();
@@ -34,23 +32,15 @@ beforeAll(async () => {
         .values({ placeId: `${PREFIX}venue`, locationName: 'Test Hall', address: '1 Test Street', latitude: 53.48, longitude: -2.24, area: 'city-centre' })
         .returning();
 
-    const password = await bcrypt.hash('correct-horse-battery', 4);
-    const account = (name, role, extra = {}) => ({
-        username: `${PREFIX}${name}`, email: email(name), password, role, emailVerifiedAt: new Date(), ...extra,
-    });
-    const accounts = await db
-        .insert(users)
-        .values([
-            account('organiser', 'organiser'),
-            account('saver', 'user'),
-            account('late', 'user'),
-            account('off', 'user', { emailNotifications: false }),
-            account('unverified', 'user', { emailVerifiedAt: null }),
-            account('admin', 'admin'),
-            account('broken', 'user'),
-        ])
-        .returning();
-    for (const user of accounts) ids[user.username.slice(PREFIX.length)] = user.userId;
+    Object.assign(ids, await insertAccounts(PREFIX, [
+        ['organiser', 'organiser'],
+        ['saver', 'user'],
+        ['late', 'user'],
+        ['off', 'user', { emailNotifications: false }],
+        ['unverified', 'user', { emailVerifiedAt: null }],
+        ['admin', 'admin'],
+        ['broken', 'user'],
+    ]));
 
     // Each event starts at 19:30 London `days` from today
     const event = (key, days, extra = {}) => ({

@@ -9,13 +9,11 @@ import { users, sessions, authTokens, systemLogs, events, categories, locations,
 import { newToken, hashToken } from '../src/lib/tokens.js';
 import { checkPassword, hashPassword } from '../src/lib/passwords.js';
 import { sendEmail } from '../src/lib/email.js';
-import { testAgent } from './helpers.js';
+import { DAY, PASSWORD, testAgent } from './helpers.js';
 
 // No real email in tests: each call is recorded, and the link is read from it
 vi.mock('../src/lib/email.js', () => ({ sendEmail: vi.fn() }));
 
-const DAY = 24 * 60 * 60 * 1000;
-const PASSWORD = 'correct-horse-battery';
 // Every account made here matches this, so afterAll can remove them all
 const EMAIL_PREFIX = 'auth-test-';
 

@@ -1,13 +1,12 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import request from 'supertest';
-import bcrypt from 'bcryptjs';
 import { and, eq, inArray, like } from 'drizzle-orm';
 
 import app from '../src/app.js';
 import { db } from '../src/db/index.js';
 import { users, events, categories, locations, systemLogs } from '../src/db/schema/index.js';
 import { lookupPlace, searchPlaces } from '../src/lib/osm.js';
-import { testAgent } from './helpers.js';
+import { eventInserter, inDays, insertAccounts, londonInput, logInAll, readEvent } from './helpers.js';
 
 // The tests never reach OpenStreetMap: lookups and searches answer from here
 vi.mock('../src/lib/osm.js', async (importOriginal) => ({
@@ -19,14 +18,6 @@ vi.mock('../src/lib/osm.js', async (importOriginal) => ({
 // Every row made here starts with this, so afterAll can remove them all.
 // OSM ids can't carry it, so the test venues use ids no real place has
 const PREFIX = 'organiser-events-test-';
-const PASSWORD = 'correct-horse-battery';
-const DAY = 24 * 60 * 60 * 1000;
-const inDays = (days) => new Date(Date.now() + days * DAY);
-// What the form's datetime-local input sends, as a London clock shows it
-const londonInput = (date) =>
-    new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/London', dateStyle: 'short', timeStyle: 'short' })
-        .format(date)
-        .replace(' ', 'T');
 
 const KNOWN_PLACE = 'N999999000001';
 const NEW_PLACE = 'W999999000002';
@@ -34,13 +25,6 @@ const FAR_PLACE = 'R999999000003';
 
 const ids = {};
 const agents = {};
-
-async function logIn(email) {
-    const agent = testAgent();
-    const res = await agent.post('/api/v1/auth/login').send({ email, password: PASSWORD });
-    expect(res.status, email).toBe(200);
-    return agent;
-}
 
 beforeAll(async () => {
     const [active, archived] = await db
@@ -58,30 +42,15 @@ beforeAll(async () => {
         .returning();
     ids.venue = venue.locationId;
 
-    const password = await bcrypt.hash(PASSWORD, 4);
-    const account = (name, extra = {}) => ({
-        username: `${PREFIX}${name}`,
-        email: `${PREFIX}${name}@example.test`,
-        password,
-        role: 'organiser',
-        emailVerifiedAt: new Date(),
-        ...extra,
-    });
-    const created = await db
-        .insert(users)
-        .values([
-            account('organiser'),
-            account('other'),
-            account('unverified', { emailVerifiedAt: null }),
-            account('suspended', { accStatus: 'suspended' }),
-            account('user', { role: 'user' }),
-        ])
-        .returning();
-    for (const user of created) ids[user.username.slice(PREFIX.length)] = user.userId;
+    Object.assign(ids, await insertAccounts(PREFIX, [
+        ['organiser', 'organiser'],
+        ['other', 'organiser'],
+        ['unverified', 'organiser', { emailVerifiedAt: null }],
+        ['suspended', 'organiser', { accStatus: 'suspended' }],
+        ['user', 'user'],
+    ]));
 
-    for (const name of ['organiser', 'other', 'unverified', 'suspended', 'user']) {
-        agents[name] = await logIn(`${PREFIX}${name}@example.test`);
-    }
+    Object.assign(agents, await logInAll(PREFIX, ['organiser', 'other', 'unverified', 'suspended', 'user']));
 });
 
 afterAll(async () => {
@@ -111,25 +80,8 @@ const form = (changes = {}) => ({
 });
 
 // An event straight into the database, in any state the tests need
-async function insertEvent(changes = {}) {
-    const [row] = await db
-        .insert(events)
-        .values({
-            organiserId: ids.organiser,
-            eventName: `${PREFIX}Row`,
-            eventDescription: 'A test event.',
-            startDatetime: inDays(10),
-            locationId: ids.venue,
-            categoryId: ids.category,
-            ticketUrl: 'https://example.test/tickets',
-            status: 'draft',
-            ...changes,
-        })
-        .returning();
-    return row;
-}
+const insertEvent = eventInserter(ids, { eventName: `${PREFIX}Row`, status: 'draft' });
 
-const readRow = async (eventId) => (await db.select().from(events).where(eq(events.eventId, eventId)))[0];
 const logsFor = (userId, action) =>
     db.select().from(systemLogs).where(and(eq(systemLogs.userId, userId), eq(systemLogs.action, action)));
 
@@ -174,7 +126,7 @@ describe('who may use the organiser routes', () => {
         expect((await agents.organiser.put(`/api/v1/events/${theirs.eventId}`).send(form())).status).toBe(404);
         expect((await agents.organiser.put(`/api/v1/events/${theirs.eventId}/submit`)).status).toBe(404);
         expect((await agents.organiser.delete(`/api/v1/events/${theirs.eventId}`)).status).toBe(404);
-        expect(await readRow(theirs.eventId)).toBeDefined();
+        expect(await readEvent(theirs.eventId)).toBeDefined();
     });
 });
 
@@ -183,12 +135,12 @@ describe('creating an event', () => {
         const draft = await agents.organiser.post('/api/v1/events').send(form({ eventName: `${PREFIX}Draft` }));
         expect(draft.status).toBe(201);
         expect(draft.body.data).toMatchObject({ name: `${PREFIX}Draft`, description: 'A test event.', status: 'draft' });
-        expect((await readRow(draft.body.data.eventId)).organiserUpdatedAt).toBeNull();
+        expect((await readEvent(draft.body.data.eventId)).organiserUpdatedAt).toBeNull();
 
         const sent = await agents.organiser.post('/api/v1/events').send(form({ eventName: `${PREFIX}Sent`, submit: true }));
         expect(sent.status).toBe(201);
         expect(sent.body.data.status).toBe('pending');
-        expect((await readRow(sent.body.data.eventId)).organiserUpdatedAt).not.toBeNull();
+        expect((await readEvent(sent.body.data.eventId)).organiserUpdatedAt).not.toBeNull();
 
         const logs = await logsFor(ids.organiser, 'Event Created');
         expect(logs.map((log) => log.details)).toEqual(expect.arrayContaining([
@@ -314,11 +266,11 @@ describe('editing an event', () => {
         expect(saved.status).toBe(200);
         expect(saved.body.data).toMatchObject({ name: `${PREFIX}Still Draft`, status: 'draft' });
         // A draft save isn't the organiser sending it
-        expect((await readRow(draft.eventId)).organiserUpdatedAt).toBeNull();
+        expect((await readEvent(draft.eventId)).organiserUpdatedAt).toBeNull();
 
         const sent = await agents.organiser.put(`/api/v1/events/${draft.eventId}`).send(form({ submit: true }));
         expect(sent.body.data.status).toBe('pending');
-        expect((await readRow(draft.eventId)).organiserUpdatedAt).not.toBeNull();
+        expect((await readEvent(draft.eventId)).organiserUpdatedAt).not.toBeNull();
         expect((await logsFor(ids.organiser, 'Draft Submitted')).some((log) => log.details.eventId === draft.eventId)).toBe(true);
     });
 
@@ -331,7 +283,7 @@ describe('editing an event', () => {
 
         // A second edit before the review keeps the first approved copy
         await agents.organiser.put(`/api/v1/events/${live.eventId}`).send(form({ eventName: `${PREFIX}Edited Again` }));
-        const row = await readRow(live.eventId);
+        const row = await readEvent(live.eventId);
         expect(row.approvedSnapshot.eventName).toBe(`${PREFIX}Approved Name`);
 
         const shown = await request(app).get(`/api/v1/events/${live.eventId}`);
@@ -381,7 +333,7 @@ describe('submitting a draft from My Drafts', () => {
 
         const stale = await insertEvent({ startDatetime: inDays(-1) });
         expect((await agents.organiser.put(`/api/v1/events/${stale.eventId}/submit`)).status).toBe(400);
-        expect((await readRow(stale.eventId)).status).toBe('draft');
+        expect((await readEvent(stale.eventId)).status).toBe('draft');
 
         const theirs = await insertEvent({ organiserId: ids.unverified });
         expect((await agents.unverified.put(`/api/v1/events/${theirs.eventId}/submit`)).status).toBe(403);
@@ -403,7 +355,7 @@ describe('cancelling an event', () => {
 
         const res = await agents.organiser.put(`/api/v1/events/${approved.eventId}/cancel`);
         expect(res.status).toBe(200);
-        const row = await readRow(approved.eventId);
+        const row = await readEvent(approved.eventId);
         expect(row).toMatchObject({ eventName: `${PREFIX}Before`, status: 'cancelled', approvedSnapshot: null });
         expect(row.startDatetime.getTime()).toBe(approved.startDatetime.getTime());
     });
@@ -426,7 +378,7 @@ describe('deleting an event', () => {
         for (const status of ['draft', 'pending', 'rejected']) {
             const event = await insertEvent({ status });
             expect((await agents.organiser.delete(`/api/v1/events/${event.eventId}`)).status, status).toBe(204);
-            expect(await readRow(event.eventId)).toBeUndefined();
+            expect(await readEvent(event.eventId)).toBeUndefined();
         }
         expect((await logsFor(ids.organiser, 'Event Deleted')).length).toBeGreaterThanOrEqual(3);
     });
@@ -440,7 +392,7 @@ describe('deleting an event', () => {
         });
         for (const event of [approved, cancelled, editWaiting]) {
             expect((await agents.organiser.delete(`/api/v1/events/${event.eventId}`)).status).toBe(409);
-            expect(await readRow(event.eventId)).toBeDefined();
+            expect(await readEvent(event.eventId)).toBeDefined();
         }
     });
 });

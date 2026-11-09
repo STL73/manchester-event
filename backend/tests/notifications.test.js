@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import request from 'supertest';
-import bcrypt from 'bcryptjs';
 import { and, eq, inArray, like } from 'drizzle-orm';
 
 import app from '../src/app.js';
@@ -8,41 +7,26 @@ import { db } from '../src/db/index.js';
 import { users, systemLogs, notifications } from '../src/db/schema/index.js';
 import { createAuthToken } from '../src/lib/authTokens.js';
 import { deliver } from '../src/lib/notifications.js';
-import { testAgent } from './helpers.js';
+import { HOUR, PASSWORD, insertAccounts, logInAll } from './helpers.js';
 
 // No email leaves the tests: the password-changed email is only recorded
 vi.mock('../src/lib/email.js', () => ({ sendEmail: vi.fn() }));
 
 // Every row made here starts with this, so afterAll can remove them all
 const PREFIX = 'notifications-test-';
-const PASSWORD = 'correct-horse-battery';
-const HOUR = 60 * 60 * 1000;
 
 const ids = {};
 const agents = {};
 
 beforeAll(async () => {
-    const password = await bcrypt.hash(PASSWORD, 4);
-    const account = (name, role, extra = {}) => ({
-        username: `${PREFIX}${name}`,
-        email: `${PREFIX}${name}@example.test`,
-        password,
-        role,
-        emailVerifiedAt: new Date(),
-        ...extra,
-    });
-    const created = await db
-        .insert(users)
-        .values([account('admin', 'admin'), account('user', 'user'), account('other', 'user'), account('suspended', 'organiser', { accStatus: 'suspended' })])
-        .returning();
-    for (const user of created) ids[user.username.slice(PREFIX.length)] = user.userId;
+    Object.assign(ids, await insertAccounts(PREFIX, [
+        ['admin', 'admin'],
+        ['user', 'user'],
+        ['other', 'user'],
+        ['suspended', 'organiser', { accStatus: 'suspended' }],
+    ]));
 
-    for (const name of ['admin', 'user', 'other', 'suspended']) {
-        const agent = testAgent();
-        const res = await agent.post('/api/v1/auth/login').send({ email: `${PREFIX}${name}@example.test`, password: PASSWORD });
-        expect(res.status, name).toBe(200);
-        agents[name] = agent;
-    }
+    Object.assign(agents, await logInAll(PREFIX, ['admin', 'user', 'other', 'suspended']));
 });
 
 afterAll(async () => {
