@@ -24,13 +24,18 @@
 - Two guards for one rule hide each other: breaking either alone changes nothing, so the pass
   reads MISSED twice. Phase 9's reply had a check before its `UPDATE … WHERE replied_at IS
   NULL`; the check went, leaving the one guard that holds under a race, and a test catches it
-- **The moderation list test sometimes times out in full runs** ("Test timed out in 15000ms",
-  `moderation.test.js` "shows every event but drafts…"), never when run alone. 2026-11-08: 2
-  failures in 15 runs at the default, none in 3 at 2 workers (+50% time) or 3 one file at a time
-  (3x). The test branch is small (52 events) and answers in about 50 ms, so the likely cause is
-  one Neon request stalling, not proven. Parallelism stays at the default. When it fails, save the
-  output and read it before changing anything; timing each step needs `console.error`, which
-  Vitest shows only for a failing test
+- **Log in through `testAgent()`** (`tests/helpers.js`), never `request.agent(app)`: it keeps
+  one connection open. Supertest closes the connection after every request by default, and on
+  Windows an answer over 64 KB on a closing local connection sometimes stalls until it is reset
+  about 19 s later. That was the moderation list test's "Test timed out in 15000ms"
+  (2026-11-09): Neon and the server answered in under a second every time, while a bare
+  Express route sending 66 KB through Supertest stalled 32 times in 300, 0 with keep-alive. The
+  admin's events list (66 KB) was the only answer over 64 KB, Manage Users (21 KB) the next.
+  `request(app)` alone is fine for small answers
+- To find where a test waits, time every Neon request by wrapping `globalThis.fetch` in
+  `tests/setup.js` (the neon-http driver calls it at query time) and write the times to a file,
+  which works whether or not Vitest shows the console. Time the server's side too
+  (`res.on('finish')`) before blaming the database
 - `notifyAdmins()` writes to every admin, including the ones other test files are deleting, so
   `deliver()` reads its recipients again after a foreign-key failure (2026-11-08). Without that,
   "tells every admin about a new account" failed now and then in full runs

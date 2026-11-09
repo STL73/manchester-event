@@ -8,6 +8,7 @@ import { db } from '../src/db/index.js';
 import { users, systemLogs, notifications } from '../src/db/schema/index.js';
 import { createAuthToken } from '../src/lib/authTokens.js';
 import { deliver } from '../src/lib/notifications.js';
+import { testAgent } from './helpers.js';
 
 // No email leaves the tests: the password-changed email is only recorded
 vi.mock('../src/lib/email.js', () => ({ sendEmail: vi.fn() }));
@@ -37,7 +38,7 @@ beforeAll(async () => {
     for (const user of created) ids[user.username.slice(PREFIX.length)] = user.userId;
 
     for (const name of ['admin', 'user', 'other', 'suspended']) {
-        const agent = request.agent(app);
+        const agent = testAgent();
         const res = await agent.post('/api/v1/auth/login').send({ email: `${PREFIX}${name}@example.test`, password: PASSWORD });
         expect(res.status, name).toBe(200);
         agents[name] = agent;

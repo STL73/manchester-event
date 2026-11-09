@@ -7,6 +7,7 @@ import app from '../src/app.js';
 import { db } from '../src/db/index.js';
 import { users, events, categories, locations, systemLogs } from '../src/db/schema/index.js';
 import { lookupPlace, searchPlaces } from '../src/lib/osm.js';
+import { testAgent } from './helpers.js';
 
 // The tests never reach OpenStreetMap: lookups and searches answer from here
 vi.mock('../src/lib/osm.js', async (importOriginal) => ({
@@ -35,7 +36,7 @@ const ids = {};
 const agents = {};
 
 async function logIn(email) {
-    const agent = request.agent(app);
+    const agent = testAgent();
     const res = await agent.post('/api/v1/auth/login').send({ email, password: PASSWORD });
     expect(res.status, email).toBe(200);
     return agent;

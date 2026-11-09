@@ -9,6 +9,7 @@ import { users, sessions, authTokens, systemLogs, events, categories, locations,
 import { newToken, hashToken } from '../src/lib/tokens.js';
 import { checkPassword, hashPassword } from '../src/lib/passwords.js';
 import { sendEmail } from '../src/lib/email.js';
+import { testAgent } from './helpers.js';
 
 // No real email in tests: each call is recorded, and the link is read from it
 vi.mock('../src/lib/email.js', () => ({ sendEmail: vi.fn() }));
@@ -56,7 +57,7 @@ function tokenFromLastEmail() {
 
 // A signed-up account and an agent that carries its cookie
 async function signUp(overrides = {}) {
-    const agent = request.agent(app);
+    const agent = testAgent();
     const body = { username: 'Test Person', email: newEmail(), password: PASSWORD, role: 'user', ...overrides };
     const res = await agent.post('/api/v1/auth/sign-up').send(body);
     return { agent, res, body };
@@ -355,7 +356,7 @@ describe('change password', () => {
 
     it('logs out every other device and keeps this one with a new session', async () => {
         const { agent, res: signUpRes, body } = await signUp();
-        const otherDevice = request.agent(app);
+        const otherDevice = testAgent();
         await otherDevice.post('/api/v1/auth/login').send({ email: body.email, password: PASSWORD });
 
         const res = await agent.put('/api/v1/auth/password').send({ currentPassword: PASSWORD, newPassword: NEW_PASSWORD });

@@ -7,6 +7,7 @@ import app from '../src/app.js';
 import { db } from '../src/db/index.js';
 import { users, events, categories, locations, systemLogs, notifications } from '../src/db/schema/index.js';
 import { deleteImage } from '../src/lib/images.js';
+import { testAgent } from './helpers.js';
 
 // Cloudinary is never called; deleteImage only records what it was asked to delete
 vi.mock('../src/lib/images.js', () => ({ uploadImage: vi.fn(), deleteImage: vi.fn() }));
@@ -63,7 +64,7 @@ beforeAll(async () => {
     await insertEvent({ organiserId: ids.draftsonly, status: 'rejected' });
 
     for (const name of ['admin', 'suspendedadmin', 'user', 'organiser', 'spare']) {
-        const agent = request.agent(app);
+        const agent = testAgent();
         const res = await agent.post('/api/v1/auth/login').send({ email: `${PREFIX}${name}@example.test`, password: PASSWORD });
         expect(res.status, name).toBe(200);
         agents[name] = agent;

@@ -9,6 +9,7 @@ import { users, events, categories, locations, systemLogs } from '../src/db/sche
 import { AppError } from '../src/lib/errors.js';
 import { deleteImage, uploadImage } from '../src/lib/images.js';
 import { withUpload } from '../src/lib/uploads.js';
+import { testAgent } from './helpers.js';
 
 // Cloudinary is never called: every upload gets the next made-up id here
 vi.mock('../src/lib/images.js', () => ({ uploadImage: vi.fn(), deleteImage: vi.fn() }));
@@ -60,7 +61,7 @@ beforeAll(async () => {
     for (const user of created) ids[user.username.slice(PREFIX.length)] = user.userId;
 
     for (const name of ['organiser', 'other', 'leaving', 'user', 'suspended']) {
-        const agent = request.agent(app);
+        const agent = testAgent();
         const res = await agent.post('/api/v1/auth/login').send({ email: `${PREFIX}${name}@example.test`, password: PASSWORD });
         expect(res.status, name).toBe(200);
         agents[name] = agent;

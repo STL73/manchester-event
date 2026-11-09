@@ -7,6 +7,7 @@ import app from '../src/app.js';
 import { db } from '../src/db/index.js';
 import { users, contactMessages, systemLogs } from '../src/db/schema/index.js';
 import { sendEmail } from '../src/lib/email.js';
+import { testAgent } from './helpers.js';
 
 // No email leaves the tests; sendEmail only records what it was asked to send
 vi.mock('../src/lib/email.js', () => ({ sendEmail: vi.fn() }));
@@ -41,7 +42,7 @@ beforeAll(async () => {
     for (const user of created) ids[user.username.slice(PREFIX.length)] = user.userId;
 
     for (const name of ['admin', 'suspendedadmin', 'user', 'suspended', 'organiser']) {
-        const agent = request.agent(app);
+        const agent = testAgent();
         const res = await agent.post('/api/v1/auth/login').send({ email: `${PREFIX}${name}@example.test`, password: PASSWORD });
         expect(res.status, name).toBe(200);
         agents[name] = agent;

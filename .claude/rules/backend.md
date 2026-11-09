@@ -62,7 +62,8 @@ backend/
 │   │       ├── app.js      app tables (users, enums...)
 │   │       └── auth.js     auth tables (sessions, auth_tokens)
 │   └── routes/<name>.routes.js
-├── tests/                  Vitest + Supertest; setup.js points DB_URL at TEST_DB_URL
+├── tests/                  Vitest + Supertest; setup.js points DB_URL at TEST_DB_URL,
+│                           helpers.js (testAgent: a logged-in agent on one kept-alive connection)
 ├── drizzle/                generated migrations + meta (commit these)
 └── drizzle.config.js       points drizzle-kit at src/db/schema/index.js
 ```

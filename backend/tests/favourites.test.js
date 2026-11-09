@@ -6,6 +6,7 @@ import { and, eq, inArray, like } from 'drizzle-orm';
 import app from '../src/app.js';
 import { db } from '../src/db/index.js';
 import { users, events, categories, locations, favourites, categoryFollows } from '../src/db/schema/index.js';
+import { testAgent } from './helpers.js';
 
 // Every row made here starts with this, so afterAll can remove them all
 const PREFIX = 'favourites-test-';
@@ -17,7 +18,7 @@ const ids = {};
 const agents = {};
 
 async function logIn(email) {
-    const agent = request.agent(app);
+    const agent = testAgent();
     const res = await agent.post('/api/v1/auth/login').send({ email, password: PASSWORD });
     expect(res.status, email).toBe(200);
     return agent;

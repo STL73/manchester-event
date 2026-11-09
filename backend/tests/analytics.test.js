@@ -7,6 +7,7 @@ import app from '../src/app.js';
 import { db } from '../src/db/index.js';
 import { users, events, categories, locations, favourites, categoryFollows, systemLogs } from '../src/db/schema/index.js';
 import { LOG } from '../src/constants/logActions.js';
+import { testAgent } from './helpers.js';
 
 // Every account, category and venue made here starts with PREFIX, so afterAll
 // can remove them all. The log rows carry TOKEN instead: the test accounts'
@@ -91,7 +92,7 @@ beforeAll(async () => {
     ]);
 
     for (const name of ['admin', 'suspendedadmin', 'user', 'organiser']) {
-        const agent = request.agent(app);
+        const agent = testAgent();
         const res = await agent.post('/api/v1/auth/login').send({ email: `${PREFIX}${name}@example.test`, password: PASSWORD });
         expect(res.status, name).toBe(200);
         agents[name] = agent;
