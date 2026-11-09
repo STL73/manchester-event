@@ -12,9 +12,8 @@ import {
 } from "../../data/profileSettingsData";
 import { fieldErrors } from "../../lib/api";
 
-// Picture and display name, saved together (the picture on Cloudinary through
-// the server, Phase 6); the email is shown locked.
-// Save stays off until something differs from what is saved
+// Picture and display name, saved together; the email is shown locked. Save
+// stays off until something differs from what is saved
 export default function ProfileSettings({ account, defaultAvatar: DefaultAvatar, onSave }) {
   const savedAvatar = account.avatar ?? null;
   const emailVerified = Boolean(account.emailVerifiedAt);

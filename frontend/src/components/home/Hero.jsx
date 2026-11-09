@@ -6,6 +6,7 @@ import { homePageData } from "../../data/homePageData";
 // written for four photos at this pace
 const PHOTO_SECONDS = 4;
 
+// The home page's hero: photos showing through the letters, and the search box
 export default function Hero() {
   const { hero } = homePageData;
   const { search } = hero;

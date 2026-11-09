@@ -10,6 +10,7 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   month: "long",
 });
 
+// The status line's next saved event, or what to do without one
 function NextFavouriteLine({ events, favouriteIds }) {
   const text = dashboardGreeting.nextFavourite;
   const event = getNextFavourite(events, favouriteIds);
@@ -74,12 +75,8 @@ function PendingLine({ role, events, organiserEvents }) {
   );
 }
 
-// Home's title row: the greeting where inner pages have their title, and
-// the status line where they have their summary. No shortcuts: the sidebar
-// already links every page, and the status line and cards link to what
-// needs attention (changed 2026-10-10; the PHP had a Quick Actions block)
-// The picture sits in the logo's cell, Home's own hexagon where inner pages
-// have their title icon; without one, the sidebar's default icon
+// Home's title row: the greeting and the account's picture in the logo's cell,
+// and a status line where inner pages have their summary
 export default function DashboardGreeting({ selectedUser, ...data }) {
   const Avatar = selectedUser.avatar;
 

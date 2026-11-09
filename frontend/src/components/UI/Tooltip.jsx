@@ -1,15 +1,12 @@
-// Styled tooltip for icon-only buttons. It is visual only (aria-hidden):
-// the button's own aria-label already tells screen readers what it does.
-// Optional props for longer text (the category descriptions on Preferences):
-// `id` so a control can point at it with aria-describedby, which still reads
-// hidden text; `align` to open it from the start, centre or end of the
-// trigger; `wrap` to let it run over several lines
+// Where `align` opens the tooltip from: the trigger's start, centre or end
 const alignClasses = {
   start: "tooltip-start",
   center: "tooltip-center",
   end: "",
 };
 
+// A tooltip for icon-only buttons, hidden from screen readers (the aria-label
+// says it). `id` lets a control point at it with aria-describedby; `wrap` for long text
 export default function Tooltip({ text, id, align = "end", wrap = false, children }) {
   const className = ["tooltip", alignClasses[align], wrap && "tooltip-wrap"]
     .filter(Boolean)

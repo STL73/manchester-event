@@ -62,6 +62,7 @@ function filterChips(filters) {
     .map((key) => ({ key, label: labels[key]() }));
 }
 
+// Explore Events' search, filters and paged grid, kept in the address
 export default function EventsBrowser({
   canFavourite = false,
   favouriteIds = [],
@@ -69,11 +70,8 @@ export default function EventsBrowser({
 }) {
   const { searchParams, setParams, setPage, setSearchParams } = useUrlParams();
   const [filters, setFilters] = useState(() => readFilters(searchParams));
-  // A link can change the address while this page is open (the footer's
-  // "Tonight", the navbar's Explore Events), so a new address this page didn't
-  // write is read again. React Router changes the address in a transition, so
-  // a render can fall between writing it and seeing it: compare with the
-  // address last seen, or that render would read the old one over the filters
+  // A link can change the address while this page is open, so an address it
+  // didn't write is read again, compared with the last one seen
   const search = searchParams.toString();
   const [seenSearch, setSeenSearch] = useState(search);
   const [writtenSearch, setWrittenSearch] = useState(null);

@@ -3,10 +3,8 @@ import { X } from "lucide-react";
 import StatusMessage from "./StatusMessage";
 import { listError } from "../../data/listErrorData";
 
-// Why a list couldn't load or a heart changed back, over whatever page is
-// open. Hearts sit on cards all over the site and the lists load for every
-// page, so the message can't live in any one page. onDismiss should keep one
-// identity (useCallback), or each render restarts the timer
+// Why a list couldn't load or a heart changed back, over whatever page is open.
+// onDismiss should keep one identity (useCallback), or each render restarts the timer
 export default function ListError({ message, onDismiss }) {
   useEffect(() => {
     if (!message) return undefined;

@@ -15,7 +15,7 @@ export function StatusBadges({ user }) {
 }
 
 // The panel's form: status, and for a suspension how long and why. Your own
-// account and other admins' aren't changed here (decided 2026-11-03)
+// account and other admins' aren't changed here
 export default function AccountForm({ user, isSelf, form, onChange, reasonError }) {
   if (isSelf) return <p className="callout callout-compact admin-note">{userPanel.self}</p>;
   if (user.role === "admin") return <p className="callout callout-compact admin-note">{userPanel.adminTarget}</p>;

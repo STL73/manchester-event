@@ -14,6 +14,7 @@ import { chartColours, chartOpacity } from "../../data/analyticsData";
 // Both series are the accent; scheduled is at half strength
 const seriesOpacity = { held: 1, scheduled: chartOpacity.scheduled };
 
+// The hovered period's count for each series
 function TimelineTooltip({ active, payload, series, valueLabel }) {
   if (!active || !payload?.length) return null;
   const row = payload[0].payload;

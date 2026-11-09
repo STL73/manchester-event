@@ -5,11 +5,8 @@ import { venueSearch } from "../../data/createEventsData";
 import { eventLocations } from "../../data/eventsData";
 import { api } from "../../lib/api";
 
-// Create and Edit Event's venue: a search box over OpenStreetMap's places
-// (GET /locations/search), then the chosen place as a card with Change. Only
-// the place's id is sent when the event is saved; the server looks it up.
-// A combobox in the ARIA pattern: the arrows move through the suggestions,
-// Enter picks one, Escape closes them
+// The event's venue: an ARIA combobox over OpenStreetMap's places, then the
+// chosen one as a card with Change. Only its id is sent; the server looks it up
 export default function VenueSearch({ id, venue, placeholder, invalid, describedBy, onChange }) {
   const listId = useId();
   const [query, setQuery] = useState("");

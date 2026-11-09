@@ -1,9 +1,5 @@
-// Pills that filter a list, each with its count, in Explore's date-pill
-// style (My Events, the admin lists). One is selected at a time; `attention`
-// marks the one that needs doing (Needs review, Unread) and `tone: "danger"`
-// one that is bad news (System Logs' Failed sign-ins). Without a `count` an
-// option is a plain pill, which is how the analytics pages switch sections.
-// `children` go after the pills in the same group (Explore's Pick a date)
+// Pills that filter a list, one selected, each with its count (without one, a plain
+// pill). `attention` marks what needs doing, `tone: "danger"` bad news
 export default function FilterPills({ label, options, value, onChange, children }) {
   return (
     <div className="events-when" role="group" aria-label={label}>

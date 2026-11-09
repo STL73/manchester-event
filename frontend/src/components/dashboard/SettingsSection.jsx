@@ -1,5 +1,5 @@
 // One Settings section: its title and a line of explanation beside the panel
-// on wide screens, above it on narrow ones (layout A, decided 2026-10-11).
+// on wide screens, above it on narrow ones.
 // `danger` gives the Delete section its red icon and border
 export default function SettingsSection({ id, section, danger = false, children }) {
   const Icon = section.icon;

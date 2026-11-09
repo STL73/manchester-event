@@ -6,6 +6,7 @@ function matches(path, url) {
   return path === url || path.startsWith(`${url}/`);
 }
 
+// One sidebar link, with its count badge when something needs doing
 export default function NavItem({ item, counts, activePath, pathname }) {
   const isActive = matches(activePath, item.url);
   // aria-current only when this really is the page shown, not the "came from" page

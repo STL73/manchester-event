@@ -11,6 +11,7 @@ function groupBySection(items) {
   }, []);
 }
 
+// The sidebar's page links, grouped under their section labels
 export default function MainNav({ items, counts, activePath, pathname }) {
   // Grows into spare height but never below its links: on a short screen the
   // whole sidebar scrolls instead, rather than the links scrolling in a box of

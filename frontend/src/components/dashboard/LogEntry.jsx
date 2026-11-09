@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { systemLogsPage } from "../../data/systemLogsData";
 import { formatTime } from "../../lib/formatDates";
 
+// The event or account a row names, linked while it still exists
 function Target({ target }) {
   if (!target) return null;
   return target.to ? (

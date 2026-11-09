@@ -1,10 +1,8 @@
 import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
-// A panel that slides in from the right over the page (Manage Events and
-// Manage Users, decided 2026-10-12). Built on <dialog>: showModal() keeps
-// focus inside, Escape closes it, and focus goes back to the row that
-// opened it. A click on the dimmed page outside closes it too
+// A panel that slides in from the right, on <dialog>: focus stays inside and
+// goes back to the row after; Escape or a click outside closes it
 export default function SidePanel({ open, title, titleId, onClose, footer, children }) {
   const dialogRef = useRef(null);
 
@@ -21,10 +19,8 @@ export default function SidePanel({ open, title, titleId, onClose, footer, child
     if (!open && dialog.open) dialog.close();
   }, [open]);
 
-  // Escape fires "cancel". The page's state closes the panel, never the
-  // browser alone: a panel opened from a link (no click first) gets a
-  // cancel without a close event. No "close" listener either: the browser
-  // can deliver it late, after the next item has opened, and close that
+  // Escape's "cancel" closes it through the page's state, never the browser's own
+  // close, which can arrive late and shut the next item opened
   useEffect(() => {
     const dialog = dialogRef.current;
     const handleCancel = (cancelEvent) => {

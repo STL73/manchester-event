@@ -4,10 +4,8 @@ const RADIUS = 15.9155;
 // A small gap between parts, so neighbours never run together
 const GAP = 0.8;
 
-// Events by status as a ring with the total in the middle, and a legend
-// giving each status's count and share. Colours are the status tones (the
-// stroke reads --tone, so it always matches the badges). Replaces the
-// status column chart, which looked empty with few statuses (2026-10-20)
+// Events by status as a ring with the total in the middle, and a legend. The
+// stroke reads --tone, so it always matches the badges
 export default function StatusDonut({ rows, tones, unit }) {
   const total = rows.reduce((sum, row) => sum + row.count, 0);
   const shown = rows.filter((row) => row.count > 0);

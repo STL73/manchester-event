@@ -9,10 +9,8 @@ function navLinkClass({ isActive }) {
   return `navbar-link ${isActive ? "is-active" : ""}`;
 }
 
-// Public pages only; the dashboard has its own sidebar instead. Signed in,
-// Dashboard and Log Out take the place of Log In and Sign Up, so a signed-in
-// user who lands here has a way back. Guest-only links (Home) are hidden
-// rather than left to redirect
+// The public pages' navbar. Signed in, Dashboard and Log Out replace Log In and
+// Sign Up, and guest-only links are hidden rather than left to redirect
 export default function Navbar({ isUser, onLogout, ...props }) {
   const navLinks = isUser ? publicNav.filter((link) => !link.guestOnly) : publicNav;
   const { pathname } = useLocation();

@@ -1,14 +1,8 @@
 import { ArrowRight, Minus, TrendingDown, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 
-// Stat card: small label (and its icon in the logo's cell) on top, one big figure, and at
-// most one line of context at the bottom. The context is, in order:
-// - item.trend  = { current, previous, label, note }: arrow from current vs
-//   previous, "+4 in the last 30 days", with the note as a tooltip
-// - item.action = { label, to }: a link to where the count is dealt with,
-//   only shown when there is something to deal with (count > 0), unless
-//   action.always is set (e.g. "Choose your interests" on a zero)
-// - item.detail: plain text, e.g. the date on text cards
+// item.trend = { current, previous, label, note }: an arrow and "+4 in the last
+// 30 days", the note as a tooltip
 function Trend({ trend }) {
   const Arrow =
     trend.current > trend.previous
@@ -26,6 +20,8 @@ function Trend({ trend }) {
   );
 }
 
+// A Home stat card: label, one big figure and one line of context, which is
+// item.trend, item.action ({ label, to }, only with a count, unless `always`) or item.detail
 export default function DashboardCard({ item }) {
   const Icon = item.icon;
   const hasCount = item.count !== undefined && item.value === undefined;

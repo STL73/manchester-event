@@ -2,26 +2,23 @@ import { ChartNoAxesColumn } from "lucide-react";
 import EmptyState from "../UI/EmptyState";
 import { chartText } from "../../data/analyticsData";
 
-// A chart with its title and a "View data table" twin, so every value can be
-// read without hovering (and by screen readers). `columns` lists the value
-// columns ({ key, heading }); by default a single Count column. `actions`
-// (e.g. the range control) sit in the header, next to the chart they change.
-// `table={false}` is for panels whose content is already text (lists, facts):
-// it is shown as it is, readable by screen readers, with no table twin.
-// `empty` replaces the generic "No data yet." where the panel can say more.
-// `interactive` is for content with controls in it (the followers
-// honeycomb): it stays reachable rather than hidden behind its table twin.
+// A chart with its title and a "View data table" twin, so every value can be read
+// without hovering, and by screen readers
 export default function ChartCard({
   id,
   title,
   description,
   rows,
   xHeading,
+  // The value columns, { key, heading }
   columns = [{ key: "count", heading: chartText.countHeading }],
   wide = false,
+  // In the header, beside the chart they change (the range control)
   actions,
+  // false for content that is already text (lists, facts): no table twin
   table = true,
   empty = chartText.noData,
+  // For content with controls in it, kept reachable instead of behind the table
   interactive = false,
   children,
 }) {

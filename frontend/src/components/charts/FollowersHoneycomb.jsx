@@ -11,12 +11,8 @@ function formatPer(value) {
   return Number.isInteger(value) ? value : value.toFixed(1);
 }
 
-// Followers and events per category (decided 2026-10-20, from a preview of
-// three hexagon versions): one cell per category with its icon, brighter =
-// more followers for each event coming up, brightest first. Beside it a card
-// that opens on every category and its followers; selecting a cell (or a
-// name in the list) shows that category's figures, and selecting it again,
-// "All categories" or Escape goes back. `rows` come from getSupplyAndDemand
+// Followers and events per category: a cell each, brighter for more followers per
+// event, beside a card listing them all or the selected one. `rows` from getSupplyAndDemand
 export default function FollowersHoneycomb({ rows, text }) {
   const [selectedKey, setSelectedKey] = useState(null);
   const cellRefs = useRef(new Map());

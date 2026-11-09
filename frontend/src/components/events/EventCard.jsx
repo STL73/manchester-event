@@ -8,6 +8,7 @@ import { organiserEventActions } from "../../data/organiserEventsData";
 import { addToCalendar } from "../../data/myFavouritesData";
 import { formatDateTime } from "../../lib/formatDates";
 
+// One event as a card: photo, date, place, and the actions the page allows
 export default function EventCard({
   event,
   isFavourite = false,
@@ -196,8 +197,8 @@ export default function EventCard({
             )}
           </div>
         )}
-        {/* Asked in the card, in place of the PHP confirm() pop-up: it takes
-            the button row's place until answered. Escape keeps the event */}
+        {/* Asked in the card, in the button row's place until answered. Escape
+            keeps the event */}
         {isConfirming && (
           <div
             className="event-card-confirm"

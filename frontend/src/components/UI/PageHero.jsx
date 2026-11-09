@@ -1,7 +1,5 @@
-// A photo card with the page's heading over it and the honeycomb texture on
-// the photo. About uses the tall version; Explore Events and Contact the
-// compact one, so the page's task stays near the top of the screen. Without
-// an image (FAQs, Privacy, Terms) it's a plain card with the texture
+// A photo card with the page's heading over it and the honeycomb texture; without
+// an image, a plain card. `compact` keeps the page's task near the top
 export default function PageHero({ eyebrow, title, titleId, intro, image, compact = false }) {
   const classes = ["page-hero", compact && "page-hero-compact", !image && "page-hero-plain"];
 

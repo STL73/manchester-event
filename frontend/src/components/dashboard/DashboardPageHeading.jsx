@@ -1,12 +1,7 @@
 import Button from "../UI/Button";
 
-// Title row of an inner dashboard page: the page's <h1>, its own actions
-// beside it (`actions` as solid buttons, e.g. "Create event" on My Events, or
-// other buttons as children), and an optional one-line summary under it.
-// Only things the page does: navigation shortcuts were removed 2026-10-10
-// because the sidebar already links every page. The PHP pages opened with a
-// Quick Actions block above the title; here the title comes first so it says
-// where you are. Home's greeting does the same job (see DashboardGreeting)
+// An inner dashboard page's title row: its <h1>, its own actions beside it, and
+// an optional summary. No navigation shortcuts: the sidebar links every page
 export default function DashboardPageHeading({
   id,
   icon: Icon,

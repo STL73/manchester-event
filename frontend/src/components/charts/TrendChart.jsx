@@ -15,10 +15,8 @@ import { themeColour } from "../../lib/themeColour";
 
 const GLOW_RADIUS = 12;
 
-// The hovered point: a faint accent glow around a 6px dot, and a thin line
-// from the bottom of the glow down to the x-axis, so the point's date is easy
-// to find without a crosshair cutting through the whole chart.
-// Recharts passes cx/cy; usePlotArea() gives the bottom of the plot.
+// The hovered point: a glowing dot and a thin line down to the x-axis, so its
+// date is easy to find without a crosshair across the chart
 function HoverPoint({ cx, cy, colour }) {
   const plot = usePlotArea();
   if (cx == null || cy == null || !plot) return null;
@@ -50,16 +48,15 @@ function HoverPoint({ cx, cy, colour }) {
   );
 }
 
-// Single-series count over time: 2px line with a 10% wash and dots with a
-// surface ring. Hovering a point shows HoverPoint and the tooltip.
-// `tone` colours it from a theme token (failed sign-ins are danger). `smooth`
-// curves the line and drops the dots, for a shape read at a glance (Saves).
-// `callout` ({ key, text }) labels one point: the latest month, or a spike
+// One count over time: a line with a wash and dots, the hovered point and its tooltip
 export default function TrendChart({
   rows,
   valueLabel = "events",
+  // A theme token (failed sign-ins are danger)
   tone = "accent",
+  // A curve without dots, for a shape read at a glance
   smooth = false,
+  // { key, text }: labels one point, the latest month or a spike
   callout,
 }) {
   const axisTick = { fill: chartColours.axisText, fontSize: 12 };

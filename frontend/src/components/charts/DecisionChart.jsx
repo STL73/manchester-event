@@ -12,6 +12,7 @@ import {
 import { chartColours, chartOpacity, decisionSeries } from "../../data/analyticsData";
 import { themeColour } from "../../lib/themeColour";
 
+// The hovered period's approved, rejected and average wait
 function DecisionTooltip({ active, payload, colours }) {
   if (!active || !payload?.length) return null;
   const row = payload[0].payload;

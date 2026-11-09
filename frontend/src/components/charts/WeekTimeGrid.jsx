@@ -1,9 +1,7 @@
 import { weekGridText } from "../../data/analyticsData";
 
-// "When events happen": start times by day of the week (Monday first) and
-// time of day, from getWeekTimeGrid. Brighter = more; an empty cell stays
-// blank. The figure is in every cell, so it reads without hovering. Where the
-// grid is too narrow for the slot names, each heading shows its icon instead
+// Start times by weekday and time of day, brighter for more, the figure in every
+// cell. Too narrow for the slot names, the headings show icons
 export default function WeekTimeGrid({ grid }) {
   const max = Math.max(1, ...grid.flat());
 

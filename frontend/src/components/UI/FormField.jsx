@@ -2,15 +2,12 @@ import { CircleCheck } from "lucide-react";
 import FieldError from "./FieldError";
 import PasswordInput from "./PasswordInput";
 
-// One labelled form control with an optional hint and error, styled by
-// .field. The hint and error are linked to the control with
-// aria-describedby so screen readers announce them with the field.
-// The hint sits on the label row so it costs no extra height. `action` sits
-// there too but isn't read as the field's description (Log in's "Forgot
-// password?"). type="password" gets the show/hide eye
+// One labelled form control with an optional hint and error, both linked by
+// aria-describedby so screen readers announce them. A password gets the eye
 export default function FormField({
   id,
   label,
+  // On the label row, but not read as the description (Log in's "Forgot password?")
   action,
   type = "text",
   options = [],

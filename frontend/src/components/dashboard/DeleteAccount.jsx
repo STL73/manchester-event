@@ -6,11 +6,8 @@ import StatusMessage from "../UI/StatusMessage";
 import { deleteAccountCopy } from "../../data/profileSettingsData";
 import { fieldErrors } from "../../lib/api";
 
-// Delete account, confirmed in the page rather than a browser dialog: what
-// goes, then the password. An organiser whose events have been public can't
-// delete here (people may have them saved): the server says so (409), and
-// they get a contact link instead. Their events are real only from Phase 5,
-// so the page can't tell before asking
+// Delete account, confirmed in the page with the password. An organiser whose
+// events have been public learns so from the server (409) and gets a contact link
 export default function DeleteAccount({ role, onDelete }) {
   const [confirming, setConfirming] = useState(false);
   const [password, setPassword] = useState("");

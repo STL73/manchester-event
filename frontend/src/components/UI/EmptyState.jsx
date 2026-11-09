@@ -1,8 +1,5 @@
-// "Nothing here" box for dashboard pages: a small honeycomb of three of the
-// logo's cells, the page's own icon in the front one, then the message and
-// any action (children). The honeycomb is the dashboard's only decoration
-// besides the title hexagon, so it appears only when a page is empty
-// (decided 2026-10-11)
+// A dashboard page's "nothing here" box: three of the logo's cells with the
+// page's icon, the message, and any action (children)
 export default function EmptyState({ icon: Icon, text, children }) {
   return (
     <div className="dashboard-empty-state">

@@ -2,10 +2,8 @@ import { useRef } from "react";
 import { CalendarDays, X } from "lucide-react";
 import { formatShortDay } from "../../lib/formatDates";
 
-// "Pick a date" as a pill (Explore, My Events): it opens the browser's own
-// calendar from a hidden date input and then shows the day picked. `value`
-// is the input's YYYY-MM-DD, "" for none. With `clearLabel` an x beside it
-// clears the date; Explore clears it from its filter chips instead
+// "Pick a date" as a pill: the browser's own calendar from a hidden date input,
+// then the day picked. `value` is YYYY-MM-DD or ""; `clearLabel` adds an x
 export default function DatePill({ value, onChange, label, min, clearLabel }) {
   const inputRef = useRef(null);
 

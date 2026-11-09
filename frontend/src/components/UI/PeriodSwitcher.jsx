@@ -1,9 +1,5 @@
-// Segmented button group: a chart's time range or metric, Notifications'
-// All / Unread, and the admin panels' choices (Approve / Reject, Active /
-// Suspended). It imports nothing from Recharts, so the pages outside
-// analytics don't pull charts into the main bundle.
-// `options` come from the page's data file; `label` names the group for
-// screen readers (the buttons' own text says enough on screen).
+// A segmented button group (a chart's range, All / Unread, Approve / Reject).
+// `label` names it for screen readers. No Recharts here, to keep it out of the main bundle
 export default function PeriodSwitcher({ label, options, value, onChange, className = "" }) {
   return (
     <div className={`period-switcher ${className}`} role="group" aria-label={label}>

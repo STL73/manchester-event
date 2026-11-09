@@ -5,11 +5,8 @@ import { reachText } from "../../data/analyticsData";
 
 const TOP = 5;
 
-// Followers per category as a small honeycomb, one cell per category with
-// its icon, brighter = more followers (option A, decided 2026-10-20). The row
-// width grows with the count, so a few categories still stack (5 = 2-3,
-// 7 = 2-3-2, 19 = 3-4-5-4-3). Beside it the top five as a plain list; the
-// rest are in the data table and on hover. `rows` is most followed first
+// Followers per category as a small honeycomb, brighter for more, beside the top
+// five as a list. `rows` is most followed first
 export default function ReachHoneycomb({ rows }) {
   const max = Math.max(1, ...rows.map((row) => row.count));
   const level = (count) => `${Math.round(10 + (count / max) * 85)}%`;

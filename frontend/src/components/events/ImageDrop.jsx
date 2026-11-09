@@ -4,7 +4,7 @@ import FieldError from "../UI/FieldError";
 import { allowedImageTypes, imageDrop } from "../../data/createEventsData";
 
 // The photo box: drop or click to choose; once chosen the photo fills it,
-// with Replace and Remove. The file goes with Save or Submit (Phase 6)
+// with Replace and Remove. The file goes with Save or Submit
 export default function ImageDrop({ image, error, inputRef, onFile, onRemove }) {
   const [isDragging, setIsDragging] = useState(false);
   const errorId = "image-error";

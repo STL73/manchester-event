@@ -6,6 +6,7 @@ import MainNav from "./MainNav";
 import SecondaryNav from "./SecondaryNav";
 import UserNav from "./UserNav";
 
+// The dashboard's sidebar: collapsible to a rail on wide screens, a drawer on narrow ones
 export default function Sidebar({
   selectedUser,
   secondaryNav,

@@ -1,11 +1,8 @@
 import PageHero from "./PageHero";
 import DashboardPageHeading from "../dashboard/DashboardPageHeading";
 
-// The public pages a signed-in person can also open from the sidebar (FAQs,
-// Contact, About, Privacy, Terms). Public: the page column under a hero.
-// Dashboard: the title row every dashboard page opens with, the hero's intro
-// as its summary (or `summary`; null for none), and the content in
-// `bodyClassName`. Explore Events uses it too
+// A page that opens both publicly (under a hero) and in the dashboard (under the
+// title row, the hero's intro as its summary, or `summary`; null for none)
 export default function PageFrame({
   inDashboard = false,
   hero,
