@@ -65,11 +65,12 @@ export async function sendReminders(now = new Date()) {
 
 // The outbox (decided 2026-11-05): notification rows of the emailed types not
 // yet sent, to verified addresses whose owner has email notifications on (or
-// any verified address for a security email). A row is claimed before its
-// email goes, so two runs at once can't both send it, and given back if the
-// email fails, to be tried again next run. After 24 hours it is left to the
-// inbox. The first failure ends the run: Gmail refusing one usually means it
-// is refusing them all (its limit is about 500 a day), and one log row says so
+// any verified address for a security email). The batch is claimed in one
+// UPDATE before any email goes, so two runs at once can't both send a row,
+// and what isn't sent when an email fails is given back, to be tried next
+// run. After 24 hours it is left to the inbox. The first failure ends the
+// run: Gmail refusing one usually means it is refusing them all (its limit is
+// about 500 a day), and one log row says so
 export async function sendNotificationEmails(now = new Date(), limit = 100) {
     const rows = await db
         .select({
@@ -95,29 +96,31 @@ export async function sendNotificationEmails(now = new Date(), limit = 100) {
         .orderBy(asc(notifications.createdAt), asc(notifications.notificationId))
         .limit(limit);
 
-    let sent = 0;
-    for (const row of rows) {
-        const [claimed] = await db
-            .update(notifications)
-            .set({ emailSentAt: now })
-            .where(and(eq(notifications.notificationId, row.notificationId), isNull(notifications.emailSentAt)))
-            .returning({ notificationId: notifications.notificationId });
-        if (!claimed) continue;
+    if (rows.length === 0) return { sent: 0, failed: false };
 
+    // Rows another run claimed after the read above don't come back
+    const claimed = new Set((await db
+        .update(notifications)
+        .set({ emailSentAt: now })
+        .where(and(inArray(notifications.notificationId, rows.map((row) => row.notificationId)), isNull(notifications.emailSentAt)))
+        .returning({ notificationId: notifications.notificationId }))
+        .map((row) => row.notificationId));
+    const batch = rows.filter((row) => claimed.has(row.notificationId));
+
+    for (const [sent, row] of batch.entries()) {
         try {
             await sendEmail(notificationEmail(row));
-            sent += 1;
         } catch (err) {
             await db
                 .update(notifications)
                 .set({ emailSentAt: null })
-                .where(eq(notifications.notificationId, row.notificationId));
+                .where(inArray(notifications.notificationId, batch.slice(sent).map((unsent) => unsent.notificationId)));
             console.error('Notification email failed:', err.message);
             await logAction(LOG.EMAIL_FAILED, row, { email: 'notification', notificationId: row.notificationId, error: err.message });
             return { sent, failed: true };
         }
     }
-    return { sent, failed: false };
+    return { sent: batch.length, failed: false };
 }
 
 // The nightly clean-up: read notifications after 90 days (decided 2026-10-05),

@@ -212,9 +212,11 @@ describe('notification emails', () => {
     });
 
     // Two runs at once, forced to interleave: run A has read both rows and is
-    // held sending the first; run B sends the second; A, let go, must find
-    // the second already claimed. Left to timing, B's read came after A's
-    // claim and the race never happened
+    // held before its claim reaches Neon; run B reads, claims and sends them;
+    // A, let go, must find them claimed and send nothing. Left to timing, B's
+    // read came after A's claim and the race never happened. The neon-http
+    // driver sends each query through globalThis.fetch when it runs, which is
+    // where A is held
     it('sends a row once when two runs overlap', async () => {
         await db.insert(notifications).values([
             row('late', 'event_update', { eventId: ids.week, subject: `${PREFIX}first` }),
@@ -222,28 +224,51 @@ describe('notification emails', () => {
         ]);
         let release;
         const held = new Promise((resolve) => { release = resolve; });
-        vi.mocked(sendEmail).mockImplementation(async (message) => {
-            if (message.subject === `${PREFIX}first`) await held;
-        });
+        let claimHeld = false;
+        const realFetch = globalThis.fetch;
+        globalThis.fetch = async (url, options) => {
+            if (!claimHeld && String(options?.body).includes('update \\"notifications\\" set \\"email_sent_at\\"')) {
+                claimHeld = true;
+                await held;
+            }
+            return realFetch(url, options);
+        };
 
-        const runA = sendNotificationEmails(NOW, 10000);
-        await vi.waitFor(() => expect(sentTo('late').map((m) => m.subject)).toEqual([`${PREFIX}first`]));
-        await sendNotificationEmails(NOW, 10000);
-        release();
-        await runA;
+        try {
+            const runA = sendNotificationEmails(NOW, 10000);
+            await vi.waitFor(() => expect(claimHeld).toBe(true));
+            await sendNotificationEmails(NOW, 10000);
+            expect(sentTo('late').map((m) => m.subject)).toEqual([`${PREFIX}first`, `${PREFIX}second`]);
+            release();
+            await runA;
+        } finally {
+            globalThis.fetch = realFetch;
+        }
 
         expect(sentTo('late').map((m) => m.subject)).toEqual([`${PREFIX}first`, `${PREFIX}second`]);
     });
 
-    it('gives a failed row back, logs it, stops, and sends it next run', async () => {
-        const [failing] = await db.insert(notifications).values(row('broken', 'event_update', { eventId: ids.week })).returning();
+    // In the batch's order: `before` is sent, `failing` fails, `after` is
+    // never tried. Both of the last two go back, and `before` stays sent
+    it('gives the failed row and the rest back, logs it, stops, and sends them next run', async () => {
+        const [before, failing, after] = await db
+            .insert(notifications)
+            .values([
+                row('saver', 'event_update', { eventId: ids.week, createdAt: new Date(NOW.getTime() - 3 * HOUR) }),
+                row('broken', 'event_update', { eventId: ids.week, createdAt: new Date(NOW.getTime() - 2 * HOUR) }),
+                row('broken', 'event_cancelled', { eventId: ids.week, createdAt: new Date(NOW.getTime() - HOUR) }),
+            ])
+            .returning();
         vi.mocked(sendEmail).mockImplementation(async (message) => {
             if (message.to === email('broken')) throw new Error('SMTP down');
         });
 
         expect(await sendNotificationEmails(NOW, 10000)).toMatchObject({ failed: true });
-        const [after] = await db.select().from(notifications).where(eq(notifications.notificationId, failing.notificationId));
-        expect(after.emailSentAt).toBeNull();
+        const stored = Object.fromEntries((await inboxOf('saver', 'broken')).map((n) => [n.notificationId, n.emailSentAt]));
+        expect(stored[before.notificationId]).toEqual(NOW);
+        expect(stored[failing.notificationId]).toBeNull();
+        expect(stored[after.notificationId]).toBeNull();
+        expect(sentTo('broken')).toHaveLength(1);
         const logs = await db
             .select()
             .from(systemLogs)
@@ -254,9 +279,27 @@ describe('notification emails', () => {
 
         vi.mocked(sendEmail).mockReset();
         await sendNotificationEmails(NOW, 10000);
-        expect(sentTo('broken')).toHaveLength(1);
-        const [sent] = await db.select().from(notifications).where(eq(notifications.notificationId, failing.notificationId));
-        expect(sent.emailSentAt).toEqual(NOW);
+        expect(sentTo('broken').map((m) => m.subject)).toEqual([failing.subject, after.subject]);
+        const sent = await inboxOf('broken');
+        expect(sent.map((n) => n.emailSentAt)).toEqual([NOW, NOW]);
+    });
+
+    // A row exactly 24 hours old is the oldest any run can see, so with a
+    // limit of 1 it is the one sent, and the next oldest is left unclaimed
+    it('sends up to the limit, oldest first, and claims no more', async () => {
+        const [edge, next] = await db
+            .insert(notifications)
+            .values([
+                row('saver', 'event_update', { eventId: ids.week, subject: `${PREFIX}edge`, createdAt: new Date(NOW.getTime() - DAY) }),
+                row('saver', 'event_update', { eventId: ids.week, subject: `${PREFIX}next`, createdAt: new Date(NOW.getTime() - DAY + 1000) }),
+            ])
+            .returning();
+
+        expect(await sendNotificationEmails(NOW, 1)).toEqual({ sent: 1, failed: false });
+        expect(vi.mocked(sendEmail).mock.calls.map(([message]) => message.subject)).toEqual([edge.subject]);
+        const stored = Object.fromEntries((await inboxOf('saver')).map((n) => [n.notificationId, n.emailSentAt]));
+        expect(stored[edge.notificationId]).toEqual(NOW);
+        expect(stored[next.notificationId]).toBeNull();
     });
 });
 

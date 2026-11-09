@@ -371,9 +371,11 @@ The frontend `.env`'s `VITE_NEON_AUTH_URL` and `VITE_NEON_DATA_API_URL` are unus
   The job sends rows of `EMAILED_TYPES` (every type but `user_registered` and
   `password_changed`, which has its own email) created in the last 24 hours, oldest first, 100
   a run, to **verified** addresses (Slav, 2026-11-05) whose owner has `email_notifications`
-  on; `account_status` (`ALWAYS_EMAILED_TYPES`) goes even with it off. Each row is claimed
-  with an `UPDATE … WHERE email_sent_at IS NULL` before its email, so two runs can't both send
-  it; a failed email gives the claim back to be tried next run, logs Email Failed
+  on; `account_status` (`ALWAYS_EMAILED_TYPES`) goes even with it off. The batch is claimed
+  in one `UPDATE … WHERE email_sent_at IS NULL RETURNING` before any email goes (2026-11-09,
+  replacing one claim per row), and only the rows it returns are sent, so two runs can't both
+  send one; a failed email gives back that row and every one after it, to be tried next run
+  (the rows already sent stay sent), logs Email Failed
   `{ email: 'notification', notificationId, error }` and ends the run (Gmail refusing one
   usually means all; about 500 a day). After 24 hours a row stays in the inbox only
 - `lib/notificationEmails.js`: the row's subject and body, a link to `/dashboard/events/:id`

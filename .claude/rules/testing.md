@@ -43,8 +43,11 @@
   none, and with every test file running at once a Phase 8 test failed now and then
 - **A race test must force the interleaving.** Phase 11's first overlap test ran two email
   jobs with `Promise.all` and passed with the claim removed: run B's read reached Neon after
-  run A's claim, so they never raced. `jobs.test.js` now holds run A inside its first send (a
-  mock that awaits a promise the test resolves), runs B, then lets A go
+  run A's claim, so they never raced. Since the batch claim (2026-11-09) the race can only
+  happen between A's read and its claim, so `jobs.test.js` holds A's claim `UPDATE` in a
+  wrapped `globalThis.fetch` (a promise the test resolves), runs B to the end, then lets A
+  go. Holding A in its first send, as before, passed with the claim removed: A had claimed
+  both rows by then, so B never saw them
 - The jobs read the whole table while other files write rows, so `jobs.test.js` checks only
   its own accounts' rows, stubs `sendEmail`, fixes "now" at 12:00 London so 09:00 reminders are
   always due, and runs the email job with a high limit so older rows can't crowd its own out
