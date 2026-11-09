@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 
-// Each account's inbox from the API, by account id, so a late answer for an
-// account that has logged out never shows under the next. null until it
-// arrives. Read again whenever the Notifications page or a Home opens, as
-// nothing pushes new ones
+// The account's inbox, null until it arrives, kept by account id so a late answer
+// never shows under the next. Read again as pages open: nothing pushes new ones
 export function useNotifications(accountId) {
   const [inboxes, setInboxes] = useState({});
   const notifications = accountId === null ? null : (inboxes[accountId] ?? null);
@@ -21,9 +19,8 @@ export function useNotifications(accountId) {
     loadNotifications();
   }, [loadNotifications]);
 
-  // Sets read_at on the ones not read yet; a read notification keeps its time.
-  // The envelope changes at once; if the server refuses, the inbox is read
-  // again so it shows what is stored
+  // Marks them read at once; if the server refuses, the inbox is read again so
+  // it shows what is stored
   function markNotificationsRead(notificationIds) {
     const userId = accountId;
     const unread = (notifications ?? [])

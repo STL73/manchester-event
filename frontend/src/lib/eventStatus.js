@@ -13,7 +13,7 @@ export function eventState(event, now) {
   return event.status;
 }
 
-// Public pages show approved events, like get_all_public_events()
+// Public pages show approved events
 export function isPublicEvent(event) {
   return event.status === "approved";
 }

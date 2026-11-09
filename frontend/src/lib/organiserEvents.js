@@ -1,8 +1,7 @@
 import { defaultEventImage } from "./publicEvents";
 
-// An organiser's own events from the API (GET /users/me/events), in the shape
-// EventCard, My Events, My Drafts, Organiser Home and Edit Event read. Unlike
-// toEvent() it is the organiser's latest version, not what the public sees
+// An organiser's own event from GET /users/me/events, in EventCard's shape: the
+// latest version, not what the public sees as toEvent() gives
 export function toOrganiserEvent(event, organiser) {
   return {
     eventId: event.eventId,
@@ -53,6 +52,7 @@ const londonParts = new Intl.DateTimeFormat("en-GB", {
   hourCycle: "h23",
 });
 
+// A moment as the form's datetime-local input holds it, on a Manchester clock
 export function toLondonInput(value) {
   if (!value) return "";
   const parts = Object.fromEntries(

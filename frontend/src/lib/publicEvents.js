@@ -3,6 +3,7 @@
 
 export const defaultEventImage = "/images/events/placeholder.jpg";
 
+// An event from the API in the shape the pages and EventCard read
 export function toEvent(event) {
   return {
     eventId: event.eventId,

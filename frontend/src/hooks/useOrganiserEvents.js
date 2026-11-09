@@ -3,11 +3,8 @@ import { api, formWithFile } from "../lib/api";
 import { toOrganiserEvent } from "../lib/organiserEvents";
 import { replaceById } from "../lib/replaceById";
 
-// An organiser's own events, kept with the account they belong to, and the
-// five handlers that change them. organiserEventsLoaded is false until they
-// arrive, so Event details can wait rather than say "not found". Each handler
-// awaits the server and throws its ApiError for the page to show; the list
-// changes only once the server has agreed
+// An organiser's own events and the handlers that change them. Each awaits the
+// server and throws its ApiError; the list changes only once it agrees
 export function useOrganiserEvents(account, showError) {
   const organiserUserId = account?.role === "organiser" ? account.userId : null;
   const [organiserLists, setOrganiserLists] = useState({ userId: null, events: null });
@@ -42,9 +39,8 @@ export function useOrganiserEvents(account, showError) {
     [],
   );
 
-  // The server decides the status from the event and `submit`, as
-  // insert_event() and update_event() did in the PHP. A new photo (a File)
-  // goes with the form in the same request
+  // The server decides the status from `submit`. A new photo (a File) goes with
+  // the form in the same request
   async function createOrganiserEvent(body, photo) {
     const userId = organiserUserId;
     const { data } = await api("/events", { method: "POST", body: photo ? formWithFile("image", photo, body) : body });
@@ -54,7 +50,7 @@ export function useOrganiserEvents(account, showError) {
   }
 
   // A live event keeps its last approved version public, with its favourites,
-  // until the edit is approved (schema option b, agreed 2026-10-05)
+  // until the edit is approved
   async function updateOrganiserEvent(eventId, body, photo) {
     const userId = organiserUserId;
     const { data } = await api(`/events/${eventId}`, {
@@ -80,7 +76,7 @@ export function useOrganiserEvents(account, showError) {
     updateOrganiserEvents(userId, (list) => replaceById(list, "eventId", cancelled));
   }
 
-  // Matches submit_draft.inc.php: the draft becomes pending
+  // My Drafts' Submit: the draft becomes pending
   async function submitDraft(eventId) {
     const userId = organiserUserId;
     const { data } = await api(`/events/${eventId}/submit`, { method: "PUT" });

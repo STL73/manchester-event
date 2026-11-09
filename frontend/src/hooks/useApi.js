@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 
-// Reads one GET path and follows it as it changes. While a new path loads, the
-// last answer stays on screen (`loading` is true), so a list doesn't flash empty
-// between filters. A null path asks for nothing
+// Reads one GET path (null for none) as it changes. The last answer stays while
+// the next loads, so a list doesn't flash empty between filters
 export function useApi(path) {
   const [attempt, setAttempt] = useState(0);
   const [result, setResult] = useState({ key: null, payload: null, error: null });

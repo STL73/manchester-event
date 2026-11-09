@@ -1,5 +1,4 @@
-// Helpers that turn the app's lists into chart data, replacing the PHP
-// GROUP BY queries and the groupData() function in app.js.
+// Helpers that turn the app's lists into chart data
 import { isUpcoming } from "./eventDates";
 import { DAY, formatDayMonth, startOfDay } from "./formatDates";
 
@@ -70,10 +69,8 @@ const periods = {
   },
 };
 
-// The window a range option covers, as { from, to } (from inclusive, to
-// exclusive), or null for All time. `days` / `months` count back from today;
-// `around: true` also counts the same number of months forward, for charts
-// that show what is scheduled as well as what has happened.
+// The window a range option covers, as { from, to } (to exclusive), or null for
+// All time. `around: true` also counts forward, for charts of what is scheduled
 export function getRangeBounds(range, now = new Date()) {
   if (range.days) {
     const today = startOfDay(now);
@@ -97,12 +94,8 @@ function inBounds(date, bounds) {
   return !bounds || (date >= bounds.from && date < bounds.to);
 }
 
-// Count items per day/week/month/year. With `bounds`, only items inside the
-// window count and every bucket of the window is listed, so "Last 30 days"
-// always shows 30 days. Without it, the buckets run from the first item to
-// the last. Either way empty buckets are 0, so a line never skips quiet months.
-// `getSeries(item)` splits each count into named parts (e.g. held/scheduled);
-// `series` lists those names so every row has all of them.
+// Counts items per day, week, month or year, empty buckets as 0 so a line never
+// skips quiet months. With `bounds` every bucket of the window is listed
 export function countOverTime(items, getDate, period, { bounds, getSeries, series = [] } = {}) {
   const { start, next, labels } = periods[period] ?? periods.month;
   const dated = items
@@ -162,8 +155,7 @@ export function getCardTrend(items, getDate, config, now = new Date()) {
   return { ...trend, label: config.label(trend.current), note: config.note(trend.previous) };
 }
 
-// ---------------------------------------------------------------------------
-// The figures behind the analytics panels. Each takes the lists and `now`.
+// The figures behind the analytics panels. Each takes the lists and `now`
 
 const HOUR = 3600000;
 
@@ -301,10 +293,8 @@ export function getSignUpFunnel(users) {
   };
 }
 
-// The three ways of splitting accounts on the Accounts panel. Unverified is
-// a label, not a status; a suspended account counts as suspended either way.
-// Unverified (grey) sits between Active and Suspended, so the green and red
-// that are hardest to tell apart are never side by side
+// The three ways of splitting accounts on the Accounts panel. Unverified (grey)
+// sits between Active and Suspended, so their green and red never touch
 export function getAccountShares(users) {
   const count = (test) => users.filter(test).length;
   return {
@@ -351,11 +341,8 @@ export function getOrganiserActivity(users, events, now = new Date(), limit = 4)
   };
 }
 
-// Per category: people following it, the public events coming up in it and
-// followers per event (how big an audience each of those events can reach;
-// null when nothing is coming up). A fact, not a judgement: nobody on the
-// page creates events (decided 2026-10-20). `follows` is the server's
-// followers per category, [{ categoryId, count }] (Phase 10)
+// Per category: its followers, its public events coming up and followers per
+// event (null when none). `follows` is the server's [{ categoryId, count }]
 export function getSupplyAndDemand(follows, events, categories, now = new Date()) {
   return categories
     .map((category) => {
@@ -393,6 +380,7 @@ export function getCategoryReach(follows, categoryIds) {
 // 05:00-12:00, afternoon to 17:00, evening to 22:00, night after that
 export const timeSlots = ["morning", "afternoon", "evening", "night"];
 
+// How many events start in each day and time slot
 export function getWeekTimeGrid(events) {
   const grid = Array.from({ length: 7 }, () => [0, 0, 0, 0]);
   events.forEach((event) => {

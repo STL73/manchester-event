@@ -1,10 +1,7 @@
 import { toOrganiserEvent } from "./organiserEvents";
 
-// The admin's events from the API (GET /events/manage), in the shape Manage
-// Events, Admin Home and Event details read: the organiser's latest version,
-// as toOrganiserEvent() makes it, plus who decided last and, for an edit of a
-// live event, the approved version in the same shape, so "what changed"
-// compares like with like
+// An admin's event from GET /events/manage, in toOrganiserEvent()'s shape, with
+// who decided last and a waiting edit's approved version in the same shape
 export function toManagedEvent(event) {
   const snapshot = event.approvedSnapshot;
   return {

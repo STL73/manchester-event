@@ -19,7 +19,7 @@ export function fieldErrors(error) {
   );
 }
 
-// A form with a photo (Phase 6): the file under its field's name and the rest
+// A form with a photo: the file under its field's name and the rest
 // of the form as JSON in `data`, which the server reads back as the usual body
 export function formWithFile(field, file, fields) {
   const form = new FormData();
@@ -28,6 +28,7 @@ export function formWithFile(field, file, fields) {
   return form;
 }
 
+// One request to the backend; answers its data, or throws an ApiError
 export async function api(path, { method = "GET", body } = {}) {
   // FormData goes as it is: the browser sets the multipart header and boundary
   const isForm = body instanceof FormData;

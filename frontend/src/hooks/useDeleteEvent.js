@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 
-// An organiser's page that deletes from its cards (My Events, My Drafts,
-// Organiser Home): the message over the cards, and the delete itself. The
-// card has already asked (see EventCard). The server may refuse: an event
-// approved since the page loaded can only be cancelled
+// Deleting from an organiser's cards: the delete and the message over the cards.
+// The server may refuse one approved since the page loaded
 export function useDeleteEvent(onDeleteEvent, deletedText) {
   // A message can arrive from Create or Edit Event (a new draft, a cancelled event)
   const location = useLocation();

@@ -24,10 +24,8 @@ import {
 } from "lucide-react";
 import { eventDetailsPath } from "../data/eventsData";
 
-// Turns one system_logs row into a sentence for the feed: who did what to
-// which event or account, with links (System Logs and Admin Home's Recent
-// Admin Actions share it). `kind` drives the filter pills; `tone` colours
-// the icon. The action names are the fixed ones from log_system_action()
+// Each action's sentence for the feed: who did what to which event or account.
+// `kind` drives the filter pills; `tone` colours the icon
 
 const eventPath = (eventId) => eventDetailsPath(eventId, true);
 const userPath = (userId) => `/dashboard/manage-users?open=${userId}`;
@@ -96,7 +94,7 @@ const describers = {
   }),
   "User Deleted": (details, lookup) => ({ kind: "accounts", tone: "danger", icon: UserMinus, verb: "deleted the account", target: userTarget(details, lookup) }),
   "Email Verified": () => ({ kind: "accounts", tone: "success", icon: MailCheck, verb: "verified their email" }),
-  // An admin's reply to a Contact form message (Phase 9), emailed to the sender
+  // An admin's reply to a Contact form message, emailed to the sender
   "Contact Message Replied": (details) => ({
     kind: "accounts",
     icon: Send,
@@ -153,6 +151,7 @@ const describers = {
   }),
 };
 
+// One system_logs row as a sentence with links, for System Logs and Admin Home
 export function describeLog(log, lookup) {
   const describe = describers[log.action];
   const base = describe ? describe(log.details ?? {}, lookup) : { kind: "accounts", icon: Pencil, verb: log.action };
@@ -168,9 +167,8 @@ export function describeLog(log, lookup) {
   };
 }
 
-// The lookups describeLog() needs, from one row of GET /logs (Phase 10): the
-// server sends the event's and accounts' names as they are now, null for one
-// since deleted, so the sentence links only to what still exists
+// The names describeLog() needs, as they are now: null for one since deleted,
+// so the sentence links only to what still exists
 export function logLookup(log) {
   return {
     eventName: () => log.eventName,

@@ -7,6 +7,7 @@ export function isUpcoming(event, now) {
   return new Date(event.endDatetime ?? event.startDatetime) >= now;
 }
 
+// Sorts events soonest first
 export function bySoonest(a, b) {
   return new Date(a.startDatetime) - new Date(b.startDatetime);
 }

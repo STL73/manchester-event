@@ -1,9 +1,8 @@
 // Row layout for a honeycomb of hexagons. Neighbouring rows differ by one
 // cell, so a centred row nests into the gaps of the row above it.
 
-// Each row is { slots, filled }: a short last row keeps its slot count
-// (the empty slots are drawn invisible) so it still nests under the row
-// above. maxPerRow is how many cells fit across, at least 2
+// Rows as { slots, filled } for `count` cells, at most maxPerRow (2+) across. A
+// short last row keeps its slots, drawn invisible, so it still nests
 export function honeycombRows(count, maxPerRow) {
   if (count <= maxPerRow) return [{ slots: count, filled: count }];
 
@@ -36,10 +35,8 @@ export function honeycombRows(count, maxPerRow) {
   if (isFull(narrowFirst)) return narrowFirst;
   const wideFirst = alternating(maxPerRow);
 
-  // A last row two or more cells short of the one above looks broken
-  // (12 was 4-3-4-1). A hill fills every row instead, 12 becoming 2-3-4-3,
-  // but only when it needs no more rows, so the panel doesn't grow
-  // (decided 2026-10-25)
+  // A last row two or more short looks broken (12 as 4-3-4-1), so a hill fills
+  // every row (2-3-4-3) when it needs no more rows
   const [above, last] = wideFirst.slice(-2);
   const shape = hill(count, maxPerRow);
   if (above.slots - last.filled >= 2 && shape && shape.length <= wideFirst.length) {

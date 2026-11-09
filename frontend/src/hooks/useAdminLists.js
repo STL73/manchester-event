@@ -3,11 +3,8 @@ import { api } from "../lib/api";
 import { toManagedEvent } from "../lib/managedEvents";
 import { replaceById } from "../lib/replaceById";
 
-// The admin's three lists, kept with the admin's id so a reply that lands
-// after a log-out changes nothing: every event but drafts (Manage Events),
-// every account (Manage Users, Admin Home's New users card) and every Contact
-// form message (Contact Messages, Admin Home, the sidebar's unread count).
-// Each is null until it arrives
+// The admin's events, accounts and Contact messages, each null until it arrives.
+// Kept with the admin's id, so an answer after a log-out changes nothing
 export function useAdminLists(account, showError) {
   const adminUserId = account?.role === "admin" ? account.userId : null;
   const [adminLists, setAdminLists] = useState({ userId: null, events: null, users: null, messages: null });
@@ -46,10 +43,8 @@ export function useAdminLists(account, showError) {
     setAdminLists((current) => (current.userId === adminId ? { ...current, [name]: change(current[name]) } : current));
   }
 
-  // Manage Events' decisions: "approve", "reject" or "take-down", the last two
-  // with the reason the organiser reads. Awaits the server and throws its
-  // ApiError for the panel to show; the list changes only once it agrees. The
-  // server records who decided and tells everyone concerned
+  // "approve", "reject" or "take-down" (the last two with a reason). Throws the
+  // server's ApiError for the panel; the list changes only once it agrees
   async function decideEvent(eventId, decision, reason) {
     const adminId = adminUserId;
     const { data } = await api(`/events/${eventId}/${decision}`, {
@@ -68,9 +63,8 @@ export function useAdminLists(account, showError) {
     updateList(adminId, "users", (list) => list.filter((user) => user.userId !== userId));
   }
 
-  // { status: "active" } or { status: "suspended", reason, days }: 7, 30 or
-  // null (until lifted), left out to keep the current end. The server works
-  // out suspended_until and tells the person
+  // { status: "active" } or { status: "suspended", reason, days }: 7, 30 or null
+  // (until lifted), left out to keep the current end
   async function updateUserStatus(userId, body) {
     const adminId = adminUserId;
     const { data } = await api(`/users/${userId}/status`, { method: "PUT", body });

@@ -41,10 +41,8 @@ function isValidUrl(value) {
   }
 }
 
-// validate_event_input()'s checks (every field but the end is required, the
-// link must be a URL) plus the schema's date rules: the end comes after the
-// start, and an event can't be submitted with a start that has passed
-// (a draft may keep one; checked when the start is new or changed)
+// The form's checks: every field but the end, a real link, the end after the
+// start, and no start already passed when submitting one that is new or changed
 export function validateEvent(form, { submitting, originalStart }) {
   const errors = {};
 

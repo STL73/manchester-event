@@ -2,11 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { toEvent } from "../lib/publicEvents";
 
-// The user role's favourites and interests (category_follows), loaded from
-// the API after login and kept with the account they belong to, so the next
-// account to log in never sees them. favouriteIds is what the hearts show:
-// it changes at once, and favouriteEvents (each as the public sees it)
-// catches up when the server has answered
+// The user role's favourites and interests, kept with their account so the next
+// one never sees them. The hearts (favouriteIds) change before the server answers
 export function useUserLists(account, showError) {
   const listsUserId = account?.role === "user" ? account.userId : null;
   const [userLists, setUserLists] = useState({ userId: null });
@@ -47,9 +44,8 @@ export function useUserLists(account, showError) {
     [],
   );
 
-  // Matches add_favourite / remove_favourites in the PHP. The heart changes
-  // at once and changes back with the server's reason if the request fails
-  // (an event that has ended or been cancelled since the page loaded)
+  // Saves or unsaves at once, and changes back with the server's reason if it
+  // refuses (an event ended or cancelled since the page loaded)
   async function toggleFavourite(eventId) {
     const userId = listsUserId;
     const saving = !favouriteIds.includes(eventId);

@@ -1,10 +1,8 @@
 // "Add to calendar": an iCalendar (.ics) file for one event, which Google,
 // Apple and Outlook calendars all open. Built in the browser, no backend.
 
-// Event times are Manchester wall-clock times ("2026-10-18T19:30:00"), so
-// they go out as Europe/London local times rather than being converted
-// through the visitor's own time zone. The VTIMEZONE block carries the UK
-// clock-change rules for calendars that don't know the zone by name
+// Times go out as Europe/London local times, not the visitor's zone. This
+// block carries the UK clock changes for calendars that don't know the zone
 const LONDON_TIMEZONE = [
   "BEGIN:VTIMEZONE",
   "TZID:Europe/London",
@@ -48,9 +46,8 @@ function fold(line) {
   return parts.join("\r\n");
 }
 
-// `pageUrl` is the event's public page, so the calendar entry links back.
-// An event without an end time gets no DTEND: calendars then show it at its
-// start time, rather than with a length the organiser never gave
+// The .ics text for one event, linking back to `pageUrl`. With no end time there
+// is no DTEND, rather than a length the organiser never gave
 export function buildEventIcs(event, pageUrl) {
   const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
   const place = [event.location, event.address].filter(Boolean).join(", ");

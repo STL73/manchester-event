@@ -2,8 +2,7 @@
 import { bySoonest, isUpcoming } from "./eventDates";
 import { isPublicEvent } from "./eventStatus";
 
-// Matches get_user_favourites(): approved events only, newest start date first.
-// Home's recent favourites use it; My Favourites splits the list below
+// Approved favourites, newest start date first, for Home's recent favourites
 export function getFavouriteEvents(events, favouriteIds) {
   return events
     .filter((event) => isPublicEvent(event) && favouriteIds.includes(event.eventId))

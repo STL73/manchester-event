@@ -12,9 +12,8 @@ export function useAccount() {
   // doesn't send a logged-in person to the home page first
   const [accountLoaded, setAccountLoaded] = useState(false);
 
-  // A 401 means nobody is logged in. Any other failure (the API is down)
-  // also shows the public site, rather than a page that can't load. Read
-  // again after the email is verified, so the banners go without a reload
+  // A 401, or any failure, shows the public site. Read again after the email is
+  // verified, so the banners go without a reload
   const refreshAccount = useCallback(
     () =>
       api("/auth/me")
@@ -33,9 +32,8 @@ export function useAccount() {
     return data;
   }
 
-  // The name, then the picture (Cloudinary), each saved on its own: if the
-  // picture fails, the name has still been saved and Save sends only the
-  // picture again. Answers the picture's address for the form to show
+  // Saves the name, then the picture, so a failed picture keeps the name saved.
+  // Answers the picture's address for the form to show
   async function saveProfile({ user, avatarFile, removeAvatar }) {
     let latest = account;
     if (user !== account.username) latest = await saveAccount({ username: user });
