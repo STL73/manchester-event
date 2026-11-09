@@ -192,6 +192,7 @@ describe('approving', () => {
         expect(sent.find((row) => row.type === 'event_status').subject).toBe(`Approved: ${PREFIX}Gig`);
         // Not the suspended follower, and not the organiser's follow
         expect(recipients(sent, 'category_new_event')).toEqual(['follower']);
+        expect(sent.find((row) => row.type === 'category_new_event').body).toContain(`added to ${PREFIX}Music,`);
         expect(recipients(sent, 'event_update')).toEqual([]);
 
         const logs = await db

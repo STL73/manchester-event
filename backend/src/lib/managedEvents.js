@@ -4,7 +4,8 @@ import { alias } from 'drizzle-orm/pg-core';
 import { db } from '../db/index.js';
 import { categories, events, locations, users } from '../db/schema/index.js';
 import { AppError } from './errors.js';
-import { eventFields } from './organiserEvents.js';
+import { deleteImage } from './images.js';
+import { droppedPhotos, eventFields, isOver } from './organiserEvents.js';
 
 // The admin's Manage Events and Admin Home (Phase 7): every event but drafts,
 // which stay the organiser's own until sent. Each is the latest version, as
@@ -72,4 +73,56 @@ export async function findManagedEvent(eventId) {
         .where(and(eq(events.eventId, eventId), ne(events.status, 'draft')));
     if (!row) throw new AppError(404, 'Event not found.');
     return row;
+}
+
+// Admins' decisions (Phase 7, decided 2026-10-05 and 2026-11-03). Each is
+// checked against the row as it is now, and the status is part of the UPDATE,
+// so a second admin deciding at the same moment gets 409 rather than a
+// second decision
+
+// Only an event waiting for review is decided. One that never went public and
+// whose start has passed is Expired: nobody can go any more. An edit of a live
+// event can still be decided until the live version has ended
+function checkDecidable(row, now) {
+    if (row.status !== 'pending') throw new AppError(400, 'Only an event waiting for review can be approved or rejected.');
+    const expired = row.approvedSnapshot ? isOver(row, now) : row.startDatetime < now;
+    if (expired) throw new AppError(400, 'This event\'s time has passed, so it can no longer be reviewed.');
+}
+
+async function decide(row, admin, now, set) {
+    const [saved] = await db
+        .update(events)
+        .set({ ...set, adminUpdatedAt: now, adminUpdatedBy: admin.userId })
+        .where(and(eq(events.eventId, row.eventId), eq(events.status, row.status)))
+        .returning();
+    if (!saved) throw new AppError(409, 'This event changed while you were deciding. Reload to see it as it is now.');
+    return saved;
+}
+
+// Approve. An edit of a live event replaces the live version, so its approved
+// copy goes, and with it the copy's photo if the edit brought its own
+export async function approveEvent(row, admin) {
+    const now = new Date();
+    checkDecidable(row, now);
+    const saved = await decide(row, admin, now, { status: 'approved', approvedSnapshot: null, rejectionReason: null });
+    await Promise.all(droppedPhotos(row, saved).map(deleteImage));
+    return saved;
+}
+
+// Reject, with the reason the organiser reads. A rejected edit of a live
+// event keeps its approved copy, so the public still sees that version
+export async function rejectEvent(row, reason, admin) {
+    const now = new Date();
+    checkDecidable(row, now);
+    return decide(row, admin, now, { status: 'rejected', rejectionReason: reason });
+}
+
+// Take a live event down (decided 2026-11-03): it is cancelled, as if its
+// organiser had, because once public an event is never hidden as though it
+// hadn't been. The reason is kept for the organiser
+export async function takeDownEvent(row, reason, admin) {
+    const now = new Date();
+    if (row.status !== 'approved') throw new AppError(400, 'Only a live event can be taken down.');
+    if (isOver(row, now)) throw new AppError(400, 'This event has ended, so it can\'t be cancelled.');
+    return decide(row, admin, now, { status: 'cancelled', rejectionReason: reason });
 }

@@ -181,7 +181,7 @@ describe('creating an event', () => {
     it('saves a draft, or a pending event when submitted, and logs it', async () => {
         const draft = await agents.organiser.post('/api/v1/events').send(form({ eventName: `${PREFIX}Draft` }));
         expect(draft.status).toBe(201);
-        expect(draft.body.data).toMatchObject({ name: `${PREFIX}Draft`, status: 'draft' });
+        expect(draft.body.data).toMatchObject({ name: `${PREFIX}Draft`, description: 'A test event.', status: 'draft' });
         expect((await readRow(draft.body.data.eventId)).organiserUpdatedAt).toBeNull();
 
         const sent = await agents.organiser.post('/api/v1/events').send(form({ eventName: `${PREFIX}Sent`, submit: true }));
@@ -312,9 +312,12 @@ describe('editing an event', () => {
         const saved = await agents.organiser.put(`/api/v1/events/${draft.eventId}`).send(form({ eventName: `${PREFIX}Still Draft` }));
         expect(saved.status).toBe(200);
         expect(saved.body.data).toMatchObject({ name: `${PREFIX}Still Draft`, status: 'draft' });
+        // A draft save isn't the organiser sending it
+        expect((await readRow(draft.eventId)).organiserUpdatedAt).toBeNull();
 
         const sent = await agents.organiser.put(`/api/v1/events/${draft.eventId}`).send(form({ submit: true }));
         expect(sent.body.data.status).toBe('pending');
+        expect((await readRow(draft.eventId)).organiserUpdatedAt).not.toBeNull();
         expect((await logsFor(ids.organiser, 'Draft Submitted')).some((log) => log.details.eventId === draft.eventId)).toBe(true);
     });
 
@@ -334,7 +337,7 @@ describe('editing an event', () => {
         expect(shown.body.data).toMatchObject({ name: `${PREFIX}Approved Name`, status: 'approved' });
     });
 
-    it('lets a live event that has started keep its start time', async () => {
+    it('lets a live event that has started keep its start time, but not move it to a passed one', async () => {
         // Whole minutes, as the form sends them, so the start reads as unchanged
         const minute = (date) => new Date(Math.floor(date.getTime() / 60000) * 60000);
         const started = await insertEvent({ status: 'approved', startDatetime: minute(inDays(-1)), endDatetime: minute(inDays(1)) });
@@ -344,6 +347,14 @@ describe('editing an event', () => {
             eventName: `${PREFIX}Late Fix`,
         }));
         expect(res.status).toBe(200);
+
+        // A changed time is new to the admin, so it must still be to come
+        const moved = await agents.organiser.put(`/api/v1/events/${started.eventId}`).send(form({
+            startDatetime: londonInput(minute(inDays(-2))),
+            endDatetime: londonInput(started.endDatetime),
+        }));
+        expect(moved.status).toBe(400);
+        expect(moved.body.error.details[0].path).toBe('body.startDatetime');
     });
 
     it('refuses cancelled and ended events', async () => {
