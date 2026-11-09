@@ -38,9 +38,8 @@ export async function liftExpiredSuspension(user) {
     return lifted;
 }
 
-// Manage Users (Phase 8): every account, newest first, with what the panel needs
-// to show and decide: how many events an organiser has sent (drafts stay with
-// them) and whether any has been public, which rules out deleting the account
+// Manage Users' list: every account, newest first, with how many events it has
+// sent and whether any has been public, which rules out deleting it
 export async function listManagedUsers(userId = null) {
     const sent = db
         .select({
@@ -72,8 +71,8 @@ export async function listManagedUsers(userId = null) {
     }));
 }
 
-// The account an admin is changing. Never your own (Settings is for that) and
-// never an admin's (decided 2026-11-03)
+// The account an admin is changing: never your own (Settings is for that), and
+// never an admin's
 export async function findManagedAccount(adminId, userId) {
     if (userId === adminId) throw new AppError(400, 'This is your account. Change it on Settings.');
     const [account] = await db.select().from(users).where(eq(users.userId, userId));
@@ -90,8 +89,8 @@ export async function reactivateAccount(account) {
     return true;
 }
 
-// `days` is 7, 30 or null (until lifted); left out, the current end is kept,
-// which only a suspended account has. Answers the end, null for none
+// Suspends for `days`: 7, 30 or null (until lifted). Left out, the current end
+// is kept, which only a suspended account has. Answers the end, null for none
 export async function suspendAccount(account, { days, reason }) {
     let until;
     if (days === undefined) {
@@ -107,11 +106,8 @@ export async function suspendAccount(account, { days, reason }) {
     return until;
 }
 
-// The schema's deletion rule, for Settings' Delete and Manage Users alike: an
-// organiser whose events have been public can only be suspended, since people
-// may have saved those events. Their other events go with the account.
-// `refusal` is the 409's message, worded for whoever asked. Answers how many
-// events went
+// Deletes an account and its other events, for Settings and Manage Users; answers
+// how many events went. One whose events have been public is refused (`refusal`)
 export async function deleteAccount(user, refusal) {
     const { userId } = user;
     const [publicEvent] = await db
@@ -121,9 +117,8 @@ export async function deleteAccount(user, refusal) {
         .limit(1);
     if (publicEvent) throw new AppError(409, refusal);
 
-    // One batch runs as one transaction. If an event went public since the
-    // check, events.organiser_id's RESTRICT stops the user delete and the
-    // whole batch is undone. Sessions, tokens, favourites and follows cascade
+    // One batch is one transaction: an event made public since the check makes
+    // events.organiser_id's RESTRICT undo all of it
     let deletedEvents;
     try {
         [deletedEvents] = await db.batch([

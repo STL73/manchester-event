@@ -6,10 +6,8 @@ import { LOG } from '../constants/logActions.js';
 import { DAY } from './londonTime.js';
 import { reachableUser } from './accounts.js';
 
-// The rows Site Analytics and Event Analytics read that no other page loads
-// (Phase 10, decided 2026-11-04). The figures are still worked out in the
-// browser (frontend lib/analytics.js); this only sends what they're made from,
-// and never who saved or followed
+// The rows the analytics pages read that no other page loads. The browser works
+// out the figures, and who saved or followed is never sent
 
 // A save is when and which event: the favourites row without its user
 const saveColumns = { eventId: favourites.eventId, createdAt: favourites.createdAt };

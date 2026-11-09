@@ -9,7 +9,7 @@ export const SESSION_COOKIE = 'sid';
 
 const SESSION_LENGTH = 30 * DAY;
 // A session used with fewer days than this left is moved forward, so someone
-// who visits at least every two weeks stays signed in (decided 2026-10-26)
+// who visits at least every two weeks stays signed in
 const RENEW_WITHIN = 15 * DAY;
 
 // httpOnly: page scripts can't read it, so an XSS bug can't steal it.
@@ -25,6 +25,7 @@ function setSessionCookie(res, token) {
     res.cookie(SESSION_COOKIE, token, { ...cookieOptions, maxAge: SESSION_LENGTH });
 }
 
+// Removes the session cookie from the browser
 export function clearSessionCookie(res) {
     res.clearCookie(SESSION_COOKIE, cookieOptions);
 }
@@ -47,6 +48,7 @@ export async function findSession(token) {
     return row ?? null;
 }
 
+// Moves a session's end forward when it has fewer than RENEW_WITHIN left
 export async function renewSessionIfDue(res, token, session) {
     if (session.expiresAt.getTime() - Date.now() > RENEW_WITHIN) return;
     await db
@@ -62,6 +64,7 @@ export async function endAllSessions(userId) {
     await db.delete(sessions).where(eq(sessions.userId, userId));
 }
 
+// Logs this device out: deletes its session and clears the cookie
 export async function endSession(res, token) {
     if (token) await db.delete(sessions).where(eq(sessions.sessionId, hashToken(token)));
     clearSessionCookie(res);

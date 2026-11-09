@@ -53,8 +53,8 @@ function searchCondition(q) {
     return containsText(text, q);
 }
 
-// System Logs (Phase 10, decided 2026-11-04): newest first, one page of one
-// view, and how many rows each pill would show for the same search
+// System Logs: one page of one view, newest first, and each pill's count for
+// the same search
 export async function listLogs({ view, q, page, limit }) {
     const search = searchCondition(q);
     const counts = Object.fromEntries(

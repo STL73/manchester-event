@@ -8,8 +8,8 @@ import { lookupPlace } from './osm.js';
 import { hasBeenPublic, wasPublic } from './publicEvents.js';
 import { withUpload } from './uploads.js';
 
-// An organiser's own events (My Events, My Drafts, Organiser Home, Edit Event):
-// every status, as the organiser last saved them, not as the public sees them
+// An organiser's own events: every status, as the organiser last saved them,
+// not as the public sees them
 
 export const eventFields = {
     eventId: events.eventId,
@@ -53,12 +53,14 @@ function fromOrganiserEvents() {
         .$dynamic();
 }
 
+// Every event the organiser owns, soonest first
 export function listOrganiserEvents(organiserId) {
     return fromOrganiserEvents()
         .where(eq(events.organiserId, organiserId))
         .orderBy(asc(events.startDatetime), asc(events.eventId));
 }
 
+// One event in the organiser list's shape
 export async function findOrganiserEvent(eventId) {
     const [event] = await fromOrganiserEvents().where(eq(events.eventId, eventId));
     return event;
@@ -75,11 +77,11 @@ export async function findOwnEvent(eventId, organiserId) {
     return event;
 }
 
-// The fields kept in approved_snapshot: the Drizzle names, dates as ISO strings,
-// the same as the seed writes and lib/publicEvents.js reads
-// (imagePublicId since Phase 6; an older snapshot reads it as NULL, a seed photo)
+// The fields kept in approved_snapshot: the Drizzle names, dates as ISO
+// strings, as the seed writes them and publicEvents.js reads them
 const SNAPSHOT_KEYS = ['eventName', 'eventDescription', 'startDatetime', 'endDatetime', 'locationId', 'categoryId', 'ticketUrl', 'imageUrl', 'imagePublicId'];
 
+// A row's approved version, as approved_snapshot keeps it
 export function snapshotOf(row) {
     return JSON.parse(JSON.stringify(Object.fromEntries(SNAPSHOT_KEYS.map((key) => [key, row[key]]))));
 }
@@ -105,9 +107,8 @@ function photosOf(row) {
     return [row.imagePublicId, row.approvedSnapshot?.imagePublicId].filter(Boolean);
 }
 
-// The photos `before` showed that `after` no longer does, to delete once the
-// write has gone through. An edit of a live event moves the old photo into the
-// snapshot, so it stays until the edit is approved or the event cancelled
+// The photos `before` showed that `after` doesn't, to delete after the write.
+// A live event's edit keeps its old photo in the snapshot until it is decided
 export function droppedPhotos(before, after) {
     const kept = new Set(photosOf(after));
     return [...new Set(photosOf(before))].filter((publicId) => !kept.has(publicId));
@@ -149,13 +150,10 @@ export async function categoryName(categoryId) {
     return category.name;
 }
 
-// Organisers' own events (Phase 5, decided 2026-10-05 and 2026-11-02). The
-// routes have found the row with findOwnEvent, so every write is the owner's
+// The writes below take a row findOwnEvent has found, so each is the owner's
 
-// Sending an event for approval: the email must be verified (the one thing an
-// unverified account can't do), and the start still to come. The start is
-// checked when it is new to the admin: a draft being sent, or a changed time.
-// A live event that has started and keeps its time can still be edited
+// Sending for approval needs a verified email and, when the start is new to
+// the admin (a draft being sent, or a changed time), a start still to come
 function checkSubmittable(user, startDatetime, startIsNew, now) {
     if (!user.emailVerifiedAt) {
         throw new AppError(403, 'Verify your email address before sending an event for approval.');
@@ -199,12 +197,9 @@ export async function createEvent(user, body, file) {
     });
 }
 
-// Edit Event, answering the new status. A draft stays a draft unless sent;
-// anything else goes to pending for an admin to approve again. Editing a live
-// event keeps its approved version public, with its favourites, until the edit
-// is approved (option b, 2026-10-05): the first edit copies it into
-// approved_snapshot, later edits before the review leave that copy alone,
-// photo included. Cancelled and ended events are final
+// Edit Event; answers the new status: a draft unless sent, otherwise pending.
+// A live event's first edit copies it into approved_snapshot, so the public
+// keeps the approved version and its favourites until the edit is approved
 export async function editEvent(row, user, body, file) {
     const now = new Date();
     if (row.status === 'cancelled') throw new AppError(400, 'A cancelled event can\'t be edited.');
@@ -240,10 +235,8 @@ export async function submitDraft(row, user) {
     await db.update(events).set({ status: 'pending', organiserUpdatedAt: now }).where(eq(events.eventId, row.eventId));
 }
 
-// Cancel, for an event that has been public: people may have saved it, so it
-// stays, marked cancelled. An edit still waiting is dropped and the approved
-// version is the one cancelled, since that's what people saw. Answers the
-// cancelled version's name
+// Cancel, for an event that has been public; answers the cancelled name. A
+// waiting edit is dropped, so the version people saw is the one cancelled
 export async function cancelEvent(row) {
     if (!wasPublic(row)) throw new AppError(400, 'This event has never been public, so delete it instead.');
     if (row.status === 'cancelled') throw new AppError(400, 'This event is already cancelled.');
@@ -259,9 +252,8 @@ export async function cancelEvent(row) {
     return restored.eventName ?? row.eventName;
 }
 
-// Delete, only for an event that has never been public (draft, pending or
-// rejected without an approved version). The condition is in the delete itself,
-// so an event approved since it was read is left alone
+// Delete, only for an event never public. The rule is in the DELETE itself,
+// so one approved since it was read is left alone
 export async function deleteEvent(row) {
     const [deleted] = await db
         .delete(events)

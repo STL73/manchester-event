@@ -7,15 +7,11 @@ import { isForeignKeyViolation } from './errors.js';
 import { isListed } from './publicEvents.js';
 import { reachableUser } from './accounts.js';
 
-// The in-app inbox (Phase 7, decided 2026-10-05 and 2026-11-03). The rows are
-// also the outbox: Phase 11's email job (jobs.js) mails them later, so a
-// request never waits on Gmail. Every notification is
-// written after the change it reports has gone through, and a failure is logged
-// rather than thrown: the decision or the cancel has happened either way
+// The in-app inbox, which is also the outbox the email job sends from. Each is
+// written after its change succeeds, so a failure is logged, never thrown
 
-// Who gets it is a query of user ids; each gets their own row, written in one
-// INSERT however many there are. An account deleted between the read and the
-// INSERT fails it for everyone, so the recipients are read again, once
+// Gives each recipient (a query of user ids) a row, in one INSERT. An account
+// deleted meanwhile fails it for everyone, so the recipients are read again once
 export async function deliver(recipients, message) {
     const write = async () => {
         const rows = await recipients;
@@ -33,6 +29,7 @@ export async function deliver(recipients, message) {
     }
 }
 
+// One account's notification
 export function notifyUser(userId, message) {
     return deliver(
         db.select({ userId: users.userId }).from(users).where(eq(users.userId, userId)),
@@ -40,6 +37,7 @@ export function notifyUser(userId, message) {
     );
 }
 
+// A notification for every admin
 export function notifyAdmins(message) {
     return deliver(
         db.select({ userId: users.userId }).from(users).where(eq(users.role, 'admin')),
@@ -71,7 +69,7 @@ export function notifyFollowers(categoryId, message) {
     );
 }
 
-// The wording, plain text (the frontend escapes it), close to the PHP's
+// The wording, plain text (the frontend escapes it)
 export const messages = {
     pendingReview: ({ eventId, name }, kind) => ({
         type: NOTIFY.EVENT_PENDING_REVIEW,
@@ -135,8 +133,8 @@ export const messages = {
         subject: 'Password Changed',
         body: 'Your password was just changed. If this wasn\'t you, contact us straight away.',
     }),
-    // Suspension (Phase 8). `until` is a date already worded for the person, or
-    // null for until an admin lifts it
+    // Suspension: `until` is a date already worded for the person, or null for
+    // until an admin lifts it
     suspended: (until, reason) => ({
         type: NOTIFY.ACCOUNT_STATUS,
         subject: 'Account Suspended',
@@ -147,7 +145,7 @@ export const messages = {
         subject: 'Account Reactivated',
         body: 'Your account is active again. You can make changes as before.',
     }),
-    // The saver's reminders (decided 2026-10-11), `when` already worded:
+    // The saver's reminders, `when` already worded:
     // "Thursday 12 November at 19:30" and "19:30"
     reminderWeek: ({ eventId, name }, when) => ({
         type: NOTIFY.EVENT_REMINDER_WEEK,
@@ -168,11 +166,8 @@ export const messages = {
     }),
 };
 
-// The inbox, newest first. 200 covers months of use; read ones older than 90
-// days are cleared by the nightly clean-up (jobs.js)
-// `listed` is the lists' rule for the row's event, so User Home's "New in your
-// interests" counts only events Explore still shows: a follower who didn't save
-// one is never told it was cancelled. False without an event
+// The inbox, newest 200 first. `listed` is the lists' rule for the row's event,
+// so User Home counts only new events Explore still shows
 export function listNotifications(userId, now = new Date()) {
     return db
         .select({
@@ -193,8 +188,7 @@ export function listNotifications(userId, now = new Date()) {
         .limit(200);
 }
 
-// Only the account's own unread rows change, so an id belonging to someone
-// else is simply left alone
+// Marks the account's own unread rows read; anyone else's ids are left alone
 export async function markRead(userId, { ids, all }) {
     await db
         .update(notifications)

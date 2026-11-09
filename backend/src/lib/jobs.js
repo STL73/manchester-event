@@ -11,20 +11,11 @@ import { notificationEmail } from './notificationEmails.js';
 import { isListed, pub } from './publicEvents.js';
 import { logAction } from './systemLogs.js';
 
-// The scheduled jobs (Phase 11, decided 2026-11-05). Each is a plain function
-// of `now`, so tests fix the time and `npm run jobs` runs them by hand;
-// scheduler.js only decides when. None of them waits for its exact moment:
-// each does whatever is due and not yet done, so a server that was asleep at
-// 09:00 catches up on its next run, and running twice changes nothing
+// The scheduled jobs, each a function of `now`; scheduler.js decides when. Each
+// does whatever is due and not yet done, so a missed run catches up
 
-// Reminders for saved events (decided 2026-10-11): 09:00 London a week before
-// the day it starts, and 09:00 the day before. Only events the lists show
-// (approved, not started, organiser not suspended), at the time the public
-// sees; a reminder whose moment had passed when the event was saved isn't
-// sent. Each is sent only on its own day, since the wording counts from it: a
-// week one missed until the next day, or a day one until the event's day,
-// isn't sent late. The unique index on (user,
-// event, type) keeps each to one row, however often this runs
+// Reminders for saved events, at 09:00 London a week before and the day before.
+// Each goes only on its own day, since the wording counts from it, and only once
 export async function sendReminders(now = new Date()) {
     // Only events starting before midnight a week on can have one due today.
     // One already started needs no check here: its reminders' days are over
@@ -63,14 +54,8 @@ export async function sendReminders(now = new Date()) {
     return { reminders: written.length };
 }
 
-// The outbox (decided 2026-11-05): notification rows of the emailed types not
-// yet sent, to verified addresses whose owner has email notifications on (or
-// any verified address for a security email). The batch is claimed in one
-// UPDATE before any email goes, so two runs at once can't both send a row,
-// and what isn't sent when an email fails is given back, to be tried next
-// run. After 24 hours it is left to the inbox. The first failure ends the
-// run: Gmail refusing one usually means it is refusing them all (its limit is
-// about 500 a day), and one log row says so
+// Emails the notifications due, claiming the batch in one UPDATE so two runs
+// can't both send one. A failure gives back the rest and ends the run
 export async function sendNotificationEmails(now = new Date(), limit = 100) {
     const rows = await db
         .select({
@@ -123,9 +108,8 @@ export async function sendNotificationEmails(now = new Date(), limit = 100) {
     return { sent: batch.length, failed: false };
 }
 
-// The nightly clean-up: read notifications after 90 days (decided 2026-10-05),
-// contact messages after 12 months (decided 2026-10-05), and sessions and
-// email links that have expired, which nothing else removes
+// The nightly clean-up: read notifications after 90 days, contact messages
+// after 12 months, and expired sessions and email links
 export async function cleanUp(now = new Date()) {
     const yearAgo = new Date(now);
     yearAgo.setUTCMonth(yearAgo.getUTCMonth() - 12);

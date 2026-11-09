@@ -1,7 +1,7 @@
 # Frontend Rules
 
-The frontend is a React port of the old PHP portal. Comments that reference `.php` files or PHP
-functions record behaviour being matched on purpose: keep that parity unless told otherwise.
+The frontend is a React port of the old PHP portal, whose behaviour it keeps unless told
+otherwise. Code comments don't cite the PHP (see `code-style.md`).
 
 ## Stack constraints
 

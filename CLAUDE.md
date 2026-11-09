@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Manchester Event Portal: users discover Greater Manchester events, organisers submit them, admins
 approve them and manage users. It is a rewrite of an older PHP/MySQL university project, which lives
 in a separate folder (`D:\MY PROJECTS\manchester-event-portal`). That code is the reference for
-behaviour. Comments here that cite `*.php` files or PHP functions mark parity that is deliberate.
+behaviour. Code comments don't cite it (comment standard in `.claude/rules/code-style.md`).
 
 The two halves are **connected for every page** since Phase 10 (2026-11-04): auth, public
 events, the user's favourites and interests, organisers' own events, moderation,

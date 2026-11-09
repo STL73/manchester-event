@@ -1,15 +1,9 @@
 import { AppError } from './errors.js';
 import { GREATER_MANCHESTER, areaFor } from '../constants/areas.js';
 
-// Venues come from OpenStreetMap (decided 2026-11-02, over Google Places: only
-// a Google place ID may be kept for good, and locations keeps the name, address
-// and coordinates). OSM's licence allows that, with "© OpenStreetMap
-// contributors" shown wherever the data is.
-// - Photon (komoot) for search as you type: the public Nominatim server forbids it
-// - Nominatim to look one place up by its id when an event is saved, so the
-//   name, address and coordinates come from OSM and never from the request
-// Both are free public servers that ask to be used fairly and to be told who
-// is calling, hence the User-Agent, the short cache and the per-user limit
+// Venues from OpenStreetMap: Photon to search as you type (Nominatim forbids it),
+// Nominatim to look a place up by id. Both are free servers asking for fair use,
+// hence the User-Agent, the cache and the per-user limit
 
 const USER_AGENT = 'manchester-event-portal/1.0';
 const TIMEOUT_MS = 5000;

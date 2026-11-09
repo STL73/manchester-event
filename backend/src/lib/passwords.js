@@ -7,6 +7,7 @@ const BCRYPT_COST = 12;
 // as a wrong password and the response time can't reveal which emails exist
 const DUMMY_HASH = bcrypt.hashSync('no-account-has-this-password', BCRYPT_COST);
 
+// A password's hash, for storing
 export const hashPassword = (password) => bcrypt.hash(password, BCRYPT_COST);
 
 // With no hash (no such account) the dummy is still compared, and the answer is false

@@ -5,12 +5,8 @@ import { containsText } from './search.js';
 import { categories, events, favourites, locations, users } from '../db/schema/index.js';
 import { dayRange, whenRange } from './londonTime.js';
 
-// What guests and users see of an event. Every public read goes through here, so
-// the rules live in one place (decided 2026-10-05 and 2026-10-27):
-// - an edit of a live event waiting for review, or rejected, still shows its last
-//   approved version (approved_snapshot), and the filters search that version too
-// - past isn't stored: an approved event is past once COALESCE(end, start) has gone by
-// - a suspended organiser's events leave the lists, but a link still opens them
+// What guests and users see of an event; every public read goes through here.
+// A waiting or rejected edit still shows, and is searched as, its approved version
 
 // Pending or rejected with an approved version kept: the public sees the snapshot
 const showsSnapshot = and(inArray(events.status, ['pending', 'rejected']), isNotNull(events.approvedSnapshot));
@@ -21,6 +17,7 @@ function current(column, key, type) {
     return sql`case when ${showsSnapshot} then (${events.approvedSnapshot} ->> ${key})::${sql.raw(type)} else ${column} end`;
 }
 
+// An event's columns as the public sees them
 export const pub = {
     name: current(events.eventName, 'eventName', 'text'),
     description: current(events.eventDescription, 'eventDescription', 'text'),
@@ -36,18 +33,14 @@ export const pub = {
 // Approved or cancelled, or an edit hiding behind its approved version
 const isPublic = or(inArray(events.status, ['approved', 'cancelled']), showsSnapshot);
 const isLive = or(eq(events.status, 'approved'), showsSnapshot);
-// Public at some point: it is approved or cancelled now, or an edit of it is
-// waiting with its approved version kept. Such an event can be cancelled but
-// never deleted, and its organiser can't delete their account. hasBeenPublic
+// Public at some point, so it can be cancelled but never deleted. hasBeenPublic
 // asks the database, wasPublic a row already read
 const PUBLIC_STATUSES = ['approved', 'cancelled'];
 export const hasBeenPublic = or(inArray(events.status, PUBLIC_STATUSES), isNotNull(events.approvedSnapshot));
 export const wasPublic = (row) => PUBLIC_STATUSES.includes(row.status) || Boolean(row.approvedSnapshot);
 const isUpcoming = (now) => gte(sql`coalesce(${pub.endDatetime}, ${pub.startDatetime})`, now);
-// A suspension whose end has passed no longer hides anything, even before the
-// account is next seen and the suspension lifted
-// isNotNull first: NULL (suspended until lifted) <= now is unknown, not false,
-// and an unknown would come back as null where the answer is read as a value
+// An ended suspension hides nothing, even before it is lifted. isNotNull goes
+// first: NULL <= now is unknown, which would come back as null, not false
 const organiserVisible = (now) =>
     or(eq(users.accStatus, 'active'), and(isNotNull(users.suspendedUntil), lte(users.suspendedUntil, now)));
 // What the lists show, and so what can be saved: live, not over, organiser not suspended
@@ -153,10 +146,8 @@ export async function summarisePublicEvents(now = new Date()) {
     return { total, when, areas: Object.fromEntries(areaRows.map(({ area, total: n }) => [area, n])) };
 }
 
-// One event by link: anything that has been public, past, cancelled or from a
-// suspended organiser included. Anything else is null, read as not found
-// `listed` says whether it's in the lists, which is when it can be saved,
-// without saying why not (a suspension isn't the public's business)
+// One event by link: anything that has been public, otherwise null (not found).
+// `listed` says whether it can be saved, without saying why not
 export async function findPublicEvent(eventId, now = new Date()) {
     const [event] = await db
         .select({ ...fields, listed: sql`${isListed(now)}`.mapWith(Boolean) })

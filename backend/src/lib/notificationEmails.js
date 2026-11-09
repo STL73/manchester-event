@@ -2,11 +2,8 @@ import { APP_URL } from '../config/env.js';
 import { ALWAYS_EMAILED_TYPES } from '../constants/notificationTypes.js';
 import { escapeHtml } from './html.js';
 
-// A notification as an email (Phase 11): the inbox row's subject and body, a
-// link and, unless it's a security email, how to turn them off. The link opens
-// the dashboard's Event details, which shows each role its own view of the
-// event (an organiser's draft, an admin's pending one), or Notifications when
-// the row has no event. Both ask a signed-out reader to log in first
+// A notification as an email: the row's subject and body, a link to the event or
+// Notifications, and, unless it's a security email, how to turn them off
 export function notificationEmail(row) {
     const link = row.eventId
         ? { url: `${APP_URL}/dashboard/events/${row.eventId}`, label: 'View the event' }

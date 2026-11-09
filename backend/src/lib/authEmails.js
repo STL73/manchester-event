@@ -66,18 +66,20 @@ async function send(user, kind, email) {
     }
 }
 
-// The links open the frontend, which sends the token with a POST. A GET to the
-// API would let email scanners, which open every link, use it up first
+// Emails the verification link. It opens the frontend, which POSTs the token:
+// email scanners open every link, and would use up a GET
 export async function sendVerificationEmail(user) {
     const token = await createAuthToken(user.userId, 'email_verification');
     return send(user, 'verification', verificationEmail(user.username, `${APP_URL}/auth/verify-email?token=${token}`));
 }
 
+// Emails a password reset link
 export async function sendPasswordResetEmail(user) {
     const token = await createAuthToken(user.userId, 'password_reset');
     return send(user, 'password_reset', passwordResetEmail(user.username, `${APP_URL}/auth/reset-password?token=${token}`));
 }
 
+// Tells the account its password changed
 export async function sendPasswordChangedEmail(user) {
     return send(user, 'password_changed', passwordChangedEmail(user.username, `${APP_URL}/auth/forgot-password`));
 }

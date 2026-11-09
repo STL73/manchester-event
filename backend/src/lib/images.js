@@ -2,10 +2,8 @@ import { v2 as cloudinary } from 'cloudinary';
 import { AppError } from './errors.js';
 import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, NODE_ENV } from '../config/env.js';
 
-// Event photos and profile pictures live on Cloudinary (decided 2026-11-02).
-// Files come to our server first, which checks them and uploads them, so the
-// browser never names a Cloudinary image for us to trust. This is the only
-// file that knows Cloudinary; tests replace it with vi.mock
+// The only file that knows Cloudinary, where photos and pictures live. Files come
+// through our server, so the browser never names an image for us to trust
 
 cloudinary.config({
     cloud_name: CLOUDINARY_CLOUD_NAME,
@@ -16,9 +14,8 @@ cloudinary.config({
 
 const TIMEOUT_MS = 20000;
 
-// What each kind of image is stored as. Cloudinary resizes on the way in, so a
-// phone's 12-megapixel photo isn't kept at full size. Folders carry NODE_ENV so
-// development uploads can be told apart from production's
+// What each kind of image is stored as: resized on the way in, in a folder per
+// NODE_ENV so development's uploads can be told apart
 const KINDS = {
     image: { folder: 'events', transformation: [{ width: 1600, crop: 'limit' }] },
     avatar: { folder: 'avatars', transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'auto' }] },
@@ -38,8 +35,8 @@ function upload(buffer, options) {
     });
 }
 
-// kind is the form field's name ('image' or 'avatar'), so a refusal lands
-// under that field
+// Uploads a photo. `kind` is the form field ('image' or 'avatar'), so a refusal
+// lands under it
 export async function uploadImage(buffer, kind) {
     const { folder, transformation } = KINDS[kind];
     let result;
@@ -64,9 +61,8 @@ export async function uploadImage(buffer, kind) {
     return { url: deliveryUrl(result), publicId: result.public_id };
 }
 
-// Best effort: a photo left behind on Cloudinary costs a little storage, while
-// a save refused because of it would cost the organiser their changes. Seeded
-// photos have no id (NULL) and are never deleted
+// Deletes a photo, best effort: one left behind costs a little storage, a refused
+// save would cost the organiser their changes. Seed photos have no id
 export async function deleteImage(publicId) {
     if (!publicId) return;
     try {

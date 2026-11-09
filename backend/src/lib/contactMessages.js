@@ -8,8 +8,8 @@ import { sendContactReply } from './contactEmails.js';
 import { AppError } from './errors.js';
 import { logAction } from './systemLogs.js';
 
-// Matches save_contact_message(). Signed in, the name and email are the
-// account's, never the form's
+// Saves a Contact message. Signed in, the name and email are the account's,
+// never the form's
 export async function saveMessage(user, { name, email, message }) {
     const sender = user
         ? { userId: user.userId, name: user.username, email: user.email }
@@ -34,23 +34,22 @@ export async function listMessages(messageId = null) {
         .orderBy(desc(contactMessages.createdAt), desc(contactMessages.messageId));
 }
 
+// One message by id, or 404
 export async function findMessage(messageId) {
     const [row] = await listMessages(messageId);
     if (!row) throw new AppError(404, 'Message not found.');
     return row;
 }
 
-// Opening a message reads it; Mark as unread clears that. The first time it
-// was read is kept
+// Marks a message read or unread, keeping the first time it was read
 export async function setRead(message, read) {
     const readAt = read ? (message.readAt ?? new Date()) : null;
     if (readAt === message.readAt) return;
     await db.update(contactMessages).set({ readAt }).where(eq(contactMessages.messageId, message.messageId));
 }
 
-// One reply per message, emailed to the sender (decided 2026-11-03). The
-// message is claimed first, so two admins can't both send one; if the email
-// fails the claim is undone, so Replied never shows for a reply nobody got
+// Emails one reply to the sender. The message is claimed first, so two admins
+// can't both reply, and the claim is undone if the email fails
 export async function replyToMessage(message, reply, admin) {
     const now = new Date();
     const [claimed] = await db

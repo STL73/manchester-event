@@ -7,10 +7,8 @@ import { AppError } from './errors.js';
 import { deleteImage } from './images.js';
 import { droppedPhotos, eventFields, isOver } from './organiserEvents.js';
 
-// The admin's Manage Events and Admin Home (Phase 7): every event but drafts,
-// which stay the organiser's own until sent. Each is the latest version, as
-// the organiser saved it, with the approved version beside it when an edit of
-// a live event is waiting, so the panel can show what changed
+// The admin's list (Manage Events, Admin Home): every event but drafts, as last
+// saved, with the approved version beside a waiting edit to show what changed
 
 const admins = alias(users, 'admins');
 
@@ -75,14 +73,11 @@ export async function findManagedEvent(eventId) {
     return row;
 }
 
-// Admins' decisions (Phase 7, decided 2026-10-05 and 2026-11-03). Each is
-// checked against the row as it is now, and the status is part of the UPDATE,
-// so a second admin deciding at the same moment gets 409 rather than a
-// second decision
+// Admins' decisions. The status read is part of each UPDATE, so a second admin
+// deciding at the same moment gets 409
 
-// Only an event waiting for review is decided. One that never went public and
-// whose start has passed is Expired: nobody can go any more. An edit of a live
-// event can still be decided until the live version has ended
+// Only a waiting event is decided. One never public whose start has passed is
+// Expired; a live event's edit can be decided until the live version ends
 function checkDecidable(row, now) {
     if (row.status !== 'pending') throw new AppError(400, 'Only an event waiting for review can be approved or rejected.');
     const expired = row.approvedSnapshot ? isOver(row, now) : row.startDatetime < now;
@@ -117,9 +112,8 @@ export async function rejectEvent(row, reason, admin) {
     return decide(row, admin, now, { status: 'rejected', rejectionReason: reason });
 }
 
-// Take a live event down (decided 2026-11-03): it is cancelled, as if its
-// organiser had, because once public an event is never hidden as though it
-// hadn't been. The reason is kept for the organiser
+// Takes a live event down: cancelled, as if by its organiser, since a public
+// event is never hidden as if it hadn't been. The reason is kept for them
 export async function takeDownEvent(row, reason, admin) {
     const now = new Date();
     if (row.status !== 'approved') throw new AppError(400, 'Only a live event can be taken down.');
